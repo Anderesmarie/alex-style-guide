@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 30 29% 94%;
+    --foreground: 0 0% 17%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 17%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 17%;
+    --primary: 27 46% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 20% 88%;
+    --secondary-foreground: 0 0% 17%;
+    --muted: 30 15% 90%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 27 46% 60%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 30 15% 85%;
+    --input: 30 15% 85%;
+    --ring: 27 46% 60%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Playfair Display', serif;
+  }
+}
+
+/* Hide scrollbar for mobile feel */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Chip styles */
+.chip {
+  @apply px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer select-none;
+  @apply bg-secondary text-foreground;
+}
+.chip-active {
+  @apply bg-primary text-primary-foreground shadow-md;
+}
+
+/* Card shadow */
+.card-shadow {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+/* Fade transition */
+.fade-enter {
+  animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, hsl(30 15% 90%) 25%, hsl(30 15% 95%) 50%, hsl(30 15% 90%) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius);
+}
+
+/* Progress bar */
+.progress-bar {
+  @apply h-1 rounded-full bg-secondary overflow-hidden;
+}
+.progress-bar-fill {
+  @apply h-full rounded-full bg-primary transition-all duration-500 ease-out;
+}
