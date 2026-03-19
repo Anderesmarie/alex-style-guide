@@ -77,8 +77,8 @@ export default function Login({ onLogin }: Props) {
     <div className="min-h-screen flex flex-col bg-background px-6 py-12 fade-enter">
       {/* Logo */}
       <div className="text-center mb-12 mt-8">
-        <h1 className="text-5xl font-serif font-bold text-foreground tracking-tight">Closify</h1>
-        <p className="text-primary italic mt-2">Ton dressing intelligent</p>
+        <h1 className="text-5xl font-serif font-bold text-foreground tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>MyStyl</h1>
+        <p className="text-primary italic mt-2">Ton style, réinventé</p>
       </div>
 
       {/* Form */}

@@ -185,10 +185,10 @@ export const getLastOutfit = (): string[] => {
 export const saveLastOutfit = (ids: string[]) => localStorage.setItem('mystyl_last_outfit', JSON.stringify(ids));
 
 export const getRejected = (): string[][] => {
-  try { const v = localStorage.getItem('alex_rejected'); return v ? JSON.parse(v) : []; } catch { return []; }
+  try { const v = localStorage.getItem('mystyl_rejected'); return v ? JSON.parse(v) : []; } catch { return []; }
 };
 export const addRejected = (ids: string[]) => {
-  const r = getRejected(); r.push(ids.sort()); localStorage.setItem('alex_rejected', JSON.stringify(r));
+  const r = getRejected(); r.push(ids.sort()); localStorage.setItem('mystyl_rejected', JSON.stringify(r));
 };
 
 // ---------- Auth compat (deprecated — Supabase handles sessions) ----------
