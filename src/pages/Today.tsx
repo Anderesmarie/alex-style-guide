@@ -26,7 +26,7 @@ interface SavedTodayData {
   results: SavedOutfitResult[];
 }
 
-const STORAGE_KEY = 'alex_today_outfits';
+const STORAGE_KEY = 'mystyl_today_outfits';
 
 function loadTodayData(today: string, wardrobe: ClothingItem[]): { outfit: ClothingItem[]; liked: boolean | null }[] | null {
   try {

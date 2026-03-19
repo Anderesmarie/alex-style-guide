@@ -4,7 +4,7 @@ export interface StreakData {
   bestStreak: number;
 }
 
-const STREAK_KEY = 'alex_streak';
+const STREAK_KEY = 'mystyl_streak';
 
 function getToday(): string {
   const d = new Date();

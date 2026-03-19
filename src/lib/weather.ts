@@ -92,7 +92,7 @@ export function getSavedCity(): string | null {
 }
 
 export function saveCity(city: string) {
-  localStorage.setItem('alex_city', city);
+  localStorage.setItem('mystyl_city', city);
 }
 
 export function getCurrentSeason(): string {

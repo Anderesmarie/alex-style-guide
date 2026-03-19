@@ -8,7 +8,7 @@ const MILESTONES = [
   { count: 30, label: 'Style Queen 👑' },
 ];
 
-const CELEBRATED_KEY = 'alex_milestones_celebrated';
+const CELEBRATED_KEY = 'mystyl_milestones_celebrated';
 
 function getCelebrated(): number[] {
   try {
