@@ -161,7 +161,7 @@ export default function Onboarding({ onComplete }: Props) {
                   const compressed = await Promise.all(toProcess.map(f => compressImage(f, 400)));
                   const updated = [...stylePhotos, ...compressed].slice(0, 5);
                   setStylePhotos(updated);
-                  localStorage.setItem('alex_style_photos', JSON.stringify(updated));
+                   localStorage.setItem('mystyl_style_photos', JSON.stringify(updated));
                   e.target.value = '';
                 }}
               />
