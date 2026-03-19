@@ -180,7 +180,7 @@ export async function saveDailyCounter(counter: DailyCounter): Promise<void> {
 
 // ---------- Last outfit / Rejected (localStorage for now) ----------
 export const getLastOutfit = (): string[] => {
-  try { const v = localStorage.getItem('alex_last_outfit'); return v ? JSON.parse(v) : []; } catch { return []; }
+  try { const v = localStorage.getItem('mystyl_last_outfit'); return v ? JSON.parse(v) : []; } catch { return []; }
 };
 export const saveLastOutfit = (ids: string[]) => localStorage.setItem('alex_last_outfit', JSON.stringify(ids));
 
