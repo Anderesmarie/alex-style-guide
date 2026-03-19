@@ -85,14 +85,14 @@ export async function fetchWeatherByCity(cityName: string): Promise<WeatherData>
 
 export function getSavedCity(): string | null {
   try {
-    return localStorage.getItem('alex_city');
+    return localStorage.getItem('mystyl_city');
   } catch {
     return null;
   }
 }
 
 export function saveCity(city: string) {
-  localStorage.setItem('alex_city', city);
+  localStorage.setItem('mystyl_city', city);
 }
 
 export function getCurrentSeason(): string {

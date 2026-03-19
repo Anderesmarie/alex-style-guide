@@ -161,7 +161,7 @@ export default function Onboarding({ onComplete }: Props) {
                   const compressed = await Promise.all(toProcess.map(f => compressImage(f, 400)));
                   const updated = [...stylePhotos, ...compressed].slice(0, 5);
                   setStylePhotos(updated);
-                  localStorage.setItem('alex_style_photos', JSON.stringify(updated));
+                   localStorage.setItem('mystyl_style_photos', JSON.stringify(updated));
                   e.target.value = '';
                 }}
               />
@@ -184,7 +184,7 @@ export default function Onboarding({ onComplete }: Props) {
                         onClick={() => {
                           const updated = stylePhotos.filter((_, idx) => idx !== i);
                           setStylePhotos(updated);
-                          localStorage.setItem('alex_style_photos', JSON.stringify(updated));
+                          localStorage.setItem('mystyl_style_photos', JSON.stringify(updated));
                         }}
                         className="absolute top-1 right-1 w-6 h-6 rounded-full bg-foreground/70 text-background text-xs flex items-center justify-center"
                       >

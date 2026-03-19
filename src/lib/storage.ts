@@ -56,10 +56,10 @@ export async function saveAvatar(avatar: AvatarConfig): Promise<void> {
 
 // ---------- Palette (still localStorage — no table) ----------
 export const getPalette = (): ColorPalette | null => {
-  try { const v = localStorage.getItem('alex_palette'); return v ? JSON.parse(v) : null; } catch { return null; }
+  try { const v = localStorage.getItem('mystyl_palette'); return v ? JSON.parse(v) : null; } catch { return null; }
 };
 export const savePalette = (palette: ColorPalette) => {
-  localStorage.setItem('alex_palette', JSON.stringify(palette));
+  localStorage.setItem('mystyl_palette', JSON.stringify(palette));
 };
 
 // ---------- Wardrobe ----------
@@ -180,15 +180,15 @@ export async function saveDailyCounter(counter: DailyCounter): Promise<void> {
 
 // ---------- Last outfit / Rejected (localStorage for now) ----------
 export const getLastOutfit = (): string[] => {
-  try { const v = localStorage.getItem('alex_last_outfit'); return v ? JSON.parse(v) : []; } catch { return []; }
+  try { const v = localStorage.getItem('mystyl_last_outfit'); return v ? JSON.parse(v) : []; } catch { return []; }
 };
-export const saveLastOutfit = (ids: string[]) => localStorage.setItem('alex_last_outfit', JSON.stringify(ids));
+export const saveLastOutfit = (ids: string[]) => localStorage.setItem('mystyl_last_outfit', JSON.stringify(ids));
 
 export const getRejected = (): string[][] => {
-  try { const v = localStorage.getItem('alex_rejected'); return v ? JSON.parse(v) : []; } catch { return []; }
+  try { const v = localStorage.getItem('mystyl_rejected'); return v ? JSON.parse(v) : []; } catch { return []; }
 };
 export const addRejected = (ids: string[]) => {
-  const r = getRejected(); r.push(ids.sort()); localStorage.setItem('alex_rejected', JSON.stringify(r));
+  const r = getRejected(); r.push(ids.sort()); localStorage.setItem('mystyl_rejected', JSON.stringify(r));
 };
 
 // ---------- Auth compat (deprecated — Supabase handles sessions) ----------

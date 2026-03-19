@@ -109,7 +109,7 @@ export default function Dressing() {
 
     // Store deletion reason
     try {
-      const history = JSON.parse(localStorage.getItem('alex_deletion_history') || '[]');
+      const history = JSON.parse(localStorage.getItem('mystyl_deletion_history') || '[]');
       history.push({
         itemId,
         type: deleteDialogItem.type,
@@ -117,7 +117,7 @@ export default function Dressing() {
         reason: deleteReason,
         date: new Date().toISOString(),
       });
-      localStorage.setItem('alex_deletion_history', JSON.stringify(history));
+      localStorage.setItem('mystyl_deletion_history', JSON.stringify(history));
     } catch {}
 
     // Delete clothing

@@ -13,7 +13,7 @@ export interface StylingTips {
 
 function getBeautyProfile(): BeautyProfile {
   try {
-    const raw = localStorage.getItem('alex_beauty_profile');
+    const raw = localStorage.getItem('mystyl_beauty_profile');
     return raw ? JSON.parse(raw) : {};
   } catch {
     return {};

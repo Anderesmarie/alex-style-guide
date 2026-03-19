@@ -100,7 +100,7 @@ export const SALES: SalesEvent[] = [
   },
 ];
 
-const DISMISSED_KEY = 'alex_dismissed_banners';
+const DISMISSED_KEY = 'mystyl_dismissed_banners';
 
 function getDismissed(): string[] {
   try {

@@ -17,10 +17,10 @@ export default function SuggestionBuilder({ wardrobe, onComplete }: Props) {
     if (!occasion || !style) return;
     // Save choice history
     try {
-      const prev = JSON.parse(localStorage.getItem('alex_custom_choices') || '[]');
+      const prev = JSON.parse(localStorage.getItem('mystyl_custom_choices') || '[]');
       prev.push({ occasion, style, pieceType: item.type, date: new Date().toISOString() });
       if (prev.length > 20) prev.shift();
-      localStorage.setItem('alex_custom_choices', JSON.stringify(prev));
+      localStorage.setItem('mystyl_custom_choices', JSON.stringify(prev));
     } catch {}
     onComplete(occasion, style, item);
   };
