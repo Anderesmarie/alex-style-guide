@@ -1,0 +1,9 @@
+{
+  "name": "Closify",
+  "short_name": "Closify",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F0EB",
+  "theme_color": "#C9956C",
+  "icons": [{"src": "/icon-closify.svg", "sizes": "512x512", "type": "image/svg+xml"}]
+}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="120" ry="120" fill="#F5E6D3"/>
+  <!-- 4-branch star -->
+  <path d="M256 100 L280 220 L400 256 L280 292 L256 412 L232 292 L112 256 L232 220 Z" fill="#C9956C"/>
+  <!-- C letter -->
+  <path d="M310 148 A130 130 0 1 0 310 364" fill="none" stroke="#C9956C" stroke-width="12" stroke-linecap="round"/>
+</svg>
