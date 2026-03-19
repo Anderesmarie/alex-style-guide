@@ -56,7 +56,7 @@ export async function saveAvatar(avatar: AvatarConfig): Promise<void> {
 
 // ---------- Palette (still localStorage — no table) ----------
 export const getPalette = (): ColorPalette | null => {
-  try { const v = localStorage.getItem('alex_palette'); return v ? JSON.parse(v) : null; } catch { return null; }
+  try { const v = localStorage.getItem('mystyl_palette'); return v ? JSON.parse(v) : null; } catch { return null; }
 };
 export const savePalette = (palette: ColorPalette) => {
   localStorage.setItem('alex_palette', JSON.stringify(palette));
