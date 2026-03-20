@@ -3,9 +3,10 @@ import { supabase } from '@/lib/supabase';
 
 interface Props {
   onLogin: () => void;
+  successMessage?: string;
 }
 
-export default function Login({ onLogin }: Props) {
+export default function Login({ onLogin, successMessage }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -14,7 +15,14 @@ export default function Login({ onLogin }: Props) {
   const [socialMsg, setSocialMsg] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [successMsg, setSuccessMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState(successMessage || '');
+
+  // Forgot password state
+  const [showForgot, setShowForgot] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotMsg, setForgotMsg] = useState('');
+  const [forgotError, setForgotError] = useState('');
 
   const handleSubmit = async () => {
     if (!email.trim() || !password.trim()) {
@@ -73,6 +81,31 @@ export default function Login({ onLogin }: Props) {
     setTimeout(() => setSocialMsg(''), 2000);
   };
 
+  const handleForgotPassword = async () => {
+    if (!forgotEmail.trim() || !forgotEmail.includes('@')) {
+      setForgotError("Merci d'entrer un email valide");
+      return;
+    }
+    setForgotError('');
+    setForgotMsg('');
+    setForgotLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+        redirectTo: 'https://alex-style-guide.lovable.app/reset-password'
+      });
+      if (error) {
+        setForgotError("Email introuvable. Vérifie l'adresse saisie.");
+      } else {
+        setForgotMsg('Un lien de réinitialisation a été envoyé à ton email ✨');
+      }
+    } catch {
+      setForgotError("Email introuvable. Vérifie l'adresse saisie.");
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background px-6 py-12 fade-enter">
       {/* Logo */}
@@ -80,6 +113,41 @@ export default function Login({ onLogin }: Props) {
         <h1 className="text-5xl font-serif font-bold text-foreground tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>MyStyl</h1>
         <p className="text-primary italic mt-2">Ton style, réinventé</p>
       </div>
+
+      {/* Forgot password overlay */}
+      {showForgot && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-6">
+          <div className="bg-card rounded-2xl p-6 w-full max-w-[380px] card-shadow space-y-4">
+            <h2 className="text-lg font-semibold text-foreground">Mot de passe oublié</h2>
+            <p className="text-sm text-muted-foreground">Entre ton email pour recevoir un lien de réinitialisation.</p>
+            <input
+              type="email"
+              value={forgotEmail}
+              onChange={e => { setForgotEmail(e.target.value); setForgotError(''); setForgotMsg(''); }}
+              placeholder="ton@email.com"
+              className="w-full px-4 py-3 rounded-xl bg-background card-shadow outline-none focus:ring-2 focus:ring-primary/30 text-foreground"
+              onKeyDown={e => e.key === 'Enter' && handleForgotPassword()}
+            />
+            {forgotError && <p className="text-sm text-destructive font-medium">{forgotError}</p>}
+            {forgotMsg && <p className="text-sm text-primary font-medium">{forgotMsg}</p>}
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setShowForgot(false); setForgotEmail(''); setForgotError(''); setForgotMsg(''); }}
+                className="flex-1 py-2.5 rounded-xl border border-border text-foreground font-medium active:scale-[0.98] transition-transform"
+              >
+                Retour
+              </button>
+              <button
+                onClick={handleForgotPassword}
+                disabled={forgotLoading}
+                className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold active:scale-[0.98] transition-transform disabled:opacity-60"
+              >
+                {forgotLoading ? '...' : 'Envoyer'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Form */}
       <div className="space-y-4 mb-6">
@@ -130,7 +198,10 @@ export default function Login({ onLogin }: Props) {
 
         {!isSignUp && (
           <div className="text-right">
-            <button className="text-xs text-muted-foreground hover:text-primary transition-colors">
+            <button
+              onClick={() => { setShowForgot(true); setForgotEmail(email); }}
+              className="text-xs text-muted-foreground hover:text-primary transition-colors"
+            >
               Mot de passe oublié ?
             </button>
           </div>
