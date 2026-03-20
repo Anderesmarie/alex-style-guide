@@ -2,20 +2,81 @@ import { ClothingItem, UserProfile } from './types';
 import { getLastOutfit, getRejected } from './storage';
 import { getCurrentSeason } from './weather';
 
-const HAUTS = ['T-shirt', 'Chemise', 'Pull'];
-const BAS = ['Jean', 'Pantalon', 'Jupe'];
-const ROBES = ['Robe'];
-const COUCHES = ['Veste', 'Manteau'];
-const CHAUSSURES = ['Chaussures'];
-const ACCESSOIRES = ['Sac', 'Accessoires'];
+// Group items by their category field from the new category system
+function getGroup(item: ClothingItem): string {
+  const cat = (item.category || '').toLowerCase();
+  const type = (item.type || '').toLowerCase();
 
-function getGroup(type: string): string {
-  if (HAUTS.includes(type)) return 'HAUTS';
-  if (BAS.includes(type)) return 'BAS';
-  if (ROBES.includes(type)) return 'ROBES';
-  if (COUCHES.includes(type)) return 'COUCHES';
-  if (CHAUSSURES.includes(type)) return 'CHAUSSURES';
-  if (ACCESSOIRES.includes(type)) return 'ACCESSOIRES';
+  // Hauts: tops, chemises, pulls, sweats, etc.
+  if (cat.includes('hauts') || cat.includes('tops')) return 'HAUTS';
+
+  // Bas: pantalons, jeans, jupes, shorts
+  if (cat.includes('bas') || cat.includes('pantalons') || cat.includes('jupes')) return 'BAS';
+
+  // Robes & combinaisons
+  if (cat.includes('robes') || cat.includes('combinaisons')) return 'ROBES';
+
+  // Manteaux & vestes
+  if (cat.includes('manteaux') || cat.includes('vestes')) return 'COUCHES';
+
+  // Chaussures
+  if (cat.includes('chaussures')) return 'CHAUSSURES';
+
+  // Sacs
+  if (cat.includes('sacs')) return 'ACCESSOIRES';
+
+  // Accessoires
+  if (cat.includes('accessoires')) return 'ACCESSOIRES';
+
+  // Streetwear - classify by subcategory/type
+  if (cat.includes('streetwear')) {
+    if (type.includes('pantalon') || type.includes('short')) return 'BAS';
+    return 'HAUTS';
+  }
+
+  // Y2K & Vintage
+  if (cat.includes('y2k') || cat.includes('vintage')) {
+    if (type.includes('jupe') || type.includes('pantalon')) return 'BAS';
+    if (type.includes('robe')) return 'ROBES';
+    return 'HAUTS';
+  }
+
+  // Sport & activewear
+  if (cat.includes('sport') || cat.includes('activewear')) {
+    if (type.includes('pantalon') || type.includes('legging') || type.includes('short') || type.includes('jupe')) return 'BAS';
+    if (type.includes('robe')) return 'ROBES';
+    if (type.includes('veste') || type.includes('extérieur')) return 'COUCHES';
+    if (type.includes('chaussure')) return 'CHAUSSURES';
+    return 'HAUTS';
+  }
+
+  // Loungewear & nuit
+  if (cat.includes('loungewear') || cat.includes('nuit') || cat.includes('lingerie')) {
+    if (type.includes('jogging') || type.includes('short') || type.includes('pantalon') || type.includes('culotte')) return 'BAS';
+    return 'HAUTS';
+  }
+
+  // Maillots & beachwear
+  if (cat.includes('maillot') || cat.includes('beachwear')) {
+    if (type.includes('bas') || type.includes('short')) return 'BAS';
+    return 'HAUTS';
+  }
+
+  // Legacy fallback: match old type names for items created before the category system
+  const legacyHauts = ['t-shirt', 'chemise', 'pull'];
+  const legacyBas = ['jean', 'pantalon', 'jupe'];
+  const legacyRobes = ['robe'];
+  const legacyCouches = ['veste', 'manteau'];
+  const legacyChaussures = ['chaussures'];
+  const legacyAcc = ['sac', 'accessoires'];
+
+  if (legacyHauts.includes(type)) return 'HAUTS';
+  if (legacyBas.includes(type)) return 'BAS';
+  if (legacyRobes.includes(type)) return 'ROBES';
+  if (legacyCouches.includes(type)) return 'COUCHES';
+  if (legacyChaussures.includes(type)) return 'CHAUSSURES';
+  if (legacyAcc.includes(type)) return 'ACCESSOIRES';
+
   return 'OTHER';
 }
 
@@ -42,12 +103,12 @@ function pickRandom(items: ClothingItem[], excludeIds: Set<string>): ClothingIte
 function buildOneOutfit(pool: ClothingItem[], globalUsedIds: Set<string>, temperature: number | null): ClothingItem[] | null {
   const available = pool.filter(i => !globalUsedIds.has(i.id));
 
-  const hauts = available.filter(i => HAUTS.includes(i.type));
-  const bas = available.filter(i => BAS.includes(i.type));
-  const robes = available.filter(i => ROBES.includes(i.type));
-  const couches = available.filter(i => COUCHES.includes(i.type));
-  const chaussures = available.filter(i => CHAUSSURES.includes(i.type));
-  const accessoires = available.filter(i => ACCESSOIRES.includes(i.type));
+  const hauts = available.filter(i => getGroup(i) === 'HAUTS');
+  const bas = available.filter(i => getGroup(i) === 'BAS');
+  const robes = available.filter(i => getGroup(i) === 'ROBES');
+  const couches = available.filter(i => getGroup(i) === 'COUCHES');
+  const chaussures = available.filter(i => getGroup(i) === 'CHAUSSURES');
+  const accessoires = available.filter(i => getGroup(i) === 'ACCESSOIRES');
 
   const outfit: ClothingItem[] = [];
   const usedIds = new Set<string>();
@@ -58,7 +119,6 @@ function buildOneOutfit(pool: ClothingItem[], globalUsedIds: Set<string>, temper
 
   if (!canHautBas && !canRobe) return null;
 
-  // Choose path randomly but prefer haut+bas if both available
   const useRobe = !canHautBas ? true : (!canRobe ? false : Math.random() < 0.3);
 
   if (useRobe) {
@@ -69,13 +129,14 @@ function buildOneOutfit(pool: ClothingItem[], globalUsedIds: Set<string>, temper
     // Pick haut with temperature preference
     let haut: ClothingItem | null = null;
     if (temperature !== null) {
+      const type = (i: ClothingItem) => i.type.toLowerCase();
       if (temperature < 10) {
-        haut = pickRandom(hauts.filter(i => i.type === 'Pull'), usedIds)
-            || pickRandom(hauts.filter(i => i.type === 'Chemise'), usedIds);
+        haut = pickRandom(hauts.filter(i => type(i).includes('pull') || type(i).includes('sweat')), usedIds)
+            || pickRandom(hauts.filter(i => type(i).includes('chemise')), usedIds);
       } else if (temperature <= 20) {
-        haut = pickRandom(hauts.filter(i => ['Chemise', 'Pull'].includes(i.type)), usedIds);
+        haut = pickRandom(hauts.filter(i => type(i).includes('chemise') || type(i).includes('pull') || type(i).includes('sweat')), usedIds);
       } else {
-        haut = pickRandom(hauts.filter(i => i.type === 'T-shirt'), usedIds);
+        haut = pickRandom(hauts.filter(i => type(i).includes('t-shirt') || type(i).includes('débardeur') || type(i).includes('crop')), usedIds);
       }
     }
     if (!haut) haut = pickRandom(hauts, usedIds);
@@ -83,7 +144,6 @@ function buildOneOutfit(pool: ClothingItem[], globalUsedIds: Set<string>, temper
     outfit.push(haut);
     usedIds.add(haut.id);
 
-    // Pick exactly 1 bas
     const b = pickRandom(bas, usedIds);
     if (!b) return null;
     outfit.push(b);
@@ -149,7 +209,7 @@ export function generateRecommendations(
 
   if (pool.length < 3) pool = wardrobe;
 
-  // Sort pool by profile preference (highest score first), with randomness to keep variety
+  // Sort pool by profile preference
   if (userProfile) {
     pool = [...pool].sort((a, b) => {
       const sa = scoreByProfile(a, userProfile);
@@ -187,7 +247,6 @@ export function buildCustomOutfit(
 ): ClothingItem[] {
   const available = wardrobe.filter(i => i.id !== centralPiece.id && !excludeIds.has(i.id));
 
-  // Score by relevance
   const scored = available.map(i => {
     let score = 0;
     if (i.occasion.some(o => o.toLowerCase().includes(occasion.toLowerCase()))) score += 2;
@@ -197,29 +256,27 @@ export function buildCustomOutfit(
   }).sort((a, b) => b.score - a.score);
 
   const outfit: ClothingItem[] = [centralPiece];
-  const centralGroup = getGroup(centralPiece.type);
+  const centralGroup = getGroup(centralPiece);
   const filledGroups = new Set([centralGroup]);
   const usedIds = new Set([centralPiece.id]);
 
   const isRobePath = centralGroup === 'ROBES';
 
-  // Fill required pieces
   if (!isRobePath) {
     if (centralGroup !== 'HAUTS') {
-      const pick = scored.find(s => HAUTS.includes(s.item.type) && !usedIds.has(s.item.id));
+      const pick = scored.find(s => getGroup(s.item) === 'HAUTS' && !usedIds.has(s.item.id));
       if (pick) { outfit.push(pick.item); usedIds.add(pick.item.id); filledGroups.add('HAUTS'); }
     }
     if (centralGroup !== 'BAS') {
-      const pick = scored.find(s => BAS.includes(s.item.type) && !usedIds.has(s.item.id));
+      const pick = scored.find(s => getGroup(s.item) === 'BAS' && !usedIds.has(s.item.id));
       if (pick) { outfit.push(pick.item); usedIds.add(pick.item.id); filledGroups.add('BAS'); }
     }
   }
 
-  // Fill optional: COUCHES, CHAUSSURES, ACCESSOIRES
-  const optionals: [string, readonly string[]][] = [['COUCHES', COUCHES], ['CHAUSSURES', CHAUSSURES], ['ACCESSOIRES', ACCESSOIRES]];
-  for (const [groupKey, types] of optionals) {
+  const optionals: string[] = ['COUCHES', 'CHAUSSURES', 'ACCESSOIRES'];
+  for (const groupKey of optionals) {
     if (filledGroups.has(groupKey) || outfit.length >= 5) continue;
-    const pick = scored.find(s => types.includes(s.item.type) && !usedIds.has(s.item.id));
+    const pick = scored.find(s => getGroup(s.item) === groupKey && !usedIds.has(s.item.id));
     if (pick) { outfit.push(pick.item); usedIds.add(pick.item.id); filledGroups.add(groupKey); }
   }
 
