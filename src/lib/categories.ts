@@ -206,5 +206,109 @@ export const CATEGORIES: Category[] = [
       ]},
     ],
   },
-  // suite dans le prompt 3
+  {
+    icon: "👟", name: "Chaussures",
+    subcategories: [
+      { name: "Bottes", items: [
+        { label: "Bottines" }, { label: "Bottes hautes" },
+        { label: "Bottes mi-hautes" }, { label: "Bottines plateforme", trend: true },
+        { label: "Bottes de combat", trend: true }, { label: "Chelsea boots" },
+        { label: "Bottes western" }, { label: "Cuissardes" },
+        { label: "Bottes de neige" }, { label: "Bottes de pluie" },
+        { label: "Bottes de travail" },
+      ]},
+      { name: "Mules et sabots", items: [
+        { label: "Mules", trend: true }, { label: "Sabots / Crocs", trend: true },
+        { label: "Mules à talons" },
+      ]},
+      { name: "Chaussures plates", items: [
+        { label: "Mocassins et chaussures bateau", trend: true },
+        { label: "Loafers plateforme", trend: true }, { label: "Ballerines" },
+        { label: "Espadrilles" }, { label: "Babies et Mary-Jane", trend: true },
+        { label: "Chaussures à lacets" },
+      ]},
+      { name: "Sandales, claquettes et tongs", items: [
+        { label: "Sandales plateforme", trend: true }, { label: "Sandales plates" },
+        { label: "Sandales à talons" },
+        { label: "Sandales techniques (Salomon…)", trend: true },
+        { label: "Claquettes" }, { label: "Tongs" },
+      ]},
+      { name: "Chaussures à talons", items: [
+        { label: "Escarpins" }, { label: "Sandales compensées" },
+        { label: "Talons aiguilles" },
+      ]},
+      { name: "Chaussons et pantoufles", items: [
+        { label: "Uggs / bottes fourrées", trend: true },
+        { label: "Chaussons" }, { label: "Pantoufles" },
+      ]},
+      { name: "Baskets", items: [
+        { label: "Sneakers plateforme", trend: true },
+        { label: "Baskets classiques" }, { label: "Baskets running", trend: true },
+        { label: "Baskets montantes" }, { label: "Converses" }, { label: "Slip-ons" },
+      ]},
+      { name: "Chaussures de sport", items: [
+        { label: "Chaussures de basket" }, { label: "Chaussures de danse" },
+        { label: "Chaussures de foot" }, { label: "Chaussures de course" },
+        { label: "Chaussures de fitness" }, { label: "Chaussures de randonnée" },
+        { label: "Chaussures de tennis" }, { label: "Chaussures de ski" },
+        { label: "Bottes de snowboard" }, { label: "Patins à roulettes et rollers" },
+      ]},
+    ],
+  },
+  {
+    icon: "👜", name: "Sacs",
+    subcategories: [
+      { name: "Sacs", items: [
+        { label: "Sacs à bandoulière" }, { label: "Sacs fourre-tout / tote bag" },
+        { label: "Sac baguette", trend: true }, { label: "Sacs à dos" },
+        { label: "Porte-monnaie" }, { label: "Pochettes" }, { label: "Cartables" },
+        { label: "Trousses à maquillage" }, { label: "Sacs banane" },
+        { label: "Sacs polochon" }, { label: "Sacs ethniques / traditionnels" },
+        { label: "Sacs de voyage" }, { label: "Mini sac", trend: true },
+        { label: "Sac filet (mesh bag)", trend: true }, { label: "Autres sacs" },
+      ]},
+    ],
+  },
+  {
+    icon: "💍", name: "Accessoires",
+    subcategories: [
+      { name: "Ceintures", items: [
+        { label: "Ceinture classique" }, { label: "Ceinture fine" },
+        { label: "Ceinture large" }, { label: "Ceinture corset", trend: true },
+        { label: "Ceinture chaîne", trend: true },
+        { label: "Ceinture à boucle dorée" }, { label: "Ceinture élastique" },
+        { label: "Ceinture tressée" }, { label: "Ceinture western" },
+        { label: "Ceinture cargo (anneaux)", trend: true },
+        { label: "Ceinture à perles" }, { label: "Ceinture bandana" },
+      ]},
+      { name: "Bijoux", items: [
+        { label: "Bagues (stacking)", trend: true }, { label: "Collier chaîne" },
+        { label: "Collier cordon / pendentif", trend: true },
+        { label: "Boucles d'oreilles" },
+        { label: "Bracelets & manchettes", trend: true },
+        { label: "Chevillère" }, { label: "Broche" },
+      ]},
+      { name: "Chaussettes", items: [
+        { label: "Chaussettes à logo / colorées", trend: true },
+        { label: "Chaussettes hautes" }, { label: "Chaussettes invisibles" },
+        { label: "Collants" }, { label: "Mi-bas" },
+      ]},
+      { name: "Couvre-chefs", items: [
+        { label: "Casquette" }, { label: "Bonnet" },
+        { label: "Bucket hat", trend: true }, { label: "Béret" },
+        { label: "Chapeau" }, { label: "Turban / foulard cheveux" },
+      ]},
+      { name: "Écharpes & gants", items: [
+        { label: "Écharpe" }, { label: "Foulard" },
+        { label: "Bandana", trend: true }, { label: "Châle" }, { label: "Gants" },
+      ]},
+      { name: "Lunettes", items: [
+        { label: "Lunettes de soleil", trend: true }, { label: "Lunettes de vue" },
+      ]},
+      { name: "Maternité", items: [
+        { label: "Haut maternité" }, { label: "Pantalon maternité" },
+        { label: "Robe maternité" },
+      ]},
+    ],
+  },
 ];
