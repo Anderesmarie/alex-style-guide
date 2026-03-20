@@ -160,6 +160,8 @@ export default function Dressing() {
   const openEdit = (item: ClothingItem) => {
     setSelectedItem(item);
     setImageBase64(item.imageBase64);
+    setCategory(item.category || '');
+    setSubcategory(item.subcategory || '');
     setType(item.type);
     setColor(item.color);
     setSeason([...item.season]);
