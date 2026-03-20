@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="120" ry="120" fill="#F5F0EB"/>
+  <!-- Hanger hook -->
+  <path d="M256 100 Q256 70 276 70 Q296 70 296 90 Q296 110 276 110" fill="none" stroke="#C9956C" stroke-width="8" stroke-linecap="round"/>
+  <!-- Hanger arms -->
+  <path d="M160 200 L256 130 L352 200" fill="none" stroke="#C9956C" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Dress body -->
+  <path d="M195 200 Q200 240 185 280 Q170 320 150 370 L362 370 Q342 320 327 280 Q312 240 317 200 Z" fill="none" stroke="#C9956C" stroke-width="8" stroke-linejoin="round"/>
+  <!-- Dress waist accent -->
+  <path d="M210 260 Q256 245 302 260" fill="none" stroke="#C9956C" stroke-width="6" stroke-linecap="round"/>
+  <!-- MyStyl text -->
+  <text x="256" y="430" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-size="52" font-weight="600" fill="#C9956C">MyStyl</text>
+</svg>
