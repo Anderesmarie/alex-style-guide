@@ -1,13 +1,45 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <rect width="512" height="512" rx="120" ry="120" fill="#F5F0EB"/>
-  <!-- Hanger hook -->
-  <path d="M256 108 Q256 72 280 72 Q304 72 304 96 Q304 118 280 118" fill="none" stroke="#C9956C" stroke-width="16" stroke-linecap="round"/>
-  <!-- Hanger arms -->
-  <path d="M148 210 L256 132 L364 210" fill="none" stroke="#C9956C" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- Dress body -->
-  <path d="M190 210 Q196 250 178 295 Q160 340 138 380 L374 380 Q352 340 334 295 Q316 250 322 210 Z" fill="none" stroke="#C9956C" stroke-width="16" stroke-linejoin="round"/>
-  <!-- Dress waist accent -->
-  <path d="M206 268 Q256 252 306 268" fill="none" stroke="#C9956C" stroke-width="12" stroke-linecap="round"/>
-  <!-- MyStyl text -->
-  <text x="256" y="445" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-size="58" font-weight="700" fill="#C9956C">MyStyl</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 350 350">
+
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#242424"/>
+      <stop offset="100%" stop-color="#161616"/>
+    </linearGradient>
+    <linearGradient id="rg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#EDD5B0"/>
+      <stop offset="45%" stop-color="#C9956C"/>
+      <stop offset="100%" stop-color="#A07040"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="350" height="350" rx="78" fill="url(#bg)"/>
+
+  <line x1="65" y1="37" x2="285" y2="37" stroke="#C9956C" stroke-width="0.6" opacity="0.3"/>
+  <line x1="65" y1="313" x2="285" y2="313" stroke="#C9956C" stroke-width="0.6" opacity="0.3"/>
+
+  <path d="M175 65 Q175 51 187 51 Q199 51 199 63 Q199 73 187 75"
+    fill="none" stroke="url(#rg)" stroke-width="3.5" stroke-linecap="round"/>
+
+  <path d="M175 75 Q145 85 85 115"
+    fill="none" stroke="url(#rg)" stroke-width="3.5" stroke-linecap="round"/>
+
+  <path d="M175 75 Q205 85 265 115"
+    fill="none" stroke="url(#rg)" stroke-width="3.5" stroke-linecap="round"/>
+
+  <line x1="85" y1="115" x2="265" y2="115"
+    stroke="url(#rg)" stroke-width="3.5" stroke-linecap="round"/>
+
+  <text x="175" y="207"
+    text-anchor="middle"
+    dominant-baseline="central"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="178"
+    font-weight="400"
+    letter-spacing="-6"
+    fill="url(#rg)">MS</text>
+
+  <line x1="85" y1="257" x2="265" y2="257" stroke="#C9956C" stroke-width="0.8" opacity="0.5"/>
+
+  <circle cx="175" cy="269" r="2.5" fill="#C9956C" opacity="0.6"/>
+
 </svg>
