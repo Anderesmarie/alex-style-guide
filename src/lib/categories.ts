@@ -104,5 +104,107 @@ export const CATEGORIES: Category[] = [
       ]},
     ],
   },
-  // suite dans le prompt 2
+  {
+    icon: "👗", name: "Robes & combinaisons",
+    subcategories: [
+      { name: "Robes", items: [
+        { label: "Mini robe" }, { label: "Robe midi" }, { label: "Robes longues" },
+        { label: "Robe casual" }, { label: "Robe chic" },
+        { label: "Robe sans bretelles" }, { label: "Petite robe noire" },
+        { label: "Robe de soirée (mariage, soirée)" }, { label: "Robe en jean" },
+        { label: "Autres robes" },
+      ]},
+      { name: "Combinaisons", items: [
+        { label: "Combinaisons" }, { label: "Combishorts" }, { label: "Salopette" },
+        { label: "Autres combinaisons et combishorts" },
+      ]},
+    ],
+  },
+  {
+    icon: "🛹", name: "Streetwear", isNew: true,
+    subcategories: [
+      { name: "Streetwear pur", items: [
+        { label: "Sweat à capuche", trend: true },
+        { label: "T-shirt graphique streetwear", trend: true },
+        { label: "Pantalon de survêtement" }, { label: "Veste track", trend: true },
+        { label: "Short de basket" }, { label: "Veste Varsity" },
+      ]},
+      { name: "Skate", items: [
+        { label: "T-shirt skate" }, { label: "Pantalon skate large" },
+        { label: "Casquette skate" },
+      ]},
+      { name: "Workwear urbain", items: [
+        { label: "Veste cargo" }, { label: "Chemise à carreaux" },
+        { label: "Denim brut" },
+      ]},
+    ],
+  },
+  {
+    icon: "✨", name: "Y2K & Vintage", isNew: true,
+    subcategories: [
+      { name: "Y2K", items: [
+        { label: "Corset / bralette", trend: true },
+        { label: "Mini-jupe Y2K", trend: true },
+        { label: "Pantalon taille basse" }, { label: "Veste velours" },
+        { label: "Set assorti Y2K" },
+      ]},
+      { name: "Vintage", items: [
+        { label: "Vintage 90s" }, { label: "Vintage 80s" },
+        { label: "Seconde main / Vinted" }, { label: "Vintage luxe" },
+      ]},
+      { name: "Cottagecore / Boho", items: [
+        { label: "Robe florale" }, { label: "Top brodé" },
+        { label: "Jupe longue boho" }, { label: "Cardigan fleuri" },
+      ]},
+    ],
+  },
+  {
+    icon: "🏃", name: "Sport & activewear",
+    subcategories: [
+      { name: "Vêtements de sport", items: [
+        { label: "Vêtements d'extérieur" }, { label: "Survêtements" },
+        { label: "Shorts sport" }, { label: "Pantalons et leggings sport" },
+        { label: "Robes sport" }, { label: "Hauts et t-shirts de sport" },
+        { label: "Sweats et sweats à capuche", trend: true },
+        { label: "Jupes sport" }, { label: "Brassières", trend: true },
+        { label: "Accessoires de sport" }, { label: "Autres vêtements de sport" },
+      ]},
+      { name: "Sports d'hiver", items: [
+        { label: "Veste de ski" }, { label: "Pantalon de ski" },
+        { label: "Combinaison de ski" }, { label: "Sous-couche thermique" },
+      ]},
+    ],
+  },
+  {
+    icon: "🛋️", name: "Loungewear & nuit", isNew: true,
+    subcategories: [
+      { name: "Loungewear", items: [
+        { label: "Set co-ord confort", trend: true }, { label: "Jogging doux" },
+        { label: "Sweat loungewear" }, { label: "Short loungewear" },
+        { label: "Débardeur confort" },
+      ]},
+      { name: "Nuit", items: [
+        { label: "Pyjama" }, { label: "Chemise de nuit" }, { label: "Nuisette" },
+        { label: "Peignoir" }, { label: "Chaussettes & chaussons" },
+      ]},
+      { name: "Lingerie", items: [
+        { label: "Soutien-gorge" }, { label: "Culotte" }, { label: "Body lingerie" },
+        { label: "Ensemble lingerie" }, { label: "Corset décoratif", trend: true },
+      ]},
+    ],
+  },
+  {
+    icon: "🩱", name: "Maillots & beachwear",
+    subcategories: [
+      { name: "Maillots", items: [
+        { label: "Bikini" }, { label: "Maillot 1 pièce" }, { label: "Tankini" },
+        { label: "Haut de maillot" }, { label: "Bas de maillot" },
+      ]},
+      { name: "Plage", items: [
+        { label: "Paréo" }, { label: "Robe de plage" },
+        { label: "Short de plage" }, { label: "Blouse de plage" },
+      ]},
+    ],
+  },
+  // suite dans le prompt 3
 ];
