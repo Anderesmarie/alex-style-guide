@@ -87,7 +87,9 @@ export default function Dressing() {
     if (!selectedItem) return;
     const finalColor = color || customColor || selectedItem.color;
     const updated: ClothingItem = {
-      ...selectedItem, type, color: finalColor,
+      ...selectedItem, category: category || selectedItem.category,
+      subcategory: subcategory || selectedItem.subcategory,
+      type, color: finalColor,
       season: season.length ? season : selectedItem.season,
       style: style.length ? style : selectedItem.style,
       occasion: occasion.length ? occasion : selectedItem.occasion,
