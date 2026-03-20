@@ -259,13 +259,66 @@ export default function Dressing() {
       )}
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
 
-      {/* Type */}
-      <label className="text-sm font-semibold text-muted-foreground mb-2 block">Type</label>
+      {/* Catégorie */}
+      <label className="text-sm font-semibold text-muted-foreground mb-2 block">Catégorie</label>
       <div className="flex flex-wrap gap-2 mb-4">
-        {TYPES.map(t => (
-          <button key={t} onClick={() => setType(t)} className={`chip text-xs ${type === t ? 'chip-active' : ''}`}>{t}</button>
+        {CATEGORIES.map(cat => (
+          <button
+            key={cat.name}
+            onClick={() => { setCategory(cat.name); setSubcategory(''); setType(''); }}
+            className={`chip text-xs flex items-center gap-1 ${category === cat.name ? 'chip-active' : ''}`}
+          >
+            {cat.icon} {cat.name}
+            {cat.isNew && <span className="ml-1 px-1.5 py-0.5 rounded-full bg-pink-500/20 text-pink-600 text-[10px] font-bold">NEW</span>}
+          </button>
         ))}
       </div>
+
+      {/* Sous-catégorie */}
+      {category && (() => {
+        const selectedCat = CATEGORIES.find(c => c.name === category);
+        if (!selectedCat) return null;
+        return (
+          <>
+            <label className="text-sm font-semibold text-muted-foreground mb-2 block">Sous-catégorie</label>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {selectedCat.subcategories.map(sub => (
+                <button
+                  key={sub.name}
+                  onClick={() => { setSubcategory(sub.name); setType(''); }}
+                  className={`chip text-xs ${subcategory === sub.name ? 'chip-active' : ''}`}
+                >
+                  {sub.name}
+                </button>
+              ))}
+            </div>
+          </>
+        );
+      })()}
+
+      {/* Type */}
+      {subcategory && (() => {
+        const selectedCat = CATEGORIES.find(c => c.name === category);
+        const selectedSub = selectedCat?.subcategories.find(s => s.name === subcategory);
+        if (!selectedSub) return null;
+        return (
+          <>
+            <label className="text-sm font-semibold text-muted-foreground mb-2 block">Type</label>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {selectedSub.items.map(item => (
+                <button
+                  key={item.label}
+                  onClick={() => setType(item.label)}
+                  className={`chip text-xs flex items-center gap-1 ${type === item.label ? 'chip-active' : ''}`}
+                >
+                  {item.label}
+                  {item.trend && <span>✨</span>}
+                </button>
+              ))}
+            </div>
+          </>
+        );
+      })()}
 
       {/* Color */}
       <label className="text-sm font-semibold text-muted-foreground mb-2 block">Couleur</label>
