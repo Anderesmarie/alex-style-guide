@@ -375,9 +375,9 @@ export default function Dressing() {
 
       <button
         onClick={isEdit ? handleUpdate : handleSave}
-        disabled={!imageBase64 || !type}
+        disabled={!imageBase64 || !type || !category}
         className={`w-full py-3.5 rounded-xl font-semibold transition-all duration-200 ${
-          imageBase64 && type
+          imageBase64 && type && category
             ? 'bg-primary text-primary-foreground shadow-lg active:scale-[0.98]'
             : 'bg-muted text-muted-foreground'
         }`}
