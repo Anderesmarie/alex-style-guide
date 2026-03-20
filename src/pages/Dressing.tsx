@@ -51,7 +51,7 @@ export default function Dressing() {
   useEffect(() => { loadWardrobe(); }, []);
 
   const resetForm = () => {
-    setImageBase64(''); setType(''); setColor(''); setCustomColor('');
+    setImageBase64(''); setCategory(''); setSubcategory(''); setType(''); setColor(''); setCustomColor('');
     setSeason([]); setStyle([]); setOccasion([]); setBrand(''); setPrice('');
   };
 
