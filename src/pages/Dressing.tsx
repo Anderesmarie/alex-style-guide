@@ -31,6 +31,8 @@ export default function Dressing() {
 
   // Form state
   const [imageBase64, setImageBase64] = useState('');
+  const [category, setCategory] = useState('');
+  const [subcategory, setSubcategory] = useState('');
   const [type, setType] = useState('');
   const [color, setColor] = useState('');
   const [customColor, setCustomColor] = useState('');
