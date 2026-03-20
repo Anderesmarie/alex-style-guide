@@ -92,7 +92,7 @@ export default function Login({ onLogin, successMessage }: Props) {
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
-        redirectTo: 'https://alex-style-guide.lovable.app/reset-password'
+        redirectTo: `${window.location.origin}/reset-password`
       });
       if (error) {
         setForgotError("Email introuvable. Vérifie l'adresse saisie.");
