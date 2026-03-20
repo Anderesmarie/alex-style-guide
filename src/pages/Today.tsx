@@ -88,7 +88,8 @@ export default function Today() {
 
         // Check saved today data
         const saved = loadTodayData(today, w);
-        if (saved) {
+        const shouldKeepSaved = Boolean(saved && (saved.length >= 5 || c.count >= 5));
+        if (saved && shouldKeepSaved) {
           setSwipeResults(saved);
           setSwipeComplete(true);
         }
