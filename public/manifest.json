@@ -3,7 +3,7 @@
   "short_name": "MyStyl",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F5F0EB",
-  "theme_color": "#C9956C",
+  "background_color": "#161616",
+  "theme_color": "#161616",
   "icons": [{"src": "/icon.svg", "sizes": "512x512", "type": "image/svg+xml"}]
 }
