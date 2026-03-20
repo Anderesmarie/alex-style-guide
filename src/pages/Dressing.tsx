@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
-import { ClothingItem, TYPES, COLORS, SEASONS, STYLES, OCCASIONS } from '@/lib/types';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { ClothingItem, COLORS, SEASONS, STYLES, OCCASIONS } from '@/lib/types';
 import { getWardrobe, addClothing, updateClothing, deleteClothing, getOutfits, saveOutfits, genId } from '@/lib/storage';
+import { CATEGORIES } from '@/lib/categories';
 import { compressImage } from '@/lib/imageUtils';
 import { toast } from 'sonner';
 
