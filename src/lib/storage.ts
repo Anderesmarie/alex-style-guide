@@ -88,6 +88,8 @@ export async function addClothing(item: ClothingItem): Promise<void> {
     id: item.id,
     user_id: uid,
     image_base64: item.imageBase64,
+    category: item.category || null,
+    subcategory: item.subcategory || null,
     type: item.type,
     color: item.color,
     season: item.season,
