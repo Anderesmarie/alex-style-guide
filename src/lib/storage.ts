@@ -70,6 +70,8 @@ export async function getWardrobe(): Promise<ClothingItem[]> {
   return data.map(row => ({
     id: row.id,
     imageBase64: row.image_base64,
+    category: row.category || '',
+    subcategory: row.subcategory || '',
     type: row.type,
     color: row.color,
     season: row.season as string[],
