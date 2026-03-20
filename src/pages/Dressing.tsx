@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
-import { ClothingItem, TYPES, COLORS, SEASONS, STYLES, OCCASIONS } from '@/lib/types';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { ClothingItem, COLORS, SEASONS, STYLES, OCCASIONS } from '@/lib/types';
 import { getWardrobe, addClothing, updateClothing, deleteClothing, getOutfits, saveOutfits, genId } from '@/lib/storage';
+import { CATEGORIES } from '@/lib/categories';
 import { compressImage } from '@/lib/imageUtils';
 import { toast } from 'sonner';
 
@@ -30,6 +31,8 @@ export default function Dressing() {
 
   // Form state
   const [imageBase64, setImageBase64] = useState('');
+  const [category, setCategory] = useState('');
+  const [subcategory, setSubcategory] = useState('');
   const [type, setType] = useState('');
   const [color, setColor] = useState('');
   const [customColor, setCustomColor] = useState('');
@@ -48,7 +51,7 @@ export default function Dressing() {
   useEffect(() => { loadWardrobe(); }, []);
 
   const resetForm = () => {
-    setImageBase64(''); setType(''); setColor(''); setCustomColor('');
+    setImageBase64(''); setCategory(''); setSubcategory(''); setType(''); setColor(''); setCustomColor('');
     setSeason([]); setStyle([]); setOccasion([]); setBrand(''); setPrice('');
   };
 
@@ -64,10 +67,10 @@ export default function Dressing() {
   };
 
   const handleSave = async () => {
-    if (!imageBase64 || !type) return;
+    if (!imageBase64 || !type || !category) return;
     const finalColor = color || customColor || 'Autre';
     const item: ClothingItem = {
-      id: genId(), imageBase64, type, color: finalColor,
+      id: genId(), imageBase64, category, subcategory, type, color: finalColor,
       season: season.length ? season : ['Toutes saisons'],
       style: style.length ? style : ['Casual'],
       occasion: occasion.length ? occasion : ['Quotidien'],
@@ -84,7 +87,9 @@ export default function Dressing() {
     if (!selectedItem) return;
     const finalColor = color || customColor || selectedItem.color;
     const updated: ClothingItem = {
-      ...selectedItem, type, color: finalColor,
+      ...selectedItem, category: category || selectedItem.category,
+      subcategory: subcategory || selectedItem.subcategory,
+      type, color: finalColor,
       season: season.length ? season : selectedItem.season,
       style: style.length ? style : selectedItem.style,
       occasion: occasion.length ? occasion : selectedItem.occasion,
@@ -155,6 +160,8 @@ export default function Dressing() {
   const openEdit = (item: ClothingItem) => {
     setSelectedItem(item);
     setImageBase64(item.imageBase64);
+    setCategory(item.category || '');
+    setSubcategory(item.subcategory || '');
     setType(item.type);
     setColor(item.color);
     setSeason([...item.season]);
@@ -252,13 +259,66 @@ export default function Dressing() {
       )}
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
 
-      {/* Type */}
-      <label className="text-sm font-semibold text-muted-foreground mb-2 block">Type</label>
+      {/* Catégorie */}
+      <label className="text-sm font-semibold text-muted-foreground mb-2 block">Catégorie</label>
       <div className="flex flex-wrap gap-2 mb-4">
-        {TYPES.map(t => (
-          <button key={t} onClick={() => setType(t)} className={`chip text-xs ${type === t ? 'chip-active' : ''}`}>{t}</button>
+        {CATEGORIES.map(cat => (
+          <button
+            key={cat.name}
+            onClick={() => { setCategory(cat.name); setSubcategory(''); setType(''); }}
+            className={`chip text-xs flex items-center gap-1 ${category === cat.name ? 'chip-active' : ''}`}
+          >
+            {cat.icon} {cat.name}
+            {cat.isNew && <span className="ml-1 px-1.5 py-0.5 rounded-full bg-pink-500/20 text-pink-600 text-[10px] font-bold">NEW</span>}
+          </button>
         ))}
       </div>
+
+      {/* Sous-catégorie */}
+      {category && (() => {
+        const selectedCat = CATEGORIES.find(c => c.name === category);
+        if (!selectedCat) return null;
+        return (
+          <>
+            <label className="text-sm font-semibold text-muted-foreground mb-2 block">Sous-catégorie</label>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {selectedCat.subcategories.map(sub => (
+                <button
+                  key={sub.name}
+                  onClick={() => { setSubcategory(sub.name); setType(''); }}
+                  className={`chip text-xs ${subcategory === sub.name ? 'chip-active' : ''}`}
+                >
+                  {sub.name}
+                </button>
+              ))}
+            </div>
+          </>
+        );
+      })()}
+
+      {/* Type */}
+      {subcategory && (() => {
+        const selectedCat = CATEGORIES.find(c => c.name === category);
+        const selectedSub = selectedCat?.subcategories.find(s => s.name === subcategory);
+        if (!selectedSub) return null;
+        return (
+          <>
+            <label className="text-sm font-semibold text-muted-foreground mb-2 block">Type</label>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {selectedSub.items.map(item => (
+                <button
+                  key={item.label}
+                  onClick={() => setType(item.label)}
+                  className={`chip text-xs flex items-center gap-1 ${type === item.label ? 'chip-active' : ''}`}
+                >
+                  {item.label}
+                  {item.trend && <span>✨</span>}
+                </button>
+              ))}
+            </div>
+          </>
+        );
+      })()}
 
       {/* Color */}
       <label className="text-sm font-semibold text-muted-foreground mb-2 block">Couleur</label>
@@ -315,9 +375,9 @@ export default function Dressing() {
 
       <button
         onClick={isEdit ? handleUpdate : handleSave}
-        disabled={!imageBase64 || !type}
+        disabled={!imageBase64 || !type || !category}
         className={`w-full py-3.5 rounded-xl font-semibold transition-all duration-200 ${
-          imageBase64 && type
+          imageBase64 && type && category
             ? 'bg-primary text-primary-foreground shadow-lg active:scale-[0.98]'
             : 'bg-muted text-muted-foreground'
         }`}
@@ -392,7 +452,9 @@ export default function Dressing() {
           <select value={filterType} onChange={e => setFilterType(e.target.value)}
             className="px-3 py-1.5 rounded-full bg-card card-shadow text-sm outline-none">
             <option value="">Type</option>
-            {TYPES.map(t => <option key={t}>{t}</option>)}
+            {CATEGORIES.flatMap(c => c.subcategories.flatMap(s => s.items.map(i => i.label)))
+              .filter((v, i, a) => a.indexOf(v) === i)
+              .map(t => <option key={t}>{t}</option>)}
           </select>
           <select value={filterColor} onChange={e => setFilterColor(e.target.value)}
             className="px-3 py-1.5 rounded-full bg-card card-shadow text-sm outline-none">

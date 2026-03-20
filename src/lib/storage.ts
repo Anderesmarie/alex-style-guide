@@ -70,6 +70,8 @@ export async function getWardrobe(): Promise<ClothingItem[]> {
   return data.map(row => ({
     id: row.id,
     imageBase64: row.image_base64,
+    category: row.category || '',
+    subcategory: row.subcategory || '',
     type: row.type,
     color: row.color,
     season: row.season as string[],
@@ -86,6 +88,8 @@ export async function addClothing(item: ClothingItem): Promise<void> {
     id: item.id,
     user_id: uid,
     image_base64: item.imageBase64,
+    category: item.category || null,
+    subcategory: item.subcategory || null,
     type: item.type,
     color: item.color,
     season: item.season,
@@ -100,6 +104,8 @@ export async function updateClothing(item: ClothingItem): Promise<void> {
   const uid = await getUserId();
   await supabase.from('wardrobe').update({
     image_base64: item.imageBase64,
+    category: item.category || null,
+    subcategory: item.subcategory || null,
     type: item.type,
     color: item.color,
     season: item.season,

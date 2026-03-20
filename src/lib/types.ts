@@ -1,6 +1,8 @@
 export interface ClothingItem {
   id: string;
   imageBase64: string;
+  category: string;
+  subcategory: string;
   type: string;
   color: string;
   season: string[];
