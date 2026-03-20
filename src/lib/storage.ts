@@ -104,6 +104,8 @@ export async function updateClothing(item: ClothingItem): Promise<void> {
   const uid = await getUserId();
   await supabase.from('wardrobe').update({
     image_base64: item.imageBase64,
+    category: item.category || null,
+    subcategory: item.subcategory || null,
     type: item.type,
     color: item.color,
     season: item.season,
