@@ -220,19 +220,20 @@ export function generateRecommendations(
   }
 
   const results: ClothingItem[][] = [];
-  const globalUsedIds = new Set<string>();
+  const seenKeys = new Set<string>();
   let attempts = 0;
 
   while (results.length < count && attempts < 80) {
     attempts++;
-    const outfit = buildOneOutfit(pool, globalUsedIds, temperature);
-    if (!outfit) break;
+    // Pass empty set — items CAN be reused across outfits
+    const outfit = buildOneOutfit(pool, new Set<string>(), temperature);
+    if (!outfit) continue;
 
     const key = outfit.map(i => i.id).sort().join(',');
-    if (key === lastKey || rejectedKeys.has(key)) continue;
+    if (key === lastKey || rejectedKeys.has(key) || seenKeys.has(key)) continue;
 
+    seenKeys.add(key);
     results.push(outfit);
-    outfit.forEach(i => globalUsedIds.add(i.id));
   }
 
   return results;
