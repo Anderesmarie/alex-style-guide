@@ -188,6 +188,32 @@ function scoreByProfile(item: ClothingItem, profile: UserProfile | null): number
   return score;
 }
 
+function collectOutfits(
+  pool: ClothingItem[],
+  targetCount: number,
+  temperature: number | null,
+  blockedKeys: Set<string>,
+  seenKeys: Set<string>
+): ClothingItem[][] {
+  const results: ClothingItem[][] = [];
+  let attempts = 0;
+  const maxAttempts = Math.max(40, targetCount * 50);
+
+  while (results.length < targetCount && attempts < maxAttempts) {
+    attempts++;
+    const outfit = buildOneOutfit(pool, new Set<string>(), temperature);
+    if (!outfit) continue;
+
+    const key = outfit.map(i => i.id).sort().join(',');
+    if (blockedKeys.has(key) || seenKeys.has(key)) continue;
+
+    seenKeys.add(key);
+    results.push(outfit);
+  }
+
+  return results;
+}
+
 export function generateRecommendations(
   wardrobe: ClothingItem[],
   temperature: number | null,
@@ -198,45 +224,45 @@ export function generateRecommendations(
   const lastOutfit = getLastOutfit();
   const rejected = getRejected();
   const lastKey = lastOutfit.sort().join(',');
-  const rejectedKeys = new Set(rejected.map(r => r.sort().join(',')));
+  const blockedKeys = new Set(rejected.map(r => r.sort().join(',')));
+  if (lastKey) blockedKeys.add(lastKey);
 
-  let pool = wardrobe.filter(
+  const seasonPool = wardrobe.filter(
     i => i.season.includes(season) || i.season.includes('Toutes saisons')
   );
 
   const occasionFilter = isWeekday() ? ['Travail', 'Quotidien'] : ['Sortie', 'Quotidien'];
-  pool = pool.filter(i => i.occasion.some(o => occasionFilter.includes(o)));
+  const occasionPool = seasonPool.filter(i => i.occasion.some(o => occasionFilter.includes(o)));
 
-  if (pool.length < 3) pool = wardrobe;
-
-  // Sort pool by profile preference
-  if (userProfile) {
-    pool = [...pool].sort((a, b) => {
+  const rankPool = (pool: ClothingItem[]) => {
+    if (!userProfile) return pool;
+    return [...pool].sort((a, b) => {
       const sa = scoreByProfile(a, userProfile);
       const sb = scoreByProfile(b, userProfile);
       if (sb !== sa) return sb - sa;
       return Math.random() - 0.5;
     });
-  }
+  };
 
   const results: ClothingItem[][] = [];
   const seenKeys = new Set<string>();
-  let attempts = 0;
+  const usedPoolKeys = new Set<string>();
+  const candidatePools = [occasionPool, seasonPool, wardrobe];
 
-  while (results.length < count && attempts < 80) {
-    attempts++;
-    // Pass empty set — items CAN be reused across outfits
-    const outfit = buildOneOutfit(pool, new Set<string>(), temperature);
-    if (!outfit) continue;
+  for (const pool of candidatePools) {
+    if (results.length >= count || pool.length < 3) continue;
 
-    const key = outfit.map(i => i.id).sort().join(',');
-    if (key === lastKey || rejectedKeys.has(key) || seenKeys.has(key)) continue;
+    const poolKey = pool.map(i => i.id).sort().join(',');
+    if (usedPoolKeys.has(poolKey)) continue;
+    usedPoolKeys.add(poolKey);
 
-    seenKeys.add(key);
-    results.push(outfit);
+    const rankedPool = rankPool(pool);
+    const missing = count - results.length;
+    const generated = collectOutfits(rankedPool, missing, temperature, blockedKeys, seenKeys);
+    results.push(...generated);
   }
 
-  return results;
+  return results.slice(0, count);
 }
 
 export function buildCustomOutfit(
