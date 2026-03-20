@@ -452,7 +452,9 @@ export default function Dressing() {
           <select value={filterType} onChange={e => setFilterType(e.target.value)}
             className="px-3 py-1.5 rounded-full bg-card card-shadow text-sm outline-none">
             <option value="">Type</option>
-            {TYPES.map(t => <option key={t}>{t}</option>)}
+            {CATEGORIES.flatMap(c => c.subcategories.flatMap(s => s.items.map(i => i.label)))
+              .filter((v, i, a) => a.indexOf(v) === i)
+              .map(t => <option key={t}>{t}</option>)}
           </select>
           <select value={filterColor} onChange={e => setFilterColor(e.target.value)}
             className="px-3 py-1.5 rounded-full bg-card card-shadow text-sm outline-none">
