@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { getProfile, getAvatar, getPalette, saveAvatar, savePalette } from '@/lib/storage';
+import { getProfile, getAvatar, saveAvatar } from '@/lib/storage';
 import AvatarSVG from '@/components/AvatarSVG';
 import AvatarCreator, { DEFAULT_AVATAR } from '@/components/AvatarCreator';
 import { AvatarData } from '@/components/AvatarSVG';
-import { getPaletteForSkin, PALETTE_COLORS } from '@/lib/colorimetry';
+import { determineSeason, SEASON_PALETTES, SEASON_COLOR_HEX, SEASON_LABELS } from '@/lib/colorimetry';
+import type { Season } from '@/lib/colorimetry';
 import { getStreak } from '@/lib/streak';
-import { UserProfile, AvatarConfig } from '@/lib/types';
-import { ColorPalette } from '@/lib/colorimetry';
+import { UserProfile } from '@/lib/types';
+import { supabase } from '@/lib/supabase';
 
 interface Props {
   onEditProfile: () => void;
@@ -16,15 +17,25 @@ interface Props {
 export default function Profile({ onEditProfile, onLogout }: Props) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [avatar, setAvatar] = useState<AvatarData>(DEFAULT_AVATAR);
-  const [palette, setPaletteState] = useState<ColorPalette | null>(null);
+  const [season, setSeason] = useState<Season | null>(null);
   const [editingAvatar, setEditingAvatar] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const computeAndSaveSeason = async (avatarData: AvatarData) => {
+    const s = determineSeason(avatarData.skin, avatarData.eyeColor, avatarData.hairColor);
+    setSeason(s);
+    try {
+      const { data } = await supabase.auth.getUser();
+      if (data.user) {
+        await supabase.from('profiles').update({ colorimetry_season: s }).eq('id', data.user.id);
+      }
+    } catch {}
+  };
 
   useEffect(() => {
     const load = async () => {
       const [p, a] = await Promise.all([getProfile(), getAvatar()]);
       setProfile(p);
-      // Prefer localStorage alex_avatar, fallback to Supabase, then default
       let avatarData: AvatarData = DEFAULT_AVATAR;
       try {
         const raw = localStorage.getItem('alex_avatar');
@@ -32,7 +43,7 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
         else if (a) avatarData = a as AvatarData;
       } catch {}
       setAvatar(avatarData);
-      setPaletteState(getPalette());
+      await computeAndSaveSeason(avatarData);
       setLoading(false);
     };
     load();
@@ -41,10 +52,8 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
   const handleAvatarSave = async (data: AvatarData) => {
     localStorage.setItem('alex_avatar', JSON.stringify(data));
     await saveAvatar(data);
-    const newPalette = getPaletteForSkin(data.skin);
-    savePalette(newPalette);
     setAvatar(data);
-    setPaletteState(newPalette);
+    await computeAndSaveSeason(data);
     setEditingAvatar(false);
   };
 
@@ -77,6 +86,9 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
 
   if (!profile) return null;
 
+  const palette = season ? SEASON_PALETTES[season] : null;
+  const seasonInfo = season ? SEASON_LABELS[season] : null;
+
   return (
     <div className="fade-enter pb-4">
       <h1 className="text-2xl font-serif font-bold mb-6">Mon Profil</h1>
@@ -95,18 +107,26 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
         </div>
       </div>
 
-      {/* Color palette */}
-      {palette && palette.recommended.length > 0 && (
+      {/* Season palette */}
+      {palette && seasonInfo && (
         <div className="bg-card rounded-xl p-5 card-shadow mb-4">
-          <p className="text-sm text-muted-foreground mb-2">Ces couleurs sont recommandées pour ton teint ✨</p>
-          <div className="flex flex-wrap gap-2">
-            {palette.recommended.map(c => (
-              <div key={c} className="flex flex-col items-center gap-1">
-                <div className="w-8 h-8 rounded-full border border-border" style={{ backgroundColor: PALETTE_COLORS[c] || '#ccc' }} />
-                <span className="text-[10px] text-muted-foreground">{c}</span>
-              </div>
+          <p className="font-serif font-semibold text-base mb-1">
+            {seasonInfo.emoji} Ta palette {seasonInfo.label}
+          </p>
+          <p className="text-sm text-muted-foreground mb-3">{seasonInfo.vibe}</p>
+          <div className="flex gap-2 mb-3">
+            {palette.recommended.slice(0, 6).map(c => (
+              <div
+                key={c}
+                className="w-4 h-4 rounded-full border border-border"
+                style={{ backgroundColor: SEASON_COLOR_HEX[c] || '#ccc' }}
+                title={c}
+              />
             ))}
           </div>
+          <p className="text-xs text-muted-foreground">
+            Bijoux recommandés : {palette.metal}
+          </p>
         </div>
       )}
 
