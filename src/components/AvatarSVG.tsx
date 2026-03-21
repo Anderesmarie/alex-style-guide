@@ -171,32 +171,36 @@ function HairSVG({ style, color }: { style: string; color: string }) {
   }
 }
 
+// Helper: darken a hex color by reducing each RGB channel
+function darkenHex(hex: string, amount: number): string {
+  const r = Math.max(0, parseInt(hex.slice(1, 3), 16) - amount);
+  const g = Math.max(0, parseInt(hex.slice(3, 5), 16) - amount);
+  const b = Math.max(0, parseInt(hex.slice(5, 7), 16) - amount);
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+}
+
 export default function AvatarSVG({ avatar, size = 120 }: Props) {
   const tone = SKIN_TONES[avatar.skin] || SKIN_TONES['clair-rose'];
   const face = FACE_SHAPES[avatar.faceShape] || FACE_SHAPES['ovale'];
   const eye = EYE_SHAPES[avatar.eyeShape] || EYE_SHAPES['amande'];
   const brow = BROW_SHAPES[avatar.browShape] || BROW_SHAPES['arques'];
+  const nose = NOSE_SHAPES[avatar.noseShape] || NOSE_SHAPES['petit'];
+  const lips = LIPS_SHAPES[avatar.lipsShape] || LIPS_SHAPES['naturelles'];
   const eyeHex = avatar.eyeColor || '#7B4F2E';
   const browHex = avatar.browColor || '#3B1F0A';
   const lipsHex = avatar.lipsColor || '#D4756A';
+  const lipsBotHex = darkenHex(lipsHex, 20);
   const hairHex = HAIR_COLORS[avatar.hairColor] || avatar.hairColor || '#3B1F0A';
 
-  // Tombants: shift outer corners down
   const tombantDy = avatar.eyeShape === 'tombants' ? 2 : 0;
 
   return (
     <svg width={size} height={size} viewBox="0 0 120 120" className="rounded-full">
-      {/* Background circle */}
       <circle id="bg-circle" cx={60} cy={60} r={60} fill={tone.bg} />
-
-      {/* Neck + shoulders */}
       <rect id="neck" x={50} y={86} width={20} height={14} rx={5} fill={tone.neck} />
       <ellipse id="shoulders" cx={60} cy={110} rx={36} ry={16} fill={tone.neck} />
-
-      {/* Face */}
       <ellipse id="face-shape" cx={face.cx} cy={face.cy} rx={face.rx} ry={face.ry} fill={tone.face} />
 
-      {/* Eyes */}
       <ellipse id="eye-white-l" cx={eye.lcx} cy={66 + tombantDy / 2} rx={eye.rx} ry={eye.ry} fill="white" />
       <ellipse id="eye-white-r" cx={eye.rcx} cy={66 + tombantDy / 2} rx={eye.rx} ry={eye.ry} fill="white" />
       {avatar.eyeShape === 'tombants' && (
@@ -212,17 +216,14 @@ export default function AvatarSVG({ avatar, size = 120 }: Props) {
       <circle cx={eye.lcx + 0.6} cy={65.4 + tombantDy / 2} r={0.8} fill="white" />
       <circle cx={eye.rcx + 0.6} cy={65.4 + tombantDy / 2} r={0.8} fill="white" />
 
-      {/* Eyebrows */}
       <path id="brow-l" d={brow.ld} stroke={browHex} strokeWidth={brow.sw} fill="none" strokeLinecap="round" />
       <path id="brow-r" d={brow.rd} stroke={browHex} strokeWidth={brow.sw} fill="none" strokeLinecap="round" />
 
-      {/* Nose */}
-      <path id="nose" d="M60 68 Q58 74 60 76 Q62 74 60 68" stroke={tone.neck} strokeWidth={1.2} fill="none" />
+      <path id="nose" d={nose.d} fill={tone.neck} />
 
-      {/* Mouth */}
-      <path d="M52 82 Q60 88 68 82" stroke={lipsHex} strokeWidth={1.8} fill="none" strokeLinecap="round" />
+      <path id="lips-top" d={lips.top} fill={lipsHex} />
+      <path id="lips-bot" d={lips.bot} fill={lipsBotHex} />
 
-      {/* Hair */}
       <HairSVG style={avatar.hairStyle} color={hairHex} />
     </svg>
   );
