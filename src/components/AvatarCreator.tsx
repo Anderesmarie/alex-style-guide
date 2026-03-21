@@ -64,6 +64,9 @@ export default function AvatarCreator({ initial, onSave }: Props) {
   const [browShape, setBrowShape] = useState(init.browShape || DEFAULT_AVATAR.browShape);
   const [browColor, setBrowColor] = useState(init.browColor || DEFAULT_AVATAR.browColor);
   const [browColorManual, setBrowColorManual] = useState(false);
+  const [noseShape, setNoseShape] = useState(init.noseShape || DEFAULT_AVATAR.noseShape);
+  const [lipsShape, setLipsShape] = useState(init.lipsShape || DEFAULT_AVATAR.lipsShape);
+  const [lipsColor, setLipsColor] = useState(init.lipsColor || DEFAULT_AVATAR.lipsColor);
   const [hairStyle, setHairStyle] = useState(init.hairStyle || DEFAULT_AVATAR.hairStyle);
   const [hairColor, setHairColor] = useState(init.hairColor || DEFAULT_AVATAR.hairColor);
 
