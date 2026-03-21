@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getProfile, getAvatar, getPalette, saveAvatar, savePalette } from '@/lib/storage';
 import AvatarSVG from '@/components/AvatarSVG';
-import AvatarCreator from '@/components/AvatarCreator';
+import AvatarCreator, { DEFAULT_AVATAR } from '@/components/AvatarCreator';
 import { AvatarData } from '@/components/AvatarSVG';
 import { getPaletteForSkin, PALETTE_COLORS } from '@/lib/colorimetry';
 import { getStreak } from '@/lib/streak';
@@ -15,7 +15,7 @@ interface Props {
 
 export default function Profile({ onEditProfile, onLogout }: Props) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [avatar, setAvatar] = useState<AvatarConfig | null>(null);
+  const [avatar, setAvatar] = useState<AvatarData>(DEFAULT_AVATAR);
   const [palette, setPaletteState] = useState<ColorPalette | null>(null);
   const [editingAvatar, setEditingAvatar] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -24,7 +24,14 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
     const load = async () => {
       const [p, a] = await Promise.all([getProfile(), getAvatar()]);
       setProfile(p);
-      setAvatar(a);
+      // Prefer localStorage alex_avatar, fallback to Supabase, then default
+      let avatarData: AvatarData = DEFAULT_AVATAR;
+      try {
+        const raw = localStorage.getItem('alex_avatar');
+        if (raw) avatarData = JSON.parse(raw);
+        else if (a) avatarData = a as AvatarData;
+      } catch {}
+      setAvatar(avatarData);
       setPaletteState(getPalette());
       setLoading(false);
     };
@@ -32,6 +39,7 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
   }, []);
 
   const handleAvatarSave = async (data: AvatarData) => {
+    localStorage.setItem('alex_avatar', JSON.stringify(data));
     await saveAvatar(data);
     const newPalette = getPaletteForSkin(data.skin);
     savePalette(newPalette);
@@ -75,7 +83,7 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
 
       {/* Avatar + name */}
       <div className="flex items-center gap-4 mb-6">
-        {avatar && <AvatarSVG avatar={avatar} size={80} />}
+        <AvatarSVG avatar={avatar} size={80} />
         <div>
           <p className="font-serif font-semibold text-lg">Mon Avatar</p>
           <button
@@ -94,10 +102,7 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
           <div className="flex flex-wrap gap-2">
             {palette.recommended.map(c => (
               <div key={c} className="flex flex-col items-center gap-1">
-                <div
-                  className="w-8 h-8 rounded-full border border-border"
-                  style={{ backgroundColor: PALETTE_COLORS[c] || '#ccc' }}
-                />
+                <div className="w-8 h-8 rounded-full border border-border" style={{ backgroundColor: PALETTE_COLORS[c] || '#ccc' }} />
                 <span className="text-[10px] text-muted-foreground">{c}</span>
               </div>
             ))}
@@ -110,7 +115,6 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
           <p className="text-sm text-muted-foreground mb-1">Silhouette</p>
           <p className="font-serif font-semibold text-lg">{profile.silhouette}</p>
         </div>
-
         <div className="bg-card rounded-xl p-5 card-shadow">
           <p className="text-sm text-muted-foreground mb-2">Styles</p>
           <div className="flex flex-wrap gap-2">
@@ -119,12 +123,10 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
             ))}
           </div>
         </div>
-
         <div className="bg-card rounded-xl p-5 card-shadow">
           <p className="text-sm text-muted-foreground mb-1">Budget par pièce</p>
           <p className="text-2xl font-serif font-bold text-primary">{profile.budget}€</p>
         </div>
-
         {profile.brands.length > 0 && (
           <div className="bg-card rounded-xl p-5 card-shadow">
             <p className="text-sm text-muted-foreground mb-2">Marques préférées</p>
@@ -135,7 +137,6 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
             </div>
           </div>
         )}
-
         <div className="bg-card rounded-xl p-5 card-shadow">
           <p className="text-sm text-muted-foreground mb-1">Meilleur streak</p>
           <p className="text-2xl font-serif font-bold" style={{ color: '#C9956C' }}>
@@ -144,17 +145,11 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
         </div>
       </div>
 
-      <button
-        onClick={onEditProfile}
-        className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold mt-6 active:scale-[0.98] transition-transform shadow-lg"
-      >
+      <button onClick={onEditProfile}
+        className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold mt-6 active:scale-[0.98] transition-transform shadow-lg">
         Modifier mon profil
       </button>
-
-      <button
-        onClick={onLogout}
-        className="w-full py-3 mt-4 text-destructive text-sm font-medium"
-      >
+      <button onClick={onLogout} className="w-full py-3 mt-4 text-destructive text-sm font-medium">
         Se déconnecter
       </button>
     </div>
