@@ -52,7 +52,7 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
           <button onClick={() => setEditingAvatar(false)} className="text-2xl">←</button>
           <h1 className="text-xl font-serif font-bold">Modifier mon avatar</h1>
         </div>
-        <AvatarCreator initial={avatar} onSave={handleAvatarSave} />
+        <AvatarCreator onSave={handleAvatarSave} />
       </div>
     );
   }
