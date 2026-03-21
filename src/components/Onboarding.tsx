@@ -36,7 +36,7 @@ interface Props {
 }
 
 export default function Onboarding({ onComplete }: Props) {
-  const [step, setStep] = useState(6);
+  const [step, setStep] = useState(0);
   const [showMessage, setShowMessage] = useState(false);
   const [silhouette, setSilhouette] = useState('');
   const [styles, setStyles] = useState<string[]>([]);
