@@ -37,11 +37,19 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
         {results.map((r, idx) => {
           const isLiked = r.liked === true;
           const tips = getStylingTips(r.outfit, weatherCode, temperature);
+          const normalizeColor = (color: string) =>
+            color.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_").trim();
+
           let colorBadge: 'perfect' | 'avoid' | null = null;
           if (userSeason) {
-            const scores = r.outfit.map(item => getColorScore(item.color, userSeason));
+            const scores = r.outfit.map(item => {
+              const norm = normalizeColor(item.color);
+              const score = getColorScore(norm, userSeason);
+              console.log("Couleur item:", item.color, "→ normalisée:", norm, "→ score:", score, "→ saison:", userSeason);
+              return score;
+            });
             const avg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
-            if (avg >= 1.5) colorBadge = 'perfect';
+            if (avg >= 0.5) colorBadge = 'perfect';
             else if (avg <= -1) colorBadge = 'avoid';
           }
           return (
