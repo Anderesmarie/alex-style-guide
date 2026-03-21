@@ -1,6 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
 import { ClothingItem } from '@/lib/types';
 import { getStylingTips, StylingTips } from '@/lib/stylingTips';
+import { getColorScore } from '@/lib/colorimetry';
+import type { Season } from '@/lib/colorimetry';
 
 interface OutfitCard {
   outfit: ClothingItem[];
@@ -12,6 +14,7 @@ interface Props {
   weatherCode: number | null;
   temperature: number | null;
   onComplete: (results: OutfitCard[]) => void;
+  userSeason?: Season | null;
 }
 
 export default function OutfitSwiper({ outfits, weatherCode, temperature, onComplete }: Props) {
