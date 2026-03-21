@@ -101,6 +101,20 @@ export default function Today() {
           setSwipeResults(saved);
           setSwipeComplete(true);
         }
+        // Fetch colorimetry season
+        try {
+          const { data: userData } = await supabase.auth.getUser();
+          if (userData.user) {
+            const { data: prof } = await supabase
+              .from('profiles')
+              .select('colorimetry_season')
+              .eq('id', userData.user.id)
+              .maybeSingle();
+            if (prof?.colorimetry_season) {
+              setUserSeason(prof.colorimetry_season as Season);
+            }
+          }
+        } catch {}
       } catch (e) {
         console.error('Error loading data:', e);
       }
