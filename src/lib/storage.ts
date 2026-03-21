@@ -40,7 +40,20 @@ export async function getAvatar(): Promise<AvatarConfig | null> {
   const uid = await getUserId();
   const { data } = await supabase.from('avatar').select('*').eq('user_id', uid).single();
   if (!data) return null;
-  return { skin: data.skin, eyeColor: data.eye_color, hairStyle: data.hair_style, hairColor: data.hair_color };
+  return {
+    skin: data.skin,
+    faceShape: data.face_shape || 'ovale',
+    eyeColor: data.eye_color,
+    eyeShape: data.eye_shape || 'amande',
+    browShape: data.brow_shape || 'arques',
+    browColor: data.brow_color || '#6B4226',
+    noseShape: data.nose_shape || 'petit',
+    lipsShape: data.lips_shape || 'naturelles',
+    lipsColor: data.lips_color || '#D4756A',
+    hairStyle: data.hair_style,
+    hairColor: data.hair_color,
+    extras: (data.extras as string[]) || [],
+  };
 }
 
 export async function saveAvatar(avatar: AvatarConfig): Promise<void> {
@@ -48,9 +61,17 @@ export async function saveAvatar(avatar: AvatarConfig): Promise<void> {
   await supabase.from('avatar').upsert({
     user_id: uid,
     skin: avatar.skin,
+    face_shape: avatar.faceShape,
     eye_color: avatar.eyeColor,
+    eye_shape: avatar.eyeShape,
+    brow_shape: avatar.browShape,
+    brow_color: avatar.browColor,
+    nose_shape: avatar.noseShape,
+    lips_shape: avatar.lipsShape,
+    lips_color: avatar.lipsColor,
     hair_style: avatar.hairStyle,
     hair_color: avatar.hairColor,
+    extras: avatar.extras,
   }, { onConflict: 'user_id' });
 }
 
