@@ -194,6 +194,48 @@ export default function AvatarCreator({ initial, onSave }: Props) {
         ))}
       </div>
 
+      {/* Nose shape */}
+      <label className="text-sm font-semibold text-muted-foreground mb-2 block">Forme du nez</label>
+      <div className="flex flex-wrap gap-2 mb-5">
+        {NOSE_SHAPE_OPTIONS.map(n => (
+          <button
+            key={n}
+            onClick={() => setNoseShape(n)}
+            className={`chip text-xs ${noseShape === n ? 'chip-active' : ''}`}
+          >
+            {NOSE_SHAPES[n].label}
+          </button>
+        ))}
+      </div>
+
+      {/* Lips shape */}
+      <label className="text-sm font-semibold text-muted-foreground mb-2 block">Forme des lèvres</label>
+      <div className="flex flex-wrap gap-2 mb-5">
+        {LIPS_SHAPE_OPTIONS.map(l => (
+          <button
+            key={l}
+            onClick={() => setLipsShape(l)}
+            className={`chip text-xs ${lipsShape === l ? 'chip-active' : ''}`}
+          >
+            {LIPS_SHAPES[l].label}
+          </button>
+        ))}
+      </div>
+
+      {/* Lips color */}
+      <label className="text-sm font-semibold text-muted-foreground mb-2 block">Couleur des lèvres</label>
+      <div className="flex flex-wrap gap-3 mb-5">
+        {LIPS_COLOR_OPTIONS.map(c => (
+          <button
+            key={c.key}
+            onClick={() => setLipsColor(c.key)}
+            className={`w-10 h-10 rounded-full transition-all ${lipsColor === c.key ? 'ring-3 ring-primary ring-offset-2' : ''}`}
+            style={{ backgroundColor: c.key }}
+            title={c.label}
+          />
+        ))}
+      </div>
+
       {/* Hair style */}
       <label className="text-sm font-semibold text-muted-foreground mb-2 block">Style de cheveux</label>
       <div className="flex flex-wrap gap-2 mb-5">
