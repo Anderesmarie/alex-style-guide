@@ -10,6 +10,8 @@ import StreakCounter from '@/components/StreakCounter';
 import EventBanner from '@/components/EventBanner';
 import AvatarSVG, { AvatarData } from '@/components/AvatarSVG';
 import { DEFAULT_AVATAR } from '@/components/AvatarCreator';
+import { supabase } from '@/lib/supabase';
+import type { Season } from '@/lib/colorimetry';
 
 type WeatherState =
   | { status: 'loading' }
