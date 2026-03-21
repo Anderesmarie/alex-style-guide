@@ -10,14 +10,15 @@ const NOSE_SHAPE_OPTIONS = Object.keys(NOSE_SHAPES);
 const LIPS_SHAPE_OPTIONS = Object.keys(LIPS_SHAPES);
 
 const HAIR_STYLE_OPTIONS = [
-  { key: 'court-lisse', label: 'Court lisse' },
-  { key: 'court-boucle', label: 'Court bouclé' },
-  { key: 'mi-long-lisse', label: 'Mi-long lisse' },
-  { key: 'mi-long-boucle', label: 'Mi-long bouclé' },
   { key: 'long-lisse', label: 'Long lisse' },
   { key: 'long-boucle', label: 'Long bouclé' },
+  { key: 'mi-long', label: 'Mi-long' },
+  { key: 'court', label: 'Court' },
   { key: 'chignon', label: 'Chignon' },
   { key: 'tresse', label: 'Tresse' },
+  { key: 'queue-de-cheval', label: 'Queue de cheval' },
+  { key: 'afro', label: 'Afro' },
+  { key: 'avec-frange', label: 'Avec frange' },
 ];
 const HAIR_COLOR_OPTIONS = Object.keys(HAIR_COLORS);
 
@@ -25,12 +26,17 @@ const HAIR_COLOR_OPTIONS = Object.keys(HAIR_COLORS);
 function hairToBrowColor(hairColor: string): string {
   const map: Record<string, string> = {
     'Noir': '#1C1C1C',
-    'Brun': '#3B1F0A',
-    'Châtain': '#6B4226',
+    'Brun foncé': '#3B1F0A',
+    'Brun': '#6B4226',
+    'Châtain': '#A0784A',
+    'Châtain clair': '#BFA888',
+    'Blond foncé': '#BFA888',
     'Blond': '#BFA888',
     'Roux': '#A0522D',
-    'Platine': '#BFA888',
-    'Gris': '#999999',
+    'Rose': '#6B4226',
+    'Violet': '#3B1F0A',
+    'Bleu': '#3B1F0A',
+    'Gris/Argenté': '#999999',
   };
   return map[hairColor] || '#3B1F0A';
 }

@@ -105,16 +105,18 @@ export const EYE_COLORS: Record<string, string> = {
 };
 
 export const HAIR_COLORS: Record<string, string> = {
-  'Noir': '#1C1C1C',
-  'Brun foncé': '#3B2F2F',
-  'Brun': '#5C4033',
-  'Châtain': '#8B6914',
-  'Châtain clair': '#B8860B',
-  'Blond foncé': '#C4A35A',
-  'Blond': '#E8D5B7',
-  'Roux': '#B7410E',
-  'Rose': '#DB7093',
-  'Gris/Argenté': '#A9A9A9',
+  'Noir': '#3B1F0A',
+  'Brun foncé': '#5C2E00',
+  'Brun': '#8B4513',
+  'Châtain': '#A0784A',
+  'Châtain clair': '#C8A87A',
+  'Blond foncé': '#D4A95A',
+  'Blond': '#F0D080',
+  'Roux': '#C04A1A',
+  'Rose': '#E875A0',
+  'Violet': '#8A4FA8',
+  'Bleu': '#1E90FF',
+  'Gris/Argenté': '#C0C0C0',
 };
 
 // Palette color circles for Profile display
