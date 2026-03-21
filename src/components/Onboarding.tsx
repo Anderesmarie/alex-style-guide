@@ -57,12 +57,9 @@ export default function Onboarding({ onComplete }: Props) {
     }, 1200);
   };
 
-  const handleAvatarSave = async (avatar: AvatarData) => {
-    await saveAvatar(avatar);
-    const palette = getPaletteForSkin(avatar.skin);
-    savePalette(palette);
+  const handleAvatarSave = async (avatarUrl: string) => {
+    localStorage.setItem('alex_avatar_url', avatarUrl);
     await saveProfile({ silhouette, styles, budget, brands });
-    // Show final message then complete
     setShowMessage(true);
     setTimeout(() => {
       setShowMessage(false);
