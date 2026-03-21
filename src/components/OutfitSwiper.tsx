@@ -115,10 +115,12 @@ export default function OutfitSwiper({ outfits, weatherCode, temperature, onComp
     color.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_").trim();
 
   let colorBadge: 'perfect' | 'avoid' | null = null;
+  const debugScores: { color: string; norm: string; score: number }[] = [];
   if (userSeason) {
     const scores = currentOutfit.map(item => {
       const norm = normalizeColor(item.color);
       const score = getColorScore(norm, userSeason);
+      debugScores.push({ color: item.color, norm, score });
       console.log("Couleur item:", item.color, "→ normalisée:", norm, "→ score:", score, "→ saison:", userSeason);
       return score;
     });
@@ -248,6 +250,16 @@ export default function OutfitSwiper({ outfits, weatherCode, temperature, onComp
                   <span style={{ color: '#C9956C' }}>{tips.accessories}</span>
                 </p>
               </div>
+            </div>
+
+            {/* DEBUG colorimétrie */}
+            <div className="px-5 py-2 border-t border-border">
+              <p className="text-[10px] text-muted-foreground font-mono">saison: {userSeason ?? 'null'}</p>
+              {debugScores.map((d, i) => (
+                <p key={i} className="text-[10px] text-muted-foreground font-mono">
+                  {d.color} → {d.norm} → score: {d.score}
+                </p>
+              ))}
             </div>
           </div>
         </div>
