@@ -1,3 +1,66 @@
+// ── New season-based colorimetry system ──
+
+export type Season = 'printemps' | 'ete' | 'automne' | 'hiver';
+
+export type ColorimetryProfile = {
+  season: Season;
+  recommended: string[];
+  avoid: string[];
+  metal: string;
+};
+
+export const ARTIFICIAL_HAIR_COLORS = ['rose', 'gris_argente'];
+
+export const SEASON_PALETTES: Record<Season, ColorimetryProfile> = {
+  printemps: {
+    season: 'printemps',
+    recommended: ['corail', 'peche', 'vert_menthe', 'bleu_ciel', 'turquoise', 'rose_saumon', 'camel_clair', 'abricot', 'ivoire', 'beige', 'jaune'],
+    avoid: ['noir', 'gris', 'bordeaux', 'violet'],
+    metal: 'Or jaune · Or rose · Bronze doré',
+  },
+  ete: {
+    season: 'ete',
+    recommended: ['rose', 'mauve', 'lavande', 'bleu', 'gris', 'blanc_casse', 'vert'],
+    avoid: ['orange_vif', 'jaune', 'rouge', 'marron', 'noir'],
+    metal: 'Argent · Or blanc · Platine · Acier',
+  },
+  automne: {
+    season: 'automne',
+    recommended: ['camel', 'terracotta', 'vert', 'bordeaux', 'marron', 'jaune', 'beige'],
+    avoid: ['rose', 'gris', 'noir', 'blanc'],
+    metal: 'Or jaune · Bronze · Cuivre · Laiton doré',
+  },
+  hiver: {
+    season: 'hiver',
+    recommended: ['noir', 'blanc', 'rouge', 'bleu', 'rose', 'violet', 'vert'],
+    avoid: ['beige', 'camel', 'orange', 'marron', 'jaune'],
+    metal: 'Argent · Or blanc · Platine · Acier',
+  },
+};
+
+export const COLOR_TO_SEASON: Record<string, Season[]> = {
+  'blanc': ['hiver'],
+  'blanc_casse': ['printemps', 'ete'],
+  'noir': ['hiver'],
+  'gris': ['ete', 'hiver'],
+  'beige': ['printemps', 'automne'],
+  'camel': ['automne'],
+  'bleu': ['printemps', 'ete'],
+  'rouge': ['hiver'],
+  'bordeaux': ['automne', 'hiver'],
+  'rose': ['ete', 'printemps'],
+  'vert': ['printemps', 'automne'],
+  'jaune': ['printemps', 'automne'],
+  'marron': ['automne'],
+  'terracotta': ['automne'],
+  'corail': ['printemps'],
+  'lavande': ['ete'],
+  'violet': ['hiver'],
+  'multicolore': [],
+};
+
+// ── Legacy exports (used by other components) ──
+
 export interface ColorPalette {
   recommended: string[];
   avoid: string[];
@@ -38,7 +101,6 @@ const SKIN_PALETTES: Record<string, ColorPalette> = {
   },
 };
 
-// Map new skin keys to palette names
 const SKIN_KEY_TO_PALETTE: Record<string, string> = {
   'tres-clair': 'Très clair',
   'clair': 'Clair',
@@ -55,7 +117,6 @@ export function getPaletteForSkin(skin: string): ColorPalette {
   return SKIN_PALETTES[paletteName] || { recommended: [], avoid: [] };
 }
 
-// Map clothing color names to palette color groups for matching
 const COLOR_TO_GROUP: Record<string, string[]> = {
   'Blanc': ['Blanc', 'Blanc cassé'],
   'Noir': ['Noir sur noir'],
@@ -83,7 +144,6 @@ export function getOutfitColorMatch(colors: string[], palette: ColorPalette): 'r
   return 'neutral';
 }
 
-// Skin tone color hex values for avatar rendering
 export const SKIN_COLORS: Record<string, string> = {
   'Très clair': '#FDEBD0',
   'Clair': '#F5CBA7',
@@ -119,7 +179,6 @@ export const HAIR_COLORS: Record<string, string> = {
   'Gris/Argenté': '#C0C0C0',
 };
 
-// Palette color circles for Profile display
 export const PALETTE_COLORS: Record<string, string> = {
   'Marine': '#001F5B',
   'Bordeaux': '#722F37',
