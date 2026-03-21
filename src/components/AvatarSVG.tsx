@@ -131,43 +131,66 @@ interface Props {
   size?: number;
 }
 
-function HairSVG({ style, color }: { style: string; color: string }) {
+function HairBack({ style, color }: { style: string; color: string }) {
   switch (style) {
-    case 'court-lisse':
-      return <path d="M36 46 Q60 18 84 46 Q86 34 82 26 Q60 10 38 26 Q34 34 36 46Z" fill={color} />;
-    case 'court-boucle':
-      return <>
-        <path d="M34 48 Q60 14 86 48 Q88 32 82 22 Q60 6 38 22 Q32 32 34 48Z" fill={color} />
-        <circle cx={38} cy={34} r={5} fill={color} /><circle cx={50} cy={24} r={5} fill={color} />
-        <circle cx={70} cy={24} r={5} fill={color} /><circle cx={82} cy={34} r={5} fill={color} />
-      </>;
-    case 'mi-long-lisse':
-      return <path d="M32 50 Q34 22 60 18 Q86 22 88 50 L90 70 Q88 74 84 70 L84 50 Q82 32 60 28 Q38 32 36 50 L36 70 Q32 74 30 70Z" fill={color} />;
-    case 'mi-long-boucle':
-      return <>
-        <path d="M32 50 Q34 22 60 18 Q86 22 88 50 L90 72 Q86 78 84 70 L84 50 Q82 32 60 28 Q38 32 36 50 L36 70 Q34 78 30 72Z" fill={color} />
-        <circle cx={32} cy={62} r={6} fill={color} /><circle cx={88} cy={62} r={6} fill={color} />
-      </>;
     case 'long-lisse':
-      return <path d="M30 50 Q34 20 60 16 Q86 20 90 50 L92 90 Q90 96 86 90 L84 50 Q82 28 60 24 Q38 28 36 50 L34 90 Q30 96 28 90Z" fill={color} />;
+    case 'avec-frange':
+      return <path id="hair-back" d="M32 62 Q28 35 60 28 Q92 35 88 62 Q88 110 60 118 Q32 110 32 62Z" fill={color} />;
     case 'long-boucle':
       return <>
-        <path d="M30 50 Q34 20 60 16 Q86 20 90 50 L92 94 Q88 98 86 92 L84 50 Q82 28 60 24 Q38 28 36 50 L34 92 Q32 98 28 94Z" fill={color} />
-        <circle cx={30} cy={72} r={6} fill={color} /><circle cx={90} cy={72} r={6} fill={color} />
-        <circle cx={28} cy={86} r={5} fill={color} /><circle cx={92} cy={86} r={5} fill={color} />
+        <path id="hair-back" d="M32 62 Q28 35 60 28 Q92 35 88 62 Q88 110 60 118 Q32 110 32 62Z" fill={color} />
+        <path d="M30 70 Q28 80 32 90 Q28 100 32 110" stroke={color} strokeWidth={4} fill="none" />
+        <path d="M90 70 Q92 80 88 90 Q92 100 88 110" stroke={color} strokeWidth={4} fill="none" />
       </>;
+    case 'mi-long':
+      return <path id="hair-back" d="M32 62 Q28 35 60 28 Q92 35 88 62 Q88 96 60 100 Q32 96 32 62Z" fill={color} />;
+    case 'court':
+      return <path id="hair-back" d="M32 62 Q28 35 60 28 Q92 35 88 62 Q88 78 60 82 Q32 78 32 62Z" fill={color} />;
+    case 'chignon':
+      return null;
+    case 'tresse':
+      return <path id="hair-back" d="M48 36 Q52 70 50 115 Q60 118 70 115 Q68 70 72 36 Q66 30 54 30Z" fill={color} />;
+    case 'queue-de-cheval':
+      return <ellipse id="hair-back" cx={62} cy={35} rx={20} ry={26} fill={color} />;
+    case 'afro':
+      return <circle id="hair-back" cx={60} cy={50} r={40} fill={color} />;
+    default:
+      return <path id="hair-back" d="M32 62 Q28 35 60 28 Q92 35 88 62 Q88 110 60 118 Q32 110 32 62Z" fill={color} />;
+  }
+}
+
+function HairFront({ style, color }: { style: string; color: string }) {
+  switch (style) {
+    case 'long-lisse':
+      return <path id="hair-front" d="M32 62 Q30 50 38 42 Q45 36 60 34 Q75 36 82 42 Q90 50 88 62 L88 70 Q88 55 60 52 Q32 55 32 70Z" fill={color} />;
+    case 'long-boucle':
+      return <path id="hair-front" d="M32 62 Q30 50 38 42 Q45 36 60 34 Q75 36 82 42 Q90 50 88 62 L88 70 Q88 55 60 52 Q32 55 32 70Z" fill={color} />;
+    case 'mi-long':
+      return <path id="hair-front" d="M32 62 Q30 50 38 42 Q45 36 60 34 Q75 36 82 42 Q90 50 88 62 L88 68 Q88 55 60 52 Q32 55 32 68Z" fill={color} />;
+    case 'court':
+      return <path id="hair-front" d="M34 62 Q32 50 40 43 Q47 37 60 35 Q73 37 80 43 Q88 50 86 62 L86 70 Q86 58 60 54 Q34 58 34 70Z" fill={color} />;
     case 'chignon':
       return <>
-        <path d="M36 46 Q60 18 84 46 Q86 34 82 26 Q60 10 38 26 Q34 34 36 46Z" fill={color} />
-        <circle cx={60} cy={20} r={12} fill={color} />
+        <ellipse id="hair-front" cx={60} cy={28} rx={18} ry={14} fill={color} />
+        <path d="M38 44 Q45 38 60 36 Q75 38 82 44 Q75 48 60 46 Q45 48 38 44Z" fill={color} />
       </>;
     case 'tresse':
       return <>
-        <path d="M32 50 Q34 22 60 18 Q86 22 88 50 L88 58 Q86 60 84 58 L84 50 Q82 32 60 28 Q38 32 36 50 L36 58 Q34 60 32 58Z" fill={color} />
-        <path d="M60 50 L62 62 L58 70 L62 78 L58 86 L62 94 L60 98 L58 94 L62 86 L58 78 L62 70 L58 62Z" fill={color} strokeWidth={2} />
+        <path id="hair-front" d="M38 44 Q45 36 60 34 Q75 36 82 44 Q75 48 60 46 Q45 48 38 44Z" fill={color} />
+        <path d="M56 46 L54 56 L58 66 L54 76 L58 86" stroke={color} strokeWidth={3} fill="none" />
+        <path d="M64 46 L66 56 L62 66 L66 76 L62 86" stroke={color} strokeWidth={3} fill="none" />
+      </>;
+    case 'queue-de-cheval':
+      return <path id="hair-front" d="M40 44 Q47 37 60 35 Q73 37 80 44 Q73 48 60 46 Q47 48 40 44Z" fill={color} />;
+    case 'afro':
+      return <circle id="hair-front" cx={60} cy={50} r={40} fill={color} />;
+    case 'avec-frange':
+      return <>
+        <path id="hair-front" d="M32 62 Q30 50 38 42 Q45 36 60 34 Q75 36 82 42 Q90 50 88 62 L88 70 Q88 55 60 52 Q32 55 32 70Z" fill={color} />
+        <path d="M36 44 Q48 52 60 52 Q72 52 84 44 Q72 58 60 58 Q48 58 36 44Z" fill={color} />
       </>;
     default:
-      return <path d="M36 46 Q60 18 84 46 Q86 34 82 26 Q60 10 38 26 Q34 34 36 46Z" fill={color} />;
+      return <path id="hair-front" d="M32 62 Q30 50 38 42 Q45 36 60 34 Q75 36 82 42 Q90 50 88 62 L88 70 Q88 55 60 52 Q32 55 32 70Z" fill={color} />;
   }
 }
 
