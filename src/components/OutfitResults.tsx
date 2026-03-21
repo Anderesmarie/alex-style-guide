@@ -37,6 +37,13 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
         {results.map((r, idx) => {
           const isLiked = r.liked === true;
           const tips = getStylingTips(r.outfit, weatherCode, temperature);
+          let colorBadge: 'perfect' | 'avoid' | null = null;
+          if (userSeason) {
+            const scores = r.outfit.map(item => getColorScore(item.color, userSeason));
+            const avg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+            if (avg >= 1.5) colorBadge = 'perfect';
+            else if (avg <= -1) colorBadge = 'avoid';
+          }
           return (
             <div
               key={idx}
