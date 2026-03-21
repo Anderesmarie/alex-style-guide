@@ -1,105 +1,126 @@
-import { SKIN_COLORS, EYE_COLORS, HAIR_COLORS } from '@/lib/colorimetry';
+import { HAIR_COLORS } from '@/lib/colorimetry';
 
 export interface AvatarData {
   skin: string;
+  faceShape: string;
   eyeColor: string;
+  eyeShape: string;
+  browShape: string;
+  browColor: string;
+  noseShape: string;
+  lipsShape: string;
+  lipsColor: string;
   hairStyle: string;
   hairColor: string;
+  extras: string[];
 }
+
+// ---------- Skin tone triplets ----------
+export const SKIN_TONES: Record<string, { face: string; neck: string; bg: string; label: string }> = {
+  'tres-clair':  { face: '#FEF0E6', neck: '#F0D8C0', bg: '#FFF8F2', label: 'Très clair' },
+  'clair':       { face: '#F9D9C0', neck: '#F0C4A0', bg: '#FDF4EC', label: 'Clair' },
+  'clair-rose':  { face: '#FADADB', neck: '#F5C8B8', bg: '#FDF0F0', label: 'Clair rosé' },
+  'beige-dore':  { face: '#E8B87A', neck: '#D9A060', bg: '#F5E8D0', label: 'Beige doré' },
+  'miel':        { face: '#D49455', neck: '#C0803C', bg: '#EDDDBE', label: 'Miel' },
+  'caramel':     { face: '#B8732A', neck: '#A06020', bg: '#D9C0A0', label: 'Caramel' },
+  'brun':        { face: '#7B4820', neck: '#623815', bg: '#B89070', label: 'Brun' },
+  'ebene':       { face: '#3D1E0A', neck: '#2E1406', bg: '#6B4028', label: 'Ébène' },
+};
+
+// ---------- Face shape params ----------
+export const FACE_SHAPES: Record<string, { cx: number; cy: number; rx: number; ry: number; label: string }> = {
+  'ovale':   { cx: 60, cy: 68, rx: 28, ry: 34, label: 'Ovale' },
+  'rond':    { cx: 60, cy: 66, rx: 30, ry: 30, label: 'Rond' },
+  'carre':   { cx: 60, cy: 68, rx: 27, ry: 29, label: 'Carré' },
+  'coeur':   { cx: 60, cy: 68, rx: 26, ry: 30, label: 'Cœur' },
+  'long':    { cx: 60, cy: 70, rx: 22, ry: 40, label: 'Long' },
+  'diamant': { cx: 60, cy: 68, rx: 24, ry: 34, label: 'Diamant' },
+};
 
 interface Props {
   avatar: AvatarData;
   size?: number;
 }
 
-function lighten(hex: string, amount = 0.15): string {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  const nr = Math.min(255, Math.round(r + (255 - r) * amount));
-  const ng = Math.min(255, Math.round(g + (255 - g) * amount));
-  const nb = Math.min(255, Math.round(b + (255 - b) * amount));
-  return `#${nr.toString(16).padStart(2, '0')}${ng.toString(16).padStart(2, '0')}${nb.toString(16).padStart(2, '0')}`;
-}
-
 function HairSVG({ style, color }: { style: string; color: string }) {
   switch (style) {
-    case 'Court lisse':
-      return <path d="M30 38 Q50 15 70 38 Q72 28 68 22 Q50 8 32 22 Q28 28 30 38Z" fill={color} />;
-    case 'Court bouclé':
+    case 'court-lisse':
+      return <path d="M36 46 Q60 18 84 46 Q86 34 82 26 Q60 10 38 26 Q34 34 36 46Z" fill={color} />;
+    case 'court-boucle':
       return <>
-        <path d="M28 40 Q50 12 72 40 Q74 26 68 18 Q50 4 32 18 Q26 26 28 40Z" fill={color} />
-        <circle cx={32} cy={28} r={4} fill={color} /><circle cx={42} cy={20} r={4} fill={color} />
-        <circle cx={58} cy={20} r={4} fill={color} /><circle cx={68} cy={28} r={4} fill={color} />
+        <path d="M34 48 Q60 14 86 48 Q88 32 82 22 Q60 6 38 22 Q32 32 34 48Z" fill={color} />
+        <circle cx={38} cy={34} r={5} fill={color} /><circle cx={50} cy={24} r={5} fill={color} />
+        <circle cx={70} cy={24} r={5} fill={color} /><circle cx={82} cy={34} r={5} fill={color} />
       </>;
-    case 'Mi-long lisse':
-      return <path d="M26 42 Q28 18 50 14 Q72 18 74 42 L76 58 Q74 62 70 58 L70 42 Q68 26 50 22 Q32 26 30 42 L30 58 Q26 62 24 58Z" fill={color} />;
-    case 'Mi-long bouclé':
+    case 'mi-long-lisse':
+      return <path d="M32 50 Q34 22 60 18 Q86 22 88 50 L90 70 Q88 74 84 70 L84 50 Q82 32 60 28 Q38 32 36 50 L36 70 Q32 74 30 70Z" fill={color} />;
+    case 'mi-long-boucle':
       return <>
-        <path d="M26 42 Q28 18 50 14 Q72 18 74 42 L76 60 Q72 65 70 58 L70 42 Q68 26 50 22 Q32 26 30 42 L30 58 Q28 65 24 60Z" fill={color} />
-        <circle cx={26} cy={52} r={5} fill={color} /><circle cx={74} cy={52} r={5} fill={color} />
+        <path d="M32 50 Q34 22 60 18 Q86 22 88 50 L90 72 Q86 78 84 70 L84 50 Q82 32 60 28 Q38 32 36 50 L36 70 Q34 78 30 72Z" fill={color} />
+        <circle cx={32} cy={62} r={6} fill={color} /><circle cx={88} cy={62} r={6} fill={color} />
       </>;
-    case 'Long lisse':
-      return <path d="M24 42 Q28 16 50 12 Q72 16 76 42 L78 75 Q76 80 72 75 L70 42 Q68 24 50 20 Q32 24 30 42 L28 75 Q24 80 22 75Z" fill={color} />;
-    case 'Long bouclé':
+    case 'long-lisse':
+      return <path d="M30 50 Q34 20 60 16 Q86 20 90 50 L92 90 Q90 96 86 90 L84 50 Q82 28 60 24 Q38 28 36 50 L34 90 Q30 96 28 90Z" fill={color} />;
+    case 'long-boucle':
       return <>
-        <path d="M24 42 Q28 16 50 12 Q72 16 76 42 L78 78 Q74 82 72 76 L70 42 Q68 24 50 20 Q32 24 30 42 L28 76 Q26 82 22 78Z" fill={color} />
-        <circle cx={24} cy={60} r={5} fill={color} /><circle cx={76} cy={60} r={5} fill={color} />
-        <circle cx={22} cy={72} r={4} fill={color} /><circle cx={78} cy={72} r={4} fill={color} />
+        <path d="M30 50 Q34 20 60 16 Q86 20 90 50 L92 94 Q88 98 86 92 L84 50 Q82 28 60 24 Q38 28 36 50 L34 92 Q32 98 28 94Z" fill={color} />
+        <circle cx={30} cy={72} r={6} fill={color} /><circle cx={90} cy={72} r={6} fill={color} />
+        <circle cx={28} cy={86} r={5} fill={color} /><circle cx={92} cy={86} r={5} fill={color} />
       </>;
-    case 'Chignon':
+    case 'chignon':
       return <>
-        <path d="M30 38 Q50 15 70 38 Q72 28 68 22 Q50 8 32 22 Q28 28 30 38Z" fill={color} />
-        <circle cx={50} cy={16} r={10} fill={color} />
+        <path d="M36 46 Q60 18 84 46 Q86 34 82 26 Q60 10 38 26 Q34 34 36 46Z" fill={color} />
+        <circle cx={60} cy={20} r={12} fill={color} />
       </>;
-    case 'Tresse':
+    case 'tresse':
       return <>
-        <path d="M26 42 Q28 18 50 14 Q72 18 74 42 L74 48 Q72 50 70 48 L70 42 Q68 26 50 22 Q32 26 30 42 L30 48 Q28 50 26 48Z" fill={color} />
-        <path d="M50 42 L52 52 L48 58 L52 64 L48 70 L52 76 L50 80 L48 76 L52 70 L48 64 L52 58 L48 52Z" fill={color} strokeWidth={2} />
+        <path d="M32 50 Q34 22 60 18 Q86 22 88 50 L88 58 Q86 60 84 58 L84 50 Q82 32 60 28 Q38 32 36 50 L36 58 Q34 60 32 58Z" fill={color} />
+        <path d="M60 50 L62 62 L58 70 L62 78 L58 86 L62 94 L60 98 L58 94 L62 86 L58 78 L62 70 L58 62Z" fill={color} strokeWidth={2} />
       </>;
     default:
-      return <path d="M30 38 Q50 15 70 38 Q72 28 68 22 Q50 8 32 22 Q28 28 30 38Z" fill={color} />;
+      return <path d="M36 46 Q60 18 84 46 Q86 34 82 26 Q60 10 38 26 Q34 34 36 46Z" fill={color} />;
   }
 }
 
 export default function AvatarSVG({ avatar, size = 120 }: Props) {
-  const skinHex = SKIN_COLORS[avatar.skin] || '#F5CBA7';
-  const faceHex = lighten(skinHex, 0.1);
-  const eyeHex = EYE_COLORS[avatar.eyeColor] || '#5C3317';
-  const hairHex = HAIR_COLORS[avatar.hairColor] || '#3B2F2F';
-  const browHex = HAIR_COLORS[avatar.hairColor] || '#3B2F2F';
+  const tone = SKIN_TONES[avatar.skin] || SKIN_TONES['clair-rose'];
+  const face = FACE_SHAPES[avatar.faceShape] || FACE_SHAPES['ovale'];
+  const eyeHex = avatar.eyeColor || '#7B4F2E';
+  const browHex = avatar.browColor || '#6B4226';
+  const lipsHex = avatar.lipsColor || '#D4756A';
+  const hairHex = HAIR_COLORS[avatar.hairColor] || avatar.hairColor || '#3B1F0A';
 
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" className="rounded-full">
+    <svg width={size} height={size} viewBox="0 0 120 120" className="rounded-full">
       {/* Background circle */}
-      <circle cx={50} cy={50} r={50} fill={skinHex} opacity={0.3} />
-      
+      <circle id="bg-circle" cx={60} cy={60} r={60} fill={tone.bg} />
+
       {/* Neck + shoulders */}
-      <rect x={42} y={72} width={16} height={12} rx={4} fill={faceHex} />
-      <ellipse cx={50} cy={90} rx={30} ry={14} fill={faceHex} />
-      
-      {/* Face oval */}
-      <ellipse cx={50} cy={48} rx={22} ry={26} fill={faceHex} />
-      
+      <rect id="neck" x={50} y={86} width={20} height={14} rx={5} fill={tone.neck} />
+      <ellipse id="shoulders" cx={60} cy={110} rx={36} ry={16} fill={tone.neck} />
+
+      {/* Face */}
+      <ellipse id="face-shape" cx={face.cx} cy={face.cy} rx={face.rx} ry={face.ry} fill={tone.face} />
+
       {/* Eyes */}
-      <ellipse cx={40} cy={48} rx={3.5} ry={3} fill="white" />
-      <ellipse cx={60} cy={48} rx={3.5} ry={3} fill="white" />
-      <circle cx={40} cy={48} r={2} fill={eyeHex} />
-      <circle cx={60} cy={48} r={2} fill={eyeHex} />
-      <circle cx={40.5} cy={47.5} r={0.7} fill="white" />
-      <circle cx={60.5} cy={47.5} r={0.7} fill="white" />
-      
+      <ellipse cx={48} cy={66} rx={4.2} ry={3.6} fill="white" />
+      <ellipse cx={72} cy={66} rx={4.2} ry={3.6} fill="white" />
+      <circle cx={48} cy={66} r={2.4} fill={eyeHex} />
+      <circle cx={72} cy={66} r={2.4} fill={eyeHex} />
+      <circle cx={48.6} cy={65.4} r={0.8} fill="white" />
+      <circle cx={72.6} cy={65.4} r={0.8} fill="white" />
+
       {/* Eyebrows */}
-      <path d="M35 42 Q40 39 45 42" stroke={browHex} strokeWidth={1.5} fill="none" strokeLinecap="round" />
-      <path d="M55 42 Q60 39 65 42" stroke={browHex} strokeWidth={1.5} fill="none" strokeLinecap="round" />
-      
+      <path d="M42 58 Q48 54 54 58" stroke={browHex} strokeWidth={1.8} fill="none" strokeLinecap="round" />
+      <path d="M66 58 Q72 54 78 58" stroke={browHex} strokeWidth={1.8} fill="none" strokeLinecap="round" />
+
       {/* Nose */}
-      <path d="M50 50 Q48 56 50 57 Q52 56 50 50" stroke={skinHex} strokeWidth={1} fill="none" />
-      
+      <path id="nose" d="M60 68 Q58 74 60 76 Q62 74 60 68" stroke={tone.neck} strokeWidth={1.2} fill="none" />
+
       {/* Mouth */}
-      <path d="M44 62 Q50 67 56 62" stroke="#C9956C" strokeWidth={1.5} fill="none" strokeLinecap="round" />
-      
-      {/* Hair (on top) */}
+      <path d="M52 82 Q60 88 68 82" stroke={lipsHex} strokeWidth={1.8} fill="none" strokeLinecap="round" />
+
+      {/* Hair */}
       <HairSVG style={avatar.hairStyle} color={hairHex} />
     </svg>
   );

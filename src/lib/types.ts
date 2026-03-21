@@ -28,9 +28,17 @@ export interface UserProfile {
 
 export interface AvatarConfig {
   skin: string;
+  faceShape: string;
   eyeColor: string;
+  eyeShape: string;
+  browShape: string;
+  browColor: string;
+  noseShape: string;
+  lipsShape: string;
+  lipsColor: string;
   hairStyle: string;
   hairColor: string;
+  extras: string[];
 }
 
 export interface AuthData {
