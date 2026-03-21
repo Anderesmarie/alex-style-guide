@@ -11,28 +11,22 @@ interface Props {
 
 export default function Profile({ onEditProfile, onLogout }: Props) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [avatar, setAvatar] = useState<AvatarConfig | null>(null);
-  const [palette, setPaletteState] = useState<ColorPalette | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [editingAvatar, setEditingAvatar] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
-      const [p, a] = await Promise.all([getProfile(), getAvatar()]);
+      const p = await getProfile();
       setProfile(p);
-      setAvatar(a);
-      setPaletteState(getPalette());
+      setAvatarUrl(localStorage.getItem('alex_avatar_url'));
       setLoading(false);
     };
     load();
   }, []);
 
-  const handleAvatarSave = async (data: AvatarData) => {
-    await saveAvatar(data);
-    const newPalette = getPaletteForSkin(data.skin);
-    savePalette(newPalette);
-    setAvatar(data);
-    setPaletteState(newPalette);
+  const handleAvatarSave = (url: string) => {
+    setAvatarUrl(url);
     setEditingAvatar(false);
   };
 
