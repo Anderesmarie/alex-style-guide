@@ -198,3 +198,65 @@ export const PALETTE_COLORS: Record<string, string> = {
   'Vert émeraude': '#50C878',
   'Rouge': '#DC143C',
 };
+
+export function determineSeason(
+  skin: string,
+  eyeColor: string,
+  hairColor: string
+): Season {
+  const artificialHair = ['rose', 'gris_argente'];
+  const effectiveHair = artificialHair.includes(hairColor) ? null : hairColor;
+
+  const lightSkins = ['tres_clair', 'clair', 'clair_rose'];
+  const goldenSkins = ['beige_dore', 'miel'];
+  const darkSkins = ['caramel', 'brun', 'ebene'];
+
+  if (lightSkins.includes(skin)) {
+    if (effectiveHair === null) {
+      if (['bleu', 'vert', 'gris'].includes(eyeColor)) return 'ete';
+      if (eyeColor === 'noisette') return 'printemps';
+      return 'ete';
+    }
+    const warmHair = ['roux', 'blond', 'chatain_clair', 'blond_fonce'];
+    if (warmHair.some(h => effectiveHair.includes(h)) &&
+        ['bleu', 'vert', 'noisette'].includes(eyeColor)) return 'printemps';
+    if (['chatain_clair', 'blond_cendre'].some(h => effectiveHair.includes(h))) return 'ete';
+    if (['marron', 'noir'].includes(eyeColor)) return 'hiver';
+    return 'ete';
+  }
+
+  if (goldenSkins.includes(skin)) {
+    if (effectiveHair === null) {
+      if (['vert', 'noisette'].includes(eyeColor)) return 'automne';
+      return 'automne';
+    }
+    const warmDeep = ['roux', 'auburn', 'chatain_chaud', 'chatain', 'brun_chaud'];
+    if (warmDeep.some(h => effectiveHair.includes(h))) return 'automne';
+    if (effectiveHair.includes('blond_dore') &&
+        ['bleu', 'vert', 'noisette'].includes(eyeColor)) return 'printemps';
+    return 'automne';
+  }
+
+  if (darkSkins.includes(skin)) {
+    if (effectiveHair === null) {
+      if (eyeColor === 'noir') return 'hiver';
+      return 'automne';
+    }
+    if (effectiveHair.includes('noir') && eyeColor === 'noir') return 'hiver';
+    const warmDeep = ['roux', 'auburn', 'chatain_chaud'];
+    if (warmDeep.some(h => effectiveHair.includes(h)) &&
+        ['bleu', 'vert', 'noisette'].includes(eyeColor)) return 'printemps';
+    return 'automne';
+  }
+
+  return 'ete';
+}
+
+export function getColorScore(itemColor: string, userSeason: Season): number {
+  const seasons = COLOR_TO_SEASON[itemColor] ?? [];
+  if (seasons.length === 0) return 0;
+  if (seasons.includes(userSeason)) return 2;
+  const palette = SEASON_PALETTES[userSeason];
+  if (palette.avoid.some(a => itemColor.includes(a))) return -1;
+  return 0;
+}
