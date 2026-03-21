@@ -1,6 +1,8 @@
 import { ClothingItem } from '@/lib/types';
 import { addOutfit, genId, saveLastOutfit } from '@/lib/storage';
 import { getStylingTips } from '@/lib/stylingTips';
+import { getColorScore } from '@/lib/colorimetry';
+import type { Season } from '@/lib/colorimetry';
 
 interface OutfitResult {
   outfit: ClothingItem[];
@@ -11,6 +13,7 @@ interface Props {
   results: OutfitResult[];
   weatherCode: number | null;
   temperature: number | null;
+  userSeason?: Season | null;
 }
 
 const ROSE_GOLD = '#C9956C';

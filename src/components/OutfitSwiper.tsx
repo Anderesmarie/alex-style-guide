@@ -208,6 +208,22 @@ export default function OutfitSwiper({ outfits, weatherCode, temperature, onComp
               ))}
             </div>
 
+            {/* Colorimetry badge */}
+            {colorBadge === 'perfect' && (
+              <div className="px-5 pb-2">
+                <span className="inline-block text-[11px] font-medium text-white rounded-xl py-1 px-2" style={{ backgroundColor: '#C9956C' }}>
+                  ✨ Parfait pour ton teint
+                </span>
+              </div>
+            )}
+            {colorBadge === 'avoid' && (
+              <div className="px-5 pb-2">
+                <span className="inline-block text-[11px] font-medium rounded-xl py-1 px-2" style={{ backgroundColor: '#F0F0F0', color: '#888888' }}>
+                  💡 Pas idéal pour ton teint
+                </span>
+              </div>
+            )}
+
             {/* Styling tips */}
             <div className="border-t border-border pt-3 rounded-b-2xl" style={{ backgroundColor: '#F5F0EB' }}>
               <div className="space-y-1.5 px-1">
