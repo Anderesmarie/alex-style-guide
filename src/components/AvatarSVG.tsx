@@ -46,6 +46,55 @@ export const EYE_SHAPES: Record<string, { rx: number; ry: number; lcx: number; r
   'ecartes':  { rx: 8, ry: 6, lcx: 40, rcx: 80, label: 'Écartés' },
 };
 
+// ---------- Nose shape params ----------
+export const NOSE_SHAPES: Record<string, { d: string; label: string }> = {
+  'petit':     { d: 'M60 66 Q57 74 54 76 Q60 78 66 76 Q63 74 60 66Z', label: 'Petit' },
+  'droit':     { d: 'M59 64 L59 76 Q60 78 61 76 L61 64Z', label: 'Droit' },
+  'retrousse': { d: 'M60 66 Q57 72 56 76 Q60 79 64 76 Q63 72 60 66Z', label: 'Retroussé' },
+  'large':     { d: 'M60 65 Q55 74 50 78 Q60 81 70 78 Q65 74 60 65Z', label: 'Large' },
+  'aquilin':   { d: 'M60 62 Q58 70 54 78 Q60 80 66 78 Q62 70 60 62Z', label: 'Aquilin' },
+};
+
+// ---------- Lips shape params ----------
+export const LIPS_SHAPES: Record<string, { top: string; bot: string; label: string }> = {
+  'naturelles': {
+    top: 'M50 86 Q55 83 60 84 Q65 83 70 86 Q65 84 60 85 Q55 84 50 86Z',
+    bot: 'M50 86 Q55 91 60 91.5 Q65 91 70 86 Q65 89 60 89.5 Q55 89 50 86Z',
+    label: 'Naturelles',
+  },
+  'pulpeuses': {
+    top: 'M48 85 Q55 80 60 82 Q65 80 72 85 Q65 82 60 83 Q55 82 48 85Z',
+    bot: 'M48 85 Q55 93 60 94 Q65 93 72 85 Q65 91 60 92 Q55 91 48 85Z',
+    label: 'Pulpeuses',
+  },
+  'fines': {
+    top: 'M51 87 Q56 84 60 85 Q64 84 69 87 Q64 85 60 86 Q56 85 51 87Z',
+    bot: 'M51 87 Q56 90 60 90.5 Q64 90 69 87 Q64 89 60 89.5 Q56 89 51 87Z',
+    label: 'Fines',
+  },
+  'cupidon': {
+    top: 'M50 86 Q54 82 57 84 Q60 81 63 84 Q66 82 70 86 Q65 84 60 85 Q55 84 50 86Z',
+    bot: 'M50 86 Q55 91 60 91.5 Q65 91 70 86 Q65 89 60 89.5 Q55 89 50 86Z',
+    label: 'Arc de Cupidon',
+  },
+  'asymetriques': {
+    top: 'M50 87 Q55 83 60 84 Q65 82 70 85 Q65 83 60 84.5 Q55 83.5 50 87Z',
+    bot: 'M50 87 Q55 91 60 91 Q65 90.5 70 85 Q65 88.5 60 89 Q55 88.5 50 87Z',
+    label: 'Asymétriques',
+  },
+};
+
+// ---------- Lips color options ----------
+export const LIPS_COLOR_OPTIONS = [
+  { key: '#D4756A', label: 'Rose naturel' },
+  { key: '#E8A090', label: 'Rose clair' },
+  { key: '#C24B4B', label: 'Rouge' },
+  { key: '#8B2040', label: 'Bordeaux' },
+  { key: '#C47560', label: 'Nude' },
+  { key: '#B06A9A', label: 'Rose froid' },
+  { key: '#3A2A2A', label: 'Foncé' },
+];
+
 // ---------- Brow shape params ----------
 export const BROW_SHAPES: Record<string, { ld: string; rd: string; sw: number; label: string }> = {
   'arques': { ld: 'M38 52 Q44 48 50 52', rd: 'M70 52 Q76 48 82 52', sw: 1.8, label: 'Arqués' },
