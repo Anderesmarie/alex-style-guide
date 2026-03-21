@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import AvatarSVG, { AvatarData, SKIN_TONES, FACE_SHAPES, EYE_SHAPES, BROW_SHAPES, EYE_COLOR_OPTIONS, BROW_COLOR_OPTIONS } from './AvatarSVG';
+import AvatarSVG, { AvatarData, SKIN_TONES, FACE_SHAPES, EYE_SHAPES, BROW_SHAPES, EYE_COLOR_OPTIONS, BROW_COLOR_OPTIONS, NOSE_SHAPES, LIPS_SHAPES, LIPS_COLOR_OPTIONS } from './AvatarSVG';
 import { HAIR_COLORS } from '@/lib/colorimetry';
 
 const SKIN_OPTIONS = Object.keys(SKIN_TONES);
