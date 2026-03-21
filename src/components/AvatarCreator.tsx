@@ -6,6 +6,8 @@ const SKIN_OPTIONS = Object.keys(SKIN_TONES);
 const FACE_SHAPE_OPTIONS = Object.keys(FACE_SHAPES);
 const EYE_SHAPE_OPTIONS = Object.keys(EYE_SHAPES);
 const BROW_SHAPE_OPTIONS = Object.keys(BROW_SHAPES);
+const NOSE_SHAPE_OPTIONS = Object.keys(NOSE_SHAPES);
+const LIPS_SHAPE_OPTIONS = Object.keys(LIPS_SHAPES);
 
 const HAIR_STYLE_OPTIONS = [
   { key: 'court-lisse', label: 'Court lisse' },
