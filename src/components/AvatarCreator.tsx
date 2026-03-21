@@ -1,9 +1,11 @@
-import { useState } from 'react';
-import AvatarSVG, { AvatarData, SKIN_TONES, FACE_SHAPES } from './AvatarSVG';
+import { useState, useEffect } from 'react';
+import AvatarSVG, { AvatarData, SKIN_TONES, FACE_SHAPES, EYE_SHAPES, BROW_SHAPES, EYE_COLOR_OPTIONS, BROW_COLOR_OPTIONS } from './AvatarSVG';
 import { HAIR_COLORS } from '@/lib/colorimetry';
 
 const SKIN_OPTIONS = Object.keys(SKIN_TONES);
 const FACE_SHAPE_OPTIONS = Object.keys(FACE_SHAPES);
+const EYE_SHAPE_OPTIONS = Object.keys(EYE_SHAPES);
+const BROW_SHAPE_OPTIONS = Object.keys(BROW_SHAPES);
 
 const HAIR_STYLE_OPTIONS = [
   { key: 'court-lisse', label: 'Court lisse' },
@@ -17,15 +19,19 @@ const HAIR_STYLE_OPTIONS = [
 ];
 const HAIR_COLOR_OPTIONS = Object.keys(HAIR_COLORS);
 
-const EYE_COLOR_OPTIONS = [
-  { key: '#8B6914', label: 'Noisette' },
-  { key: '#7B4F2E', label: 'Marron' },
-  { key: '#5C3317', label: 'Marron foncé' },
-  { key: '#4E8B57', label: 'Vert' },
-  { key: '#4682B4', label: 'Bleu' },
-  { key: '#808080', label: 'Gris' },
-  { key: '#1C1C1C', label: 'Noir' },
-];
+// Map hair color to closest brow color
+function hairToBrowColor(hairColor: string): string {
+  const map: Record<string, string> = {
+    'Noir': '#1C1C1C',
+    'Brun': '#3B1F0A',
+    'Châtain': '#6B4226',
+    'Blond': '#BFA888',
+    'Roux': '#A0522D',
+    'Platine': '#BFA888',
+    'Gris': '#999999',
+  };
+  return map[hairColor] || '#3B1F0A';
+}
 
 interface Props {
   initial?: AvatarData | null;
@@ -38,7 +44,7 @@ export const DEFAULT_AVATAR: AvatarData = {
   eyeColor: '#7B4F2E',
   eyeShape: 'amande',
   browShape: 'arques',
-  browColor: '#6B4226',
+  browColor: '#3B1F0A',
   noseShape: 'petit',
   lipsShape: 'naturelles',
   lipsColor: '#D4756A',
@@ -52,16 +58,27 @@ export default function AvatarCreator({ initial, onSave }: Props) {
   const [skin, setSkin] = useState(init.skin || DEFAULT_AVATAR.skin);
   const [faceShape, setFaceShape] = useState(init.faceShape || DEFAULT_AVATAR.faceShape);
   const [eyeColor, setEyeColor] = useState(init.eyeColor || DEFAULT_AVATAR.eyeColor);
+  const [eyeShape, setEyeShape] = useState(init.eyeShape || DEFAULT_AVATAR.eyeShape);
+  const [browShape, setBrowShape] = useState(init.browShape || DEFAULT_AVATAR.browShape);
+  const [browColor, setBrowColor] = useState(init.browColor || DEFAULT_AVATAR.browColor);
+  const [browColorManual, setBrowColorManual] = useState(false);
   const [hairStyle, setHairStyle] = useState(init.hairStyle || DEFAULT_AVATAR.hairStyle);
   const [hairColor, setHairColor] = useState(init.hairColor || DEFAULT_AVATAR.hairColor);
+
+  // Sync brow color with hair color unless manually overridden
+  useEffect(() => {
+    if (!browColorManual) {
+      setBrowColor(hairToBrowColor(hairColor));
+    }
+  }, [hairColor, browColorManual]);
 
   const avatar: AvatarData = {
     skin,
     faceShape,
     eyeColor,
-    eyeShape: init.eyeShape || DEFAULT_AVATAR.eyeShape,
-    browShape: init.browShape || DEFAULT_AVATAR.browShape,
-    browColor: init.browColor || DEFAULT_AVATAR.browColor,
+    eyeShape,
+    browShape,
+    browColor,
     noseShape: init.noseShape || DEFAULT_AVATAR.noseShape,
     lipsShape: init.lipsShape || DEFAULT_AVATAR.lipsShape,
     lipsColor: init.lipsColor || DEFAULT_AVATAR.lipsColor,
@@ -123,6 +140,51 @@ export default function AvatarCreator({ initial, onSave }: Props) {
             className={`w-10 h-10 rounded-full transition-all ${eyeColor === e.key ? 'ring-3 ring-primary ring-offset-2' : ''}`}
             style={{ backgroundColor: e.key }}
             title={e.label}
+          />
+        ))}
+      </div>
+
+      {/* Eye shape */}
+      <label className="text-sm font-semibold text-muted-foreground mb-2 block">Forme des yeux</label>
+      <div className="flex flex-wrap gap-2 mb-5">
+        {EYE_SHAPE_OPTIONS.map(e => (
+          <button
+            key={e}
+            onClick={() => setEyeShape(e)}
+            className={`chip text-xs ${eyeShape === e ? 'chip-active' : ''}`}
+          >
+            {EYE_SHAPES[e].label}
+          </button>
+        ))}
+      </div>
+
+      {/* Brow shape */}
+      <label className="text-sm font-semibold text-muted-foreground mb-2 block">Forme des sourcils</label>
+      <div className="flex flex-wrap gap-2 mb-5">
+        {BROW_SHAPE_OPTIONS.map(b => (
+          <button
+            key={b}
+            onClick={() => setBrowShape(b)}
+            className={`chip text-xs ${browShape === b ? 'chip-active' : ''}`}
+          >
+            {BROW_SHAPES[b].label}
+          </button>
+        ))}
+      </div>
+
+      {/* Brow color */}
+      <label className="text-sm font-semibold text-muted-foreground mb-2 block">
+        Couleur des sourcils
+        {!browColorManual && <span className="text-xs font-normal ml-1">(sync cheveux)</span>}
+      </label>
+      <div className="flex flex-wrap gap-3 mb-5">
+        {BROW_COLOR_OPTIONS.map(c => (
+          <button
+            key={c.key}
+            onClick={() => { setBrowColor(c.key); setBrowColorManual(true); }}
+            className={`w-10 h-10 rounded-full transition-all ${browColor === c.key ? 'ring-3 ring-primary ring-offset-2' : ''}`}
+            style={{ backgroundColor: c.key }}
+            title={c.label}
           />
         ))}
       </div>
