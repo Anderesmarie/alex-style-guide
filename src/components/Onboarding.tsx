@@ -1,10 +1,8 @@
 import { useState, useRef } from 'react';
 import { compressImage } from '@/lib/imageUtils';
 import { UserProfile, SILHOUETTES, STYLE_OPTIONS, BRAND_SUGGESTIONS } from '@/lib/types';
-import { saveProfile, saveAvatar, savePalette } from '@/lib/storage';
-import { AvatarData } from './AvatarSVG';
+import { saveProfile } from '@/lib/storage';
 import AvatarCreator from './AvatarCreator';
-import { getPaletteForSkin } from '@/lib/colorimetry';
 
 const MOTIVATIONAL = [
   'Super choix, on s\'en souvient ! ✨',
@@ -59,12 +57,9 @@ export default function Onboarding({ onComplete }: Props) {
     }, 1200);
   };
 
-  const handleAvatarSave = async (avatar: AvatarData) => {
-    await saveAvatar(avatar);
-    const palette = getPaletteForSkin(avatar.skin);
-    savePalette(palette);
+  const handleAvatarSave = async (avatarUrl: string) => {
+    localStorage.setItem('alex_avatar_url', avatarUrl);
     await saveProfile({ silhouette, styles, budget, brands });
-    // Show final message then complete
     setShowMessage(true);
     setTimeout(() => {
       setShowMessage(false);
