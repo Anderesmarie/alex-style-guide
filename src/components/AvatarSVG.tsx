@@ -199,7 +199,7 @@ export default function AvatarSVG({ avatar, size = 120 }: Props) {
   return (
     <svg width={size} height={size} viewBox="0 0 120 120" className="rounded-full">
       <defs>
-        <clipPath id="avatar-clip"><circle cx={60} cy={60} r={55} /></clipPath>
+        <clipPath id="avatar-clip"><rect x={0} y={0} width={120} height={95} /></clipPath>
         {avatar.eyeShape === 'tombants' && (
           <>
             <clipPath id="clip-eye-l"><ellipse cx={eye.lcx} cy={eyeCy} rx={eye.rx} ry={eye.ry} /></clipPath>
