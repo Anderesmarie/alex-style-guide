@@ -1,10 +1,8 @@
 import { useState, useRef } from 'react';
 import { compressImage } from '@/lib/imageUtils';
 import { UserProfile, SILHOUETTES, STYLE_OPTIONS, BRAND_SUGGESTIONS } from '@/lib/types';
-import { saveProfile, saveAvatar, savePalette } from '@/lib/storage';
-import { AvatarData } from './AvatarSVG';
+import { saveProfile } from '@/lib/storage';
 import AvatarCreator from './AvatarCreator';
-import { getPaletteForSkin } from '@/lib/colorimetry';
 
 const MOTIVATIONAL = [
   'Super choix, on s\'en souvient ! ✨',
