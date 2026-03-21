@@ -184,15 +184,7 @@ export default function Today() {
   return (
     <div className="fade-enter pb-4">
       <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center gap-3">
-          {(() => {
-            const url = localStorage.getItem('alex_avatar_url');
-            return url ? (
-              <img src={`${url}?quality=medium`} alt="Avatar" className="w-10 h-10 rounded-full object-cover border border-border bg-muted" />
-            ) : null;
-          })()}
-          <h1 className="text-2xl font-serif font-bold">Aujourd'hui</h1>
-        </div>
+        <h1 className="text-2xl font-serif font-bold">Aujourd'hui</h1>
         <StreakCounter />
       </div>
       <p className="text-muted-foreground text-sm mb-4">

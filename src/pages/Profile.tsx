@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
-import { getProfile } from '@/lib/storage';
+import { getProfile, getAvatar, getPalette, saveAvatar, savePalette } from '@/lib/storage';
+import AvatarSVG from '@/components/AvatarSVG';
 import AvatarCreator from '@/components/AvatarCreator';
+import { AvatarData } from '@/components/AvatarSVG';
+import { getPaletteForSkin, PALETTE_COLORS } from '@/lib/colorimetry';
 import { getStreak } from '@/lib/streak';
-import { UserProfile } from '@/lib/types';
+import { UserProfile, AvatarConfig } from '@/lib/types';
+import { ColorPalette } from '@/lib/colorimetry';
 
 interface Props {
   onEditProfile: () => void;
@@ -11,22 +15,28 @@ interface Props {
 
 export default function Profile({ onEditProfile, onLogout }: Props) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<AvatarConfig | null>(null);
+  const [palette, setPaletteState] = useState<ColorPalette | null>(null);
   const [editingAvatar, setEditingAvatar] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
-      const p = await getProfile();
+      const [p, a] = await Promise.all([getProfile(), getAvatar()]);
       setProfile(p);
-      setAvatarUrl(localStorage.getItem('alex_avatar_url'));
+      setAvatar(a);
+      setPaletteState(getPalette());
       setLoading(false);
     };
     load();
   }, []);
 
-  const handleAvatarSave = (url: string) => {
-    setAvatarUrl(url);
+  const handleAvatarSave = async (data: AvatarData) => {
+    await saveAvatar(data);
+    const newPalette = getPaletteForSkin(data.skin);
+    savePalette(newPalette);
+    setAvatar(data);
+    setPaletteState(newPalette);
     setEditingAvatar(false);
   };
 
@@ -52,7 +62,7 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
           <button onClick={() => setEditingAvatar(false)} className="text-2xl">←</button>
           <h1 className="text-xl font-serif font-bold">Modifier mon avatar</h1>
         </div>
-        <AvatarCreator onSave={handleAvatarSave} />
+        <AvatarCreator initial={avatar} onSave={handleAvatarSave} />
       </div>
     );
   }
@@ -63,27 +73,37 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
     <div className="fade-enter pb-4">
       <h1 className="text-2xl font-serif font-bold mb-6">Mon Profil</h1>
 
-      {/* Avatar */}
+      {/* Avatar + name */}
       <div className="flex items-center gap-4 mb-6">
-        {avatarUrl ? (
-          <img
-            src={`${avatarUrl}?quality=medium`}
-            alt="Mon avatar"
-            className="w-20 h-20 rounded-full object-cover border-2 border-border bg-muted"
-          />
-        ) : (
-          <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center text-3xl">👤</div>
-        )}
+        {avatar && <AvatarSVG avatar={avatar} size={80} />}
         <div>
           <p className="font-serif font-semibold text-lg">Mon Avatar</p>
           <button
             onClick={() => setEditingAvatar(true)}
             className="text-sm text-primary font-medium mt-1"
           >
-            {avatarUrl ? 'Modifier mon avatar' : 'Créer mon avatar'}
+            Modifier mon avatar
           </button>
         </div>
       </div>
+
+      {/* Color palette */}
+      {palette && palette.recommended.length > 0 && (
+        <div className="bg-card rounded-xl p-5 card-shadow mb-4">
+          <p className="text-sm text-muted-foreground mb-2">Ces couleurs sont recommandées pour ton teint ✨</p>
+          <div className="flex flex-wrap gap-2">
+            {palette.recommended.map(c => (
+              <div key={c} className="flex flex-col items-center gap-1">
+                <div
+                  className="w-8 h-8 rounded-full border border-border"
+                  style={{ backgroundColor: PALETTE_COLORS[c] || '#ccc' }}
+                />
+                <span className="text-[10px] text-muted-foreground">{c}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="space-y-4">
         <div className="bg-card rounded-xl p-5 card-shadow">
