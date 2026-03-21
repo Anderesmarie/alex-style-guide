@@ -8,6 +8,8 @@ import OutfitResults from '@/components/OutfitResults';
 import ProgressMilestones from '@/components/ProgressMilestones';
 import StreakCounter from '@/components/StreakCounter';
 import EventBanner from '@/components/EventBanner';
+import AvatarSVG, { AvatarData } from '@/components/AvatarSVG';
+import { DEFAULT_AVATAR } from '@/components/AvatarCreator';
 
 type WeatherState =
   | { status: 'loading' }
@@ -34,12 +36,10 @@ function loadTodayData(today: string, wardrobe: ClothingItem[]): { outfit: Cloth
     if (!raw) return null;
     const data: SavedTodayData = JSON.parse(raw);
     if (data.date !== today) return null;
-
     const resolved = data.results.map(r => {
       const items = r.outfitIds.map(id => wardrobe.find(i => i.id === id)).filter(Boolean) as ClothingItem[];
       return { outfit: items, liked: r.liked };
     }).filter(r => r.outfit.length > 0);
-
     return resolved.length > 0 ? resolved : null;
   } catch {
     return null;
@@ -55,6 +55,13 @@ function saveTodayData(today: string, results: { outfit: ClothingItem[]; liked: 
     })),
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function getAvatarFromStorage(): AvatarData {
+  try {
+    const raw = localStorage.getItem('alex_avatar');
+    return raw ? JSON.parse(raw) : DEFAULT_AVATAR;
+  } catch { return DEFAULT_AVATAR; }
 }
 
 export default function Today() {
@@ -85,8 +92,6 @@ export default function Today() {
         setWardrobe(w);
         setUserProfile(p);
         setDailyCount(c.date === today ? c.count : 0);
-
-        // Check saved today data
         const saved = loadTodayData(today, w);
         const shouldKeepSaved = Boolean(saved && (saved.length >= 5 || c.count >= 5));
         if (saved && shouldKeepSaved) {
@@ -160,6 +165,8 @@ export default function Today() {
     saveTodayData(today, results);
   };
 
+  const avatarData = getAvatarFromStorage();
+
   if (loading) {
     return (
       <div className="fade-enter pb-4">
@@ -184,7 +191,12 @@ export default function Today() {
   return (
     <div className="fade-enter pb-4">
       <div className="flex items-center justify-between mb-1">
-        <h1 className="text-2xl font-serif font-bold">Aujourd'hui</h1>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full overflow-hidden">
+            <AvatarSVG avatar={avatarData} size={40} />
+          </div>
+          <h1 className="text-2xl font-serif font-bold">Aujourd'hui</h1>
+        </div>
         <StreakCounter />
       </div>
       <p className="text-muted-foreground text-sm mb-4">
@@ -238,14 +250,9 @@ export default function Today() {
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground text-center">Quelle est ta ville ?</p>
             <div className="flex gap-2">
-              <input
-                type="text"
-                value={cityInput}
-                onChange={e => setCityInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && searchCity()}
-                placeholder="Ex : Paris"
-                className="flex-1 h-10 rounded-lg border border-input bg-background px-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              />
+              <input type="text" value={cityInput} onChange={e => setCityInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && searchCity()} placeholder="Ex : Paris"
+                className="flex-1 h-10 rounded-lg border border-input bg-background px-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
               <button onClick={searchCity} disabled={ws.searching}
                 className="py-2 px-4 rounded-lg bg-primary text-primary-foreground font-medium text-sm active:scale-[0.98] transition-transform disabled:opacity-50">
                 {ws.searching ? '...' : 'OK'}
@@ -260,7 +267,6 @@ export default function Today() {
         )}
       </div>
 
-      {/* Event / Sales Banner */}
       <EventBanner onViewOutfits={() => {
         if (!enough) return;
         const recs = generateRecommendations(wardrobe, weatherTemp, 5, userProfile);
@@ -269,7 +275,6 @@ export default function Today() {
         setSwipeResults(null);
       }} />
 
-      {/* Not enough clothes */}
       {!enough && (
         <div className="bg-card rounded-xl p-6 card-shadow text-center">
           <p className="text-lg font-serif mb-3">
@@ -282,7 +287,6 @@ export default function Today() {
         </div>
       )}
 
-      {/* Freemium limit */}
       {enough && !canSuggest && !swipeComplete && (
         <div className="bg-card rounded-xl p-6 card-shadow text-center">
           <p className="text-lg font-serif">Tu as utilisé tes 5 suggestions du jour ✨</p>
@@ -290,7 +294,6 @@ export default function Today() {
         </div>
       )}
 
-      {/* Swipe mode — active swiping */}
       {enough && !swipeComplete && recommendations.length > 0 && (
         <div className="space-y-2">
           <h2 className="text-lg font-serif font-semibold text-center">Suggestions du jour</h2>
@@ -303,7 +306,6 @@ export default function Today() {
         </div>
       )}
 
-      {/* Results — already swiped today */}
       {swipeComplete && swipeResults && (
         <OutfitResults
           results={swipeResults}
@@ -312,7 +314,6 @@ export default function Today() {
         />
       )}
 
-      {/* Not enough pieces for full suggestions */}
       {enough && canSuggest && recommendations.length > 0 && recommendations.length < 5 && !swipeComplete && (
         <p className="text-sm text-muted-foreground text-center mt-2">Ajoute plus de pièces pour débloquer plus de suggestions 👗</p>
       )}
