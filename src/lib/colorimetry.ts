@@ -59,6 +59,43 @@ export const COLOR_TO_SEASON: Record<string, Season[]> = {
   'multicolore': [],
 };
 
+// Hex values for season palette color names (for rendering circles)
+export const SEASON_COLOR_HEX: Record<string, string> = {
+  corail: '#FF7F50',
+  peche: '#FFDAB9',
+  vert_menthe: '#98FF98',
+  bleu_ciel: '#87CEEB',
+  turquoise: '#40E0D0',
+  rose_saumon: '#FA8072',
+  camel_clair: '#D2B48C',
+  abricot: '#FBCEB1',
+  ivoire: '#FFFFF0',
+  beige: '#F5F5DC',
+  jaune: '#FFD700',
+  rose: '#FFB6C1',
+  mauve: '#E0B0FF',
+  lavande: '#E6E6FA',
+  bleu: '#4682B4',
+  gris: '#A9A9A9',
+  blanc_casse: '#FAF0E6',
+  vert: '#2E8B57',
+  camel: '#C19A6B',
+  terracotta: '#CC4E24',
+  bordeaux: '#722F37',
+  marron: '#8B4513',
+  noir: '#1C1C1C',
+  blanc: '#FFFFFF',
+  rouge: '#DC143C',
+  violet: '#8A2BE2',
+};
+
+export const SEASON_LABELS: Record<Season, { emoji: string; label: string; vibe: string }> = {
+  printemps: { emoji: '🌸', label: 'Printemps', vibe: 'Les teintes chaudes te subliment ✨' },
+  ete: { emoji: '🌊', label: 'Été', vibe: 'Les teintes douces te subliment ✨' },
+  automne: { emoji: '🍂', label: 'Automne', vibe: 'Les teintes chaudes te subliment ✨' },
+  hiver: { emoji: '❄️', label: 'Hiver', vibe: 'Les teintes intenses te subliment ✨' },
+};
+
 // ── Legacy exports (used by other components) ──
 
 export interface ColorPalette {
