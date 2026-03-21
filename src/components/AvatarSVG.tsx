@@ -236,9 +236,6 @@ export default function AvatarSVG({ avatar, size = 120 }: Props) {
       <path d={`M${eye.lcx - eye.rx + 1} ${eyeCy - 1} Q${eye.lcx} ${eyeCy - eye.ry - 1} ${eye.lcx + eye.rx - 1} ${eyeCy - 1}`} stroke="#2C2C2C" strokeWidth={1.5} fill="none" />
       <path d={`M${eye.rcx - eye.rx + 1} ${eyeCy - 1} Q${eye.rcx} ${eyeCy - eye.ry - 1} ${eye.rcx + eye.rx - 1} ${eyeCy - 1}`} stroke="#2C2C2C" strokeWidth={1.5} fill="none" />
 
-      <path id="brow-l" d={brow.ld} stroke={browHex} strokeWidth={brow.sw} fill="none" strokeLinecap="round" />
-      <path id="brow-r" d={brow.rd} stroke={browHex} strokeWidth={brow.sw} fill="none" strokeLinecap="round" />
-
       <path id="nose" d={nose.d} fill={tone.neck} />
 
       <path id="lips-top" d={lips.top} fill={lipsHex} />
@@ -247,6 +244,10 @@ export default function AvatarSVG({ avatar, size = 120 }: Props) {
       <g clipPath="url(#avatar-clip)">
         <HairFront style={avatar.hairStyle} color={hairHex} />
       </g>
+
+      {/* Brows rendered after hair so they're always visible */}
+      <path id="brow-l" d={brow.ld} stroke={browHex} strokeWidth={brow.sw} fill="none" strokeLinecap="round" />
+      <path id="brow-r" d={brow.rd} stroke={browHex} strokeWidth={brow.sw} fill="none" strokeLinecap="round" />
     </svg>
   );
 }
