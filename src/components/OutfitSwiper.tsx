@@ -109,6 +109,16 @@ export default function OutfitSwiper({ outfits, weatherCode, temperature, onComp
 
   const currentOutfit = cards[currentIndex].outfit;
   const tips = getStylingTips(currentOutfit, weatherCode, temperature);
+
+  // Colorimetry badge
+  let colorBadge: 'perfect' | 'avoid' | null = null;
+  if (userSeason) {
+    const scores = currentOutfit.map(item => getColorScore(item.color, userSeason));
+    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+    if (avg >= 1.5) colorBadge = 'perfect';
+    else if (avg <= -1) colorBadge = 'avoid';
+  }
+
   const rotation = dragX * 0.08;
   const likeOpacity = Math.min(Math.max(dragX / threshold, 0), 1);
   const nopeOpacity = Math.min(Math.max(-dragX / threshold, 0), 1);
