@@ -111,11 +111,19 @@ export default function OutfitSwiper({ outfits, weatherCode, temperature, onComp
   const tips = getStylingTips(currentOutfit, weatherCode, temperature);
 
   // Colorimetry badge
+  const normalizeColor = (color: string) =>
+    color.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_").trim();
+
   let colorBadge: 'perfect' | 'avoid' | null = null;
   if (userSeason) {
-    const scores = currentOutfit.map(item => getColorScore(item.color, userSeason));
+    const scores = currentOutfit.map(item => {
+      const norm = normalizeColor(item.color);
+      const score = getColorScore(norm, userSeason);
+      console.log("Couleur item:", item.color, "→ normalisée:", norm, "→ score:", score, "→ saison:", userSeason);
+      return score;
+    });
     const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-    if (avg >= 1.5) colorBadge = 'perfect';
+    if (avg >= 0.5) colorBadge = 'perfect';
     else if (avg <= -1) colorBadge = 'avoid';
   }
 
