@@ -14,10 +14,6 @@ const HAIR_STYLE_OPTIONS = [
   { key: 'long-boucle', label: 'Long bouclé' },
   { key: 'mi-long', label: 'Mi-long' },
   { key: 'court', label: 'Court' },
-  { key: 'chignon', label: 'Chignon' },
-  { key: 'tresse', label: 'Tresse' },
-  { key: 'queue-de-cheval', label: 'Queue de cheval' },
-  { key: 'afro', label: 'Afro' },
   { key: 'avec-frange', label: 'Avec frange' },
 ];
 const HAIR_COLOR_OPTIONS = Object.keys(HAIR_COLORS);
