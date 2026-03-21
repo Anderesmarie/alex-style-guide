@@ -217,30 +217,47 @@ export default function AvatarSVG({ avatar, size = 120 }: Props) {
 
   const tombantDy = avatar.eyeShape === 'tombants' ? 2 : 0;
 
+  const eyeCy = 66 + tombantDy / 2;
+
   return (
     <svg width={size} height={size} viewBox="0 0 120 120" className="rounded-full">
+      <defs>
+        <clipPath id="avatar-clip"><circle cx={60} cy={60} r={55} /></clipPath>
+        {avatar.eyeShape === 'tombants' && (
+          <>
+            <clipPath id="clip-eye-l"><ellipse cx={eye.lcx} cy={eyeCy} rx={eye.rx} ry={eye.ry} /></clipPath>
+            <clipPath id="clip-eye-r"><ellipse cx={eye.rcx} cy={eyeCy} rx={eye.rx} ry={eye.ry} /></clipPath>
+          </>
+        )}
+      </defs>
+
       <circle id="bg-circle" cx={60} cy={60} r={60} fill={tone.bg} />
       <rect id="neck" x={50} y={86} width={20} height={14} rx={5} fill={tone.neck} />
       <ellipse id="shoulders" cx={60} cy={110} rx={36} ry={16} fill={tone.neck} />
 
-      <HairBack style={avatar.hairStyle} color={hairHex} />
+      <g clipPath="url(#avatar-clip)">
+        <HairBack style={avatar.hairStyle} color={hairHex} />
+      </g>
 
       <ellipse id="face-shape" cx={face.cx} cy={face.cy} rx={face.rx} ry={face.ry} fill={tone.face} />
 
-      <ellipse id="eye-white-l" cx={eye.lcx} cy={66 + tombantDy / 2} rx={eye.rx} ry={eye.ry} fill="white" />
-      <ellipse id="eye-white-r" cx={eye.rcx} cy={66 + tombantDy / 2} rx={eye.rx} ry={eye.ry} fill="white" />
+      {/* Eyes */}
+      <ellipse id="eye-white-l" cx={eye.lcx} cy={eyeCy} rx={eye.rx} ry={eye.ry} fill="white" />
+      <ellipse id="eye-white-r" cx={eye.rcx} cy={eyeCy} rx={eye.rx} ry={eye.ry} fill="white" />
       {avatar.eyeShape === 'tombants' && (
         <>
-          <clipPath id="clip-eye-l"><ellipse cx={eye.lcx} cy={66 + tombantDy / 2} rx={eye.rx} ry={eye.ry} /></clipPath>
-          <clipPath id="clip-eye-r"><ellipse cx={eye.rcx} cy={66 + tombantDy / 2} rx={eye.rx} ry={eye.ry} /></clipPath>
           <rect x={eye.lcx + 2} y={64} width={eye.rx} height={4} fill={tone.face} clipPath="url(#clip-eye-l)" />
           <rect x={eye.rcx + 2} y={64} width={eye.rx} height={4} fill={tone.face} clipPath="url(#clip-eye-r)" />
         </>
       )}
-      <circle id="iris-l" cx={eye.lcx} cy={66 + tombantDy / 2} r={2.8} fill={eyeHex} />
-      <circle id="iris-r" cx={eye.rcx} cy={66 + tombantDy / 2} r={2.8} fill={eyeHex} />
-      <circle cx={eye.lcx + 0.6} cy={65.4 + tombantDy / 2} r={0.8} fill="white" />
-      <circle cx={eye.rcx + 0.6} cy={65.4 + tombantDy / 2} r={0.8} fill="white" />
+      <circle id="iris-l" cx={eye.lcx} cy={eyeCy} r={4.5} fill={eyeHex} />
+      <circle id="iris-r" cx={eye.rcx} cy={eyeCy} r={4.5} fill={eyeHex} />
+      <circle cx={eye.lcx} cy={eyeCy} r={2} fill="#000" />
+      <circle cx={eye.rcx} cy={eyeCy} r={2} fill="#000" />
+      <circle cx={eye.lcx + 1.2} cy={eyeCy - 1.2} r={1.2} fill="white" />
+      <circle cx={eye.rcx + 1.2} cy={eyeCy - 1.2} r={1.2} fill="white" />
+      <path d={`M${eye.lcx - eye.rx + 1} ${eyeCy - 1} Q${eye.lcx} ${eyeCy - eye.ry - 1} ${eye.lcx + eye.rx - 1} ${eyeCy - 1}`} stroke="#2C2C2C" strokeWidth={1.5} fill="none" />
+      <path d={`M${eye.rcx - eye.rx + 1} ${eyeCy - 1} Q${eye.rcx} ${eyeCy - eye.ry - 1} ${eye.rcx + eye.rx - 1} ${eyeCy - 1}`} stroke="#2C2C2C" strokeWidth={1.5} fill="none" />
 
       <path id="brow-l" d={brow.ld} stroke={browHex} strokeWidth={brow.sw} fill="none" strokeLinecap="round" />
       <path id="brow-r" d={brow.rd} stroke={browHex} strokeWidth={brow.sw} fill="none" strokeLinecap="round" />
@@ -250,7 +267,9 @@ export default function AvatarSVG({ avatar, size = 120 }: Props) {
       <path id="lips-top" d={lips.top} fill={lipsHex} />
       <path id="lips-bot" d={lips.bot} fill={lipsBotHex} />
 
-      <HairFront style={avatar.hairStyle} color={hairHex} />
+      <g clipPath="url(#avatar-clip)">
+        <HairFront style={avatar.hairStyle} color={hairHex} />
+      </g>
     </svg>
   );
 }
