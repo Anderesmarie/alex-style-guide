@@ -10,6 +10,8 @@ import StreakCounter from '@/components/StreakCounter';
 import EventBanner from '@/components/EventBanner';
 import AvatarSVG, { AvatarData } from '@/components/AvatarSVG';
 import { DEFAULT_AVATAR } from '@/components/AvatarCreator';
+import { supabase } from '@/lib/supabase';
+import type { Season } from '@/lib/colorimetry';
 
 type WeatherState =
   | { status: 'loading' }
@@ -74,6 +76,7 @@ export default function Today() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [dailyCount, setDailyCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [userSeason, setUserSeason] = useState<Season | null>(null);
 
   const today = new Date().toISOString().split('T')[0];
   const enough = wardrobe.length >= 8;
@@ -98,6 +101,20 @@ export default function Today() {
           setSwipeResults(saved);
           setSwipeComplete(true);
         }
+        // Fetch colorimetry season
+        try {
+          const { data: userData } = await supabase.auth.getUser();
+          if (userData.user) {
+            const { data: prof } = await supabase
+              .from('profiles')
+              .select('colorimetry_season')
+              .eq('id', userData.user.id)
+              .maybeSingle();
+            if (prof?.colorimetry_season) {
+              setUserSeason(prof.colorimetry_season as Season);
+            }
+          }
+        } catch {}
       } catch (e) {
         console.error('Error loading data:', e);
       }
@@ -302,6 +319,7 @@ export default function Today() {
             weatherCode={ws.status === 'done' ? ws.data.weathercode : null}
             temperature={weatherTemp}
             onComplete={handleSwipeComplete}
+            userSeason={userSeason}
           />
         </div>
       )}
@@ -311,6 +329,7 @@ export default function Today() {
           results={swipeResults}
           weatherCode={ws.status === 'done' ? ws.data.weathercode : null}
           temperature={weatherTemp}
+          userSeason={userSeason}
         />
       )}
 

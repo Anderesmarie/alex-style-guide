@@ -1,6 +1,8 @@
 import { ClothingItem } from '@/lib/types';
 import { addOutfit, genId, saveLastOutfit } from '@/lib/storage';
 import { getStylingTips } from '@/lib/stylingTips';
+import { getColorScore } from '@/lib/colorimetry';
+import type { Season } from '@/lib/colorimetry';
 
 interface OutfitResult {
   outfit: ClothingItem[];
@@ -11,11 +13,12 @@ interface Props {
   results: OutfitResult[];
   weatherCode: number | null;
   temperature: number | null;
+  userSeason?: Season | null;
 }
 
 const ROSE_GOLD = '#C9956C';
 
-export default function OutfitResults({ results, weatherCode, temperature }: Props) {
+export default function OutfitResults({ results, weatherCode, temperature, userSeason }: Props) {
   const handleSave = (items: ClothingItem[]) => {
     const ids = items.map(i => i.id);
     saveLastOutfit(ids);
@@ -34,6 +37,13 @@ export default function OutfitResults({ results, weatherCode, temperature }: Pro
         {results.map((r, idx) => {
           const isLiked = r.liked === true;
           const tips = getStylingTips(r.outfit, weatherCode, temperature);
+          let colorBadge: 'perfect' | 'avoid' | null = null;
+          if (userSeason) {
+            const scores = r.outfit.map(item => getColorScore(item.color, userSeason));
+            const avg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+            if (avg >= 1.5) colorBadge = 'perfect';
+            else if (avg <= -1) colorBadge = 'avoid';
+          }
           return (
             <div
               key={idx}
@@ -70,6 +80,22 @@ export default function OutfitResults({ results, weatherCode, temperature }: Pro
                   </div>
                 ))}
               </div>
+
+              {/* Colorimetry badge */}
+              {colorBadge === 'perfect' && (
+                <div className="px-2 pb-1">
+                  <span className="inline-block text-[9px] font-medium text-white rounded-xl py-0.5 px-1.5" style={{ backgroundColor: '#C9956C' }}>
+                    ✨ Parfait pour ton teint
+                  </span>
+                </div>
+              )}
+              {colorBadge === 'avoid' && (
+                <div className="px-2 pb-1">
+                  <span className="inline-block text-[9px] font-medium rounded-xl py-0.5 px-1.5" style={{ backgroundColor: '#F0F0F0', color: '#888888' }}>
+                    💡 Pas idéal
+                  </span>
+                </div>
+              )}
 
               {/* Styling tips */}
               <div className="border-t border-border px-2 py-2" style={{ backgroundColor: '#F5F0EB' }}>
