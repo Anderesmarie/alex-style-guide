@@ -251,6 +251,16 @@ export default function OutfitSwiper({ outfits, weatherCode, temperature, onComp
                 </p>
               </div>
             </div>
+
+            {/* DEBUG colorimétrie */}
+            <div className="px-5 py-2 border-t border-border">
+              <p className="text-[10px] text-muted-foreground font-mono">saison: {userSeason ?? 'null'}</p>
+              {debugScores.map((d, i) => (
+                <p key={i} className="text-[10px] text-muted-foreground font-mono">
+                  {d.color} → {d.norm} → score: {d.score}
+                </p>
+              ))}
+            </div>
           </div>
         </div>
       </div>
