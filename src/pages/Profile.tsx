@@ -1,12 +1,8 @@
 import { useState, useEffect } from 'react';
-import { getProfile, getAvatar, getPalette, saveAvatar, savePalette } from '@/lib/storage';
-import AvatarSVG from '@/components/AvatarSVG';
+import { getProfile } from '@/lib/storage';
 import AvatarCreator from '@/components/AvatarCreator';
-import { AvatarData } from '@/components/AvatarSVG';
-import { getPaletteForSkin, PALETTE_COLORS } from '@/lib/colorimetry';
 import { getStreak } from '@/lib/streak';
-import { UserProfile, AvatarConfig } from '@/lib/types';
-import { ColorPalette } from '@/lib/colorimetry';
+import { UserProfile } from '@/lib/types';
 
 interface Props {
   onEditProfile: () => void;
