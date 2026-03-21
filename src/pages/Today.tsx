@@ -76,6 +76,7 @@ export default function Today() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [dailyCount, setDailyCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [userSeason, setUserSeason] = useState<Season | null>(null);
 
   const today = new Date().toISOString().split('T')[0];
   const enough = wardrobe.length >= 8;
