@@ -329,6 +329,7 @@ export default function Today() {
           results={swipeResults}
           weatherCode={ws.status === 'done' ? ws.data.weathercode : null}
           temperature={weatherTemp}
+          userSeason={userSeason}
         />
       )}
 
