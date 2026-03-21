@@ -63,37 +63,27 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
     <div className="fade-enter pb-4">
       <h1 className="text-2xl font-serif font-bold mb-6">Mon Profil</h1>
 
-      {/* Avatar + name */}
+      {/* Avatar */}
       <div className="flex items-center gap-4 mb-6">
-        {avatar && <AvatarSVG avatar={avatar} size={80} />}
+        {avatarUrl ? (
+          <img
+            src={`${avatarUrl}?quality=medium`}
+            alt="Mon avatar"
+            className="w-20 h-20 rounded-full object-cover border-2 border-border bg-muted"
+          />
+        ) : (
+          <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center text-3xl">👤</div>
+        )}
         <div>
           <p className="font-serif font-semibold text-lg">Mon Avatar</p>
           <button
             onClick={() => setEditingAvatar(true)}
             className="text-sm text-primary font-medium mt-1"
           >
-            Modifier mon avatar
+            {avatarUrl ? 'Modifier mon avatar' : 'Créer mon avatar'}
           </button>
         </div>
       </div>
-
-      {/* Color palette */}
-      {palette && palette.recommended.length > 0 && (
-        <div className="bg-card rounded-xl p-5 card-shadow mb-4">
-          <p className="text-sm text-muted-foreground mb-2">Ces couleurs sont recommandées pour ton teint ✨</p>
-          <div className="flex flex-wrap gap-2">
-            {palette.recommended.map(c => (
-              <div key={c} className="flex flex-col items-center gap-1">
-                <div
-                  className="w-8 h-8 rounded-full border border-border"
-                  style={{ backgroundColor: PALETTE_COLORS[c] || '#ccc' }}
-                />
-                <span className="text-[10px] text-muted-foreground">{c}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       <div className="space-y-4">
         <div className="bg-card rounded-xl p-5 card-shadow">
