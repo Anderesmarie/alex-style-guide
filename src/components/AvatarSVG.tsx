@@ -37,6 +37,46 @@ export const FACE_SHAPES: Record<string, { cx: number; cy: number; rx: number; r
   'diamant': { cx: 60, cy: 68, rx: 24, ry: 34, label: 'Diamant' },
 };
 
+// ---------- Eye shape params ----------
+export const EYE_SHAPES: Record<string, { rx: number; ry: number; lcx: number; rcx: number; label: string }> = {
+  'amande':   { rx: 8, ry: 6, lcx: 45, rcx: 75, label: 'Amande' },
+  'ronds':    { rx: 7, ry: 7, lcx: 45, rcx: 75, label: 'Ronds' },
+  'brides':   { rx: 9, ry: 4, lcx: 45, rcx: 75, label: 'Bridés' },
+  'tombants': { rx: 8, ry: 6, lcx: 45, rcx: 75, label: 'Tombants' },
+  'ecartes':  { rx: 8, ry: 6, lcx: 40, rcx: 80, label: 'Écartés' },
+};
+
+// ---------- Brow shape params ----------
+export const BROW_SHAPES: Record<string, { ld: string; rd: string; sw: number; label: string }> = {
+  'arques': { ld: 'M38 52 Q44 48 50 52', rd: 'M70 52 Q76 48 82 52', sw: 1.8, label: 'Arqués' },
+  'droits': { ld: 'M37 52 L50 52', rd: 'M70 52 L83 52', sw: 2, label: 'Droits' },
+  'ronds':  { ld: 'M38 53 Q44 50 50 53', rd: 'M70 53 Q76 50 82 53', sw: 1.8, label: 'Ronds' },
+  'epais':  { ld: 'M38 52 Q44 48 50 52', rd: 'M70 52 Q76 48 82 52', sw: 3, label: 'Épais' },
+  'fins':   { ld: 'M39 52 Q44 50 49 52', rd: 'M71 52 Q76 50 81 52', sw: 1, label: 'Fins' },
+};
+
+// ---------- Eye color options ----------
+export const EYE_COLOR_OPTIONS = [
+  { key: '#7B4F2E', label: 'Noisette' },
+  { key: '#5C3317', label: 'Marron' },
+  { key: '#4A7C59', label: 'Vert' },
+  { key: '#4A7EBD', label: 'Bleu' },
+  { key: '#7D8C8C', label: 'Gris' },
+  { key: '#1A0A00', label: 'Noir' },
+  { key: '#8B6914', label: 'Ambre' },
+];
+
+// ---------- Brow color options ----------
+export const BROW_COLOR_OPTIONS = [
+  { key: '#3B1F0A', label: 'Brun foncé' },
+  { key: '#6B4226', label: 'Brun' },
+  { key: '#A0784A', label: 'Châtain' },
+  { key: '#BFA888', label: 'Blond' },
+  { key: '#A0522D', label: 'Roux' },
+  { key: '#1C1C1C', label: 'Noir' },
+  { key: '#999999', label: 'Gris' },
+];
+
 interface Props {
   avatar: AvatarData;
   size?: number;
@@ -85,10 +125,15 @@ function HairSVG({ style, color }: { style: string; color: string }) {
 export default function AvatarSVG({ avatar, size = 120 }: Props) {
   const tone = SKIN_TONES[avatar.skin] || SKIN_TONES['clair-rose'];
   const face = FACE_SHAPES[avatar.faceShape] || FACE_SHAPES['ovale'];
+  const eye = EYE_SHAPES[avatar.eyeShape] || EYE_SHAPES['amande'];
+  const brow = BROW_SHAPES[avatar.browShape] || BROW_SHAPES['arques'];
   const eyeHex = avatar.eyeColor || '#7B4F2E';
-  const browHex = avatar.browColor || '#6B4226';
+  const browHex = avatar.browColor || '#3B1F0A';
   const lipsHex = avatar.lipsColor || '#D4756A';
   const hairHex = HAIR_COLORS[avatar.hairColor] || avatar.hairColor || '#3B1F0A';
+
+  // Tombants: shift outer corners down
+  const tombantDy = avatar.eyeShape === 'tombants' ? 2 : 0;
 
   return (
     <svg width={size} height={size} viewBox="0 0 120 120" className="rounded-full">
@@ -103,16 +148,24 @@ export default function AvatarSVG({ avatar, size = 120 }: Props) {
       <ellipse id="face-shape" cx={face.cx} cy={face.cy} rx={face.rx} ry={face.ry} fill={tone.face} />
 
       {/* Eyes */}
-      <ellipse cx={48} cy={66} rx={4.2} ry={3.6} fill="white" />
-      <ellipse cx={72} cy={66} rx={4.2} ry={3.6} fill="white" />
-      <circle cx={48} cy={66} r={2.4} fill={eyeHex} />
-      <circle cx={72} cy={66} r={2.4} fill={eyeHex} />
-      <circle cx={48.6} cy={65.4} r={0.8} fill="white" />
-      <circle cx={72.6} cy={65.4} r={0.8} fill="white" />
+      <ellipse id="eye-white-l" cx={eye.lcx} cy={66 + tombantDy / 2} rx={eye.rx} ry={eye.ry} fill="white" />
+      <ellipse id="eye-white-r" cx={eye.rcx} cy={66 + tombantDy / 2} rx={eye.rx} ry={eye.ry} fill="white" />
+      {avatar.eyeShape === 'tombants' && (
+        <>
+          <clipPath id="clip-eye-l"><ellipse cx={eye.lcx} cy={66 + tombantDy / 2} rx={eye.rx} ry={eye.ry} /></clipPath>
+          <clipPath id="clip-eye-r"><ellipse cx={eye.rcx} cy={66 + tombantDy / 2} rx={eye.rx} ry={eye.ry} /></clipPath>
+          <rect x={eye.lcx + 2} y={64} width={eye.rx} height={4} fill={tone.face} clipPath="url(#clip-eye-l)" />
+          <rect x={eye.rcx + 2} y={64} width={eye.rx} height={4} fill={tone.face} clipPath="url(#clip-eye-r)" />
+        </>
+      )}
+      <circle id="iris-l" cx={eye.lcx} cy={66 + tombantDy / 2} r={2.8} fill={eyeHex} />
+      <circle id="iris-r" cx={eye.rcx} cy={66 + tombantDy / 2} r={2.8} fill={eyeHex} />
+      <circle cx={eye.lcx + 0.6} cy={65.4 + tombantDy / 2} r={0.8} fill="white" />
+      <circle cx={eye.rcx + 0.6} cy={65.4 + tombantDy / 2} r={0.8} fill="white" />
 
       {/* Eyebrows */}
-      <path d="M42 58 Q48 54 54 58" stroke={browHex} strokeWidth={1.8} fill="none" strokeLinecap="round" />
-      <path d="M66 58 Q72 54 78 58" stroke={browHex} strokeWidth={1.8} fill="none" strokeLinecap="round" />
+      <path id="brow-l" d={brow.ld} stroke={browHex} strokeWidth={brow.sw} fill="none" strokeLinecap="round" />
+      <path id="brow-r" d={brow.rd} stroke={browHex} strokeWidth={brow.sw} fill="none" strokeLinecap="round" />
 
       {/* Nose */}
       <path id="nose" d="M60 68 Q58 74 60 76 Q62 74 60 68" stroke={tone.neck} strokeWidth={1.2} fill="none" />
