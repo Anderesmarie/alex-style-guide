@@ -222,6 +222,9 @@ export default function AvatarSVG({ avatar, size = 120 }: Props) {
       <circle id="bg-circle" cx={60} cy={60} r={60} fill={tone.bg} />
       <rect id="neck" x={50} y={86} width={20} height={14} rx={5} fill={tone.neck} />
       <ellipse id="shoulders" cx={60} cy={110} rx={36} ry={16} fill={tone.neck} />
+
+      <HairBack style={avatar.hairStyle} color={hairHex} />
+
       <ellipse id="face-shape" cx={face.cx} cy={face.cy} rx={face.rx} ry={face.ry} fill={tone.face} />
 
       <ellipse id="eye-white-l" cx={eye.lcx} cy={66 + tombantDy / 2} rx={eye.rx} ry={eye.ry} fill="white" />
@@ -247,7 +250,7 @@ export default function AvatarSVG({ avatar, size = 120 }: Props) {
       <path id="lips-top" d={lips.top} fill={lipsHex} />
       <path id="lips-bot" d={lips.bot} fill={lipsBotHex} />
 
-      <HairSVG style={avatar.hairStyle} color={hairHex} />
+      <HairFront style={avatar.hairStyle} color={hairHex} />
     </svg>
   );
 }

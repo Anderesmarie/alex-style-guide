@@ -10,14 +10,15 @@ const NOSE_SHAPE_OPTIONS = Object.keys(NOSE_SHAPES);
 const LIPS_SHAPE_OPTIONS = Object.keys(LIPS_SHAPES);
 
 const HAIR_STYLE_OPTIONS = [
-  { key: 'court-lisse', label: 'Court lisse' },
-  { key: 'court-boucle', label: 'Court bouclé' },
-  { key: 'mi-long-lisse', label: 'Mi-long lisse' },
-  { key: 'mi-long-boucle', label: 'Mi-long bouclé' },
   { key: 'long-lisse', label: 'Long lisse' },
   { key: 'long-boucle', label: 'Long bouclé' },
+  { key: 'mi-long', label: 'Mi-long' },
+  { key: 'court', label: 'Court' },
   { key: 'chignon', label: 'Chignon' },
   { key: 'tresse', label: 'Tresse' },
+  { key: 'queue-de-cheval', label: 'Queue de cheval' },
+  { key: 'afro', label: 'Afro' },
+  { key: 'avec-frange', label: 'Avec frange' },
 ];
 const HAIR_COLOR_OPTIONS = Object.keys(HAIR_COLORS);
 
