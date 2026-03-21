@@ -38,8 +38,21 @@ const SKIN_PALETTES: Record<string, ColorPalette> = {
   },
 };
 
+// Map new skin keys to palette names
+const SKIN_KEY_TO_PALETTE: Record<string, string> = {
+  'tres-clair': 'Très clair',
+  'clair': 'Clair',
+  'clair-rose': 'Clair rosé',
+  'beige-dore': 'Beige doré',
+  'miel': 'Miel',
+  'caramel': 'Caramel',
+  'brun': 'Brun',
+  'ebene': 'Ébène',
+};
+
 export function getPaletteForSkin(skin: string): ColorPalette {
-  return SKIN_PALETTES[skin] || { recommended: [], avoid: [] };
+  const paletteName = SKIN_KEY_TO_PALETTE[skin] || skin;
+  return SKIN_PALETTES[paletteName] || { recommended: [], avoid: [] };
 }
 
 // Map clothing color names to palette color groups for matching
