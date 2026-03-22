@@ -205,6 +205,56 @@ export function getSilhouetteScore(
   return score;
 }
 
+export function getMorphologyScore(
+  item: ClothingItem,
+  morphologie: string | null
+): number {
+  if (!morphologie) return 0;
+  let score = 0;
+
+  if (morphologie === 'A') {
+    if (['Robe', 'Jupe'].includes(item.type) && item.style?.includes('Boho')) score += 2;
+    if (item.type === 'Jean' && item.style?.includes('évasé')) score += 2;
+    if (item.occasion?.includes('Travail')) score += 1;
+    if (item.type === 'Jupe' && item.style?.includes('crayon')) score -= 2;
+    if (item.style?.includes('moulant')) score -= 1;
+  }
+
+  if (morphologie === 'H') {
+    if (item.style?.includes('cintré') || item.style?.includes('cache-coeur')) score += 2;
+    if (item.type === 'Pantalon' && item.style?.includes('cigarette')) score += 2;
+    if (item.style?.includes('oversize')) score -= 1;
+  }
+
+  if (morphologie === 'X') {
+    if (item.style?.includes('cintré') || item.style?.includes('ajusté')) score += 2;
+    if (['Robe', 'Jupe'].includes(item.type) && item.style?.includes('taille haute')) score += 2;
+    if (item.style?.includes('oversize')) score -= 1;
+  }
+
+  if (morphologie === 'V') {
+    if (item.type === 'Jupe' && item.style?.includes('trapèze')) score += 2;
+    if (item.type === 'Pantalon' && item.style?.includes('large')) score += 2;
+    if (item.color === 'noir' && item.type?.includes('Haut')) score += 1;
+    if (item.style?.includes('épaules')) score -= 2;
+  }
+
+  if (morphologie === 'O') {
+    if (['viscose', 'soie', 'jersey'].some(m => item.matiere?.includes(m))) score += 2;
+    if (item.style?.includes('col V')) score += 1;
+    if (item.style?.includes('moulant')) score -= 2;
+    if (item.style?.includes('taille basse')) score -= 1;
+  }
+
+  if (morphologie === '8') {
+    if (item.style?.includes('cintré') || item.style?.includes('cache-coeur')) score += 2;
+    if (item.type === 'Pantalon' && item.style?.includes('taille haute')) score += 2;
+    if (item.style?.includes('oversize')) score -= 1;
+  }
+
+  return score;
+}
+
 function scoreByProfile(item: ClothingItem, profile: UserProfile | null): number {
   if (!profile) return 0;
   let score = 0;
@@ -225,6 +275,9 @@ function scoreByProfile(item: ClothingItem, profile: UserProfile | null): number
 
   // Add silhouette score
   score += getSilhouetteScore(item, profile.taille, profile.corpulence);
+
+  // Add morphology score
+  score += getMorphologyScore(item, profile.morphologie ?? null);
 
   return score;
 }
