@@ -39,24 +39,17 @@ export const SEASON_PALETTES: Record<Season, ColorimetryProfile> = {
 };
 
 export const COLOR_TO_SEASON: Record<string, Season[]> = {
-  'blanc': ['hiver'],
-  'blanc_casse': ['printemps', 'ete'],
-  'noir': ['hiver'],
-  'gris': ['ete', 'hiver'],
-  'beige': ['printemps', 'automne'],
-  'camel': ['automne'],
-  'bleu': ['printemps', 'ete'],
-  'rouge': ['hiver'],
-  'bordeaux': ['automne', 'hiver'],
-  'rose': ['ete', 'printemps'],
-  'vert': ['printemps', 'automne'],
-  'jaune': ['printemps', 'automne'],
-  'marron': ['automne'],
-  'terracotta': ['automne'],
-  'corail': ['printemps'],
-  'lavande': ['ete'],
-  'violet': ['hiver'],
-  'multicolore': [],
+  'Blanc': ['hiver'],
+  'Noir': ['hiver'],
+  'Gris': ['ete', 'hiver'],
+  'Beige': ['printemps', 'automne'],
+  'Bleu': ['printemps', 'ete'],
+  'Rouge': ['hiver'],
+  'Rose': ['ete', 'printemps'],
+  'Vert': ['printemps', 'automne'],
+  'Jaune': ['printemps', 'automne'],
+  'Marron': ['automne'],
+  'Multicolore': [],
 };
 
 // Hex values for season palette color names (for rendering circles)
