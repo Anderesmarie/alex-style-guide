@@ -45,7 +45,7 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
             const scores = r.outfit.map(item => {
               const norm = normalizeColor(item.color);
               const score = getColorScore(norm, userSeason);
-              console.log("Couleur item:", item.color, "→ normalisée:", norm, "→ score:", score, "→ saison:", userSeason);
+              
               return score;
             });
             const avg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
