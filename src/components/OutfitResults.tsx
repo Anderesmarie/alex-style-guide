@@ -92,11 +92,25 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
                 ))}
               </div>
 
-              {/* Colorimetry badge */}
-              {colorBadge === 'perfect' && (
+              {/* Smart badge */}
+              {smartBadge === 'ideal' && (
+                <div className="px-2 pb-1">
+                  <span className="inline-block text-[9px] font-bold text-white rounded-xl py-0.5 px-1.5" style={{ background: 'linear-gradient(135deg, #C9956C, #E8C4A0)' }}>
+                    ⭐ Tenue idéale
+                  </span>
+                </div>
+              )}
+              {smartBadge === 'color' && (
                 <div className="px-2 pb-1">
                   <span className="inline-block text-[9px] font-medium text-white rounded-xl py-0.5 px-1.5" style={{ backgroundColor: '#C9956C' }}>
-                    ✨ Parfait pour ton teint
+                    ✨ Ton teint
+                  </span>
+                </div>
+              )}
+              {smartBadge === 'silhouette' && (
+                <div className="px-2 pb-1">
+                  <span className="inline-block text-[9px] font-medium rounded-xl py-0.5 px-1.5" style={{ backgroundColor: '#F5F0EB', color: '#C9956C', border: '1px solid #C9956C' }}>
+                    📏 Ta morpho
                   </span>
                 </div>
               )}
