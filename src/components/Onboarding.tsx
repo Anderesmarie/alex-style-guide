@@ -39,6 +39,8 @@ export default function Onboarding({ onComplete }: Props) {
   const [step, setStep] = useState(0);
   const [showMessage, setShowMessage] = useState(false);
   const [silhouette, setSilhouette] = useState('');
+  const [taille, setTaille] = useState<'petite' | 'moyenne' | 'grande' | ''>('');
+  const [corpulence, setCorpulence] = useState<'fine' | 'medium' | 'ronde' | ''>('');
   const [styles, setStyles] = useState<string[]>([]);
   const [budget, setBudget] = useState(80);
   const [brands, setBrands] = useState<string[]>([]);
@@ -47,7 +49,7 @@ export default function Onboarding({ onComplete }: Props) {
   const [lifestyle, setLifestyle] = useState('');
   const [makeup, setMakeup] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const totalSteps = 7;
+  const totalSteps = 8;
 
   const nextStep = () => {
     setShowMessage(true);
@@ -60,13 +62,11 @@ export default function Onboarding({ onComplete }: Props) {
   };
 
   const handleAvatarSave = async (avatar: AvatarData) => {
-    // Save to localStorage as alex_avatar
     localStorage.setItem('alex_avatar', JSON.stringify(avatar));
-    // Also save to Supabase
     await saveAvatar(avatar);
     const palette = getPaletteForSkin(avatar.skin);
     savePalette(palette);
-    await saveProfile({ silhouette, styles, budget, brands, taille: null, corpulence: null });
+    await saveProfile({ silhouette, styles, budget, brands, taille: taille || null, corpulence: corpulence || null });
     setShowMessage(true);
     setTimeout(() => {
       setShowMessage(false);
@@ -85,6 +85,7 @@ export default function Onboarding({ onComplete }: Props) {
 
   const canProceed = [
     silhouette !== '',
+    taille !== '' && corpulence !== '',
     styles.length > 0,
     lifestyle !== '',
     true,
@@ -124,6 +125,59 @@ export default function Onboarding({ onComplete }: Props) {
         )}
 
         {step === 1 && (
+          <>
+            <h1 className="text-2xl font-serif font-bold mb-2">Et ta silhouette en détail ?</h1>
+            <p className="text-sm text-muted-foreground mb-6">Pour des suggestions encore plus adaptées ✨</p>
+
+            <h2 className="text-base font-semibold mb-3">Ta taille</h2>
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              {([
+                { value: 'petite' as const, label: 'Petite', sub: 'Moins de 160 cm', emoji: '🧍‍♀️' },
+                { value: 'moyenne' as const, label: 'Moyenne', sub: '160 à 170 cm', emoji: '🧍‍♀️' },
+                { value: 'grande' as const, label: 'Grande', sub: 'Plus de 170 cm', emoji: '🧍‍♀️' },
+              ]).map(t => (
+                <button
+                  key={t.value}
+                  onClick={() => setTaille(t.value)}
+                  className="p-3 rounded-xl text-center transition-all duration-200 card-shadow"
+                  style={taille === t.value
+                    ? { border: '2px solid #C9956C', backgroundColor: '#FAF5F0' }
+                    : { border: '2px solid transparent', backgroundColor: 'hsl(var(--card))' }
+                  }
+                >
+                  <span className="text-2xl block mb-1">{t.emoji}</span>
+                  <span className="text-sm font-medium block">{t.label}</span>
+                  <span className="text-[10px] text-muted-foreground block mt-0.5">{t.sub}</span>
+                </button>
+              ))}
+            </div>
+
+            <h2 className="text-base font-semibold mb-3">Ta corpulence</h2>
+            <div className="grid grid-cols-3 gap-3">
+              {([
+                { value: 'fine' as const, label: 'Fine', sub: 'Je me trouve plutôt élancée', emoji: '✨' },
+                { value: 'medium' as const, label: 'Medium', sub: 'Je me sens entre les deux', emoji: '💫' },
+                { value: 'ronde' as const, label: 'Ronde', sub: "J'ai des courbes généreuses que j'assume", emoji: '🌸' },
+              ]).map(c => (
+                <button
+                  key={c.value}
+                  onClick={() => setCorpulence(c.value)}
+                  className="p-3 rounded-xl text-center transition-all duration-200 card-shadow"
+                  style={corpulence === c.value
+                    ? { border: '2px solid #C9956C', backgroundColor: '#FAF5F0' }
+                    : { border: '2px solid transparent', backgroundColor: 'hsl(var(--card))' }
+                  }
+                >
+                  <span className="text-2xl block mb-1">{c.emoji}</span>
+                  <span className="text-sm font-medium block">{c.label}</span>
+                  <span className="text-[10px] text-muted-foreground block mt-0.5 leading-tight">{c.sub}</span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        {step === 2 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">Ton style, c'est plutôt ?</h1>
             <div className="flex flex-wrap gap-3">
@@ -170,7 +224,7 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 2 && (
+        {step === 3 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">T'es plutôt dans quelle vibe ?</h1>
             <div className="grid grid-cols-1 gap-3">
@@ -187,7 +241,7 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 3 && (
+        {step === 4 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">Ton budget habituel par vêtement ?</h1>
             <div className="mt-8">
@@ -205,7 +259,7 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 4 && (
+        {step === 5 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">Tes marques préférées ?</h1>
             {brands.length > 0 && (
@@ -230,7 +284,7 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 5 && (
+        {step === 6 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">Ton rapport au maquillage ?</h1>
             <div className="flex flex-wrap gap-3">
@@ -244,12 +298,12 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 6 && (
+        {step === 7 && (
           <AvatarCreator onSave={handleAvatarSave} />
         )}
       </div>
 
-      {step < 6 && (
+      {step < 7 && (
         <button onClick={nextStep} disabled={!canProceed}
           className={`w-full py-4 rounded-xl text-lg font-semibold transition-all duration-200 mt-6 ${
             canProceed ? 'bg-primary text-primary-foreground shadow-lg active:scale-[0.98]' : 'bg-muted text-muted-foreground'
