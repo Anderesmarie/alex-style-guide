@@ -141,6 +141,103 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
         </div>
       )}
 
+      {/* Favorite colors section */}
+      {editingColors ? (
+        <div className="bg-card rounded-xl p-5 card-shadow mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="font-serif font-semibold text-base">Mes couleurs préférées</p>
+            <span className="text-xs text-muted-foreground">{tempColors.length}/5</span>
+          </div>
+          <div className="grid grid-cols-5 gap-3 mb-4">
+            {ALL_COLOR_NAMES.map(name => {
+              const selected = tempColors.includes(name);
+              const disabled = !selected && tempColors.length >= 5;
+              return (
+                <button
+                  key={name}
+                  onClick={() => {
+                    setTempColors(prev =>
+                      prev.includes(name) ? prev.filter(c => c !== name) :
+                      prev.length >= 5 ? prev : [...prev, name]
+                    );
+                  }}
+                  disabled={disabled}
+                  className="flex flex-col items-center gap-1 transition-all"
+                  style={{ opacity: disabled ? 0.35 : 1 }}
+                >
+                  <div
+                    className="w-9 h-9 rounded-full transition-all"
+                    style={{
+                      backgroundColor: FAVORITE_COLORS_MAP[name],
+                      border: selected ? '3px solid #C9956C' : name === 'Blanc' ? '2px solid hsl(var(--border))' : '2px solid transparent',
+                      boxShadow: selected ? '0 0 0 2px #C9956C40' : 'none',
+                      transform: selected ? 'scale(1.1)' : 'scale(1)',
+                    }}
+                  />
+                  <span className="text-[10px] text-muted-foreground leading-tight text-center">{name}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setEditingColors(false)}
+              className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-muted text-muted-foreground"
+            >
+              Annuler
+            </button>
+            <button
+              onClick={async () => {
+                if (profile) {
+                  const updated = { ...profile, favorite_colors: tempColors };
+                  await saveProfile(updated);
+                  setProfile(updated);
+                }
+                setEditingColors(false);
+              }}
+              className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white"
+              style={{ backgroundColor: '#C9956C' }}
+            >
+              Enregistrer
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-card rounded-xl p-5 card-shadow mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm text-muted-foreground">Mes couleurs préférées</p>
+            <button
+              onClick={() => {
+                setTempColors(profile?.favorite_colors || []);
+                setEditingColors(true);
+              }}
+              className="text-sm font-medium"
+              style={{ color: '#C9956C' }}
+            >
+              {profile?.favorite_colors?.length ? 'Modifier' : '＋'}
+            </button>
+          </div>
+          {profile?.favorite_colors?.length ? (
+            <div className="flex gap-2 flex-wrap">
+              {profile.favorite_colors.map(name => (
+                <div key={name} className="flex flex-col items-center gap-1">
+                  <div
+                    className="w-8 h-8 rounded-full"
+                    style={{
+                      backgroundColor: FAVORITE_COLORS_MAP[name] || '#ccc',
+                      border: name === 'Blanc' ? '1.5px solid hsl(var(--border))' : 'none',
+                    }}
+                  />
+                  <span className="text-[10px] text-muted-foreground">{name}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">Ajoute tes couleurs préférées ✨</p>
+          )}
+        </div>
+      )}
+
       <div className="space-y-4">
         <div className="bg-card rounded-xl p-5 card-shadow">
           <p className="text-sm text-muted-foreground mb-1">Silhouette</p>
