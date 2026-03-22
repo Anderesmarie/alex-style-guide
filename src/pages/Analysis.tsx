@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'; // v2
 import { getWardrobe } from '@/lib/storage';
 import { ClothingItem } from '@/lib/types';
 
