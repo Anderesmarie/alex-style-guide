@@ -7,6 +7,40 @@ import { toast } from 'sonner';
 
 type View = 'grid' | 'add' | 'detail' | 'edit';
 
+const COLOR_PALETTE = [
+  { label: 'Blanc', value: 'blanc', bg: '#FFFFFF' },
+  { label: 'Noir', value: 'noir', bg: '#2C2C2C' },
+  { label: 'Gris', value: 'gris', bg: '#9B9B9B' },
+  { label: 'Beige', value: 'beige', bg: '#F5F0EB' },
+  { label: 'Camel', value: 'camel', bg: '#C8A882' },
+  { label: 'Bleu', value: 'bleu', bg: '#3B6BA5' },
+  { label: 'Marine', value: 'marine', bg: '#1B2A4A' },
+  { label: 'Rouge', value: 'rouge', bg: '#C0392B' },
+  { label: 'Bordeaux', value: 'bordeaux', bg: '#722F37' },
+  { label: 'Rose', value: 'rose', bg: '#E8A0B4' },
+  { label: 'Vert', value: 'vert', bg: '#2E7D32' },
+  { label: 'Kaki', value: 'kaki', bg: '#6B7C3A' },
+  { label: 'Jaune', value: 'jaune', bg: '#F4C430' },
+  { label: 'Marron', value: 'marron', bg: '#6B3F2A' },
+  { label: 'Violet', value: 'violet', bg: '#6B3FA0' },
+  { label: 'Corail', value: 'corail', bg: '#E8734A' },
+  { label: 'Terracotta', value: 'terracotta', bg: '#C1440E' },
+  { label: 'Lavande', value: 'lavande', bg: '#B8A0CC' },
+  { label: 'Turquoise', value: 'turquoise', bg: '#00CED1' },
+  { label: 'Rose gold', value: 'rose_gold', bg: '#C9956C' },
+  { label: 'Crème', value: 'creme', bg: '#F5F5DC' },
+  { label: 'Fuchsia', value: 'fuchsia', bg: '#FF69B4' },
+];
+
+const PATTERN_PALETTE = [
+  { label: 'Léopard', value: 'leopard', bg: 'radial-gradient(circle at 30% 40%, #6B3F2A 3px, transparent 3px), radial-gradient(circle at 70% 60%, #6B3F2A 2px, transparent 2px), #C8A882' },
+  { label: 'Fleuri', value: 'fleuri', bg: 'radial-gradient(circle at 25% 30%, #E8A0B4 3px, transparent 3px), radial-gradient(circle at 65% 50%, #E8A0B4 2px, transparent 2px), radial-gradient(circle at 45% 75%, #E8A0B4 3px, transparent 3px), #FFFFFF' },
+  { label: 'Rayé', value: 'raye', bg: 'repeating-linear-gradient(90deg, #2C2C2C 0px, #2C2C2C 3px, #FFFFFF 3px, #FFFFFF 6px)' },
+  { label: 'Carreaux', value: 'carreaux', bg: 'repeating-linear-gradient(0deg, transparent, transparent 8px, #3B6BA555 8px, #3B6BA555 9px), repeating-linear-gradient(90deg, transparent, transparent 8px, #3B6BA555 8px, #3B6BA555 9px), #D6E4F0' },
+  { label: 'Géométrique', value: 'geometrique', bg: 'repeating-linear-gradient(45deg, #C9956C 0px, #C9956C 4px, #F5F0EB 4px, #F5F0EB 8px)' },
+  { label: 'Multicolore', value: 'multicolore', bg: 'linear-gradient(135deg, #C0392B, #F4C430, #2E7D32, #3B6BA5, #6B3FA0)' },
+];
+
 const DELETE_REASONS = [
   { emoji: '📏', label: 'Trop petit / trop grand' },
   { emoji: '💔', label: 'Je ne l\'aime plus' },
