@@ -14,6 +14,8 @@ const MOTIVATIONAL = [
   'Nickel, on note 📝',
   'Beauty game activé 💅',
   'Parfait, on est prêts ! 🚀',
+  'Tes couleurs, c\'est noté ! 🎨',
+  'Top, on finalise ! ✨',
 ];
 
 const LIFESTYLES = [
@@ -29,6 +31,29 @@ const MAKEUP_OPTIONS = [
   { label: 'Naturel', emoji: '🌸' },
   { label: 'Coloré', emoji: '💄' },
   { label: 'J\'adore varier', emoji: '✨' },
+] as const;
+
+const FAVORITE_COLORS = [
+  { name: 'Blanc', hex: '#FFFFFF' },
+  { name: 'Noir', hex: '#1A1A1A' },
+  { name: 'Gris', hex: '#9E9E9E' },
+  { name: 'Beige', hex: '#E8D5B7' },
+  { name: 'Camel', hex: '#C19A6B' },
+  { name: 'Bleu', hex: '#4A90D9' },
+  { name: 'Marine', hex: '#1B2A4A' },
+  { name: 'Rouge', hex: '#D32F2F' },
+  { name: 'Bordeaux', hex: '#722F37' },
+  { name: 'Rose', hex: '#F48FB1' },
+  { name: 'Vert', hex: '#4CAF50' },
+  { name: 'Kaki', hex: '#6B7B3A' },
+  { name: 'Jaune', hex: '#FFD54F' },
+  { name: 'Marron', hex: '#6D4C41' },
+  { name: 'Violet', hex: '#7B1FA2' },
+  { name: 'Corail', hex: '#FF7F7F' },
+  { name: 'Terracotta', hex: '#CC5C3B' },
+  { name: 'Lavande', hex: '#B39DDB' },
+  { name: 'Turquoise', hex: '#26C6DA' },
+  { name: 'Rose gold', hex: '#C9956C' },
 ] as const;
 
 interface Props {
@@ -48,8 +73,9 @@ export default function Onboarding({ onComplete }: Props) {
   const [stylePhotos, setStylePhotos] = useState<string[]>([]);
   const [lifestyle, setLifestyle] = useState('');
   const [makeup, setMakeup] = useState('');
+  const [favoriteColors, setFavoriteColors] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const totalSteps = 8;
+  const totalSteps = 9;
 
   const nextStep = () => {
     setShowMessage(true);
@@ -66,7 +92,7 @@ export default function Onboarding({ onComplete }: Props) {
     await saveAvatar(avatar);
     const palette = getPaletteForSkin(avatar.skin);
     savePalette(palette);
-    await saveProfile({ silhouette, styles, budget, brands, taille: taille || null, corpulence: corpulence || null, morphologie: null, favorite_colors: [] });
+    await saveProfile({ silhouette, styles, budget, brands, taille: taille || null, corpulence: corpulence || null, morphologie: null, favorite_colors: favoriteColors });
     setShowMessage(true);
     setTimeout(() => {
       setShowMessage(false);
@@ -78,20 +104,29 @@ export default function Onboarding({ onComplete }: Props) {
     setStyles(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
   };
 
+  const toggleFavoriteColor = (color: string) => {
+    setFavoriteColors(prev => {
+      if (prev.includes(color)) return prev.filter(c => c !== color);
+      if (prev.length >= 5) return prev;
+      return [...prev, color];
+    });
+  };
+
   const addBrand = (b: string) => {
     if (brands.length < 3 && !brands.includes(b)) setBrands([...brands, b]);
   };
   const removeBrand = (b: string) => setBrands(brands.filter(x => x !== b));
 
   const canProceed = [
-    silhouette !== '',
-    taille !== '' && corpulence !== '',
-    styles.length > 0,
-    lifestyle !== '',
-    true,
-    true,
-    makeup !== '',
-    false,
+    silhouette !== '',       // 0
+    taille !== '' && corpulence !== '', // 1
+    true,                    // 2 — favorite colors (optional)
+    styles.length > 0,       // 3
+    lifestyle !== '',        // 4
+    true,                    // 5 — budget
+    true,                    // 6 — brands
+    makeup !== '',           // 7
+    false,                   // 8 — avatar
   ][step];
 
   return (
@@ -102,7 +137,7 @@ export default function Onboarding({ onComplete }: Props) {
 
       {showMessage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80">
-          <p className="text-xl font-serif text-primary animate-pulse">{MOTIVATIONAL[step]}</p>
+          <p className="text-xl font-serif text-primary animate-pulse">{MOTIVATIONAL[step] || MOTIVATIONAL[0]}</p>
         </div>
       )}
 
@@ -179,6 +214,44 @@ export default function Onboarding({ onComplete }: Props) {
 
         {step === 2 && (
           <>
+            <h1 className="text-2xl font-serif font-bold mb-2">Tes couleurs préférées ?</h1>
+            <p className="text-sm text-muted-foreground mb-6">On privilégiera ces teintes dans tes suggestions ✨</p>
+
+            <div className="grid grid-cols-4 gap-4 mb-4">
+              {FAVORITE_COLORS.map(c => {
+                const selected = favoriteColors.includes(c.name);
+                const disabled = !selected && favoriteColors.length >= 5;
+                return (
+                  <button
+                    key={c.name}
+                    onClick={() => toggleFavoriteColor(c.name)}
+                    disabled={disabled}
+                    className="flex flex-col items-center gap-1.5 transition-all duration-200"
+                    style={{ opacity: disabled ? 0.35 : 1 }}
+                  >
+                    <div
+                      className="w-11 h-11 rounded-full transition-all duration-200"
+                      style={{
+                        backgroundColor: c.hex,
+                        border: selected ? '3px solid #C9956C' : c.name === 'Blanc' ? '2px solid hsl(var(--border))' : '2px solid transparent',
+                        boxShadow: selected ? '0 0 0 2px #C9956C40' : 'none',
+                        transform: selected ? 'scale(1.1)' : 'scale(1)',
+                      }}
+                    />
+                    <span className="text-[11px] text-muted-foreground font-medium leading-tight text-center">{c.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <p className="text-xs text-muted-foreground text-center">
+              {favoriteColors.length}/5 couleurs choisies
+            </p>
+          </>
+        )}
+
+        {step === 3 && (
+          <>
             <h1 className="text-2xl font-serif font-bold mb-6">Ton style, c'est plutôt ?</h1>
             <div className="flex flex-wrap gap-3">
               {STYLE_OPTIONS.map(s => (
@@ -224,7 +297,7 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 3 && (
+        {step === 4 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">T'es plutôt dans quelle vibe ?</h1>
             <div className="grid grid-cols-1 gap-3">
@@ -241,7 +314,7 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 4 && (
+        {step === 5 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">Ton budget habituel par vêtement ?</h1>
             <div className="mt-8">
@@ -259,7 +332,7 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 5 && (
+        {step === 6 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">Tes marques préférées ?</h1>
             {brands.length > 0 && (
@@ -284,7 +357,7 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 6 && (
+        {step === 7 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">Ton rapport au maquillage ?</h1>
             <div className="flex flex-wrap gap-3">
@@ -298,12 +371,12 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 7 && (
+        {step === 8 && (
           <AvatarCreator onSave={handleAvatarSave} />
         )}
       </div>
 
-      {step < 7 && (
+      {step < 8 && (
         <button onClick={nextStep} disabled={!canProceed}
           className={`w-full py-4 rounded-xl text-lg font-semibold transition-all duration-200 mt-6 ${
             canProceed ? 'bg-primary text-primary-foreground shadow-lg active:scale-[0.98]' : 'bg-muted text-muted-foreground'
