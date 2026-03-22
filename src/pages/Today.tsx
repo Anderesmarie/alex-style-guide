@@ -166,7 +166,7 @@ export default function Today() {
   const generate = useCallback(async () => {
     if (!enough || swipeComplete) return;
     if (!canSuggest) return;
-    const recs = generateRecommendations(wardrobe, weatherTemp, 5, userProfile);
+    const recs = await generateRecommendations(wardrobe, weatherTemp, 5, userProfile);
     setRecommendations(recs);
     const newCount = dailyCount + 1;
     setDailyCount(newCount);
