@@ -3,12 +3,14 @@ import { TabId } from '@/lib/types';
 import Today from '@/pages/Today';
 import Dressing from '@/pages/Dressing';
 import Outfits from '@/pages/Outfits';
+import Analysis from '@/pages/Analysis';
 import Profile from '@/pages/Profile';
 
 const tabs: { id: TabId; emoji: string; label: string }[] = [
   { id: 'today', emoji: '🏠', label: "Aujourd'hui" },
   { id: 'dressing', emoji: '👗', label: 'Dressing' },
   { id: 'outfits', emoji: '✨', label: 'Tenues' },
+  { id: 'analysis', emoji: '🔍', label: 'Analyse' },
   { id: 'profile', emoji: '👤', label: 'Profil' },
 ];
 
@@ -26,6 +28,7 @@ export default function AppShell({ onEditProfile, onLogout }: Props) {
         {activeTab === 'today' && <Today />}
         {activeTab === 'dressing' && <Dressing />}
         {activeTab === 'outfits' && <Outfits />}
+        {activeTab === 'analysis' && <Analysis />}
         {activeTab === 'profile' && <Profile onEditProfile={onEditProfile} onLogout={onLogout} />}
       </main>
 

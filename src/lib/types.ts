@@ -56,7 +56,7 @@ export interface DailyCounter {
   count: number;
 }
 
-export type TabId = 'today' | 'dressing' | 'outfits' | 'profile';
+export type TabId = 'today' | 'dressing' | 'outfits' | 'analysis' | 'profile';
 
 export const TYPES = ['T-shirt', 'Chemise', 'Pull', 'Jean', 'Pantalon', 'Jupe', 'Robe', 'Veste', 'Manteau', 'Chaussures', 'Sac', 'Accessoires'] as const;
 export const COLORS = ['Blanc', 'Noir', 'Gris', 'Beige', 'Bleu', 'Rouge', 'Rose', 'Vert', 'Jaune', 'Marron'] as const;
