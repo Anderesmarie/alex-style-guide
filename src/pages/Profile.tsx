@@ -6,7 +6,7 @@ import { AvatarData } from '@/components/AvatarSVG';
 import { determineSeason, SEASON_PALETTES, SEASON_COLOR_HEX, SEASON_LABELS } from '@/lib/colorimetry';
 import type { Season } from '@/lib/colorimetry';
 import { getStreak } from '@/lib/streak';
-import { UserProfile } from '@/lib/types';
+import { UserProfile, STYLE_OPTIONS } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 
 const FAVORITE_COLORS_MAP: Record<string, string> = {
