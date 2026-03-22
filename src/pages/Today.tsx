@@ -306,12 +306,7 @@ export default function Today() {
         </div>
       )}
 
-      {enough && !canSuggest && !swipeComplete && recommendations.length === 0 && (
-        <div className="bg-card rounded-xl p-6 card-shadow text-center">
-          <p className="text-lg font-serif">Tu as utilisé tes 5 suggestions du jour ✨</p>
-          <p className="text-muted-foreground mt-2">Reviens demain ou passe en Premium pour en voir plus.</p>
-        </div>
-      )}
+      {/* Removed: standalone limit message that replaced results */}
 
       {enough && !swipeComplete && recommendations.length > 0 && (
         <div className="space-y-2">
