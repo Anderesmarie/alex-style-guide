@@ -1,6 +1,77 @@
 import { ClothingItem, UserProfile } from './types';
 import { getLastOutfit, getRejected } from './storage';
 import { getCurrentSeason } from './weather';
+import { supabase } from './supabase';
+
+// ---------- Preference helpers (Supabase) ----------
+
+async function getUserIdSafe(): Promise<string | null> {
+  try {
+    const { data } = await supabase.auth.getUser();
+    return data.user?.id ?? null;
+  } catch { return null; }
+}
+
+export async function getRecentOutfitItemIds(): Promise<{ itemIds: string[]; createdAt: string }[]> {
+  const uid = await getUserIdSafe();
+  if (!uid) return [];
+  const { data } = await supabase
+    .from('user_preferences')
+    .select('item_ids, created_at')
+    .eq('user_id', uid)
+    .eq('type', 'recent_outfit')
+    .order('created_at', { ascending: false })
+    .limit(7);
+  return (data || []).map(r => ({ itemIds: r.item_ids as string[], createdAt: r.created_at }));
+}
+
+export async function saveRecentOutfit(itemIds: string[]): Promise<void> {
+  const uid = await getUserIdSafe();
+  if (!uid) return;
+  await supabase.from('user_preferences').insert({
+    user_id: uid,
+    type: 'recent_outfit',
+    item_ids: itemIds,
+  });
+  // Keep only last 7
+  const { data } = await supabase
+    .from('user_preferences')
+    .select('id')
+    .eq('user_id', uid)
+    .eq('type', 'recent_outfit')
+    .order('created_at', { ascending: false });
+  if (data && data.length > 7) {
+    const toDelete = data.slice(7).map(r => r.id);
+    await supabase.from('user_preferences').delete().in('id', toDelete);
+  }
+}
+
+export async function getDislikedItemIds(): Promise<string[]> {
+  const uid = await getUserIdSafe();
+  if (!uid) return [];
+  const now = new Date().toISOString();
+  const { data } = await supabase
+    .from('user_preferences')
+    .select('item_ids')
+    .eq('user_id', uid)
+    .eq('type', 'aime_pas')
+    .gte('bloquee_jusqua', now);
+  if (!data) return [];
+  return data.flatMap(r => r.item_ids as string[]);
+}
+
+export async function saveDislikedOutfit(itemIds: string[]): Promise<void> {
+  const uid = await getUserIdSafe();
+  if (!uid) return;
+  const bloquee = new Date();
+  bloquee.setDate(bloquee.getDate() + 30);
+  await supabase.from('user_preferences').insert({
+    user_id: uid,
+    type: 'aime_pas',
+    item_ids: itemIds,
+    bloquee_jusqua: bloquee.toISOString(),
+  });
+}
 
 // Group items by their category field from the new category system
 function getGroup(item: ClothingItem): string {
