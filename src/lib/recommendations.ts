@@ -429,18 +429,59 @@ function collectOutfits(
   return results;
 }
 
-export function generateRecommendations(
+export async function loadScoringContext(wardrobe: ClothingItem[]): Promise<ScoringContext> {
+  const [recentOutfits, dislikedIds] = await Promise.all([
+    getRecentOutfitItemIds(),
+    getDislikedItemIds(),
+  ]);
+
+  // Build wardrobeCreatedAt from supabase (wardrobe items have created_at)
+  const wardrobeCreatedAt: Record<string, string> = {};
+  const uid = await getUserIdSafe();
+  if (uid) {
+    const { data } = await supabase.from('wardrobe').select('id, created_at').eq('user_id', uid);
+    (data || []).forEach(r => { wardrobeCreatedAt[r.id] = r.created_at; });
+  }
+
+  const now = Date.now();
+  const day = 1000 * 60 * 60 * 24;
+  const lastProposedIds = new Set<string>();
+  const recent3Ids = new Set<string>();
+  const allProposedIds = new Set<string>();
+
+  recentOutfits.forEach((o, i) => {
+    const age = (now - new Date(o.createdAt).getTime()) / day;
+    if (age < 14) o.itemIds.forEach(id => allProposedIds.add(id));
+    if (i === 0 && age < 2) o.itemIds.forEach(id => lastProposedIds.add(id));
+    if (i < 3) o.itemIds.forEach(id => recent3Ids.add(id));
+  });
+
+  return {
+    recentOutfits,
+    dislikedIds: new Set(dislikedIds),
+    wardrobeCreatedAt,
+    allProposedIds,
+    lastProposedIds,
+    recent3Ids,
+  };
+}
+
+export async function generateRecommendations(
   wardrobe: ClothingItem[],
   temperature: number | null,
   count = 2,
   userProfile: UserProfile | null = null
-): ClothingItem[][] {
+): Promise<ClothingItem[][]> {
   const season = getCurrentSeason();
   const lastOutfit = getLastOutfit();
   const rejected = getRejected();
   const lastKey = lastOutfit.sort().join(',');
   const blockedKeys = new Set(rejected.map(r => r.sort().join(',')));
   if (lastKey) blockedKeys.add(lastKey);
+
+  // Load async scoring context
+  let ctx: ScoringContext | null = null;
+  try { ctx = await loadScoringContext(wardrobe); } catch {}
 
   const seasonPool = wardrobe.filter(
     i => i.season.includes(season) || i.season.includes('Toutes saisons')
@@ -452,8 +493,8 @@ export function generateRecommendations(
   const rankPool = (pool: ClothingItem[]) => {
     if (!userProfile) return pool;
     return [...pool].sort((a, b) => {
-      const sa = scoreByProfile(a, userProfile);
-      const sb = scoreByProfile(b, userProfile);
+      const sa = scoreByProfile(a, userProfile, ctx);
+      const sb = scoreByProfile(b, userProfile, ctx);
       if (sb !== sa) return sb - sa;
       return Math.random() - 0.5;
     });
