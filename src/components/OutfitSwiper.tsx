@@ -16,6 +16,7 @@ interface Props {
   temperature: number | null;
   onComplete: (results: OutfitCard[]) => void;
   userSeason?: Season | null;
+  userProfile?: UserProfile | null;
 }
 
 export default function OutfitSwiper({ outfits, weatherCode, temperature, onComplete, userSeason }: Props) {
