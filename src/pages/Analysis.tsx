@@ -162,20 +162,22 @@ export default function Analysis() {
                 {occasionStats.map(o => {
                   const icon = o.count === 0 ? '🔴' : o.count <= 2 ? '🟡' : '✅';
                   const msg = o.count === 0
-                    ? `Tu n'as rien à mettre pour ${o.name} !`
-                    : o.count <= 2
-                    ? 'Ajoute 1-2 pièces pour avoir plus d\'options'
+                    ? 'On va remédier à ça !'
                     : null;
                   return (
                     <div key={o.name} className="flex items-start gap-2.5">
                       <span className="text-sm mt-0.5">{icon}</span>
                       <div className="flex-1">
                         <p className="text-sm font-semibold" style={{ color: o.count >= 3 ? '#BFBFBF' : '#2C2C2C' }}>
-                          {o.count === 0 ? `Aucune tenue pour ${o.name}` : o.count <= 2 ? `Peu de choix pour ${o.name}` : `${o.name} bien couverte`}
+                          {o.count === 0
+                            ? `Zéro tenue pour ${o.name} 😬`
+                            : o.count <= 2
+                            ? `Peut mieux faire (${o.count} pièces)`
+                            : `Tu gères ! (${o.count} pièces)`}
                         </p>
                         {msg && <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>{msg}</p>}
                       </div>
-                      <span className="text-xs font-medium mt-0.5" style={{ color: '#9B9B9B' }}>{o.count}</span>
+                      <span className="text-xs font-medium mt-0.5" style={{ color: '#9B9B9B' }}>{o.name}</span>
                     </div>
                   );
                 })}
