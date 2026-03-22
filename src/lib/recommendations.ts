@@ -338,32 +338,67 @@ export function getFavoriteColorScore(
   return 0;
 }
 
-function scoreByProfile(item: ClothingItem, profile: UserProfile | null): number {
+// Context for advanced scoring (loaded async before generation)
+interface ScoringContext {
+  recentOutfits: { itemIds: string[]; createdAt: string }[];
+  dislikedIds: Set<string>;
+  wardrobeCreatedAt: Record<string, string>; // itemId → created_at ISO
+  allProposedIds: Set<string>; // all item IDs proposed in last 14 days
+  lastProposedIds: Set<string>; // item IDs from yesterday
+  recent3Ids: Set<string>; // item IDs from last 3 suggestions
+}
+
+function scoreByProfile(
+  item: ClothingItem,
+  profile: UserProfile | null,
+  ctx: ScoringContext | null = null
+): number {
   if (!profile) return 0;
   let score = 0;
   const styles = profile.styles.map(s => s.toLowerCase());
 
+  // 1. Style profil (+3)
   if (styles.includes('élégant') || styles.includes('casual chic')) {
-    if (item.style.some(s => ['Chic', 'Bureau'].includes(s))) score += 2;
+    if (item.style.some(s => ['Chic', 'Bureau'].includes(s))) score += 3;
   }
   if (styles.includes('sportswear')) {
-    if (item.style.some(s => s === 'Sport')) score += 2;
+    if (item.style.some(s => s === 'Sport')) score += 3;
   }
   if (styles.includes('bohème')) {
-    if (item.style.some(s => s === 'Boho')) score += 2;
+    if (item.style.some(s => s === 'Boho')) score += 3;
   }
   if (styles.includes('minimaliste')) {
-    if (['Blanc', 'Noir', 'Gris', 'Beige'].includes(item.color)) score += 1;
+    if (['blanc', 'noir', 'gris', 'beige'].includes(item.color?.toLowerCase())) score += 2;
   }
 
-  // Add silhouette score
+  // 2. Occasion du jour (+2)
+  const occasionFilter = isWeekday() ? ['Travail', 'Quotidien'] : ['Sortie', 'Quotidien'];
+  if (item.occasion?.some(o => occasionFilter.includes(o))) score += 2;
+
+  // Silhouette, morphology, favorite color scores
   score += getSilhouetteScore(item, profile.taille, profile.corpulence);
-
-  // Add morphology score
   score += getMorphologyScore(item, profile.morphologie ?? null);
-
-  // Add favorite color score
   score += getFavoriteColorScore(item, profile.favorite_colors ?? []);
+
+  // Context-based scoring
+  if (ctx) {
+    // 3. Anti-répétition
+    if (ctx.lastProposedIds.has(item.id)) score -= 5;
+    else if (ctx.recent3Ids.has(item.id)) score -= 3;
+
+    // 4. Dislike (-10)
+    if (ctx.dislikedIds.has(item.id)) score -= 10;
+
+    // 5. Nouveauté (+1 if added < 30 days)
+    const createdAt = ctx.wardrobeCreatedAt[item.id];
+    if (createdAt) {
+      const age = (Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24);
+      if (age < 30) score += 1;
+    }
+
+    // 6. Fraîcheur (+1 if not proposed in 14+ days)
+    if (!ctx.allProposedIds.has(item.id)) score += 1;
+  }
 
   return score;
 }
