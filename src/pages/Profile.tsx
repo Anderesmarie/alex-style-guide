@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getProfile, getAvatar, saveAvatar } from '@/lib/storage';
+import { getProfile, getAvatar, saveAvatar, saveProfile } from '@/lib/storage';
 import AvatarSVG from '@/components/AvatarSVG';
 import AvatarCreator, { DEFAULT_AVATAR } from '@/components/AvatarCreator';
 import { AvatarData } from '@/components/AvatarSVG';
@@ -8,6 +8,15 @@ import type { Season } from '@/lib/colorimetry';
 import { getStreak } from '@/lib/streak';
 import { UserProfile } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
+
+const FAVORITE_COLORS_MAP: Record<string, string> = {
+  'Blanc': '#FFFFFF', 'Noir': '#1A1A1A', 'Gris': '#9E9E9E', 'Beige': '#E8D5B7',
+  'Camel': '#C19A6B', 'Bleu': '#4A90D9', 'Marine': '#1B2A4A', 'Rouge': '#D32F2F',
+  'Bordeaux': '#722F37', 'Rose': '#F48FB1', 'Vert': '#4CAF50', 'Kaki': '#6B7B3A',
+  'Jaune': '#FFD54F', 'Marron': '#6D4C41', 'Violet': '#7B1FA2', 'Corail': '#FF7F7F',
+  'Terracotta': '#CC5C3B', 'Lavande': '#B39DDB', 'Turquoise': '#26C6DA', 'Rose gold': '#C9956C',
+};
+const ALL_COLOR_NAMES = Object.keys(FAVORITE_COLORS_MAP);
 
 interface Props {
   onEditProfile: () => void;
@@ -19,6 +28,8 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
   const [avatar, setAvatar] = useState<AvatarData>(DEFAULT_AVATAR);
   const [season, setSeason] = useState<Season | null>(null);
   const [editingAvatar, setEditingAvatar] = useState(false);
+  const [editingColors, setEditingColors] = useState(false);
+  const [tempColors, setTempColors] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   const computeAndSaveSeason = async (avatarData: AvatarData) => {
