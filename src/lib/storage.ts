@@ -34,6 +34,8 @@ export async function saveProfile(profile: UserProfile): Promise<void> {
     styles: profile.styles,
     budget: profile.budget,
     brands: profile.brands,
+    taille: profile.taille,
+    corpulence: profile.corpulence,
   });
 }
 
