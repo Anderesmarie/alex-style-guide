@@ -255,6 +255,18 @@ export function getMorphologyScore(
   return score;
 }
 
+export function getFavoriteColorScore(
+  item: ClothingItem,
+  favoriteColors: string[]
+): number {
+  if (!favoriteColors || favoriteColors.length === 0) return 0;
+  const itemColor = item.color?.trim() ?? '';
+  if (favoriteColors.some(c => c.toLowerCase() === itemColor.toLowerCase())) {
+    return 2;
+  }
+  return 0;
+}
+
 function scoreByProfile(item: ClothingItem, profile: UserProfile | null): number {
   if (!profile) return 0;
   let score = 0;
@@ -278,6 +290,9 @@ function scoreByProfile(item: ClothingItem, profile: UserProfile | null): number
 
   // Add morphology score
   score += getMorphologyScore(item, profile.morphologie ?? null);
+
+  // Add favorite color score
+  score += getFavoriteColorScore(item, profile.favorite_colors ?? []);
 
   return score;
 }
