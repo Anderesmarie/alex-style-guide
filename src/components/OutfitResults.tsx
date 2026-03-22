@@ -2,7 +2,7 @@ import { ClothingItem, UserProfile } from '@/lib/types';
 import { addOutfit, genId, saveLastOutfit } from '@/lib/storage';
 import { getStylingTips } from '@/lib/stylingTips';
 import { getColorScore } from '@/lib/colorimetry';
-import { getSilhouetteScore } from '@/lib/recommendations';
+import { getSilhouetteScore, getMorphologyScore } from '@/lib/recommendations';
 import type { Season } from '@/lib/colorimetry';
 
 interface OutfitResult {
