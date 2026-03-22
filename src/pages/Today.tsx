@@ -30,7 +30,7 @@ interface SavedTodayData {
   results: SavedOutfitResult[];
 }
 
-const STORAGE_KEY = 'mystyl_today_outfits';
+const STORAGE_KEY = 'closify_daily_outfits';
 
 function loadTodayData(today: string, wardrobe: ClothingItem[]): { outfit: ClothingItem[]; liked: boolean | null }[] | null {
   try {
