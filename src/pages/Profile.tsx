@@ -100,186 +100,247 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
   const palette = season ? SEASON_PALETTES[season] : null;
   const seasonInfo = season ? SEASON_LABELS[season] : null;
 
+  const SEASON_VIBES: Record<string, string> = {
+    printemps: 'Les teintes chaudes et lumineuses te subliment ✨',
+    ete: "Les teintes douces et fraîches t'illuminent ✨",
+    automne: 'Les teintes profondes et chaleureuses te mettent en valeur ✨',
+    hiver: 'Les teintes intenses et contrastées te subliment ✨',
+  };
+
+  const MORPHO_LABELS: Record<string, string> = {
+    A: 'Morphologie A (Triangle)',
+    H: 'Morphologie H (Rectangle)',
+    X: 'Morphologie X (Sablier)',
+    V: 'Morphologie V (Triangle inversé)',
+    O: 'Morphologie O (Ronde)',
+    '8': 'Morphologie 8 (Sablier pulpeux)',
+  };
+
   return (
-    <div className="fade-enter pb-4">
-      <h1 className="text-2xl font-serif font-bold mb-6">Mon Profil</h1>
+    <div className="fade-enter pb-6" style={{ backgroundColor: '#F5F0EB', minHeight: '100vh' }}>
+      <div className="px-5 pt-6">
+        <h1 className="text-2xl font-serif font-bold mb-6" style={{ color: '#2C2C2C' }}>Mon Profil</h1>
 
-      {/* Avatar + name */}
-      <div className="flex items-center gap-4 mb-6">
-        <AvatarSVG avatar={avatar} size={80} />
-        <div>
-          <p className="font-serif font-semibold text-lg">Mon Avatar</p>
-          <button
-            onClick={() => setEditingAvatar(true)}
-            className="text-sm text-primary font-medium mt-1"
-          >
-            Modifier mon avatar
-          </button>
-        </div>
-      </div>
-
-      {/* Season palette */}
-      {palette && seasonInfo && (
-        <div className="bg-card rounded-xl p-5 card-shadow mb-4">
-          <p className="font-serif font-semibold text-base mb-1">
-            {seasonInfo.emoji} Ta palette {seasonInfo.label}
-          </p>
-          <p className="text-sm text-muted-foreground mb-3">{seasonInfo.vibe}</p>
-          <div className="flex gap-2 mb-3">
-            {palette.recommended.slice(0, 6).map(c => (
-              <div
-                key={c}
-                className="w-4 h-4 rounded-full border border-border"
-                style={{ backgroundColor: SEASON_COLOR_HEX[c] || '#ccc' }}
-                title={c}
-              />
-            ))}
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Bijoux recommandés : {palette.metal}
-          </p>
-        </div>
-      )}
-
-      {/* Favorite colors section */}
-      {editingColors ? (
-        <div className="bg-card rounded-xl p-5 card-shadow mb-4">
-          <div className="flex items-center justify-between mb-3">
-            <p className="font-serif font-semibold text-base">Mes couleurs préférées</p>
-            <span className="text-xs text-muted-foreground">{tempColors.length}/5</span>
-          </div>
-          <div className="grid grid-cols-5 gap-3 mb-4">
-            {ALL_COLOR_NAMES.map(name => {
-              const selected = tempColors.includes(name);
-              const disabled = !selected && tempColors.length >= 5;
-              return (
-                <button
-                  key={name}
-                  onClick={() => {
-                    setTempColors(prev =>
-                      prev.includes(name) ? prev.filter(c => c !== name) :
-                      prev.length >= 5 ? prev : [...prev, name]
-                    );
-                  }}
-                  disabled={disabled}
-                  className="flex flex-col items-center gap-1 transition-all"
-                  style={{ opacity: disabled ? 0.35 : 1 }}
-                >
-                  <div
-                    className="w-9 h-9 rounded-full transition-all"
-                    style={{
-                      backgroundColor: FAVORITE_COLORS_MAP[name],
-                      border: selected ? '3px solid #C9956C' : name === 'Blanc' ? '2px solid hsl(var(--border))' : '2px solid transparent',
-                      boxShadow: selected ? '0 0 0 2px #C9956C40' : 'none',
-                      transform: selected ? 'scale(1.1)' : 'scale(1)',
-                    }}
-                  />
-                  <span className="text-[10px] text-muted-foreground leading-tight text-center">{name}</span>
-                </button>
-              );
-            })}
-          </div>
-          <div className="flex gap-2">
+        {/* Avatar */}
+        <div className="flex items-center gap-4 mb-6">
+          <AvatarSVG avatar={avatar} size={80} />
+          <div>
+            <p className="font-serif font-semibold text-lg" style={{ color: '#2C2C2C' }}>Mon Avatar</p>
             <button
-              onClick={() => setEditingColors(false)}
-              className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-muted text-muted-foreground"
-            >
-              Annuler
-            </button>
-            <button
-              onClick={async () => {
-                if (profile) {
-                  const updated = { ...profile, favorite_colors: tempColors };
-                  await saveProfile(updated);
-                  setProfile(updated);
-                }
-                setEditingColors(false);
-              }}
-              className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white"
-              style={{ backgroundColor: '#C9956C' }}
-            >
-              Enregistrer
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="bg-card rounded-xl p-5 card-shadow mb-4">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-muted-foreground">Mes couleurs préférées</p>
-            <button
-              onClick={() => {
-                setTempColors(profile?.favorite_colors || []);
-                setEditingColors(true);
-              }}
-              className="text-sm font-medium"
+              onClick={() => setEditingAvatar(true)}
+              className="text-sm font-medium mt-1"
               style={{ color: '#C9956C' }}
             >
-              {profile?.favorite_colors?.length ? 'Modifier' : '＋'}
+              Modifier mon avatar
             </button>
           </div>
-          {profile?.favorite_colors?.length ? (
-            <div className="flex gap-2 flex-wrap">
-              {profile.favorite_colors.map(name => (
-                <div key={name} className="flex flex-col items-center gap-1">
-                  <div
-                    className="w-8 h-8 rounded-full"
-                    style={{
-                      backgroundColor: FAVORITE_COLORS_MAP[name] || '#ccc',
-                      border: name === 'Blanc' ? '1.5px solid hsl(var(--border))' : 'none',
-                    }}
-                  />
-                  <span className="text-[10px] text-muted-foreground">{name}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">Ajoute tes couleurs préférées ✨</p>
-          )}
         </div>
-      )}
 
-      <div className="space-y-4">
-        <div className="bg-card rounded-xl p-5 card-shadow">
-          <p className="text-sm text-muted-foreground mb-1">Silhouette</p>
-          <p className="font-serif font-semibold text-lg">{profile.silhouette}</p>
-        </div>
-        <div className="bg-card rounded-xl p-5 card-shadow">
-          <p className="text-sm text-muted-foreground mb-2">Styles</p>
-          <div className="flex flex-wrap gap-2">
-            {profile.styles.map(s => (
-              <span key={s} className="chip chip-active text-sm">{s}</span>
-            ))}
-          </div>
-        </div>
-        <div className="bg-card rounded-xl p-5 card-shadow">
-          <p className="text-sm text-muted-foreground mb-1">Budget par pièce</p>
-          <p className="text-2xl font-serif font-bold text-primary">{profile.budget}€</p>
-        </div>
-        {profile.brands.length > 0 && (
-          <div className="bg-card rounded-xl p-5 card-shadow">
-            <p className="text-sm text-muted-foreground mb-2">Marques préférées</p>
-            <div className="flex flex-wrap gap-2">
-              {profile.brands.map(b => (
-                <span key={b} className="chip text-sm">{b}</span>
+        {/* 1. SAISON COLORIMÉTRIQUE */}
+        {palette && seasonInfo && season && (
+          <div
+            className="rounded-2xl p-5 mb-4"
+            style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+          >
+            <p className="font-serif font-bold text-xl mb-1" style={{ color: '#2C2C2C' }}>
+              {seasonInfo.emoji} Palette {seasonInfo.label}
+            </p>
+            <p className="text-sm mb-4" style={{ color: '#6B6B6B' }}>
+              {SEASON_VIBES[season] || seasonInfo.vibe}
+            </p>
+            <div className="flex gap-2.5 mb-3 flex-wrap">
+              {palette.recommended.slice(0, 8).map(c => (
+                <div
+                  key={c}
+                  className="w-5 h-5 rounded-full"
+                  style={{
+                    backgroundColor: SEASON_COLOR_HEX[c] || '#ccc',
+                    border: c === 'blanc' || c === 'creme' ? '1.5px solid #E0D5C8' : 'none',
+                  }}
+                  title={c}
+                />
               ))}
             </div>
+            <p className="text-xs" style={{ color: '#9B9B9B' }}>
+              Bijoux recommandés : {palette.metal}
+            </p>
           </div>
         )}
-        <div className="bg-card rounded-xl p-5 card-shadow">
-          <p className="text-sm text-muted-foreground mb-1">Meilleur streak</p>
+
+        {/* 2. MES COULEURS PRÉFÉRÉES */}
+        {editingColors ? (
+          <div
+            className="rounded-2xl p-5 mb-4"
+            style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <p className="font-serif font-semibold text-base" style={{ color: '#2C2C2C' }}>
+                Mes couleurs préférées 🎨
+              </p>
+              <span className="text-xs" style={{ color: '#9B9B9B' }}>{tempColors.length}/5</span>
+            </div>
+            <div className="grid grid-cols-5 gap-3 mb-4">
+              {ALL_COLOR_NAMES.map(name => {
+                const selected = tempColors.includes(name);
+                const disabled = !selected && tempColors.length >= 5;
+                return (
+                  <button
+                    key={name}
+                    onClick={() => {
+                      setTempColors(prev =>
+                        prev.includes(name) ? prev.filter(c => c !== name) :
+                        prev.length >= 5 ? prev : [...prev, name]
+                      );
+                    }}
+                    disabled={disabled}
+                    className="flex flex-col items-center gap-1 transition-all"
+                    style={{ opacity: disabled ? 0.35 : 1 }}
+                  >
+                    <div
+                      className="w-9 h-9 rounded-full transition-all"
+                      style={{
+                        backgroundColor: FAVORITE_COLORS_MAP[name],
+                        border: selected ? '3px solid #C9956C' : name === 'Blanc' ? '2px solid #E0D5C8' : '2px solid transparent',
+                        boxShadow: selected ? '0 0 0 2px #C9956C40' : 'none',
+                        transform: selected ? 'scale(1.1)' : 'scale(1)',
+                      }}
+                    />
+                    <span className="text-[10px] leading-tight text-center" style={{ color: '#6B6B6B' }}>{name}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setEditingColors(false)}
+                className="flex-1 py-2.5 rounded-xl text-sm font-medium"
+                style={{ backgroundColor: '#F5F0EB', color: '#6B6B6B' }}
+              >
+                Annuler
+              </button>
+              <button
+                onClick={async () => {
+                  if (profile) {
+                    const updated = { ...profile, favorite_colors: tempColors };
+                    await saveProfile(updated);
+                    setProfile(updated);
+                  }
+                  setEditingColors(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white"
+                style={{ backgroundColor: '#C9956C' }}
+              >
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div
+            className="rounded-2xl p-5 mb-4"
+            style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <p className="font-serif font-semibold text-base" style={{ color: '#2C2C2C' }}>
+                Mes couleurs préférées 🎨
+              </p>
+              <button
+                onClick={() => {
+                  setTempColors(profile?.favorite_colors || []);
+                  setEditingColors(true);
+                }}
+                className="text-sm font-medium"
+                style={{ color: '#C9956C' }}
+              >
+                {profile?.favorite_colors?.length ? 'Modifier' : '＋'}
+              </button>
+            </div>
+            {profile?.favorite_colors?.length ? (
+              <div className="flex gap-3 flex-wrap">
+                {profile.favorite_colors.map(name => (
+                  <div key={name} className="flex flex-col items-center gap-1">
+                    <div
+                      className="w-8 h-8 rounded-full"
+                      style={{
+                        backgroundColor: FAVORITE_COLORS_MAP[name] || '#ccc',
+                        border: name === 'Blanc' ? '1.5px solid #E0D5C8' : 'none',
+                      }}
+                    />
+                    <span className="text-[10px]" style={{ color: '#6B6B6B' }}>{name}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm" style={{ color: '#9B9B9B' }}>Ajoute tes couleurs préférées ✨</p>
+            )}
+          </div>
+        )}
+
+        {/* 3. MON PROFIL DE STYLE */}
+        <div
+          className="rounded-2xl p-5 mb-4"
+          style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+        >
+          <p className="font-serif font-semibold text-base mb-4" style={{ color: '#2C2C2C' }}>
+            Mon profil de style 👗
+          </p>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {profile.morphologie && (
+              <span className="px-3 py-1.5 rounded-full text-xs font-semibold" style={{ backgroundColor: '#F5F0EB', color: '#C9956C' }}>
+                {MORPHO_LABELS[profile.morphologie] || `Morpho ${profile.morphologie}`}
+              </span>
+            )}
+            {profile.taille && (
+              <span className="px-3 py-1.5 rounded-full text-xs font-semibold" style={{ backgroundColor: '#F5F0EB', color: '#2C2C2C' }}>
+                Taille {profile.taille}
+              </span>
+            )}
+            {profile.corpulence && (
+              <span className="px-3 py-1.5 rounded-full text-xs font-semibold" style={{ backgroundColor: '#F5F0EB', color: '#2C2C2C' }}>
+                Corpulence {profile.corpulence}
+              </span>
+            )}
+            {profile.silhouette && (
+              <span className="px-3 py-1.5 rounded-full text-xs font-semibold" style={{ backgroundColor: '#F5F0EB', color: '#2C2C2C' }}>
+                {profile.silhouette}
+              </span>
+            )}
+            {profile.styles.map(s => (
+              <span key={s} className="px-3 py-1.5 rounded-full text-xs font-semibold" style={{ backgroundColor: '#C9956C20', color: '#C9956C' }}>
+                {s}
+              </span>
+            ))}
+            <span className="px-3 py-1.5 rounded-full text-xs font-semibold" style={{ backgroundColor: '#F5F0EB', color: '#2C2C2C' }}>
+              Budget {profile.budget}€
+            </span>
+            {profile.brands.map(b => (
+              <span key={b} className="px-3 py-1.5 rounded-full text-xs font-medium" style={{ backgroundColor: '#F5F0EB', color: '#6B6B6B' }}>
+                {b}
+              </span>
+            ))}
+          </div>
+
+          <button onClick={onEditProfile}
+            className="w-full py-3 rounded-xl text-sm font-semibold text-white active:scale-[0.98] transition-transform"
+            style={{ backgroundColor: '#C9956C' }}>
+            Modifier mon profil
+          </button>
+        </div>
+
+        {/* Streak */}
+        <div
+          className="rounded-2xl p-5 mb-4"
+          style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+        >
+          <p className="text-sm mb-1" style={{ color: '#9B9B9B' }}>Meilleur streak</p>
           <p className="text-2xl font-serif font-bold" style={{ color: '#C9956C' }}>
             {getStreak().bestStreak} jours 🔥
           </p>
         </div>
-      </div>
 
-      <button onClick={onEditProfile}
-        className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold mt-6 active:scale-[0.98] transition-transform shadow-lg">
-        Modifier mon profil
-      </button>
-      <button onClick={onLogout} className="w-full py-3 mt-4 text-destructive text-sm font-medium">
-        Se déconnecter
-      </button>
+        <button onClick={onLogout} className="w-full py-3 mt-2 mb-4 text-sm font-medium" style={{ color: '#D32F2F' }}>
+          Se déconnecter
+        </button>
+      </div>
     </div>
   );
 }
