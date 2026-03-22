@@ -253,10 +253,16 @@ export default function Onboarding({ onComplete }: Props) {
         {step === 3 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">Ton style, c'est plutôt ?</h1>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2.5">
               {STYLE_OPTIONS.map(s => (
-                <button key={s} onClick={() => toggleStyle(s)}
-                  className={`chip ${styles.includes(s) ? 'chip-active' : ''}`}>{s}</button>
+                <button key={s.label} onClick={() => toggleStyle(s.label)}
+                  className="px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-1.5"
+                  style={styles.includes(s.label)
+                    ? { backgroundColor: '#C9956C', color: '#FFFFFF', border: '1.5px solid #C9956C' }
+                    : { backgroundColor: '#FFFFFF', color: '#2C2C2C', border: '1.5px solid #E0D5C8' }
+                  }>
+                  <span>{s.emoji}</span> {s.label}
+                </button>
               ))}
             </div>
             <div className="mt-8">
