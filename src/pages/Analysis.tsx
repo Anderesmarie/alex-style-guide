@@ -202,27 +202,22 @@ export default function Analysis() {
             ) : (
               <div className="space-y-2.5">
                 {seasonStats.map(s => {
-                  const icon = s.count <= 3 ? '🔴' : s.count <= 7 ? '🟡' : '✅';
-                  const msg = s.count <= 3
-                    ? `Il te manque des pièces pour ${s.name}`
-                    : s.count <= 7
-                    ? `${s.name} à compléter`
-                    : null;
                   return (
                     <div
                       key={s.name}
                       className="flex items-start gap-2.5 rounded-xl px-3 py-2"
                       style={s.isCurrent ? { border: '1.5px solid #C9956C', backgroundColor: '#FDF6EC' } : {}}
                     >
-                      <span className="text-sm mt-0.5">{icon}</span>
                       <div className="flex-1">
                         <p className="text-sm font-semibold flex items-center gap-1.5" style={{ color: s.count > 7 ? '#BFBFBF' : '#2C2C2C' }}>
-                          {s.count <= 3 ? `Dressing ${s.name} trop vide` : s.count <= 7 ? `${s.name} à compléter` : `${s.name} bien couverte`}
+                          {s.count <= 3
+                            ? `Dressing ${s.name} vide 🔴 (${s.count} pièces)`
+                            : s.count <= 7
+                            ? `Dressing ${s.name} un peu léger 🟡 (${s.count} pièces)`
+                            : `Dressing ${s.name} au point ✅ (${s.count} pièces)`}
                           {s.isCurrent && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: '#C9956C', color: '#FFF' }}>Actuelle</span>}
                         </p>
-                        {msg && <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>{msg}</p>}
                       </div>
-                      <span className="text-xs font-medium mt-0.5" style={{ color: '#9B9B9B' }}>{s.count}</span>
                     </div>
                   );
                 })}
