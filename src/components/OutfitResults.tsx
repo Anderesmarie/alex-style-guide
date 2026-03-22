@@ -45,7 +45,7 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
             const scores = r.outfit.map(item => {
               const norm = normalizeColor(item.color);
               const score = getColorScore(norm, userSeason);
-              console.log("Couleur item:", item.color, "→ normalisée:", norm, "→ score:", score, "→ saison:", userSeason);
+              
               return score;
             });
             const avg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
@@ -94,13 +94,6 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
                 <div className="px-2 pb-1">
                   <span className="inline-block text-[9px] font-medium text-white rounded-xl py-0.5 px-1.5" style={{ backgroundColor: '#C9956C' }}>
                     ✨ Parfait pour ton teint
-                  </span>
-                </div>
-              )}
-              {colorBadge === 'avoid' && (
-                <div className="px-2 pb-1">
-                  <span className="inline-block text-[9px] font-medium rounded-xl py-0.5 px-1.5" style={{ backgroundColor: '#F0F0F0', color: '#888888' }}>
-                    💡 Pas idéal
                   </span>
                 </div>
               )}
