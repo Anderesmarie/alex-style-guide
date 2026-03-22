@@ -28,6 +28,7 @@ export default function AppShell({ onEditProfile, onLogout }: Props) {
         {activeTab === 'today' && <Today />}
         {activeTab === 'dressing' && <Dressing />}
         {activeTab === 'outfits' && <Outfits />}
+        {activeTab === 'analysis' && <Analysis />}
         {activeTab === 'profile' && <Profile onEditProfile={onEditProfile} onLogout={onLogout} />}
       </main>
 
