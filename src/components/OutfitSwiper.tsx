@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { ClothingItem, UserProfile } from '@/lib/types';
 import { getStylingTips, StylingTips } from '@/lib/stylingTips';
 import { getColorScore } from '@/lib/colorimetry';
-import { getSilhouetteScore } from '@/lib/recommendations';
+import { getSilhouetteScore, getMorphologyScore } from '@/lib/recommendations';
 import type { Season } from '@/lib/colorimetry';
 
 interface OutfitCard {
@@ -116,7 +116,7 @@ export default function OutfitSwiper({ outfits, weatherCode, temperature, onComp
   const normalizeColor = (color: string) =>
     color.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_").trim();
 
-  let smartBadge: 'ideal' | 'color' | 'silhouette' | null = null;
+  let smartBadge: 'ideal' | 'color' | 'morpho' | null = null;
 
   const colorAvg = userSeason
     ? currentOutfit.map(item => getColorScore(normalizeColor(item.color), userSeason)).reduce((a, b) => a + b, 0) / currentOutfit.length
@@ -126,9 +126,15 @@ export default function OutfitSwiper({ outfits, weatherCode, temperature, onComp
     ? currentOutfit.map(item => getSilhouetteScore(item, userProfile.taille, userProfile.corpulence)).reduce((a, b) => a + b, 0) / currentOutfit.length
     : 0;
 
-  if (colorAvg >= 1 && silhouetteAvg >= 1) smartBadge = 'ideal';
-  else if (colorAvg >= 1) smartBadge = 'color';
-  else if (silhouetteAvg >= 1) smartBadge = 'silhouette';
+  const morphoAvg = userProfile?.morphologie
+    ? currentOutfit.map(item => getMorphologyScore(item, userProfile.morphologie)).reduce((a, b) => a + b, 0) / currentOutfit.length
+    : 0;
+
+  const totalScore = colorAvg + silhouetteAvg + morphoAvg;
+
+  if (totalScore >= 3) smartBadge = 'ideal';
+  else if (colorAvg >= 1 && totalScore < 3) smartBadge = 'color';
+  else if (morphoAvg >= 2 && colorAvg < 1) smartBadge = 'morpho';
 
   const rotation = dragX * 0.08;
   const likeOpacity = Math.min(Math.max(dragX / threshold, 0), 1);
@@ -234,7 +240,7 @@ export default function OutfitSwiper({ outfits, weatherCode, temperature, onComp
                 </span>
               </div>
             )}
-            {smartBadge === 'silhouette' && (
+            {smartBadge === 'morpho' && (
               <div className="px-5 pb-2">
                 <span className="inline-block text-[11px] font-medium rounded-xl py-1 px-2.5" style={{ backgroundColor: '#F5F0EB', color: '#C9956C', border: '1px solid #C9956C' }}>
                   📏 Parfait pour ta morphologie
