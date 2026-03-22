@@ -1,7 +1,8 @@
-import { ClothingItem } from '@/lib/types';
+import { ClothingItem, UserProfile } from '@/lib/types';
 import { addOutfit, genId, saveLastOutfit } from '@/lib/storage';
 import { getStylingTips } from '@/lib/stylingTips';
 import { getColorScore } from '@/lib/colorimetry';
+import { getSilhouetteScore } from '@/lib/recommendations';
 import type { Season } from '@/lib/colorimetry';
 
 interface OutfitResult {
@@ -14,11 +15,12 @@ interface Props {
   weatherCode: number | null;
   temperature: number | null;
   userSeason?: Season | null;
+  userProfile?: UserProfile | null;
 }
 
 const ROSE_GOLD = '#C9956C';
 
-export default function OutfitResults({ results, weatherCode, temperature, userSeason }: Props) {
+export default function OutfitResults({ results, weatherCode, temperature, userSeason, userProfile }: Props) {
   const handleSave = (items: ClothingItem[]) => {
     const ids = items.map(i => i.id);
     saveLastOutfit(ids);
@@ -40,18 +42,19 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
           const normalizeColor = (color: string) =>
             color.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_").trim();
 
-          let colorBadge: 'perfect' | 'avoid' | null = null;
-          if (userSeason) {
-            const scores = r.outfit.map(item => {
-              const norm = normalizeColor(item.color);
-              const score = getColorScore(norm, userSeason);
-              
-              return score;
-            });
-            const avg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
-            if (avg >= 0.5) colorBadge = 'perfect';
-            else if (avg <= -1) colorBadge = 'avoid';
-          }
+          let smartBadge: 'ideal' | 'color' | 'silhouette' | null = null;
+
+          const colorAvg = userSeason
+            ? r.outfit.map(item => getColorScore(normalizeColor(item.color), userSeason)).reduce((a, b) => a + b, 0) / r.outfit.length
+            : 0;
+
+          const silhouetteAvg = userProfile
+            ? r.outfit.map(item => getSilhouetteScore(item, userProfile.taille, userProfile.corpulence)).reduce((a, b) => a + b, 0) / r.outfit.length
+            : 0;
+
+          if (colorAvg >= 1 && silhouetteAvg >= 1) smartBadge = 'ideal';
+          else if (colorAvg >= 1) smartBadge = 'color';
+          else if (silhouetteAvg >= 1) smartBadge = 'silhouette';
           return (
             <div
               key={idx}
@@ -89,11 +92,25 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
                 ))}
               </div>
 
-              {/* Colorimetry badge */}
-              {colorBadge === 'perfect' && (
+              {/* Smart badge */}
+              {smartBadge === 'ideal' && (
+                <div className="px-2 pb-1">
+                  <span className="inline-block text-[9px] font-bold text-white rounded-xl py-0.5 px-1.5" style={{ background: 'linear-gradient(135deg, #C9956C, #E8C4A0)' }}>
+                    ⭐ Tenue idéale
+                  </span>
+                </div>
+              )}
+              {smartBadge === 'color' && (
                 <div className="px-2 pb-1">
                   <span className="inline-block text-[9px] font-medium text-white rounded-xl py-0.5 px-1.5" style={{ backgroundColor: '#C9956C' }}>
-                    ✨ Parfait pour ton teint
+                    ✨ Ton teint
+                  </span>
+                </div>
+              )}
+              {smartBadge === 'silhouette' && (
+                <div className="px-2 pb-1">
+                  <span className="inline-block text-[9px] font-medium rounded-xl py-0.5 px-1.5" style={{ backgroundColor: '#F5F0EB', color: '#C9956C', border: '1px solid #C9956C' }}>
+                    📏 Ta morpho
                   </span>
                 </div>
               )}

@@ -320,6 +320,7 @@ export default function Today() {
             temperature={weatherTemp}
             onComplete={handleSwipeComplete}
             userSeason={userSeason}
+            userProfile={userProfile}
           />
         </div>
       )}
@@ -330,6 +331,7 @@ export default function Today() {
           weatherCode={ws.status === 'done' ? ws.data.weathercode : null}
           temperature={weatherTemp}
           userSeason={userSeason}
+          userProfile={userProfile}
         />
       )}
 
