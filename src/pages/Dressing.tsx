@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { ClothingItem, COLORS, SEASONS, STYLES, OCCASIONS } from '@/lib/types';
+import { ClothingItem, COLORS, SEASONS, OCCASIONS, STYLE_OPTIONS } from '@/lib/types';
 import { getWardrobe, addClothing, updateClothing, deleteClothing, getOutfits, saveOutfits, genId } from '@/lib/storage';
 import { CATEGORIES } from '@/lib/categories';
 import { compressImage } from '@/lib/imageUtils';
