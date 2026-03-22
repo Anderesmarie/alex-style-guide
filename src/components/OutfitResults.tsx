@@ -113,7 +113,7 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
                   </span>
                 </div>
               )}
-              {smartBadge === 'silhouette' && (
+              {smartBadge === 'morpho' && (
                 <div className="px-2 pb-1">
                   <span className="inline-block text-[9px] font-medium rounded-xl py-0.5 px-1.5" style={{ backgroundColor: '#F5F0EB', color: '#C9956C', border: '1px solid #C9956C' }}>
                     📏 Ta morpho

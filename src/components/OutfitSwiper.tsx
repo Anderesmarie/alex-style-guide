@@ -240,7 +240,7 @@ export default function OutfitSwiper({ outfits, weatherCode, temperature, onComp
                 </span>
               </div>
             )}
-            {smartBadge === 'silhouette' && (
+            {smartBadge === 'morpho' && (
               <div className="px-5 pb-2">
                 <span className="inline-block text-[11px] font-medium rounded-xl py-1 px-2.5" style={{ backgroundColor: '#F5F0EB', color: '#C9956C', border: '1px solid #C9956C' }}>
                   📏 Parfait pour ta morphologie
