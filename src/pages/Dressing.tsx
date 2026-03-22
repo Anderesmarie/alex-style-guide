@@ -322,18 +322,57 @@ export default function Dressing() {
 
       {/* Color */}
       <label className="text-sm font-semibold text-muted-foreground mb-2 block">Couleur</label>
-      <div className="flex flex-wrap gap-2 mb-2">
-        {COLORS.map(c => (
-          <button key={c} onClick={() => { setColor(c); setCustomColor(''); }} className={`chip text-xs ${color === c ? 'chip-active' : ''}`}>{c}</button>
-        ))}
+      <div className="grid grid-cols-7 gap-2.5 mb-2">
+        {COLOR_PALETTE.map(c => {
+          const selected = color === c.value;
+          return (
+            <button
+              key={c.value}
+              onClick={() => { setColor(c.value); setCustomColor(''); }}
+              className="flex flex-col items-center gap-1"
+            >
+              <div
+                className="w-10 h-10 rounded-full relative flex items-center justify-center transition-all"
+                style={{
+                  background: c.bg,
+                  border: selected ? '3px solid #C9956C' : c.value === 'blanc' ? '1.5px solid hsl(var(--border))' : '1.5px solid transparent',
+                  boxShadow: selected ? '0 0 0 2px #C9956C40' : 'none',
+                  transform: selected ? 'scale(1.1)' : 'scale(1)',
+                }}
+              >
+                {selected && <span className="text-white text-sm font-bold drop-shadow-md">✓</span>}
+              </div>
+              <span className="text-[10px] text-muted-foreground leading-tight text-center">{c.label}</span>
+            </button>
+          );
+        })}
       </div>
-      <input
-        type="text"
-        value={customColor}
-        onChange={e => { setCustomColor(e.target.value); setColor(''); }}
-        placeholder="Autre couleur..."
-        className="w-full px-3 py-2 rounded-lg bg-card card-shadow text-sm outline-none focus:ring-2 focus:ring-primary/30 mb-4"
-      />
+      <p className="text-[10px] text-muted-foreground mb-1 mt-2 font-semibold uppercase tracking-wide">Motifs</p>
+      <div className="grid grid-cols-6 gap-2.5 mb-4">
+        {PATTERN_PALETTE.map(c => {
+          const selected = color === c.value;
+          return (
+            <button
+              key={c.value}
+              onClick={() => { setColor(c.value); setCustomColor(''); }}
+              className="flex flex-col items-center gap-1"
+            >
+              <div
+                className="w-10 h-10 rounded-full relative flex items-center justify-center transition-all overflow-hidden"
+                style={{
+                  background: c.bg,
+                  border: selected ? '3px solid #C9956C' : '1.5px solid hsl(var(--border))',
+                  boxShadow: selected ? '0 0 0 2px #C9956C40' : 'none',
+                  transform: selected ? 'scale(1.1)' : 'scale(1)',
+                }}
+              >
+                {selected && <span className="text-white text-sm font-bold drop-shadow-md">✓</span>}
+              </div>
+              <span className="text-[10px] text-muted-foreground leading-tight text-center">{c.label}</span>
+            </button>
+          );
+        })}
+      </div>
 
       {/* Season */}
       <label className="text-sm font-semibold text-muted-foreground mb-2 block">Saison</label>
