@@ -39,24 +39,17 @@ export const SEASON_PALETTES: Record<Season, ColorimetryProfile> = {
 };
 
 export const COLOR_TO_SEASON: Record<string, Season[]> = {
-  'blanc': ['hiver'],
-  'blanc_casse': ['printemps', 'ete'],
-  'noir': ['hiver'],
-  'gris': ['ete', 'hiver'],
-  'beige': ['printemps', 'automne'],
-  'camel': ['automne'],
-  'bleu': ['printemps', 'ete'],
-  'rouge': ['hiver'],
-  'bordeaux': ['automne', 'hiver'],
-  'rose': ['ete', 'printemps'],
-  'vert': ['printemps', 'automne'],
-  'jaune': ['printemps', 'automne'],
-  'marron': ['automne'],
-  'terracotta': ['automne'],
-  'corail': ['printemps'],
-  'lavande': ['ete'],
-  'violet': ['hiver'],
-  'multicolore': [],
+  'Blanc': ['hiver'],
+  'Noir': ['hiver'],
+  'Gris': ['ete', 'hiver'],
+  'Beige': ['printemps', 'automne'],
+  'Bleu': ['printemps', 'ete'],
+  'Rouge': ['hiver'],
+  'Rose': ['ete', 'printemps'],
+  'Vert': ['printemps', 'automne'],
+  'Jaune': ['printemps', 'automne'],
+  'Marron': ['automne'],
+  'Multicolore': [],
 };
 
 // Hex values for season palette color names (for rendering circles)
@@ -290,10 +283,11 @@ export function determineSeason(
 }
 
 export function getColorScore(itemColor: string, userSeason: Season): number {
-  const seasons = COLOR_TO_SEASON[itemColor] ?? [];
+  const normalized = itemColor?.trim() ?? '';
+  const seasons = COLOR_TO_SEASON[normalized] ?? [];
   if (seasons.length === 0) return 0;
   if (seasons.includes(userSeason)) return 2;
   const palette = SEASON_PALETTES[userSeason];
-  if (palette.avoid.some(a => itemColor.includes(a))) return -1;
+  if (palette.avoid.some(a => normalized.toLowerCase().includes(a))) return -1;
   return 0;
 }
