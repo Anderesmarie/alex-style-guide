@@ -39,17 +39,36 @@ export const SEASON_PALETTES: Record<Season, ColorimetryProfile> = {
 };
 
 export const COLOR_TO_SEASON: Record<string, Season[]> = {
-  'Blanc': ['hiver'],
-  'Noir': ['hiver'],
-  'Gris': ['ete', 'hiver'],
-  'Beige': ['printemps', 'automne'],
-  'Bleu': ['printemps', 'ete'],
-  'Rouge': ['hiver'],
-  'Rose': ['ete', 'printemps'],
-  'Vert': ['printemps', 'automne'],
-  'Jaune': ['printemps', 'automne'],
-  'Marron': ['automne'],
-  'Multicolore': [],
+  // Couleurs unies
+  'blanc': ['hiver'],
+  'noir': ['hiver'],
+  'gris': ['ete', 'hiver'],
+  'beige': ['printemps', 'automne'],
+  'camel': ['automne'],
+  'bleu': ['printemps', 'ete'],
+  'marine': ['hiver', 'ete'],
+  'rouge': ['hiver'],
+  'bordeaux': ['automne', 'hiver'],
+  'rose': ['ete', 'printemps'],
+  'vert': ['printemps', 'automne'],
+  'kaki': ['automne'],
+  'jaune': ['printemps', 'automne'],
+  'marron': ['automne'],
+  'violet': ['hiver'],
+  'corail': ['printemps'],
+  'terracotta': ['automne'],
+  'lavande': ['ete'],
+  'turquoise': ['printemps'],
+  'rose_gold': ['printemps', 'ete'],
+  'creme': ['printemps', 'ete'],
+  'fuchsia': ['hiver'],
+  // Motifs — score neutre pour tous
+  'leopard': [],
+  'fleuri': [],
+  'raye': [],
+  'carreaux': [],
+  'geometrique': [],
+  'multicolore': [],
 };
 
 // Hex values for season palette color names (for rendering circles)
