@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'; // v2
+import { useState, useEffect } from 'react';
 import { getWardrobe } from '@/lib/storage';
 import { ClothingItem } from '@/lib/types';
+import { supabase } from '@/lib/supabase';
 
 const BASICS = [
   { type: 'Jean', color: 'noir', label: 'Jean noir', impact: 'Crée 5+ tenues casual et chic' },
