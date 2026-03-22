@@ -42,18 +42,19 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
           const normalizeColor = (color: string) =>
             color.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_").trim();
 
-          let colorBadge: 'perfect' | 'avoid' | null = null;
-          if (userSeason) {
-            const scores = r.outfit.map(item => {
-              const norm = normalizeColor(item.color);
-              const score = getColorScore(norm, userSeason);
-              
-              return score;
-            });
-            const avg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
-            if (avg >= 0.5) colorBadge = 'perfect';
-            else if (avg <= -1) colorBadge = 'avoid';
-          }
+          let smartBadge: 'ideal' | 'color' | 'silhouette' | null = null;
+
+          const colorAvg = userSeason
+            ? r.outfit.map(item => getColorScore(normalizeColor(item.color), userSeason)).reduce((a, b) => a + b, 0) / r.outfit.length
+            : 0;
+
+          const silhouetteAvg = userProfile
+            ? r.outfit.map(item => getSilhouetteScore(item, userProfile.taille, userProfile.corpulence)).reduce((a, b) => a + b, 0) / r.outfit.length
+            : 0;
+
+          if (colorAvg >= 1 && silhouetteAvg >= 1) smartBadge = 'ideal';
+          else if (colorAvg >= 1) smartBadge = 'color';
+          else if (silhouetteAvg >= 1) smartBadge = 'silhouette';
           return (
             <div
               key={idx}
