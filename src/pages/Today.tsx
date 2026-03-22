@@ -320,6 +320,7 @@ export default function Today() {
             temperature={weatherTemp}
             onComplete={handleSwipeComplete}
             userSeason={userSeason}
+            userProfile={userProfile}
           />
         </div>
       )}
