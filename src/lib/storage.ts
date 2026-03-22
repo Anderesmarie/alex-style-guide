@@ -23,6 +23,7 @@ export async function getProfile(): Promise<UserProfile | null> {
     brands: (data.brands as string[]) || [],
     taille: data.taille || null,
     corpulence: data.corpulence || null,
+    morphologie: data.morphologie || null,
   };
 }
 
