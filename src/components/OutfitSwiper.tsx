@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { ClothingItem, UserProfile } from '@/lib/types';
 import { getStylingTips, StylingTips } from '@/lib/stylingTips';
 import { getColorScore } from '@/lib/colorimetry';
-import { getSilhouetteScore } from '@/lib/recommendations';
+import { getSilhouetteScore, getMorphologyScore } from '@/lib/recommendations';
 import type { Season } from '@/lib/colorimetry';
 
 interface OutfitCard {
