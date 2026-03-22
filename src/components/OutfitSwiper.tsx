@@ -115,7 +115,7 @@ export default function OutfitSwiper({ outfits, weatherCode, temperature, onComp
     color.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_").trim();
 
   let colorBadge: 'perfect' | 'avoid' | null = null;
-  const debugScores: { color: string; norm: string; score: number }[] = [];
+  
   if (userSeason) {
     const scores = currentOutfit.map(item => {
       const norm = normalizeColor(item.color);
