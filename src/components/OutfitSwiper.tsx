@@ -19,7 +19,7 @@ interface Props {
   userProfile?: UserProfile | null;
 }
 
-export default function OutfitSwiper({ outfits, weatherCode, temperature, onComplete, userSeason }: Props) {
+export default function OutfitSwiper({ outfits, weatherCode, temperature, onComplete, userSeason, userProfile }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [cards, setCards] = useState<OutfitCard[]>(
     outfits.map(o => ({ outfit: o, liked: null }))
