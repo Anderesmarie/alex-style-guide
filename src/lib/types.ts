@@ -24,6 +24,8 @@ export interface UserProfile {
   styles: string[];
   budget: number;
   brands: string[];
+  taille: 'petite' | 'moyenne' | 'grande' | null;
+  corpulence: 'fine' | 'medium' | 'ronde' | null;
 }
 
 export interface AvatarConfig {
