@@ -30,7 +30,7 @@ interface SavedTodayData {
   results: SavedOutfitResult[];
 }
 
-const STORAGE_KEY = 'mystyl_today_outfits';
+const STORAGE_KEY = 'closify_daily_outfits';
 
 function loadTodayData(today: string, wardrobe: ClothingItem[]): { outfit: ClothingItem[]; liked: boolean | null }[] | null {
   try {
@@ -83,7 +83,7 @@ export default function Today() {
   const canSuggest = dailyCount < 5;
   const weatherTemp = ws.status === 'done' ? ws.data.temperature : null;
 
-  // Load data from Supabase
+  // Load data
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -95,12 +95,14 @@ export default function Today() {
         setWardrobe(w);
         setUserProfile(p);
         setDailyCount(c.date === today ? c.count : 0);
-        // Always restore today's saved results if they exist
+
+        // Restore today's saved results
         const saved = loadTodayData(today, w);
         if (saved) {
           setSwipeResults(saved);
           setSwipeComplete(true);
         }
+
         // Fetch colorimetry season
         try {
           const { data: userData } = await supabase.auth.getUser();
@@ -163,7 +165,7 @@ export default function Today() {
 
   const generate = useCallback(async () => {
     if (!enough || swipeComplete) return;
-    if (!canSuggest) return; // only block NEW generation requests
+    if (!canSuggest) return;
     const recs = generateRecommendations(wardrobe, weatherTemp, 5, userProfile);
     setRecommendations(recs);
     const newCount = dailyCount + 1;
@@ -171,12 +173,12 @@ export default function Today() {
     await saveDailyCounter({ date: today, count: newCount });
   }, [weatherTemp, canSuggest, enough, wardrobe, dailyCount, today, swipeComplete, userProfile]);
 
+  // Auto-generate only if no saved results for today and has quota
   useEffect(() => {
-    // Auto-generate only if no results saved and still has quota
-    if (!loading && ws.status !== 'loading' && enough && canSuggest && recommendations.length === 0 && !swipeComplete) {
+    if (!loading && ws.status !== 'loading' && enough && !swipeComplete && recommendations.length === 0 && canSuggest) {
       generate();
     }
-  }, [loading, ws.status, enough, canSuggest, swipeComplete]); // eslint-disable-line
+  }, [loading, ws.status, enough, swipeComplete]); // eslint-disable-line
 
   const handleSwipeComplete = (results: { outfit: ClothingItem[]; liked: boolean | null }[]) => {
     setSwipeResults(results);
@@ -306,8 +308,7 @@ export default function Today() {
         </div>
       )}
 
-      {/* Removed: standalone limit message that replaced results */}
-
+      {/* Swiper for new suggestions */}
       {enough && !swipeComplete && recommendations.length > 0 && (
         <div className="space-y-2">
           <h2 className="text-lg font-serif font-semibold text-center">Suggestions du jour</h2>
@@ -322,22 +323,22 @@ export default function Today() {
         </div>
       )}
 
+      {/* Saved results — always visible */}
       {swipeComplete && swipeResults && (
-        <>
-          <OutfitResults
-            results={swipeResults}
-            weatherCode={ws.status === 'done' ? ws.data.weathercode : null}
-            temperature={weatherTemp}
-            userSeason={userSeason}
-            userProfile={userProfile}
-          />
-          {!canSuggest && (
-            <div className="bg-card rounded-xl p-4 card-shadow text-center mt-3">
-              <p className="text-sm font-serif text-muted-foreground">Tu as utilisé tes 5 suggestions du jour ✨</p>
-              <p className="text-xs text-muted-foreground mt-1">Reviens demain ou passe en Premium pour en voir plus.</p>
-            </div>
-          )}
-        </>
+        <OutfitResults
+          results={swipeResults}
+          weatherCode={ws.status === 'done' ? ws.data.weathercode : null}
+          temperature={weatherTemp}
+          userSeason={userSeason}
+          userProfile={userProfile}
+        />
+      )}
+
+      {/* Limit message — always BELOW results, never replaces them */}
+      {enough && !canSuggest && (
+        <p className="text-xs text-muted-foreground text-center mt-3">
+          Tu as utilisé tes 5 suggestions du jour ✨ Reviens demain pour de nouvelles idées.
+        </p>
       )}
 
       {enough && canSuggest && recommendations.length > 0 && recommendations.length < 5 && !swipeComplete && (
