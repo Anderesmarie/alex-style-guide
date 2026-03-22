@@ -97,13 +97,6 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
                   </span>
                 </div>
               )}
-              {colorBadge === 'avoid' && (
-                <div className="px-2 pb-1">
-                  <span className="inline-block text-[9px] font-medium rounded-xl py-0.5 px-1.5" style={{ backgroundColor: '#F0F0F0', color: '#888888' }}>
-                    💡 Pas idéal
-                  </span>
-                </div>
-              )}
 
               {/* Styling tips */}
               <div className="border-t border-border px-2 py-2" style={{ backgroundColor: '#F5F0EB' }}>
