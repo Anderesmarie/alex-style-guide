@@ -228,7 +228,7 @@ export default function Analysis() {
             )}
           </div>
 
-          {/* Style — placeholder */}
+          {/* Style */}
           <div
             className="rounded-2xl p-5 relative"
             style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
@@ -237,10 +237,80 @@ export default function Analysis() {
               style={{ backgroundColor: '#FDF6EC', color: '#C9956C', border: '1px solid #C9956C30' }}>
               Premium ✨
             </span>
-            <p className="font-serif font-semibold text-base mb-2" style={{ color: '#2C2C2C' }}>
+            <p className="font-serif font-semibold text-base mb-4" style={{ color: '#2C2C2C' }}>
               ✨ Manques par style
             </p>
-            <p className="text-sm italic" style={{ color: '#9B9B9B' }}>Analyse en cours...</p>
+            {loading ? (
+              <p className="text-sm italic" style={{ color: '#9B9B9B' }}>Analyse en cours...</p>
+            ) : profileStyles.length === 0 ? (
+              <p className="text-sm italic" style={{ color: '#9B9B9B' }}>Définis tes styles dans ton profil pour voir l'analyse ✨</p>
+            ) : (() => {
+              const styleStats = profileStyles.map(s => {
+                const count = wardrobe.filter(i => i.style?.includes(s)).length;
+                return { name: s, count };
+              });
+              const matchingItems = wardrobe.filter(i => i.style?.some(s => profileStyles.includes(s))).length;
+              const scorePercent = wardrobe.length > 0 ? Math.round((matchingItems / wardrobe.length) * 100) : 0;
+              const SUGGESTIONS: Record<string, string> = {
+                'Casual chic': 'un blazer ou un jean bien coupé',
+                'Élégant': 'une robe midi ou un trench',
+                'Sportswear': 'un jogging ou des sneakers',
+                'Bohème': 'une robe fluide ou une jupe longue',
+                'Minimaliste': 'un basique neutre en coton',
+                'Streetwear': 'un hoodie ou des cargo pants',
+                'Y2K': 'un crop top ou un pantalon taille basse',
+                'Vintage': 'une pièce rétro en friperie',
+                'Preppy': 'un polo ou une jupe plissée',
+                'Cottagecore': 'une blouse fleurie ou une jupe midi',
+                'Old Money': 'un pull en cachemire ou un pantalon droit',
+                'Grunge': 'une chemise à carreaux ou des boots',
+                'Chic parisien': 'une marinière ou un trench beige',
+                'Dark': 'un total look noir structuré',
+                'Kawaii': 'un accessoire pastel ou une jupe patineuse',
+                'Business': 'un pantalon de tailleur ou une chemise',
+                'Romantique': 'une blouse en dentelle ou une jupe fluide',
+                'Athleisure': 'un legging ou une brassière stylée',
+                'Tropical': 'une chemise à imprimé ou un short coloré',
+                'Rock': 'un perfecto ou un t-shirt band',
+              };
+              return (
+                <div className="space-y-2.5">
+                  {styleStats.map(s => {
+                    const icon = s.count <= 2 ? '🔴' : s.count <= 5 ? '🟡' : '✅';
+                    return (
+                      <div key={s.name} className="flex items-start gap-2.5">
+                        <span className="text-sm mt-0.5">{icon}</span>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold" style={{ color: s.count > 5 ? '#BFBFBF' : '#2C2C2C' }}>
+                            {s.count <= 2
+                              ? `Peu de pièces ${s.name}`
+                              : s.count <= 5
+                              ? `${s.name} à développer`
+                              : `${s.name} bien représenté 🎉`}
+                          </p>
+                          {s.count <= 2 && (
+                            <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>
+                              Ajoute {SUGGESTIONS[s.name] || 'une pièce'} {s.name.toLowerCase()} pour compléter
+                            </p>
+                          )}
+                          {s.count > 2 && s.count <= 5 && (
+                            <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>
+                              Ton style {s.name} est à développer
+                            </p>
+                          )}
+                        </div>
+                        <span className="text-xs font-medium mt-0.5" style={{ color: '#9B9B9B' }}>{s.count}</span>
+                      </div>
+                    );
+                  })}
+                  <div className="pt-3 mt-2 text-center" style={{ borderTop: '1px solid #F0EBE5' }}>
+                    <p className="text-sm font-semibold" style={{ color: '#C9956C' }}>
+                      Ton dressing reflète ton style à {scorePercent}% ✨
+                    </p>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>
