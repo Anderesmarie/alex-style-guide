@@ -114,7 +114,7 @@ export default function Analysis() {
                     <span className="text-sm mt-0.5">🔴</span>
                     <div className="flex-1">
                       <p className="text-sm font-semibold" style={{ color: '#2C2C2C' }}>
-                        {b.label}
+                        Il te manque {b.label} 🔴
                       </p>
                       <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>
                         {b.impact}
@@ -134,7 +134,7 @@ export default function Analysis() {
                     {basicsStatus.filter(b => b.owned).map(b => (
                       <div key={b.label} className="flex items-center gap-2 py-1">
                         <span className="text-sm">✅</span>
-                        <span className="text-sm" style={{ color: '#BFBFBF' }}>{b.label}</span>
+                        <span className="text-sm" style={{ color: '#BFBFBF' }}>{b.label} — Tu l'as déjà ✅</span>
                       </div>
                     ))}
                   </div>
@@ -162,20 +162,22 @@ export default function Analysis() {
                 {occasionStats.map(o => {
                   const icon = o.count === 0 ? '🔴' : o.count <= 2 ? '🟡' : '✅';
                   const msg = o.count === 0
-                    ? `Tu n'as rien à mettre pour ${o.name} !`
-                    : o.count <= 2
-                    ? 'Ajoute 1-2 pièces pour avoir plus d\'options'
+                    ? 'On va remédier à ça !'
                     : null;
                   return (
                     <div key={o.name} className="flex items-start gap-2.5">
                       <span className="text-sm mt-0.5">{icon}</span>
                       <div className="flex-1">
                         <p className="text-sm font-semibold" style={{ color: o.count >= 3 ? '#BFBFBF' : '#2C2C2C' }}>
-                          {o.count === 0 ? `Aucune tenue pour ${o.name}` : o.count <= 2 ? `Peu de choix pour ${o.name}` : `${o.name} bien couverte`}
+                          {o.count === 0
+                            ? `Zéro tenue pour ${o.name} 😬`
+                            : o.count <= 2
+                            ? `Peut mieux faire (${o.count} pièces)`
+                            : `Tu gères ! (${o.count} pièces)`}
                         </p>
                         {msg && <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>{msg}</p>}
                       </div>
-                      <span className="text-xs font-medium mt-0.5" style={{ color: '#9B9B9B' }}>{o.count}</span>
+                      <span className="text-xs font-medium mt-0.5" style={{ color: '#9B9B9B' }}>{o.name}</span>
                     </div>
                   );
                 })}
@@ -200,27 +202,22 @@ export default function Analysis() {
             ) : (
               <div className="space-y-2.5">
                 {seasonStats.map(s => {
-                  const icon = s.count <= 3 ? '🔴' : s.count <= 7 ? '🟡' : '✅';
-                  const msg = s.count <= 3
-                    ? `Il te manque des pièces pour ${s.name}`
-                    : s.count <= 7
-                    ? `${s.name} à compléter`
-                    : null;
                   return (
                     <div
                       key={s.name}
                       className="flex items-start gap-2.5 rounded-xl px-3 py-2"
                       style={s.isCurrent ? { border: '1.5px solid #C9956C', backgroundColor: '#FDF6EC' } : {}}
                     >
-                      <span className="text-sm mt-0.5">{icon}</span>
                       <div className="flex-1">
                         <p className="text-sm font-semibold flex items-center gap-1.5" style={{ color: s.count > 7 ? '#BFBFBF' : '#2C2C2C' }}>
-                          {s.count <= 3 ? `Dressing ${s.name} trop vide` : s.count <= 7 ? `${s.name} à compléter` : `${s.name} bien couverte`}
+                          {s.count <= 3
+                            ? `Dressing ${s.name} vide 🔴 (${s.count} pièces)`
+                            : s.count <= 7
+                            ? `Dressing ${s.name} un peu léger 🟡 (${s.count} pièces)`
+                            : `Dressing ${s.name} au point ✅ (${s.count} pièces)`}
                           {s.isCurrent && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: '#C9956C', color: '#FFF' }}>Actuelle</span>}
                         </p>
-                        {msg && <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>{msg}</p>}
                       </div>
-                      <span className="text-xs font-medium mt-0.5" style={{ color: '#9B9B9B' }}>{s.count}</span>
                     </div>
                   );
                 })}
@@ -283,19 +280,14 @@ export default function Analysis() {
                         <div className="flex-1">
                           <p className="text-sm font-semibold" style={{ color: s.count > 5 ? '#BFBFBF' : '#2C2C2C' }}>
                             {s.count <= 2
-                              ? `Peu de pièces ${s.name}`
+                              ? `Tu te définis ${s.name} mais ton dressing ne le montre pas encore 😅`
                               : s.count <= 5
-                              ? `${s.name} à développer`
-                              : `${s.name} bien représenté 🎉`}
+                              ? `Ton style ${s.name} manque de pièces`
+                              : `Ton style ${s.name} est validé ✨`}
                           </p>
                           {s.count <= 2 && (
                             <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>
-                              Ajoute {SUGGESTIONS[s.name] || 'une pièce'} {s.name.toLowerCase()} pour compléter
-                            </p>
-                          )}
-                          {s.count > 2 && s.count <= 5 && (
-                            <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>
-                              Ton style {s.name} est à développer
+                              Ajoute {SUGGESTIONS[s.name] || 'une pièce'} pour compléter
                             </p>
                           )}
                         </div>
@@ -305,7 +297,7 @@ export default function Analysis() {
                   })}
                   <div className="pt-3 mt-2 text-center" style={{ borderTop: '1px solid #F0EBE5' }}>
                     <p className="text-sm font-semibold" style={{ color: '#C9956C' }}>
-                      Ton dressing reflète ton style à {scorePercent}% ✨
+                      Ton dressing te ressemble à {scorePercent}% 🎯
                     </p>
                   </div>
                 </div>
