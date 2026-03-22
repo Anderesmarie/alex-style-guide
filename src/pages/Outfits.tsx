@@ -55,8 +55,8 @@ export default function Outfits() {
     setView('gallery');
   };
 
-  const handleGenerate = () => {
-    const recs = generateRecommendations(wardrobe, null, 1);
+  const handleGenerate = async () => {
+    const recs = await generateRecommendations(wardrobe, null, 1);
     if (recs.length > 0) {
       setSelectedIds(new Set(recs[0].map(i => i.id)));
     }

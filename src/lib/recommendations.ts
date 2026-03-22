@@ -1,6 +1,77 @@
 import { ClothingItem, UserProfile } from './types';
 import { getLastOutfit, getRejected } from './storage';
 import { getCurrentSeason } from './weather';
+import { supabase } from './supabase';
+
+// ---------- Preference helpers (Supabase) ----------
+
+async function getUserIdSafe(): Promise<string | null> {
+  try {
+    const { data } = await supabase.auth.getUser();
+    return data.user?.id ?? null;
+  } catch { return null; }
+}
+
+export async function getRecentOutfitItemIds(): Promise<{ itemIds: string[]; createdAt: string }[]> {
+  const uid = await getUserIdSafe();
+  if (!uid) return [];
+  const { data } = await supabase
+    .from('user_preferences')
+    .select('item_ids, created_at')
+    .eq('user_id', uid)
+    .eq('type', 'recent_outfit')
+    .order('created_at', { ascending: false })
+    .limit(7);
+  return (data || []).map(r => ({ itemIds: r.item_ids as string[], createdAt: r.created_at }));
+}
+
+export async function saveRecentOutfit(itemIds: string[]): Promise<void> {
+  const uid = await getUserIdSafe();
+  if (!uid) return;
+  await supabase.from('user_preferences').insert({
+    user_id: uid,
+    type: 'recent_outfit',
+    item_ids: itemIds,
+  });
+  // Keep only last 7
+  const { data } = await supabase
+    .from('user_preferences')
+    .select('id')
+    .eq('user_id', uid)
+    .eq('type', 'recent_outfit')
+    .order('created_at', { ascending: false });
+  if (data && data.length > 7) {
+    const toDelete = data.slice(7).map(r => r.id);
+    await supabase.from('user_preferences').delete().in('id', toDelete);
+  }
+}
+
+export async function getDislikedItemIds(): Promise<string[]> {
+  const uid = await getUserIdSafe();
+  if (!uid) return [];
+  const now = new Date().toISOString();
+  const { data } = await supabase
+    .from('user_preferences')
+    .select('item_ids')
+    .eq('user_id', uid)
+    .eq('type', 'aime_pas')
+    .gte('bloquee_jusqua', now);
+  if (!data) return [];
+  return data.flatMap(r => r.item_ids as string[]);
+}
+
+export async function saveDislikedOutfit(itemIds: string[]): Promise<void> {
+  const uid = await getUserIdSafe();
+  if (!uid) return;
+  const bloquee = new Date();
+  bloquee.setDate(bloquee.getDate() + 30);
+  await supabase.from('user_preferences').insert({
+    user_id: uid,
+    type: 'aime_pas',
+    item_ids: itemIds,
+    bloquee_jusqua: bloquee.toISOString(),
+  });
+}
 
 // Group items by their category field from the new category system
 function getGroup(item: ClothingItem): string {
@@ -267,32 +338,67 @@ export function getFavoriteColorScore(
   return 0;
 }
 
-function scoreByProfile(item: ClothingItem, profile: UserProfile | null): number {
+// Context for advanced scoring (loaded async before generation)
+interface ScoringContext {
+  recentOutfits: { itemIds: string[]; createdAt: string }[];
+  dislikedIds: Set<string>;
+  wardrobeCreatedAt: Record<string, string>; // itemId → created_at ISO
+  allProposedIds: Set<string>; // all item IDs proposed in last 14 days
+  lastProposedIds: Set<string>; // item IDs from yesterday
+  recent3Ids: Set<string>; // item IDs from last 3 suggestions
+}
+
+function scoreByProfile(
+  item: ClothingItem,
+  profile: UserProfile | null,
+  ctx: ScoringContext | null = null
+): number {
   if (!profile) return 0;
   let score = 0;
   const styles = profile.styles.map(s => s.toLowerCase());
 
+  // 1. Style profil (+3)
   if (styles.includes('élégant') || styles.includes('casual chic')) {
-    if (item.style.some(s => ['Chic', 'Bureau'].includes(s))) score += 2;
+    if (item.style.some(s => ['Chic', 'Bureau'].includes(s))) score += 3;
   }
   if (styles.includes('sportswear')) {
-    if (item.style.some(s => s === 'Sport')) score += 2;
+    if (item.style.some(s => s === 'Sport')) score += 3;
   }
   if (styles.includes('bohème')) {
-    if (item.style.some(s => s === 'Boho')) score += 2;
+    if (item.style.some(s => s === 'Boho')) score += 3;
   }
   if (styles.includes('minimaliste')) {
-    if (['Blanc', 'Noir', 'Gris', 'Beige'].includes(item.color)) score += 1;
+    if (['blanc', 'noir', 'gris', 'beige'].includes(item.color?.toLowerCase())) score += 2;
   }
 
-  // Add silhouette score
+  // 2. Occasion du jour (+2)
+  const occasionFilter = isWeekday() ? ['Travail', 'Quotidien'] : ['Sortie', 'Quotidien'];
+  if (item.occasion?.some(o => occasionFilter.includes(o))) score += 2;
+
+  // Silhouette, morphology, favorite color scores
   score += getSilhouetteScore(item, profile.taille, profile.corpulence);
-
-  // Add morphology score
   score += getMorphologyScore(item, profile.morphologie ?? null);
-
-  // Add favorite color score
   score += getFavoriteColorScore(item, profile.favorite_colors ?? []);
+
+  // Context-based scoring
+  if (ctx) {
+    // 3. Anti-répétition
+    if (ctx.lastProposedIds.has(item.id)) score -= 5;
+    else if (ctx.recent3Ids.has(item.id)) score -= 3;
+
+    // 4. Dislike (-10)
+    if (ctx.dislikedIds.has(item.id)) score -= 10;
+
+    // 5. Nouveauté (+1 if added < 30 days)
+    const createdAt = ctx.wardrobeCreatedAt[item.id];
+    if (createdAt) {
+      const age = (Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24);
+      if (age < 30) score += 1;
+    }
+
+    // 6. Fraîcheur (+1 if not proposed in 14+ days)
+    if (!ctx.allProposedIds.has(item.id)) score += 1;
+  }
 
   return score;
 }
@@ -323,18 +429,59 @@ function collectOutfits(
   return results;
 }
 
-export function generateRecommendations(
+export async function loadScoringContext(wardrobe: ClothingItem[]): Promise<ScoringContext> {
+  const [recentOutfits, dislikedIds] = await Promise.all([
+    getRecentOutfitItemIds(),
+    getDislikedItemIds(),
+  ]);
+
+  // Build wardrobeCreatedAt from supabase (wardrobe items have created_at)
+  const wardrobeCreatedAt: Record<string, string> = {};
+  const uid = await getUserIdSafe();
+  if (uid) {
+    const { data } = await supabase.from('wardrobe').select('id, created_at').eq('user_id', uid);
+    (data || []).forEach(r => { wardrobeCreatedAt[r.id] = r.created_at; });
+  }
+
+  const now = Date.now();
+  const day = 1000 * 60 * 60 * 24;
+  const lastProposedIds = new Set<string>();
+  const recent3Ids = new Set<string>();
+  const allProposedIds = new Set<string>();
+
+  recentOutfits.forEach((o, i) => {
+    const age = (now - new Date(o.createdAt).getTime()) / day;
+    if (age < 14) o.itemIds.forEach(id => allProposedIds.add(id));
+    if (i === 0 && age < 2) o.itemIds.forEach(id => lastProposedIds.add(id));
+    if (i < 3) o.itemIds.forEach(id => recent3Ids.add(id));
+  });
+
+  return {
+    recentOutfits,
+    dislikedIds: new Set(dislikedIds),
+    wardrobeCreatedAt,
+    allProposedIds,
+    lastProposedIds,
+    recent3Ids,
+  };
+}
+
+export async function generateRecommendations(
   wardrobe: ClothingItem[],
   temperature: number | null,
   count = 2,
   userProfile: UserProfile | null = null
-): ClothingItem[][] {
+): Promise<ClothingItem[][]> {
   const season = getCurrentSeason();
   const lastOutfit = getLastOutfit();
   const rejected = getRejected();
   const lastKey = lastOutfit.sort().join(',');
   const blockedKeys = new Set(rejected.map(r => r.sort().join(',')));
   if (lastKey) blockedKeys.add(lastKey);
+
+  // Load async scoring context
+  let ctx: ScoringContext | null = null;
+  try { ctx = await loadScoringContext(wardrobe); } catch {}
 
   const seasonPool = wardrobe.filter(
     i => i.season.includes(season) || i.season.includes('Toutes saisons')
@@ -346,8 +493,8 @@ export function generateRecommendations(
   const rankPool = (pool: ClothingItem[]) => {
     if (!userProfile) return pool;
     return [...pool].sort((a, b) => {
-      const sa = scoreByProfile(a, userProfile);
-      const sb = scoreByProfile(b, userProfile);
+      const sa = scoreByProfile(a, userProfile, ctx);
+      const sb = scoreByProfile(b, userProfile, ctx);
       if (sb !== sa) return sb - sa;
       return Math.random() - 0.5;
     });
