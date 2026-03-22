@@ -10,6 +10,7 @@ export interface ClothingItem {
   occasion: string[];
   brand?: string;
   price?: number;
+  matiere?: string;
 }
 
 export interface Outfit {
