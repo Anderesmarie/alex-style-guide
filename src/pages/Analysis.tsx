@@ -1,6 +1,43 @@
+import { useState, useEffect } from 'react';
+import { getWardrobe } from '@/lib/storage';
+import { ClothingItem } from '@/lib/types';
+
+const BASICS = [
+  { type: 'Jean', color: 'noir', label: 'Jean noir', impact: 'Crée 5+ tenues casual et chic' },
+  { type: 'Jean', color: 'bleu', label: 'Jean brut', impact: 'La base de tout dressing' },
+  { type: 'T-shirt', color: 'blanc', label: 'T-shirt blanc', impact: 'Se porte avec absolument tout' },
+  { type: 'T-shirt', color: 'noir', label: 'T-shirt noir', impact: 'Indispensable au quotidien' },
+  { type: 'Blazer', color: null, label: 'Blazer', impact: 'Transforme 3+ tenues en look chic instantané' },
+  { type: 'Manteau', color: null, label: 'Manteau classique', impact: "Indispensable pour l'hiver" },
+  { type: 'Robe', color: 'noir', label: 'Petite robe noire', impact: 'Parfaite pour tous les événements' },
+  { type: 'Chaussures', color: 'blanc', label: 'Baskets blanches', impact: "S'associe avec 80% de ton dressing" },
+  { type: 'Chaussures', color: 'noir', label: 'Chaussures noires', impact: "Habille n'importe quelle tenue" },
+  { type: 'Sac', color: null, label: 'Sac neutre', impact: 'Va avec toutes tes tenues' },
+] as const;
+
 export default function Analysis() {
-  const cards = [
-    { emoji: '🧺', title: 'Pièces basiques manquantes' },
+  const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getWardrobe().then(w => { setWardrobe(w); setLoading(false); });
+  }, []);
+
+  const checkBasic = (basic: typeof BASICS[number]) => {
+    return wardrobe.some(item => {
+      const typeMatch = item.type.toLowerCase().includes(basic.type.toLowerCase())
+        || item.category?.toLowerCase().includes(basic.type.toLowerCase());
+      if (!typeMatch) return false;
+      if (basic.color) return item.color.toLowerCase().includes(basic.color);
+      return true;
+    });
+  };
+
+  const basicsStatus = BASICS.map(b => ({ ...b, owned: checkBasic(b) }));
+  const missingCount = basicsStatus.filter(b => !b.owned).length;
+  const allPresent = missingCount === 0;
+
+  const otherCards = [
     { emoji: '👔', title: 'Manques par occasion' },
     { emoji: '🌦️', title: 'Manques par saison' },
     { emoji: '✨', title: 'Manques par style' },
@@ -17,7 +54,65 @@ export default function Analysis() {
         </p>
 
         <div className="space-y-4">
-          {cards.map(card => (
+          {/* Basiques */}
+          <div
+            className="rounded-2xl p-5 relative"
+            style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+          >
+            <span
+              className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold"
+              style={{ backgroundColor: '#FDF6EC', color: '#C9956C', border: '1px solid #C9956C30' }}
+            >
+              Premium ✨
+            </span>
+            <p className="font-serif font-semibold text-base mb-4" style={{ color: '#2C2C2C' }}>
+              🧺 Pièces basiques manquantes
+            </p>
+
+            {loading ? (
+              <p className="text-sm italic" style={{ color: '#9B9B9B' }}>Analyse en cours...</p>
+            ) : allPresent ? (
+              <p className="text-sm font-medium" style={{ color: '#4CAF50' }}>
+                Ton dressing est bien équipé en basiques ! 🎉
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {basicsStatus.filter(b => !b.owned).map(b => (
+                  <div key={b.label} className="flex items-start gap-2.5">
+                    <span className="text-sm mt-0.5">🔴</span>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold" style={{ color: '#2C2C2C' }}>
+                        {b.label}
+                      </p>
+                      <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>
+                        {b.impact}
+                      </p>
+                      <button
+                        className="text-[11px] font-medium mt-1 underline underline-offset-2"
+                        style={{ color: '#9B9B9B' }}
+                      >
+                        Voir des idées →
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                {basicsStatus.some(b => b.owned) && (
+                  <div className="pt-2 mt-2" style={{ borderTop: '1px solid #F0EBE5' }}>
+                    {basicsStatus.filter(b => b.owned).map(b => (
+                      <div key={b.label} className="flex items-center gap-2 py-1">
+                        <span className="text-sm">✅</span>
+                        <span className="text-sm" style={{ color: '#BFBFBF' }}>{b.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Other cards */}
+          {otherCards.map(card => (
             <div
               key={card.title}
               className="rounded-2xl p-5 relative"
