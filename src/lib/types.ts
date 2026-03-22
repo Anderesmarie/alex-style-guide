@@ -28,6 +28,7 @@ export interface UserProfile {
   taille: 'petite' | 'moyenne' | 'grande' | null;
   corpulence: 'fine' | 'medium' | 'ronde' | null;
   morphologie: 'A' | 'H' | 'X' | 'V' | 'O' | '8' | null;
+  favorite_colors: string[];
 }
 
 export interface AvatarConfig {
