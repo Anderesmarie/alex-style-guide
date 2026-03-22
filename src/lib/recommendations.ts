@@ -19,7 +19,7 @@ export async function getRecentOutfitItemIds(): Promise<{ itemIds: string[]; cre
     .from('user_preferences')
     .select('item_ids, created_at')
     .eq('user_id', uid)
-    .eq('type', 'recent_outfit')
+    .eq('reaction', 'proposee')
     .order('created_at', { ascending: false })
     .limit(7);
   return (data || []).map(r => ({ itemIds: r.item_ids as string[], createdAt: r.created_at }));
@@ -30,15 +30,17 @@ export async function saveRecentOutfit(itemIds: string[]): Promise<void> {
   if (!uid) return;
   await supabase.from('user_preferences').insert({
     user_id: uid,
-    type: 'recent_outfit',
     item_ids: itemIds,
+    reaction: 'proposee',
+    nb_fois_portee: 0,
+    derniere_utilisation: new Date().toISOString(),
   });
   // Keep only last 7
   const { data } = await supabase
     .from('user_preferences')
     .select('id')
     .eq('user_id', uid)
-    .eq('type', 'recent_outfit')
+    .eq('reaction', 'proposee')
     .order('created_at', { ascending: false });
   if (data && data.length > 7) {
     const toDelete = data.slice(7).map(r => r.id);
@@ -54,7 +56,7 @@ export async function getDislikedItemIds(): Promise<string[]> {
     .from('user_preferences')
     .select('item_ids')
     .eq('user_id', uid)
-    .eq('type', 'aime_pas')
+    .eq('reaction', 'aime_pas')
     .gte('bloquee_jusqua', now);
   if (!data) return [];
   return data.flatMap(r => r.item_ids as string[]);
@@ -67,8 +69,8 @@ export async function saveDislikedOutfit(itemIds: string[]): Promise<void> {
   bloquee.setDate(bloquee.getDate() + 30);
   await supabase.from('user_preferences').insert({
     user_id: uid,
-    type: 'aime_pas',
     item_ids: itemIds,
+    reaction: 'aime_pas',
     bloquee_jusqua: bloquee.toISOString(),
   });
 }
