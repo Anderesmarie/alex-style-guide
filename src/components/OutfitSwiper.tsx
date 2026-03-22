@@ -112,22 +112,23 @@ export default function OutfitSwiper({ outfits, weatherCode, temperature, onComp
   const currentOutfit = cards[currentIndex].outfit;
   const tips = getStylingTips(currentOutfit, weatherCode, temperature);
 
-  // Colorimetry badge
+  // Smart badge calculation
   const normalizeColor = (color: string) =>
     color.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_").trim();
 
-  let colorBadge: 'perfect' | 'avoid' | null = null;
-  
-  if (userSeason) {
-    const scores = currentOutfit.map(item => {
-      const norm = normalizeColor(item.color);
-      const score = getColorScore(norm, userSeason);
-      return score;
-    });
-    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-    if (avg >= 0.5) colorBadge = 'perfect';
-    else if (avg <= -1) colorBadge = 'avoid';
-  }
+  let smartBadge: 'ideal' | 'color' | 'silhouette' | null = null;
+
+  const colorAvg = userSeason
+    ? currentOutfit.map(item => getColorScore(normalizeColor(item.color), userSeason)).reduce((a, b) => a + b, 0) / currentOutfit.length
+    : 0;
+
+  const silhouetteAvg = userProfile
+    ? currentOutfit.map(item => getSilhouetteScore(item, userProfile.taille, userProfile.corpulence)).reduce((a, b) => a + b, 0) / currentOutfit.length
+    : 0;
+
+  if (colorAvg >= 1 && silhouetteAvg >= 1) smartBadge = 'ideal';
+  else if (colorAvg >= 1) smartBadge = 'color';
+  else if (silhouetteAvg >= 1) smartBadge = 'silhouette';
 
   const rotation = dragX * 0.08;
   const likeOpacity = Math.min(Math.max(dragX / threshold, 0), 1);
