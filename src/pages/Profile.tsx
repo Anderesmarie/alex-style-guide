@@ -8,6 +8,7 @@ import type { Season } from '@/lib/colorimetry';
 import { getStreak } from '@/lib/streak';
 import { UserProfile, STYLE_OPTIONS } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 
 const FAVORITE_COLORS_MAP: Record<string, string> = {
   'Blanc': '#FFFFFF', 'Noir': '#1A1A1A', 'Gris': '#9E9E9E', 'Beige': '#E8D5B7',
