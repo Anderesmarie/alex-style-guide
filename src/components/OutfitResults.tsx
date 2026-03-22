@@ -42,7 +42,7 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
           const normalizeColor = (color: string) =>
             color.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_").trim();
 
-          let smartBadge: 'ideal' | 'color' | 'silhouette' | null = null;
+          let smartBadge: 'ideal' | 'color' | 'morpho' | null = null;
 
           const colorAvg = userSeason
             ? r.outfit.map(item => getColorScore(normalizeColor(item.color), userSeason)).reduce((a, b) => a + b, 0) / r.outfit.length
@@ -52,9 +52,15 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
             ? r.outfit.map(item => getSilhouetteScore(item, userProfile.taille, userProfile.corpulence)).reduce((a, b) => a + b, 0) / r.outfit.length
             : 0;
 
-          if (colorAvg >= 1 && silhouetteAvg >= 1) smartBadge = 'ideal';
-          else if (colorAvg >= 1) smartBadge = 'color';
-          else if (silhouetteAvg >= 1) smartBadge = 'silhouette';
+          const morphoAvg = userProfile?.morphologie
+            ? r.outfit.map(item => getMorphologyScore(item, userProfile.morphologie)).reduce((a, b) => a + b, 0) / r.outfit.length
+            : 0;
+
+          const totalScore = colorAvg + silhouetteAvg + morphoAvg;
+
+          if (totalScore >= 3) smartBadge = 'ideal';
+          else if (colorAvg >= 1 && totalScore < 3) smartBadge = 'color';
+          else if (morphoAvg >= 2 && colorAvg < 1) smartBadge = 'morpho';
           return (
             <div
               key={idx}
