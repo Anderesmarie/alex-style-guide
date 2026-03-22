@@ -419,8 +419,15 @@ export default function Dressing() {
       {/* Style */}
       <label className="text-sm font-semibold text-muted-foreground mb-2 block">Style</label>
       <div className="flex flex-wrap gap-2 mb-4">
-        {STYLES.map(s => (
-          <button key={s} onClick={() => toggle(style, s, setStyle)} className={`chip text-xs ${style.includes(s) ? 'chip-active' : ''}`}>{s}</button>
+        {STYLE_OPTIONS.map(s => (
+          <button key={s.label} onClick={() => toggle(style, s.label, setStyle)}
+            className="px-3 py-2 rounded-full text-xs font-medium transition-all duration-200 flex items-center gap-1"
+            style={style.includes(s.label)
+              ? { backgroundColor: '#C9956C', color: '#FFFFFF', border: '1.5px solid #C9956C' }
+              : { backgroundColor: '#FFFFFF', color: '#2C2C2C', border: '1.5px solid #E0D5C8' }
+            }>
+            <span>{s.emoji}</span> {s.label}
+          </button>
         ))}
       </div>
 
