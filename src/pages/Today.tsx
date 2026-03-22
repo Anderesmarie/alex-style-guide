@@ -162,7 +162,8 @@ export default function Today() {
   };
 
   const generate = useCallback(async () => {
-    if (!canSuggest || !enough || swipeComplete) return;
+    if (!enough || swipeComplete) return;
+    if (!canSuggest) return; // only block NEW generation requests
     const recs = generateRecommendations(wardrobe, weatherTemp, 5, userProfile);
     setRecommendations(recs);
     const newCount = dailyCount + 1;
@@ -171,6 +172,7 @@ export default function Today() {
   }, [weatherTemp, canSuggest, enough, wardrobe, dailyCount, today, swipeComplete, userProfile]);
 
   useEffect(() => {
+    // Auto-generate only if no results saved and still has quota
     if (!loading && ws.status !== 'loading' && enough && canSuggest && recommendations.length === 0 && !swipeComplete) {
       generate();
     }
