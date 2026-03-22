@@ -283,10 +283,11 @@ export function determineSeason(
 }
 
 export function getColorScore(itemColor: string, userSeason: Season): number {
-  const seasons = COLOR_TO_SEASON[itemColor] ?? [];
+  const normalized = itemColor?.trim() ?? '';
+  const seasons = COLOR_TO_SEASON[normalized] ?? [];
   if (seasons.length === 0) return 0;
   if (seasons.includes(userSeason)) return 2;
   const palette = SEASON_PALETTES[userSeason];
-  if (palette.avoid.some(a => itemColor.includes(a))) return -1;
+  if (palette.avoid.some(a => normalized.toLowerCase().includes(a))) return -1;
   return 0;
 }
