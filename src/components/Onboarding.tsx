@@ -39,6 +39,8 @@ export default function Onboarding({ onComplete }: Props) {
   const [step, setStep] = useState(0);
   const [showMessage, setShowMessage] = useState(false);
   const [silhouette, setSilhouette] = useState('');
+  const [taille, setTaille] = useState('');
+  const [corpulence, setCorpulence] = useState('');
   const [styles, setStyles] = useState<string[]>([]);
   const [budget, setBudget] = useState(80);
   const [brands, setBrands] = useState<string[]>([]);
@@ -47,7 +49,7 @@ export default function Onboarding({ onComplete }: Props) {
   const [lifestyle, setLifestyle] = useState('');
   const [makeup, setMakeup] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const totalSteps = 7;
+  const totalSteps = 8;
 
   const nextStep = () => {
     setShowMessage(true);
@@ -60,13 +62,11 @@ export default function Onboarding({ onComplete }: Props) {
   };
 
   const handleAvatarSave = async (avatar: AvatarData) => {
-    // Save to localStorage as alex_avatar
     localStorage.setItem('alex_avatar', JSON.stringify(avatar));
-    // Also save to Supabase
     await saveAvatar(avatar);
     const palette = getPaletteForSkin(avatar.skin);
     savePalette(palette);
-    await saveProfile({ silhouette, styles, budget, brands, taille: null, corpulence: null });
+    await saveProfile({ silhouette, styles, budget, brands, taille: taille || null, corpulence: corpulence || null });
     setShowMessage(true);
     setTimeout(() => {
       setShowMessage(false);
@@ -85,6 +85,7 @@ export default function Onboarding({ onComplete }: Props) {
 
   const canProceed = [
     silhouette !== '',
+    taille !== '' && corpulence !== '',
     styles.length > 0,
     lifestyle !== '',
     true,
