@@ -241,10 +241,14 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
               </button>
               <button
                 onClick={async () => {
-                  if (profile) {
-                    const updated = { ...profile, favorite_colors: tempColors };
-                    await saveProfile(updated);
-                    setProfile(updated);
+                  const { data: userData } = await supabase.auth.getUser();
+                  if (userData.user) {
+                    await supabase
+                      .from('profiles')
+                      .update({ favorite_colors: tempColors })
+                      .eq('id', userData.user.id);
+                    setProfile(prev => prev ? { ...prev, favorite_colors: tempColors } : prev);
+                    toast.success('Couleurs sauvegardées ✨', { duration: 2000 });
                   }
                   setEditingColors(false);
                 }}
