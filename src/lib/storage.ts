@@ -21,6 +21,8 @@ export async function getProfile(): Promise<UserProfile | null> {
     styles: (data.styles as string[]) || [],
     budget: data.budget || 80,
     brands: (data.brands as string[]) || [],
+    taille: data.taille || null,
+    corpulence: data.corpulence || null,
   };
 }
 
