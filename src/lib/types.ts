@@ -71,5 +71,26 @@ export const SILHOUETTES = [
   { label: 'Ovale', emoji: '⬭' },
   { label: 'Autre', emoji: '✦' },
 ] as const;
-export const STYLE_OPTIONS = ['Casual chic', 'Élégant', 'Sportswear', 'Bohème', 'Minimaliste'] as const;
+export const STYLE_OPTIONS = [
+  { label: 'Casual chic', emoji: '✨' },
+  { label: 'Élégant', emoji: '👗' },
+  { label: 'Sportswear', emoji: '🏃' },
+  { label: 'Bohème', emoji: '🌿' },
+  { label: 'Minimaliste', emoji: '⬜' },
+  { label: 'Streetwear', emoji: '🛹' },
+  { label: 'Y2K', emoji: '💫' },
+  { label: 'Vintage', emoji: '🕰️' },
+  { label: 'Preppy', emoji: '🎀' },
+  { label: 'Cottagecore', emoji: '🌸' },
+  { label: 'Old Money', emoji: '💰' },
+  { label: 'Grunge', emoji: '🎸' },
+  { label: 'Chic parisien', emoji: '🗼' },
+  { label: 'Dark', emoji: '🖤' },
+  { label: 'Kawaii', emoji: '🌟' },
+  { label: 'Business', emoji: '💼' },
+  { label: 'Romantique', emoji: '💝' },
+  { label: 'Athleisure', emoji: '⚡' },
+  { label: 'Tropical', emoji: '🌴' },
+  { label: 'Rock', emoji: '🤘' },
+] as const;
 export const BRAND_SUGGESTIONS = ['Zara', 'H&M', 'Shein', 'Sézane', 'Vinted', 'Mango', 'Bershka'] as const;

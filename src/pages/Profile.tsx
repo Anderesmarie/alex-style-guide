@@ -6,7 +6,7 @@ import { AvatarData } from '@/components/AvatarSVG';
 import { determineSeason, SEASON_PALETTES, SEASON_COLOR_HEX, SEASON_LABELS } from '@/lib/colorimetry';
 import type { Season } from '@/lib/colorimetry';
 import { getStreak } from '@/lib/streak';
-import { UserProfile } from '@/lib/types';
+import { UserProfile, STYLE_OPTIONS } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 
 const FAVORITE_COLORS_MAP: Record<string, string> = {
@@ -304,11 +304,14 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
                 {profile.silhouette}
               </span>
             )}
-            {profile.styles.map(s => (
-              <span key={s} className="px-3 py-1.5 rounded-full text-xs font-semibold" style={{ backgroundColor: '#C9956C20', color: '#C9956C' }}>
-                {s}
-              </span>
-            ))}
+            {profile.styles.map(s => {
+              const styleObj = STYLE_OPTIONS.find(so => so.label === s);
+              return (
+                <span key={s} className="px-3 py-1.5 rounded-full text-xs font-semibold" style={{ backgroundColor: '#C9956C20', color: '#C9956C' }}>
+                  {styleObj ? `${styleObj.emoji} ` : ''}{s}
+                </span>
+              );
+            })}
             <span className="px-3 py-1.5 rounded-full text-xs font-semibold" style={{ backgroundColor: '#F5F0EB', color: '#2C2C2C' }}>
               Budget {profile.budget}€
             </span>
