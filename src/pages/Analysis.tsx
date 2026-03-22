@@ -280,19 +280,14 @@ export default function Analysis() {
                         <div className="flex-1">
                           <p className="text-sm font-semibold" style={{ color: s.count > 5 ? '#BFBFBF' : '#2C2C2C' }}>
                             {s.count <= 2
-                              ? `Peu de pièces ${s.name}`
+                              ? `Tu te définis ${s.name} mais ton dressing ne le montre pas encore 😅`
                               : s.count <= 5
-                              ? `${s.name} à développer`
-                              : `${s.name} bien représenté 🎉`}
+                              ? `Ton style ${s.name} manque de pièces`
+                              : `Ton style ${s.name} est validé ✨`}
                           </p>
                           {s.count <= 2 && (
                             <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>
-                              Ajoute {SUGGESTIONS[s.name] || 'une pièce'} {s.name.toLowerCase()} pour compléter
-                            </p>
-                          )}
-                          {s.count > 2 && s.count <= 5 && (
-                            <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>
-                              Ton style {s.name} est à développer
+                              Ajoute {SUGGESTIONS[s.name] || 'une pièce'} pour compléter
                             </p>
                           )}
                         </div>
@@ -302,7 +297,7 @@ export default function Analysis() {
                   })}
                   <div className="pt-3 mt-2 text-center" style={{ borderTop: '1px solid #F0EBE5' }}>
                     <p className="text-sm font-semibold" style={{ color: '#C9956C' }}>
-                      Ton dressing reflète ton style à {scorePercent}% ✨
+                      Ton dressing te ressemble à {scorePercent}% 🎯
                     </p>
                   </div>
                 </div>
