@@ -95,9 +95,9 @@ export default function Today() {
         setWardrobe(w);
         setUserProfile(p);
         setDailyCount(c.date === today ? c.count : 0);
+        // Always restore today's saved results if they exist
         const saved = loadTodayData(today, w);
-        const shouldKeepSaved = Boolean(saved && (saved.length >= 5 || c.count >= 5));
-        if (saved && shouldKeepSaved) {
+        if (saved) {
           setSwipeResults(saved);
           setSwipeComplete(true);
         }
