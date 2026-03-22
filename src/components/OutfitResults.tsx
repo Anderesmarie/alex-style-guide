@@ -15,6 +15,7 @@ interface Props {
   weatherCode: number | null;
   temperature: number | null;
   userSeason?: Season | null;
+  userProfile?: UserProfile | null;
 }
 
 const ROSE_GOLD = '#C9956C';
