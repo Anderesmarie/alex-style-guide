@@ -8,6 +8,7 @@ import type { Season } from '@/lib/colorimetry';
 import { getStreak } from '@/lib/streak';
 import { UserProfile, STYLE_OPTIONS } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 
 const FAVORITE_COLORS_MAP: Record<string, string> = {
   'Blanc': '#FFFFFF', 'Noir': '#1A1A1A', 'Gris': '#9E9E9E', 'Beige': '#E8D5B7',
@@ -45,8 +46,28 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
 
   useEffect(() => {
     const load = async () => {
-      const [p, a] = await Promise.all([getProfile(), getAvatar()]);
-      setProfile(p);
+      const [a] = await Promise.all([getAvatar()]);
+      // Load profile directly from Supabase for fresh data
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData.user) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userData.user.id)
+          .single();
+        if (profileData) {
+          setProfile({
+            silhouette: profileData.silhouette || '',
+            styles: (profileData.styles as string[]) || [],
+            budget: profileData.budget || 80,
+            brands: (profileData.brands as string[]) || [],
+            taille: profileData.taille || null,
+            corpulence: profileData.corpulence || null,
+            morphologie: profileData.morphologie || null,
+            favorite_colors: (profileData.favorite_colors as string[]) || [],
+          });
+        }
+      }
       let avatarData: AvatarData = DEFAULT_AVATAR;
       try {
         const raw = localStorage.getItem('alex_avatar');
@@ -220,10 +241,14 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
               </button>
               <button
                 onClick={async () => {
-                  if (profile) {
-                    const updated = { ...profile, favorite_colors: tempColors };
-                    await saveProfile(updated);
-                    setProfile(updated);
+                  const { data: userData } = await supabase.auth.getUser();
+                  if (userData.user) {
+                    await supabase
+                      .from('profiles')
+                      .update({ favorite_colors: tempColors })
+                      .eq('id', userData.user.id);
+                    setProfile(prev => prev ? { ...prev, favorite_colors: tempColors } : prev);
+                    toast.success('Couleurs sauvegardées ✨', { duration: 2000 });
                   }
                   setEditingColors(false);
                 }}
