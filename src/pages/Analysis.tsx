@@ -49,11 +49,17 @@ export default function Analysis() {
   const missingCount = basicsStatus.filter(b => !b.owned).length;
   const allPresent = missingCount === 0;
 
-  const otherCards = [
-    { emoji: '👔', title: 'Manques par occasion' },
-    { emoji: '🌦️', title: 'Manques par saison' },
-    { emoji: '✨', title: 'Manques par style' },
-  ];
+  // Occasion analysis
+  const occasionStats = OCCASIONS.map(occ => {
+    const count = wardrobe.filter(i => i.occasion?.includes(occ)).length;
+    return { name: occ, count };
+  });
+
+  // Season analysis
+  const seasonStats = SEASONS_LIST.map(s => {
+    const count = wardrobe.filter(i => i.season?.includes(s) || i.season?.includes('Toutes saisons')).length;
+    return { name: s, count, isCurrent: s === currentSeason };
+  });
 
   return (
     <div className="fade-enter pb-6" style={{ backgroundColor: '#F5F0EB', minHeight: '100vh' }}>
