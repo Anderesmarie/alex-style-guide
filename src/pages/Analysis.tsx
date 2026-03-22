@@ -15,9 +15,21 @@ const BASICS = [
   { type: 'Sac', color: null, label: 'Sac neutre', impact: 'Va avec toutes tes tenues' },
 ] as const;
 
+const OCCASIONS = ['Travail', 'Sortie', 'Sport', 'Événement', 'Mariage', 'Voyage', 'Plage'] as const;
+const SEASONS_LIST = ['Été', 'Automne', 'Hiver', 'Printemps'] as const;
+
+function getCurrentSeason(): string {
+  const m = new Date().getMonth();
+  if (m >= 2 && m <= 4) return 'Printemps';
+  if (m >= 5 && m <= 7) return 'Été';
+  if (m >= 8 && m <= 10) return 'Automne';
+  return 'Hiver';
+}
+
 export default function Analysis() {
   const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const currentSeason = getCurrentSeason();
 
   useEffect(() => {
     getWardrobe().then(w => { setWardrobe(w); setLoading(false); });
