@@ -162,7 +162,8 @@ export default function Today() {
   };
 
   const generate = useCallback(async () => {
-    if (!canSuggest || !enough || swipeComplete) return;
+    if (!enough || swipeComplete) return;
+    if (!canSuggest) return; // only block NEW generation requests
     const recs = generateRecommendations(wardrobe, weatherTemp, 5, userProfile);
     setRecommendations(recs);
     const newCount = dailyCount + 1;
@@ -171,6 +172,7 @@ export default function Today() {
   }, [weatherTemp, canSuggest, enough, wardrobe, dailyCount, today, swipeComplete, userProfile]);
 
   useEffect(() => {
+    // Auto-generate only if no results saved and still has quota
     if (!loading && ws.status !== 'loading' && enough && canSuggest && recommendations.length === 0 && !swipeComplete) {
       generate();
     }
@@ -304,7 +306,7 @@ export default function Today() {
         </div>
       )}
 
-      {enough && !canSuggest && !swipeComplete && (
+      {enough && !canSuggest && !swipeComplete && recommendations.length === 0 && (
         <div className="bg-card rounded-xl p-6 card-shadow text-center">
           <p className="text-lg font-serif">Tu as utilisé tes 5 suggestions du jour ✨</p>
           <p className="text-muted-foreground mt-2">Reviens demain ou passe en Premium pour en voir plus.</p>
