@@ -283,11 +283,29 @@ export function determineSeason(
 }
 
 export function getColorScore(itemColor: string, userSeason: Season): number {
-  const normalized = itemColor?.trim() ?? '';
-  const seasons = COLOR_TO_SEASON[normalized] ?? [];
+  const normalized = itemColor?.trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") ?? '';
+
+  const colorMap: Record<string, string> = {
+    'blanc': 'Blanc',
+    'noir': 'Noir',
+    'gris': 'Gris',
+    'beige': 'Beige',
+    'bleu': 'Bleu',
+    'rouge': 'Rouge',
+    'rose': 'Rose',
+    'vert': 'Vert',
+    'jaune': 'Jaune',
+    'marron': 'Marron',
+    'multicolore': 'Multicolore',
+  };
+
+  const seasons = COLOR_TO_SEASON[colorMap[normalized] ?? itemColor] ?? [];
   if (seasons.length === 0) return 0;
   if (seasons.includes(userSeason)) return 2;
   const palette = SEASON_PALETTES[userSeason];
-  if (palette.avoid.some(a => normalized.toLowerCase().includes(a))) return -1;
+  if (palette.avoid.some(a => normalized.includes(a))) return -1;
   return 0;
 }
