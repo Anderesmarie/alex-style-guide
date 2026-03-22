@@ -226,41 +226,8 @@ export default function OutfitSwiper({ outfits, weatherCode, temperature, onComp
                 </span>
               </div>
             )}
-            {colorBadge === 'avoid' && (
-              <div className="px-5 pb-2">
-                <span className="inline-block text-[11px] font-medium rounded-xl py-1 px-2" style={{ backgroundColor: '#F0F0F0', color: '#888888' }}>
-                  💡 Pas idéal pour ton teint
-                </span>
-              </div>
-            )}
 
             {/* Styling tips */}
-            <div className="border-t border-border pt-3 rounded-b-2xl" style={{ backgroundColor: '#F5F0EB' }}>
-              <div className="space-y-1.5 px-1">
-                <p className="text-xs">
-                  <span className="text-muted-foreground">✨ Beauté — </span>
-                  <span style={{ color: '#C9956C' }}>{tips.beauty}</span>
-                </p>
-                <p className="text-xs">
-                  <span className="text-muted-foreground">💇 Coiffure — </span>
-                  <span style={{ color: '#C9956C' }}>{tips.hair}</span>
-                </p>
-                <p className="text-xs">
-                  <span className="text-muted-foreground">👜 Accessoires — </span>
-                  <span style={{ color: '#C9956C' }}>{tips.accessories}</span>
-                </p>
-              </div>
-            </div>
-
-            {/* DEBUG colorimétrie */}
-            <div className="px-5 py-2 border-t border-border">
-              <p className="text-[10px] text-muted-foreground font-mono">saison: {userSeason ?? 'null'}</p>
-              {debugScores.map((d, i) => (
-                <p key={i} className="text-[10px] text-muted-foreground font-mono">
-                  {d.color} → {d.norm} → score: {d.score}
-                </p>
-              ))}
-            </div>
           </div>
         </div>
       </div>
