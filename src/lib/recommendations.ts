@@ -168,6 +168,43 @@ function buildOneOutfit(pool: ClothingItem[], globalUsedIds: Set<string>, temper
   return outfit;
 }
 
+export function getSilhouetteScore(
+  item: ClothingItem,
+  taille: string | null,
+  corpulence: string | null
+): number {
+  let score = 0;
+
+  // Règles Taille
+  if (taille === 'petite') {
+    if (item.style?.some(s => s === 'Bureau') || item.type === 'Robe') score += 2;
+    if (item.color?.toLowerCase() === 'noir' || item.color?.toLowerCase() === 'blanc') score += 1;
+    if (item.type === 'Pantalon' && item.style?.some(s => s.toLowerCase().includes('large'))) score -= 2;
+    if (item.type === 'Manteau' && item.occasion?.includes('Quotidien')) score -= 1;
+  }
+
+  if (taille === 'grande') {
+    if (item.type === 'Robe' || item.type === 'Pantalon') score += 2;
+    if (item.style?.some(s => s.toLowerCase().includes('large') || s === 'Boho')) score += 1;
+  }
+
+  // Règles Corpulence
+  if (corpulence === 'ronde') {
+    const itemDesc = `${item.type} ${item.category} ${item.subcategory}`.toLowerCase();
+    if (['viscose', 'soie', 'jersey', 'modal'].some(m => itemDesc.includes(m))) score += 2;
+    if (item.color?.toLowerCase() === 'noir' || item.color?.toLowerCase() === 'marron') score += 1;
+    if (['tweed', 'rigide', 'structure'].some(m => itemDesc.includes(m))) score -= 2;
+  }
+
+  if (corpulence === 'fine') {
+    const itemDesc = `${item.type} ${item.category} ${item.subcategory}`.toLowerCase();
+    if (['tweed', 'coton', 'denim'].some(m => itemDesc.includes(m))) score += 1;
+    if (item.style?.some(s => s.toLowerCase().includes('oversize') || s === 'Boho')) score += 1;
+  }
+
+  return score;
+}
+
 function scoreByProfile(item: ClothingItem, profile: UserProfile | null): number {
   if (!profile) return 0;
   let score = 0;
@@ -185,6 +222,10 @@ function scoreByProfile(item: ClothingItem, profile: UserProfile | null): number
   if (styles.includes('minimaliste')) {
     if (['Blanc', 'Noir', 'Gris', 'Beige'].includes(item.color)) score += 1;
   }
+
+  // Add silhouette score
+  score += getSilhouetteScore(item, profile.taille, profile.corpulence);
+
   return score;
 }
 
