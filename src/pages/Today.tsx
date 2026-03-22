@@ -323,13 +323,21 @@ export default function Today() {
       )}
 
       {swipeComplete && swipeResults && (
-        <OutfitResults
-          results={swipeResults}
-          weatherCode={ws.status === 'done' ? ws.data.weathercode : null}
-          temperature={weatherTemp}
-          userSeason={userSeason}
-          userProfile={userProfile}
-        />
+        <>
+          <OutfitResults
+            results={swipeResults}
+            weatherCode={ws.status === 'done' ? ws.data.weathercode : null}
+            temperature={weatherTemp}
+            userSeason={userSeason}
+            userProfile={userProfile}
+          />
+          {!canSuggest && (
+            <div className="bg-card rounded-xl p-4 card-shadow text-center mt-3">
+              <p className="text-sm font-serif text-muted-foreground">Tu as utilisé tes 5 suggestions du jour ✨</p>
+              <p className="text-xs text-muted-foreground mt-1">Reviens demain ou passe en Premium pour en voir plus.</p>
+            </div>
+          )}
+        </>
       )}
 
       {enough && canSuggest && recommendations.length > 0 && recommendations.length < 5 && !swipeComplete && (
