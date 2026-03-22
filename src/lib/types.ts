@@ -10,6 +10,7 @@ export interface ClothingItem {
   occasion: string[];
   brand?: string;
   price?: number;
+  matiere?: string;
 }
 
 export interface Outfit {
@@ -26,6 +27,7 @@ export interface UserProfile {
   brands: string[];
   taille: 'petite' | 'moyenne' | 'grande' | null;
   corpulence: 'fine' | 'medium' | 'ronde' | null;
+  morphologie: 'A' | 'H' | 'X' | 'V' | 'O' | '8' | null;
 }
 
 export interface AvatarConfig {
