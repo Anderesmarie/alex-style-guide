@@ -29,11 +29,24 @@ function getCurrentSeason(): string {
 
 export default function Analysis() {
   const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
+  const [profileStyles, setProfileStyles] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const currentSeason = getCurrentSeason();
 
   useEffect(() => {
-    getWardrobe().then(w => { setWardrobe(w); setLoading(false); });
+    const load = async () => {
+      const [w] = await Promise.all([getWardrobe()]);
+      setWardrobe(w);
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData.user) {
+          const { data: p } = await supabase.from('profiles').select('styles').eq('id', userData.user.id).single();
+          if (p?.styles) setProfileStyles(p.styles as string[]);
+        }
+      } catch {}
+      setLoading(false);
+    };
+    load();
   }, []);
 
   const checkBasic = (basic: typeof BASICS[number]) => {
