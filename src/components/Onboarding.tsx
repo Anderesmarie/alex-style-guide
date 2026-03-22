@@ -39,8 +39,8 @@ export default function Onboarding({ onComplete }: Props) {
   const [step, setStep] = useState(0);
   const [showMessage, setShowMessage] = useState(false);
   const [silhouette, setSilhouette] = useState('');
-  const [taille, setTaille] = useState('');
-  const [corpulence, setCorpulence] = useState('');
+  const [taille, setTaille] = useState<'petite' | 'moyenne' | 'grande' | ''>('');
+  const [corpulence, setCorpulence] = useState<'fine' | 'medium' | 'ronde' | ''>('');
   const [styles, setStyles] = useState<string[]>([]);
   const [budget, setBudget] = useState(80);
   const [brands, setBrands] = useState<string[]>([]);
