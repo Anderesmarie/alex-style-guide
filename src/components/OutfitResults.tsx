@@ -20,7 +20,7 @@ interface Props {
 
 const ROSE_GOLD = '#C9956C';
 
-export default function OutfitResults({ results, weatherCode, temperature, userSeason }: Props) {
+export default function OutfitResults({ results, weatherCode, temperature, userSeason, userProfile }: Props) {
   const handleSave = (items: ClothingItem[]) => {
     const ids = items.map(i => i.id);
     saveLastOutfit(ids);
