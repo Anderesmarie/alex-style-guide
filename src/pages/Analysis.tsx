@@ -129,27 +129,105 @@ export default function Analysis() {
             )}
           </div>
 
-          {/* Other cards */}
-          {otherCards.map(card => (
-            <div
-              key={card.title}
-              className="rounded-2xl p-5 relative"
-              style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
-            >
-              <span
-                className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold"
-                style={{ backgroundColor: '#FDF6EC', color: '#C9956C', border: '1px solid #C9956C30' }}
-              >
-                Premium ✨
-              </span>
-              <p className="font-serif font-semibold text-base mb-2" style={{ color: '#2C2C2C' }}>
-                {card.emoji} {card.title}
-              </p>
-              <p className="text-sm italic" style={{ color: '#9B9B9B' }}>
-                Analyse en cours...
-              </p>
-            </div>
-          ))}
+          {/* Occasion */}
+          <div
+            className="rounded-2xl p-5 relative"
+            style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+          >
+            <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold"
+              style={{ backgroundColor: '#FDF6EC', color: '#C9956C', border: '1px solid #C9956C30' }}>
+              Premium ✨
+            </span>
+            <p className="font-serif font-semibold text-base mb-4" style={{ color: '#2C2C2C' }}>
+              👔 Manques par occasion
+            </p>
+            {loading ? (
+              <p className="text-sm italic" style={{ color: '#9B9B9B' }}>Analyse en cours...</p>
+            ) : (
+              <div className="space-y-2.5">
+                {occasionStats.map(o => {
+                  const icon = o.count === 0 ? '🔴' : o.count <= 2 ? '🟡' : '✅';
+                  const msg = o.count === 0
+                    ? `Tu n'as rien à mettre pour ${o.name} !`
+                    : o.count <= 2
+                    ? 'Ajoute 1-2 pièces pour avoir plus d\'options'
+                    : null;
+                  return (
+                    <div key={o.name} className="flex items-start gap-2.5">
+                      <span className="text-sm mt-0.5">{icon}</span>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold" style={{ color: o.count >= 3 ? '#BFBFBF' : '#2C2C2C' }}>
+                          {o.count === 0 ? `Aucune tenue pour ${o.name}` : o.count <= 2 ? `Peu de choix pour ${o.name}` : `${o.name} bien couverte`}
+                        </p>
+                        {msg && <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>{msg}</p>}
+                      </div>
+                      <span className="text-xs font-medium mt-0.5" style={{ color: '#9B9B9B' }}>{o.count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Saison */}
+          <div
+            className="rounded-2xl p-5 relative"
+            style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+          >
+            <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold"
+              style={{ backgroundColor: '#FDF6EC', color: '#C9956C', border: '1px solid #C9956C30' }}>
+              Premium ✨
+            </span>
+            <p className="font-serif font-semibold text-base mb-4" style={{ color: '#2C2C2C' }}>
+              🌦️ Manques par saison
+            </p>
+            {loading ? (
+              <p className="text-sm italic" style={{ color: '#9B9B9B' }}>Analyse en cours...</p>
+            ) : (
+              <div className="space-y-2.5">
+                {seasonStats.map(s => {
+                  const icon = s.count <= 3 ? '🔴' : s.count <= 7 ? '🟡' : '✅';
+                  const msg = s.count <= 3
+                    ? `Il te manque des pièces pour ${s.name}`
+                    : s.count <= 7
+                    ? `${s.name} à compléter`
+                    : null;
+                  return (
+                    <div
+                      key={s.name}
+                      className="flex items-start gap-2.5 rounded-xl px-3 py-2"
+                      style={s.isCurrent ? { border: '1.5px solid #C9956C', backgroundColor: '#FDF6EC' } : {}}
+                    >
+                      <span className="text-sm mt-0.5">{icon}</span>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold flex items-center gap-1.5" style={{ color: s.count > 7 ? '#BFBFBF' : '#2C2C2C' }}>
+                          {s.count <= 3 ? `Dressing ${s.name} trop vide` : s.count <= 7 ? `${s.name} à compléter` : `${s.name} bien couverte`}
+                          {s.isCurrent && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: '#C9956C', color: '#FFF' }}>Actuelle</span>}
+                        </p>
+                        {msg && <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>{msg}</p>}
+                      </div>
+                      <span className="text-xs font-medium mt-0.5" style={{ color: '#9B9B9B' }}>{s.count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Style — placeholder */}
+          <div
+            className="rounded-2xl p-5 relative"
+            style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+          >
+            <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold"
+              style={{ backgroundColor: '#FDF6EC', color: '#C9956C', border: '1px solid #C9956C30' }}>
+              Premium ✨
+            </span>
+            <p className="font-serif font-semibold text-base mb-2" style={{ color: '#2C2C2C' }}>
+              ✨ Manques par style
+            </p>
+            <p className="text-sm italic" style={{ color: '#9B9B9B' }}>Analyse en cours...</p>
+          </div>
         </div>
       </div>
     </div>
