@@ -66,7 +66,7 @@ export default function Onboarding({ onComplete }: Props) {
     await saveAvatar(avatar);
     const palette = getPaletteForSkin(avatar.skin);
     savePalette(palette);
-    await saveProfile({ silhouette, styles, budget, brands, taille: taille || null, corpulence: corpulence || null, morphologie: null });
+    await saveProfile({ silhouette, styles, budget, brands, taille: taille || null, corpulence: corpulence || null, morphologie: null, favorite_colors: [] });
     setShowMessage(true);
     setTimeout(() => {
       setShowMessage(false);

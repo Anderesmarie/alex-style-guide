@@ -24,6 +24,7 @@ export async function getProfile(): Promise<UserProfile | null> {
     taille: data.taille || null,
     corpulence: data.corpulence || null,
     morphologie: data.morphologie || null,
+    favorite_colors: (data.favorite_colors as string[]) || [],
   };
 }
 
