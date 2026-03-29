@@ -81,7 +81,7 @@ export default function Today() {
 
   const today = new Date().toISOString().split('T')[0];
   const enough = wardrobe.length >= 8;
-  const canSuggest = dailyCount < 5;
+  const canSuggest = dailyCount < 3;
   const weatherTemp = ws.status === 'done' ? ws.data.temperature : null;
 
   // Load data
@@ -167,7 +167,7 @@ export default function Today() {
   const generate = useCallback(async () => {
     if (!enough || swipeComplete) return;
     if (!canSuggest) return;
-    const recs = await generateRecommendations(wardrobe, weatherTemp, 5, userProfile);
+    const recs = await generateRecommendations(wardrobe, weatherTemp, 3, userProfile);
     setRecommendations(recs);
     const newCount = dailyCount + 1;
     setDailyCount(newCount);
@@ -291,7 +291,7 @@ export default function Today() {
 
       <EventBanner onViewOutfits={async () => {
         if (!enough) return;
-        const recs = await generateRecommendations(wardrobe, weatherTemp, 5, userProfile);
+        const recs = await generateRecommendations(wardrobe, weatherTemp, 3, userProfile);
         setRecommendations(recs);
         setSwipeComplete(false);
         setSwipeResults(null);
