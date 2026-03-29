@@ -2,7 +2,7 @@ import { ClothingItem, UserProfile } from '@/lib/types';
 import { addOutfit, genId, saveLastOutfit } from '@/lib/storage';
 import { getStylingTips } from '@/lib/stylingTips';
 import { getColorScore } from '@/lib/colorimetry';
-import { getSilhouetteScore, getMorphologyScore } from '@/lib/recommendations';
+import { getSilhouetteScore, getMorphologyScore, getFavoriteColorScore } from '@/lib/recommendations';
 import type { Season } from '@/lib/colorimetry';
 
 interface OutfitResult {
@@ -48,19 +48,24 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
             ? r.outfit.map(item => getColorScore(normalizeColor(item.color), userSeason)).reduce((a, b) => a + b, 0) / r.outfit.length
             : 0;
 
-          const silhouetteAvg = userProfile
-            ? r.outfit.map(item => getSilhouetteScore(item, userProfile.taille, userProfile.corpulence)).reduce((a, b) => a + b, 0) / r.outfit.length
-            : 0;
-
           const morphoAvg = userProfile?.morphologie
             ? r.outfit.map(item => getMorphologyScore(item, userProfile.morphologie)).reduce((a, b) => a + b, 0) / r.outfit.length
             : 0;
 
-          const totalScore = colorAvg + silhouetteAvg + morphoAvg;
+          const favoriteAvg = userProfile?.favorite_colors?.length
+            ? r.outfit.map(item => getFavoriteColorScore(item, userProfile.favorite_colors)).reduce((a, b) => a + b, 0) / r.outfit.length
+            : 0;
+
+          const totalScore = colorAvg + morphoAvg + favoriteAvg;
+
+          // Debug log
+          console.log('Scores carte:', { idx, colorAvg, morphoAvg, favoriteAvg, totalScore, userSeason, morphologie: userProfile?.morphologie, favoriteColors: userProfile?.favorite_colors });
 
           if (totalScore >= 3) smartBadge = 'ideal';
           else if (colorAvg >= 1 && totalScore < 3) smartBadge = 'color';
-          else if (morphoAvg >= 2 && colorAvg < 1) smartBadge = 'morpho';
+          else if (morphoAvg >= 1 && colorAvg < 1) smartBadge = 'morpho';
+          // totalScore < 1 → no badge
+
           return (
             <div
               key={idx}
@@ -102,21 +107,21 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
               {smartBadge === 'ideal' && (
                 <div className="px-2 pb-1">
                   <span className="inline-block text-[9px] font-bold text-white rounded-xl py-0.5 px-1.5" style={{ background: 'linear-gradient(135deg, #C9956C, #E8C4A0)' }}>
-                    ⭐ Tenue idéale
+                    ⭐ Tenue idéale pour toi
                   </span>
                 </div>
               )}
               {smartBadge === 'color' && (
                 <div className="px-2 pb-1">
                   <span className="inline-block text-[9px] font-medium text-white rounded-xl py-0.5 px-1.5" style={{ backgroundColor: '#C9956C' }}>
-                    ✨ Ton teint
+                    ✨ Parfait pour ton teint
                   </span>
                 </div>
               )}
               {smartBadge === 'morpho' && (
                 <div className="px-2 pb-1">
                   <span className="inline-block text-[9px] font-medium rounded-xl py-0.5 px-1.5" style={{ backgroundColor: '#F5F0EB', color: '#C9956C', border: '1px solid #C9956C' }}>
-                    📏 Ta morpho
+                    📏 Parfait pour ta morphologie
                   </span>
                 </div>
               )}
