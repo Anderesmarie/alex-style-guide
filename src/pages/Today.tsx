@@ -5,6 +5,7 @@ import { generateRecommendations } from '@/lib/recommendations';
 import { ClothingItem, UserProfile } from '@/lib/types';
 import OutfitSwiper from '@/components/OutfitSwiper';
 import OutfitResults from '@/components/OutfitResults';
+import CustomOutfitCard from '@/components/CustomOutfitCard';
 import ProgressMilestones from '@/components/ProgressMilestones';
 import StreakCounter from '@/components/StreakCounter';
 import EventBanner from '@/components/EventBanner';
@@ -80,7 +81,7 @@ export default function Today() {
 
   const today = new Date().toISOString().split('T')[0];
   const enough = wardrobe.length >= 8;
-  const canSuggest = dailyCount < 5;
+  const canSuggest = dailyCount < 3;
   const weatherTemp = ws.status === 'done' ? ws.data.temperature : null;
 
   // Load data
@@ -166,7 +167,7 @@ export default function Today() {
   const generate = useCallback(async () => {
     if (!enough || swipeComplete) return;
     if (!canSuggest) return;
-    const recs = await generateRecommendations(wardrobe, weatherTemp, 5, userProfile);
+    const recs = await generateRecommendations(wardrobe, weatherTemp, 3, userProfile);
     setRecommendations(recs);
     const newCount = dailyCount + 1;
     setDailyCount(newCount);
@@ -290,7 +291,7 @@ export default function Today() {
 
       <EventBanner onViewOutfits={async () => {
         if (!enough) return;
-        const recs = await generateRecommendations(wardrobe, weatherTemp, 5, userProfile);
+        const recs = await generateRecommendations(wardrobe, weatherTemp, 3, userProfile);
         setRecommendations(recs);
         setSwipeComplete(false);
         setSwipeResults(null);
@@ -325,23 +326,34 @@ export default function Today() {
 
       {/* Saved results — always visible */}
       {swipeComplete && swipeResults && (
-        <OutfitResults
-          results={swipeResults}
-          weatherCode={ws.status === 'done' ? ws.data.weathercode : null}
-          temperature={weatherTemp}
-          userSeason={userSeason}
-          userProfile={userProfile}
-        />
+        <>
+          <OutfitResults
+            results={swipeResults}
+            weatherCode={ws.status === 'done' ? ws.data.weathercode : null}
+            temperature={weatherTemp}
+            userSeason={userSeason}
+            userProfile={userProfile}
+          />
+          {/* Custom outfit card — always after auto results */}
+          <div className="mt-4">
+            <CustomOutfitCard
+              wardrobe={wardrobe}
+              temperature={weatherTemp}
+              weatherCode={ws.status === 'done' ? ws.data.weathercode : null}
+              userProfile={userProfile}
+            />
+          </div>
+        </>
       )}
 
       {/* Limit message — always BELOW results, never replaces them */}
       {enough && !canSuggest && (
         <p className="text-xs text-muted-foreground text-center mt-3">
-          Tu as utilisé tes 5 suggestions du jour ✨ Reviens demain pour de nouvelles idées.
+          Tu as utilisé tes 3 suggestions du jour ✨ Reviens demain pour de nouvelles idées.
         </p>
       )}
 
-      {enough && canSuggest && recommendations.length > 0 && recommendations.length < 5 && !swipeComplete && (
+      {enough && canSuggest && recommendations.length > 0 && recommendations.length < 3 && !swipeComplete && (
         <p className="text-sm text-muted-foreground text-center mt-2">Ajoute plus de pièces pour débloquer plus de suggestions 👗</p>
       )}
 
