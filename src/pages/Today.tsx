@@ -326,23 +326,34 @@ export default function Today() {
 
       {/* Saved results — always visible */}
       {swipeComplete && swipeResults && (
-        <OutfitResults
-          results={swipeResults}
-          weatherCode={ws.status === 'done' ? ws.data.weathercode : null}
-          temperature={weatherTemp}
-          userSeason={userSeason}
-          userProfile={userProfile}
-        />
+        <>
+          <OutfitResults
+            results={swipeResults}
+            weatherCode={ws.status === 'done' ? ws.data.weathercode : null}
+            temperature={weatherTemp}
+            userSeason={userSeason}
+            userProfile={userProfile}
+          />
+          {/* Custom outfit card — always after auto results */}
+          <div className="mt-4">
+            <CustomOutfitCard
+              wardrobe={wardrobe}
+              temperature={weatherTemp}
+              weatherCode={ws.status === 'done' ? ws.data.weathercode : null}
+              userProfile={userProfile}
+            />
+          </div>
+        </>
       )}
 
       {/* Limit message — always BELOW results, never replaces them */}
       {enough && !canSuggest && (
         <p className="text-xs text-muted-foreground text-center mt-3">
-          Tu as utilisé tes 5 suggestions du jour ✨ Reviens demain pour de nouvelles idées.
+          Tu as utilisé tes 3 suggestions du jour ✨ Reviens demain pour de nouvelles idées.
         </p>
       )}
 
-      {enough && canSuggest && recommendations.length > 0 && recommendations.length < 5 && !swipeComplete && (
+      {enough && canSuggest && recommendations.length > 0 && recommendations.length < 3 && !swipeComplete && (
         <p className="text-sm text-muted-foreground text-center mt-2">Ajoute plus de pièces pour débloquer plus de suggestions 👗</p>
       )}
 
