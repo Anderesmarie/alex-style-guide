@@ -142,6 +142,18 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
                 </p>
               </div>
 
+              {/* Debug info */}
+              <div className="px-2 py-1 text-[9px] text-muted-foreground leading-snug font-mono">
+                <p>Saison: {userSeason ?? 'null'}</p>
+                <p>Morpho: {userProfile?.morphologie ?? 'null'}</p>
+                <p>Taille: {userProfile?.taille ?? 'null'}</p>
+                <p>Corpulence: {userProfile?.corpulence ?? 'null'}</p>
+                {r.outfit.map(item => (
+                  <p key={item.id}>Couleur: {item.color} → score: {userSeason ? getColorScore(normalizeColor(item.color), userSeason) : 0}</p>
+                ))}
+                <p className="font-semibold">Score total: {totalScore.toFixed(2)}</p>
+              </div>
+
               {/* Save button */}
               <div className="px-2 pb-2 pt-1">
                 <button
