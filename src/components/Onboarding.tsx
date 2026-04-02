@@ -63,6 +63,7 @@ interface Props {
 export default function Onboarding({ onComplete }: Props) {
   const [step, setStep] = useState(0);
   const [showMessage, setShowMessage] = useState(false);
+  const [pseudo, setPseudo] = useState('');
   const [silhouette, setSilhouette] = useState('');
   const [taille, setTaille] = useState<'petite' | 'moyenne' | 'grande' | ''>('');
   const [corpulence, setCorpulence] = useState<'fine' | 'medium' | 'ronde' | ''>('');
@@ -75,7 +76,7 @@ export default function Onboarding({ onComplete }: Props) {
   const [makeup, setMakeup] = useState('');
   const [favoriteColors, setFavoriteColors] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const totalSteps = 9;
+  const totalSteps = 10;
 
   const nextStep = () => {
     setShowMessage(true);
