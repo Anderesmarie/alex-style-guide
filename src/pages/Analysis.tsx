@@ -143,12 +143,20 @@ const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
                       <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>
                         {b.impact}
                       </p>
-                      <button
-                        className="text-[11px] font-medium mt-1 underline underline-offset-2"
-                        style={{ color: '#9B9B9B' }}
-                      >
-                        Voir des idées →
-                      </button>
+                      <div className="flex gap-2 mt-1.5 flex-wrap">
+                        {getShopLinks(b.label).map(link => (
+                          <a
+                            key={link.name}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[11px] font-medium underline underline-offset-2"
+                            style={{ color: '#C9956C' }}
+                          >
+                            🛍️ Voir sur {link.name}
+                          </a>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 ))}
