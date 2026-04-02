@@ -32,6 +32,9 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
   const [editingColors, setEditingColors] = useState(false);
   const [tempColors, setTempColors] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pseudo, setPseudo] = useState('');
+  const [editingPseudo, setEditingPseudo] = useState(false);
+  const [tempPseudo, setTempPseudo] = useState('');
 
   const computeAndSaveSeason = async (avatarData: AvatarData) => {
     const s = determineSeason(avatarData.skin, avatarData.eyeColor, avatarData.hairColor);
