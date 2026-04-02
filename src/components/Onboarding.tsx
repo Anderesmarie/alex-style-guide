@@ -403,12 +403,12 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 8 && (
+        {step === 9 && (
           <AvatarCreator onSave={handleAvatarSave} />
         )}
       </div>
 
-      {step < 8 && (
+      {step < 9 && (
         <button onClick={nextStep} disabled={!canProceed}
           className={`w-full py-4 rounded-xl text-lg font-semibold transition-all duration-200 mt-6 ${
             canProceed ? 'bg-primary text-primary-foreground shadow-lg active:scale-[0.98]' : 'bg-muted text-muted-foreground'
