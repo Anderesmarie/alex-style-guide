@@ -389,7 +389,7 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 7 && (
+        {step === 8 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">Ton rapport au maquillage ?</h1>
             <div className="flex flex-wrap gap-3">
