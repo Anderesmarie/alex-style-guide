@@ -185,7 +185,7 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 1 && (
+        {step === 2 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-2">Et ta silhouette en détail ?</h1>
             <p className="text-sm text-muted-foreground mb-6">Pour des suggestions encore plus adaptées ✨</p>
