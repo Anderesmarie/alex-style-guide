@@ -59,6 +59,7 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
           .eq('id', userData.user.id)
           .single();
         if (profileData) {
+          setPseudo(profileData.pseudo || '');
           setProfile({
             silhouette: profileData.silhouette || '',
             styles: (profileData.styles as string[]) || [],
