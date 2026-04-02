@@ -118,6 +118,9 @@ export default function Today() {
             if (prof?.colorimetry_season) {
               setUserSeason(prof.colorimetry_season as Season);
             }
+            if (prof?.pseudo) {
+              setPseudo(prof.pseudo);
+            }
             if (prof) {
               setUserProfile(prev => ({
                 ...prev,
