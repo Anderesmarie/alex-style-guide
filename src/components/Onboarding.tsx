@@ -154,6 +154,22 @@ export default function Onboarding({ onComplete }: Props) {
       <div className="flex-1 fade-enter no-scrollbar overflow-y-auto" key={step}>
         {step === 0 && (
           <>
+            <h1 className="text-2xl font-serif font-bold mb-2">Comment on t'appelle ? 🌸</h1>
+            <p className="text-sm text-muted-foreground mb-6">Choisis un pseudo pour personnaliser ton expérience</p>
+            <input
+              type="text"
+              value={pseudo}
+              onChange={e => setPseudo(e.target.value.slice(0, 20))}
+              placeholder="Ton pseudo..."
+              maxLength={20}
+              className="w-full px-4 py-3 rounded-lg bg-card card-shadow border-0 outline-none focus:ring-2 focus:ring-primary/30 text-base"
+            />
+            <p className="text-xs text-muted-foreground mt-2 text-right">{pseudo.length}/20</p>
+          </>
+        )}
+
+        {step === 1 && (
+          <>
             <h1 className="text-2xl font-serif font-bold mb-6">C'est quoi ta silhouette ?</h1>
             <div className="grid grid-cols-2 gap-3">
               {SILHOUETTES.map(s => (
