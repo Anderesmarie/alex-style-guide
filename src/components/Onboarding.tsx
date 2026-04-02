@@ -329,7 +329,7 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 4 && (
+        {step === 5 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">T'es plutôt dans quelle vibe ?</h1>
             <div className="grid grid-cols-1 gap-3">
