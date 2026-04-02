@@ -138,7 +138,7 @@ const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
                     <span className="text-sm mt-0.5">🔴</span>
                     <div className="flex-1">
                       <p className="text-sm font-semibold" style={{ color: '#2C2C2C' }}>
-                        Il te manque {b.label} 🔴
+                        Il te manque {b.label}
                       </p>
                       <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>
                         {b.impact}
@@ -166,7 +166,7 @@ const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
                     {basicsStatus.filter(b => b.owned).map(b => (
                       <div key={b.label} className="flex items-center gap-2 py-1">
                         <span className="text-sm">✅</span>
-                        <span className="text-sm" style={{ color: '#BFBFBF' }}>{b.label} — Tu l'as déjà ✅</span>
+                        <span className="text-sm" style={{ color: '#BFBFBF' }}>{b.label} — Tu l'as déjà</span>
                       </div>
                     ))}
                   </div>
