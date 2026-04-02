@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { compressImage } from '@/lib/imageUtils';
 import { UserProfile, SILHOUETTES, STYLE_OPTIONS, BRAND_SUGGESTIONS } from '@/lib/types';
+import { supabase } from '@/lib/supabase';
 import { saveProfile, saveAvatar, savePalette } from '@/lib/storage';
 import { AvatarData } from './AvatarSVG';
 import AvatarCreator from './AvatarCreator';
@@ -63,6 +64,7 @@ interface Props {
 export default function Onboarding({ onComplete }: Props) {
   const [step, setStep] = useState(0);
   const [showMessage, setShowMessage] = useState(false);
+  const [pseudo, setPseudo] = useState('');
   const [silhouette, setSilhouette] = useState('');
   const [taille, setTaille] = useState<'petite' | 'moyenne' | 'grande' | ''>('');
   const [corpulence, setCorpulence] = useState<'fine' | 'medium' | 'ronde' | ''>('');
@@ -75,7 +77,7 @@ export default function Onboarding({ onComplete }: Props) {
   const [makeup, setMakeup] = useState('');
   const [favoriteColors, setFavoriteColors] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const totalSteps = 9;
+  const totalSteps = 10;
 
   const nextStep = () => {
     setShowMessage(true);
@@ -93,6 +95,13 @@ export default function Onboarding({ onComplete }: Props) {
     const palette = getPaletteForSkin(avatar.skin);
     savePalette(palette);
     await saveProfile({ silhouette, styles, budget, brands, taille: taille || null, corpulence: corpulence || null, morphologie: null, favorite_colors: favoriteColors });
+    // Save pseudo to Supabase
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData.user && pseudo.trim()) {
+        await supabase.from('profiles').update({ pseudo: pseudo.trim() }).eq('id', userData.user.id);
+      }
+    } catch {}
     setShowMessage(true);
     setTimeout(() => {
       setShowMessage(false);
@@ -118,15 +127,16 @@ export default function Onboarding({ onComplete }: Props) {
   const removeBrand = (b: string) => setBrands(brands.filter(x => x !== b));
 
   const canProceed = [
-    silhouette !== '',       // 0
-    taille !== '' && corpulence !== '', // 1
-    true,                    // 2 — favorite colors (optional)
-    styles.length > 0,       // 3
-    lifestyle !== '',        // 4
-    true,                    // 5 — budget
-    true,                    // 6 — brands
-    makeup !== '',           // 7
-    false,                   // 8 — avatar
+    pseudo.trim().length > 0, // 0 — pseudo
+    silhouette !== '',       // 1
+    taille !== '' && corpulence !== '', // 2
+    true,                    // 3 — favorite colors (optional)
+    styles.length > 0,       // 4
+    lifestyle !== '',        // 5
+    true,                    // 6 — budget
+    true,                    // 7 — brands
+    makeup !== '',           // 8
+    false,                   // 9 — avatar
   ][step];
 
   return (
@@ -144,6 +154,22 @@ export default function Onboarding({ onComplete }: Props) {
       <div className="flex-1 fade-enter no-scrollbar overflow-y-auto" key={step}>
         {step === 0 && (
           <>
+            <h1 className="text-2xl font-serif font-bold mb-2">Comment on t'appelle ? 🌸</h1>
+            <p className="text-sm text-muted-foreground mb-6">Choisis un pseudo pour personnaliser ton expérience</p>
+            <input
+              type="text"
+              value={pseudo}
+              onChange={e => setPseudo(e.target.value.slice(0, 20))}
+              placeholder="Ton pseudo..."
+              maxLength={20}
+              className="w-full px-4 py-3 rounded-lg bg-card card-shadow border-0 outline-none focus:ring-2 focus:ring-primary/30 text-base"
+            />
+            <p className="text-xs text-muted-foreground mt-2 text-right">{pseudo.length}/20</p>
+          </>
+        )}
+
+        {step === 1 && (
+          <>
             <h1 className="text-2xl font-serif font-bold mb-6">C'est quoi ta silhouette ?</h1>
             <div className="grid grid-cols-2 gap-3">
               {SILHOUETTES.map(s => (
@@ -159,7 +185,7 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 1 && (
+        {step === 2 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-2">Et ta silhouette en détail ?</h1>
             <p className="text-sm text-muted-foreground mb-6">Pour des suggestions encore plus adaptées ✨</p>
@@ -212,7 +238,7 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 2 && (
+        {step === 3 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-2">Tes couleurs préférées ?</h1>
             <p className="text-sm text-muted-foreground mb-6">On privilégiera ces teintes dans tes suggestions ✨</p>
@@ -250,7 +276,7 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 3 && (
+        {step === 4 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">Ton style, c'est plutôt ?</h1>
             <div className="flex flex-wrap gap-2.5">
@@ -303,7 +329,7 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 4 && (
+        {step === 5 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">T'es plutôt dans quelle vibe ?</h1>
             <div className="grid grid-cols-1 gap-3">
@@ -320,7 +346,7 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 5 && (
+        {step === 6 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">Ton budget habituel par vêtement ?</h1>
             <div className="mt-8">
@@ -338,7 +364,7 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 6 && (
+        {step === 7 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">Tes marques préférées ?</h1>
             {brands.length > 0 && (
@@ -363,7 +389,7 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 7 && (
+        {step === 8 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">Ton rapport au maquillage ?</h1>
             <div className="flex flex-wrap gap-3">
@@ -377,12 +403,12 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 8 && (
+        {step === 9 && (
           <AvatarCreator onSave={handleAvatarSave} />
         )}
       </div>
 
-      {step < 8 && (
+      {step < 9 && (
         <button onClick={nextStep} disabled={!canProceed}
           className={`w-full py-4 rounded-xl text-lg font-semibold transition-all duration-200 mt-6 ${
             canProceed ? 'bg-primary text-primary-foreground shadow-lg active:scale-[0.98]' : 'bg-muted text-muted-foreground'
