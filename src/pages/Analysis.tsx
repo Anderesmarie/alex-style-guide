@@ -138,7 +138,7 @@ const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
                     <span className="text-sm mt-0.5">🔴</span>
                     <div className="flex-1">
                       <p className="text-sm font-semibold" style={{ color: '#2C2C2C' }}>
-                        Il te manque {b.label} 🔴
+                        Il te manque {b.label}
                       </p>
                       <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>
                         {b.impact}
