@@ -226,18 +226,39 @@ export default function Today() {
 
   return (
     <div className="fade-enter pb-4">
-      <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full overflow-hidden">
-            <AvatarSVG avatar={avatarData} size={40} />
-          </div>
-          <h1 className="text-2xl font-serif font-bold">Aujourd'hui</h1>
-        </div>
-        <StreakCounter />
-      </div>
-      <p className="text-muted-foreground text-sm mb-4">
-        {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
-      </p>
+      {(() => {
+        const hour = new Date().getHours();
+        const name = pseudo || 'toi';
+        let greeting = '';
+        let subGreeting = '';
+        if (hour >= 6 && hour < 12) {
+          greeting = `Bonjour ${name} ☀️`;
+          subGreeting = 'Prête à être stylée ?';
+        } else if (hour >= 12 && hour < 18) {
+          greeting = `Coucou ${name} ✨`;
+          subGreeting = 'On trouve ta tenue du jour ?';
+        } else {
+          greeting = `Bonsoir ${name} 🌙`;
+          subGreeting = 'Une tenue pour ce soir ?';
+        }
+        return (
+          <>
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full overflow-hidden">
+                  <AvatarSVG avatar={avatarData} size={40} />
+                </div>
+                <h1 className="text-2xl font-serif font-bold">{greeting}</h1>
+              </div>
+              <StreakCounter />
+            </div>
+            <p className="text-sm italic ml-[52px]" style={{ color: '#C9956C' }}>{subGreeting}</p>
+            <p className="text-muted-foreground text-xs ml-[52px] mb-4">
+              {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </p>
+          </>
+        );
+      })()}
 
       <ProgressMilestones />
 
