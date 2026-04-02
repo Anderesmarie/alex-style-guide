@@ -63,8 +63,9 @@ const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
       try {
         const { data: userData } = await supabase.auth.getUser();
         if (userData.user) {
-          const { data: p } = await supabase.from('profiles').select('styles').eq('id', userData.user.id).single();
+          const { data: p } = await supabase.from('profiles').select('styles, brands').eq('id', userData.user.id).single();
           if (p?.styles) setProfileStyles(p.styles as string[]);
+          if (p?.brands) setUserBrands(p.brands as string[]);
         }
       } catch {}
       setLoading(false);
