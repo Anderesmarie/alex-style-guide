@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { compressImage } from '@/lib/imageUtils';
 import { UserProfile, SILHOUETTES, STYLE_OPTIONS, BRAND_SUGGESTIONS } from '@/lib/types';
+import { supabase } from '@/lib/supabase';
 import { saveProfile, saveAvatar, savePalette } from '@/lib/storage';
 import { AvatarData } from './AvatarSVG';
 import AvatarCreator from './AvatarCreator';
