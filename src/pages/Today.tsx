@@ -111,7 +111,7 @@ export default function Today() {
           if (userData.user) {
             const { data: prof } = await supabase
               .from('profiles')
-              .select('colorimetry_season, morphologie, taille, corpulence, favorite_colors')
+              .select('colorimetry_season, morphologie, taille, corpulence, favorite_colors, pseudo')
               .eq('id', userData.user.id)
               .single();
             console.log('Profil complet chargé:', prof);
