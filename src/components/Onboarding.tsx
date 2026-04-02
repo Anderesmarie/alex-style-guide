@@ -276,7 +276,7 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 3 && (
+        {step === 4 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">Ton style, c'est plutôt ?</h1>
             <div className="flex flex-wrap gap-2.5">
