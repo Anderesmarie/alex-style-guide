@@ -346,7 +346,7 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 5 && (
+        {step === 6 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">Ton budget habituel par vêtement ?</h1>
             <div className="mt-8">
