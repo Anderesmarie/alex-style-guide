@@ -238,7 +238,7 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 2 && (
+        {step === 3 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-2">Tes couleurs préférées ?</h1>
             <p className="text-sm text-muted-foreground mb-6">On privilégiera ces teintes dans tes suggestions ✨</p>
