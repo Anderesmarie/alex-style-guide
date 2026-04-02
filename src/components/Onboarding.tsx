@@ -364,7 +364,7 @@ export default function Onboarding({ onComplete }: Props) {
           </>
         )}
 
-        {step === 6 && (
+        {step === 7 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">Tes marques préférées ?</h1>
             {brands.length > 0 && (
