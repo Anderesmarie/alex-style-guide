@@ -127,15 +127,16 @@ export default function Onboarding({ onComplete }: Props) {
   const removeBrand = (b: string) => setBrands(brands.filter(x => x !== b));
 
   const canProceed = [
-    silhouette !== '',       // 0
-    taille !== '' && corpulence !== '', // 1
-    true,                    // 2 — favorite colors (optional)
-    styles.length > 0,       // 3
-    lifestyle !== '',        // 4
-    true,                    // 5 — budget
-    true,                    // 6 — brands
-    makeup !== '',           // 7
-    false,                   // 8 — avatar
+    pseudo.trim().length > 0, // 0 — pseudo
+    silhouette !== '',       // 1
+    taille !== '' && corpulence !== '', // 2
+    true,                    // 3 — favorite colors (optional)
+    styles.length > 0,       // 4
+    lifestyle !== '',        // 5
+    true,                    // 6 — budget
+    true,                    // 7 — brands
+    makeup !== '',           // 8
+    false,                   // 9 — avatar
   ][step];
 
   return (
