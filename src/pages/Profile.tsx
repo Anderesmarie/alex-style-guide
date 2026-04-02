@@ -161,6 +161,69 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
           </div>
         </div>
 
+        {/* Pseudo */}
+        <div
+          className="rounded-2xl p-5 mb-4"
+          style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+        >
+          <div className="flex items-center justify-between">
+            <p className="font-serif font-semibold text-base" style={{ color: '#2C2C2C' }}>
+              Mon pseudo
+            </p>
+            {!editingPseudo && (
+              <button
+                onClick={() => { setTempPseudo(pseudo); setEditingPseudo(true); }}
+                className="text-sm"
+                style={{ color: '#C9956C' }}
+              >
+                ✏️
+              </button>
+            )}
+          </div>
+          {editingPseudo ? (
+            <div className="mt-3 space-y-3">
+              <input
+                type="text"
+                value={tempPseudo}
+                onChange={e => setTempPseudo(e.target.value.slice(0, 20))}
+                maxLength={20}
+                placeholder="Ton pseudo..."
+                className="w-full px-3 py-2 rounded-lg border text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                style={{ borderColor: '#E0D5C8' }}
+              />
+              <p className="text-xs text-right" style={{ color: '#9B9B9B' }}>{tempPseudo.length}/20</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setEditingPseudo(false)}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-medium"
+                  style={{ backgroundColor: '#F5F0EB', color: '#6B6B6B' }}
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={async () => {
+                    const { data: userData } = await supabase.auth.getUser();
+                    if (userData.user) {
+                      await supabase.from('profiles').update({ pseudo: tempPseudo.trim() || null }).eq('id', userData.user.id);
+                      setPseudo(tempPseudo.trim());
+                      toast.success('Pseudo sauvegardé ✨', { duration: 2000 });
+                    }
+                    setEditingPseudo(false);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white"
+                  style={{ backgroundColor: '#C9956C' }}
+                >
+                  Enregistrer
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm mt-1" style={{ color: pseudo ? '#2C2C2C' : '#9B9B9B' }}>
+              {pseudo || 'Non défini'}
+            </p>
+          )}
+        </div>
+
         {/* 1. SAISON COLORIMÉTRIQUE */}
         {palette && seasonInfo && season && (
           <div
