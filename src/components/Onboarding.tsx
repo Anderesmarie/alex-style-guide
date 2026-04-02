@@ -95,6 +95,13 @@ export default function Onboarding({ onComplete }: Props) {
     const palette = getPaletteForSkin(avatar.skin);
     savePalette(palette);
     await saveProfile({ silhouette, styles, budget, brands, taille: taille || null, corpulence: corpulence || null, morphologie: null, favorite_colors: favoriteColors });
+    // Save pseudo to Supabase
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData.user && pseudo.trim()) {
+        await supabase.from('profiles').update({ pseudo: pseudo.trim() }).eq('id', userData.user.id);
+      }
+    } catch {}
     setShowMessage(true);
     setTimeout(() => {
       setShowMessage(false);
