@@ -28,9 +28,32 @@ function getCurrentSeason(): string {
 }
 
 export default function Analysis() {
-  const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
+const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
   const [profileStyles, setProfileStyles] = useState<string[]>([]);
+  const [userBrands, setUserBrands] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const BRAND_URLS: Record<string, string> = {
+    'Zara': 'https://www.zara.com/fr/fr/search?searchTerm=',
+    'H&M': 'https://www2.hm.com/fr_fr/recherche.html?q=',
+    'Shein': 'https://fr.shein.com/search?q=',
+    'Vinted': 'https://www.vinted.fr/catalog?search_text=',
+    'Sézane': 'https://www.sezane.com/fr/recherche?q=',
+    'Mango': 'https://shop.mango.com/fr/recherche?q=',
+    'Bershka': 'https://www.bershka.com/fr/search?q=',
+    'Zalando': 'https://www.zalando.fr/recherche/?q=',
+    'Asos': 'https://www.asos.com/fr/recherche/?q=',
+    'Primark': 'https://www.primark.com/fr-fr/search?q=',
+  };
+
+  const getShopLinks = (searchTerm: string) => {
+    const matched = userBrands.filter(b => BRAND_URLS[b]);
+    const brands = matched.length > 0 ? matched.slice(0, 2) : [{ name: 'Zalando', url: BRAND_URLS['Zalando'] }] as any;
+    if (matched.length === 0) {
+      return [{ name: 'Zalando', url: BRAND_URLS['Zalando'] + encodeURIComponent(searchTerm) }];
+    }
+    return matched.slice(0, 2).map(b => ({ name: b, url: BRAND_URLS[b] + encodeURIComponent(searchTerm) }));
+  };
   const currentSeason = getCurrentSeason();
 
   useEffect(() => {
