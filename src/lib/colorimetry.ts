@@ -39,36 +39,57 @@ export const SEASON_PALETTES: Record<Season, ColorimetryProfile> = {
 };
 
 export const COLOR_TO_SEASON: Record<string, Season[]> = {
-  // Couleurs unies
+  // Couleurs unies — minuscules ET majuscules
   'blanc': ['hiver'],
+  'Blanc': ['hiver'],
   'noir': ['hiver'],
+  'Noir': ['hiver'],
   'gris': ['ete', 'hiver'],
+  'Gris': ['ete', 'hiver'],
   'beige': ['printemps', 'automne'],
+  'Beige': ['printemps', 'automne'],
   'camel': ['automne'],
+  'Camel': ['automne'],
   'bleu': ['printemps', 'ete'],
+  'Bleu': ['printemps', 'ete'],
   'marine': ['hiver', 'ete'],
+  'Marine': ['hiver', 'ete'],
   'rouge': ['hiver'],
+  'Rouge': ['hiver'],
   'bordeaux': ['automne', 'hiver'],
+  'Bordeaux': ['automne', 'hiver'],
   'rose': ['ete', 'printemps'],
+  'Rose': ['ete', 'printemps'],
   'vert': ['printemps', 'automne'],
+  'Vert': ['printemps', 'automne'],
   'kaki': ['automne'],
+  'Kaki': ['automne'],
   'jaune': ['printemps', 'automne'],
+  'Jaune': ['printemps', 'automne'],
   'marron': ['automne'],
+  'Marron': ['automne'],
   'violet': ['hiver'],
+  'Violet': ['hiver'],
   'corail': ['printemps'],
+  'Corail': ['printemps'],
   'terracotta': ['automne'],
+  'Terracotta': ['automne'],
   'lavande': ['ete'],
+  'Lavande': ['ete'],
   'turquoise': ['printemps'],
+  'Turquoise': ['printemps'],
   'rose_gold': ['printemps', 'ete'],
   'creme': ['printemps', 'ete'],
   'fuchsia': ['hiver'],
+  'Fuchsia': ['hiver'],
+  'multicolore': [],
+  'Multicolore': [],
   // Motifs — score neutre pour tous
   'leopard': [],
   'fleuri': [],
   'raye': [],
   'carreaux': [],
   'geometrique': [],
-  'multicolore': [],
 };
 
 // Hex values for season palette color names (for rendering circles)
@@ -302,26 +323,9 @@ export function determineSeason(
 }
 
 export function getColorScore(itemColor: string, userSeason: Season): number {
-  const normalized = itemColor?.trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") ?? '';
-
-  const colorMap: Record<string, string> = {
-    'blanc': 'Blanc',
-    'noir': 'Noir',
-    'gris': 'Gris',
-    'beige': 'Beige',
-    'bleu': 'Bleu',
-    'rouge': 'Rouge',
-    'rose': 'Rose',
-    'vert': 'Vert',
-    'jaune': 'Jaune',
-    'marron': 'Marron',
-    'multicolore': 'Multicolore',
-  };
-
-  const seasons = COLOR_TO_SEASON[colorMap[normalized] ?? itemColor] ?? [];
+  const normalized = itemColor?.trim().toLowerCase() ?? '';
+  const seasons = COLOR_TO_SEASON[normalized] ??
+                  COLOR_TO_SEASON[itemColor] ?? [];
   if (seasons.length === 0) return 0;
   if (seasons.includes(userSeason)) return 2;
   const palette = SEASON_PALETTES[userSeason];

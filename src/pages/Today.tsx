@@ -104,17 +104,27 @@ export default function Today() {
           setSwipeComplete(true);
         }
 
-        // Fetch colorimetry season
+        // Fetch full profile (colorimetry, morpho, taille, corpulence, favorite_colors)
         try {
           const { data: userData } = await supabase.auth.getUser();
           if (userData.user) {
             const { data: prof } = await supabase
               .from('profiles')
-              .select('colorimetry_season')
+              .select('colorimetry_season, morphologie, taille, corpulence, favorite_colors')
               .eq('id', userData.user.id)
-              .maybeSingle();
+              .single();
+            console.log('Profil complet chargé:', prof);
             if (prof?.colorimetry_season) {
               setUserSeason(prof.colorimetry_season as Season);
+            }
+            if (prof) {
+              setUserProfile(prev => ({
+                ...prev,
+                morphologie: prof.morphologie ?? undefined,
+                taille: prof.taille ?? undefined,
+                corpulence: prof.corpulence ?? undefined,
+                favorite_colors: prof.favorite_colors ?? [],
+              } as UserProfile));
             }
           }
         } catch {}
