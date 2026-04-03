@@ -230,7 +230,7 @@ export default function Analysis() {
                                   className="text-[11px] font-medium underline underline-offset-2"
                                   style={{ color: '#C9956C' }}
                                 >
-                                  🛍️ Voir des idées →
+                                  🛍️ Voir sur {link.name}
                                 </a>
                               ))}
                             </div>
@@ -361,14 +361,19 @@ export default function Analysis() {
                         <div className="flex-1">
                           <p className="text-sm font-semibold" style={{ color: s.count > 5 ? '#888888' : '#2C2C2C' }}>
                             {s.count <= 2
-                              ? `Tu te définis ${s.name} mais ton dressing ne le montre pas encore 😅`
+                              ? `Style ${s.name} à développer (${s.count} pièces)`
                               : s.count <= 5
-                              ? `Ton style ${s.name} manque de pièces`
-                              : `Ton style ${s.name} est validé`}
+                              ? `Style ${s.name} un peu léger (${s.count} pièces)`
+                              : `Style ${s.name} bien représenté ✨`}
                           </p>
                           {s.count <= 2 && (
                             <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>
-                              Ajoute {SUGGESTIONS[s.name] || 'une pièce'} pour compléter
+                              Ajoute des pièces {s.name} pour l'affirmer
+                            </p>
+                          )}
+                          {s.count > 2 && s.count <= 5 && (
+                            <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>
+                              Encore quelques pièces !
                             </p>
                           )}
                         </div>
