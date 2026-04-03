@@ -82,10 +82,10 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
     setSavedIdxs(getSavedSet(today));
   }, [today]);
 
-  const handleSave = (items: ClothingItem[], idx: number) => {
+  const handleSave = async (items: ClothingItem[], idx: number) => {
     const ids = items.map(i => i.id);
-    saveLastOutfit(ids);
-    addOutfit({
+    await saveLastOutfit(ids);
+    await addOutfit({
       id: genId(),
       name: `Tenue du ${new Date().toLocaleDateString('fr-FR')}`,
       itemIds: ids,

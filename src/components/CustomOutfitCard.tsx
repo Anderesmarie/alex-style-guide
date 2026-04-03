@@ -52,11 +52,11 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
     setGenerating(false);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!generatedOutfit) return;
     const ids = generatedOutfit.map(i => i.id);
-    saveLastOutfit(ids);
-    addOutfit({
+    await saveLastOutfit(ids);
+    await addOutfit({
       id: genId(),
       name: `Tenue perso du ${new Date().toLocaleDateString('fr-FR')}`,
       itemIds: ids,

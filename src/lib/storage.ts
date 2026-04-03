@@ -225,18 +225,36 @@ export async function saveDailyCounter(counter: DailyCounter): Promise<void> {
   }, { onConflict: 'user_id,date' });
 }
 
-// ---------- Last outfit / Rejected (localStorage for now) ----------
-export const getLastOutfit = (): string[] => {
-  try { const v = localStorage.getItem('mystyl_last_outfit'); return v ? JSON.parse(v) : []; } catch { return []; }
-};
-export const saveLastOutfit = (ids: string[]) => localStorage.setItem('mystyl_last_outfit', JSON.stringify(ids));
+// ---------- Last outfit / Rejected (Supabase) ----------
+export async function getLastOutfit(): Promise<string[]> {
+  const uid = await getUserId();
+  const { data } = await supabase.from('last_outfit').select('item_ids').eq('user_id', uid).maybeSingle();
+  if (!data) return [];
+  return (data.item_ids as string[]) ?? [];
+}
 
-export const getRejected = (): string[][] => {
-  try { const v = localStorage.getItem('mystyl_rejected'); return v ? JSON.parse(v) : []; } catch { return []; }
-};
-export const addRejected = (ids: string[]) => {
-  const r = getRejected(); r.push(ids.sort()); localStorage.setItem('mystyl_rejected', JSON.stringify(r));
-};
+export async function saveLastOutfit(ids: string[]): Promise<void> {
+  const uid = await getUserId();
+  await supabase.from('last_outfit').upsert({
+    user_id: uid,
+    item_ids: ids,
+  }, { onConflict: 'user_id' });
+}
+
+export async function getRejected(): Promise<string[][]> {
+  const uid = await getUserId();
+  const { data } = await supabase.from('rejected_outfits').select('item_ids').eq('user_id', uid);
+  if (!data) return [];
+  return data.map(r => (r.item_ids as string[]) ?? []);
+}
+
+export async function addRejected(ids: string[]): Promise<void> {
+  const uid = await getUserId();
+  await supabase.from('rejected_outfits').insert({
+    user_id: uid,
+    item_ids: ids.sort(),
+  });
+}
 
 // ---------- Auth compat (deprecated — Supabase handles sessions) ----------
 export const getAuth = () => null;
