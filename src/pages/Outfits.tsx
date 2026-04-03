@@ -40,6 +40,7 @@ export default function Outfits() {
       itemIds: Array.from(selectedIds),
       createdAt: new Date().toISOString(),
     });
+    updateStreak();
     const o = await getOutfits();
     setOutfits(o);
     setSelectedIds(new Set());

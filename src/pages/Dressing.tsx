@@ -113,6 +113,7 @@ export default function Dressing() {
       price: price ? Number(price) : undefined,
     };
     await addClothing(item);
+    updateStreak();
     await loadWardrobe();
     resetForm();
     setView('grid');

@@ -98,6 +98,7 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
       persistSavedSet(today, next);
       return next;
     });
+    updateStreak();
   };
 
   const handleWearOutfit = async (items: ClothingItem[], idx: number) => {

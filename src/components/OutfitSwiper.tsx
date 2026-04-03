@@ -41,6 +41,7 @@ export default function OutfitSwiper({ outfits, weatherCode, temperature, onComp
     setTimeout(() => {
       const updated = [...cards];
       updated[currentIndex] = { ...updated[currentIndex], liked };
+      updateStreak();
       setCards(updated);
 
       const nextIndex = currentIndex + 1;
