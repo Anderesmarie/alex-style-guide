@@ -475,8 +475,8 @@ export async function generateRecommendations(
   userProfile: UserProfile | null = null
 ): Promise<ClothingItem[][]> {
   const season = getCurrentSeason();
-  const lastOutfit = getLastOutfit();
-  const rejected = getRejected();
+  const lastOutfit = await getLastOutfit();
+  const rejected = await getRejected();
   const lastKey = lastOutfit.sort().join(',');
   const blockedKeys = new Set(rejected.map(r => r.sort().join(',')));
   if (lastKey) blockedKeys.add(lastKey);
