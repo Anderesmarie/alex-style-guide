@@ -83,7 +83,7 @@ export default function Today() {
 
   const today = new Date().toISOString().split('T')[0];
   const enough = wardrobe.length >= 8;
-  const canSuggest = dailyCount < 5;
+  const canSuggest = dailyCount < 3;
   const weatherTemp = ws.status === 'done' ? ws.data.temperature : null;
 
   // Load data
@@ -391,7 +391,7 @@ export default function Today() {
       {/* Limit message — always BELOW results, never replaces them */}
       {enough && !canSuggest && !swipeResults && (
         <p className="text-xs text-muted-foreground text-center mt-3">
-          Tu as utilisé tes 5 suggestions du jour ✨ Reviens demain pour de nouvelles idées.
+          Tu as utilisé tes 3 suggestions du jour ✨ Reviens demain pour de nouvelles idées.
         </p>
       )}
 
