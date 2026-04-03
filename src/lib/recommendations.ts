@@ -467,13 +467,20 @@ export async function loadScoringContext(wardrobe: ClothingItem[]): Promise<Scor
   };
 }
 
+function getCompatibleSeasons(temperature: number | null): string[] {
+  if (temperature === null) return ['Printemps', 'Été', 'Automne', 'Hiver', 'Toutes saisons'];
+  if (temperature >= 25) return ['Été', 'Toutes saisons'];
+  if (temperature >= 15 && temperature < 25) return ['Printemps', 'Été', 'Automne', 'Toutes saisons'];
+  if (temperature >= 5 && temperature < 15) return ['Automne', 'Hiver', 'Printemps', 'Toutes saisons'];
+  return ['Hiver', 'Toutes saisons'];
+}
+
 export async function generateRecommendations(
   wardrobe: ClothingItem[],
   temperature: number | null,
   count = 2,
   userProfile: UserProfile | null = null
 ): Promise<ClothingItem[][]> {
-  const season = getCurrentSeason();
   const lastOutfit = await getLastOutfit();
   const rejected = await getRejected();
   const lastKey = lastOutfit.sort().join(',');
@@ -484,12 +491,16 @@ export async function generateRecommendations(
   let ctx: ScoringContext | null = null;
   try { ctx = await loadScoringContext(wardrobe); } catch {}
 
+  const compatibleSeasons = getCompatibleSeasons(temperature);
   const seasonPool = wardrobe.filter(
-    i => i.season.includes(season) || i.season.includes('Toutes saisons')
+    i => i.season.length === 0 || i.season.some(s => compatibleSeasons.includes(s))
   );
+  const effectivePool = seasonPool.length >= 4 ? seasonPool : wardrobe;
 
   const occasionFilter = isWeekday() ? ['Travail', 'Quotidien'] : ['Sortie', 'Quotidien'];
-  const occasionPool = seasonPool.filter(i => i.occasion.some(o => occasionFilter.includes(o)));
+  const occasionPool = effectivePool.filter(
+    i => i.occasion.length === 0 || i.occasion.some(o => occasionFilter.includes(o))
+  );
 
   const rankPool = (pool: ClothingItem[]) => {
     if (!userProfile) return pool;
@@ -504,7 +515,7 @@ export async function generateRecommendations(
   const results: ClothingItem[][] = [];
   const seenKeys = new Set<string>();
   const usedPoolKeys = new Set<string>();
-  const candidatePools = [occasionPool, seasonPool, wardrobe];
+  const candidatePools = [occasionPool, effectivePool, wardrobe];
 
   for (const pool of candidatePools) {
     if (results.length >= count || pool.length < 3) continue;
