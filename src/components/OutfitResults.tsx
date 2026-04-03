@@ -193,7 +193,7 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
             <div
               key={idx}
               className={`bg-card rounded-xl overflow-hidden card-shadow transition-all ${
-                !isLiked && !isWorn ? 'opacity-50 grayscale-[40%]' : ''
+                isOtherWorn ? 'opacity-60 grayscale-[30%]' : !isLiked && !isWorn ? 'opacity-50 grayscale-[40%]' : ''
               }`}
               style={{
                 border: isWorn
