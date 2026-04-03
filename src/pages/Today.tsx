@@ -83,7 +83,7 @@ export default function Today() {
 
   const today = new Date().toISOString().split('T')[0];
   const enough = wardrobe.length >= 8;
-  const canSuggest = dailyCount < 3;
+  const canSuggest = dailyCount < 5;
   const weatherTemp = ws.status === 'done' ? ws.data.temperature : null;
 
   // Load data
