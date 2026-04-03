@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { getWardrobe } from '@/lib/storage';
-import { ClothingItem } from '@/lib/types';
+import { getWardrobe, getOutfits } from '@/lib/storage';
+import { ClothingItem, Outfit } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import { updateStreak } from '@/lib/streak';
+import WardrobeStats from '@/components/WardrobeStats';
 
 const BASICS = [
   { type: 'Jean', color: 'noir', label: 'Jean noir', impact: 'Crée 5+ tenues casual et chic' },
@@ -47,6 +48,7 @@ function getCurrentSeason(): string {
 
 export default function Analysis() {
   const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
+  const [outfits, setOutfits] = useState<Outfit[]>([]);
   const [profileStyles, setProfileStyles] = useState<string[]>([]);
   const [userBrands, setUserBrands] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,8 +78,9 @@ export default function Analysis() {
 
   useEffect(() => {
     const load = async () => {
-      const [w] = await Promise.all([getWardrobe()]);
+      const [w, o] = await Promise.all([getWardrobe(), getOutfits()]);
       setWardrobe(w);
+      setOutfits(o);
       updateStreak();
       try {
         const { data: userData } = await supabase.auth.getUser();
@@ -134,7 +137,9 @@ export default function Analysis() {
           ✨ Fonctionnalités Premium — Abonnement à venir
         </div>
 
-        <div className="space-y-4">
+        <WardrobeStats wardrobe={wardrobe} outfits={outfits} loading={loading} />
+
+        <div className="space-y-4 mt-4">
           {/* Basiques */}
           <div
             className="rounded-2xl p-5"
