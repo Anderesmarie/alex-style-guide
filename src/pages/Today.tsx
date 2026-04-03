@@ -128,13 +128,6 @@ export default function Today() {
               setPseudo(prof.pseudo);
             }
             if (prof) {
-              setDebugProfile({
-                colorimetry_season: prof.colorimetry_season ?? null,
-                morphologie: prof.morphologie ?? null,
-                taille: prof.taille ?? null,
-                corpulence: prof.corpulence ?? null,
-                favorite_colors: prof.favorite_colors ?? null,
-              });
               setUserProfile(prev => ({
                 ...prev,
                 morphologie: prof.morphologie ?? undefined,
