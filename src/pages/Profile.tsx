@@ -422,15 +422,7 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
         </div>
 
         {/* Streak */}
-        <div
-          className="rounded-2xl p-5 mb-4"
-          style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
-        >
-          <p className="text-sm mb-1" style={{ color: '#9B9B9B' }}>Meilleur streak</p>
-          <p className="text-2xl font-serif font-bold" style={{ color: '#C9956C' }}>
-            {getStreak().bestStreak} jours 🔥
-          </p>
-        </div>
+        <StreakCard />
 
         <button onClick={onLogout} className="w-full py-3 mt-2 mb-4 text-sm font-medium" style={{ color: '#D32F2F' }}>
           Se déconnecter
