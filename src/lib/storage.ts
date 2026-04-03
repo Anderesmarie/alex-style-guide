@@ -3,11 +3,23 @@ import { ColorPalette } from './colorimetry';
 import { supabase } from './supabase';
 
 // ---------- helpers ----------
+let cachedUserId: string | null | undefined = undefined;
+
 async function getUserId(): Promise<string> {
+  if (cachedUserId !== undefined) {
+    if (!cachedUserId) throw new Error('Not authenticated');
+    return cachedUserId;
+  }
   const { data } = await supabase.auth.getUser();
-  if (!data.user) throw new Error('Not authenticated');
-  return data.user.id;
+  cachedUserId = data.user?.id ?? null;
+  if (!cachedUserId) throw new Error('Not authenticated');
+  return cachedUserId;
 }
+
+supabase.auth.onAuthStateChange((event) => {
+  if (event === 'SIGNED_OUT') cachedUserId = null;
+  if (event === 'SIGNED_IN') cachedUserId = undefined;
+});
 
 export const genId = () => crypto.randomUUID();
 
@@ -210,7 +222,7 @@ export async function saveDailyCounter(counter: DailyCounter): Promise<void> {
     user_id: uid,
     date: counter.date,
     count: counter.count,
-  });
+  }, { onConflict: 'user_id,date' });
 }
 
 // ---------- Last outfit / Rejected (localStorage for now) ----------
