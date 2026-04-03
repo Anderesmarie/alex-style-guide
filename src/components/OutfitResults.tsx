@@ -271,21 +271,36 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
                 </p>
               </div>
 
-              {/* Buttons */}
               <div className="px-2 pb-2 pt-1 space-y-1.5">
-                <button
-                  onClick={() => handleSave(r.outfit)}
-                  className="w-full py-2 rounded-lg bg-primary text-primary-foreground font-medium text-xs active:scale-[0.98] transition-transform"
-                >
-                  💾 Sauvegarder
-                </button>
+                {isSaved ? (
+                  <div
+                    className="w-full py-2 rounded-lg text-center font-medium text-xs text-white"
+                    style={{ backgroundColor: '#4CAF50' }}
+                  >
+                    ✅ Sauvegardée !
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleSave(r.outfit, idx)}
+                    className="w-full py-2 rounded-lg bg-primary text-primary-foreground font-medium text-xs active:scale-[0.98] transition-transform"
+                  >
+                    💾 Sauvegarder
+                  </button>
+                )}
 
                 {isWorn ? (
+                  <div
+                    className="w-full py-2.5 rounded-xl text-center font-medium text-xs text-white"
+                    style={{ backgroundColor: '#4CAF50' }}
+                  >
+                    Portée aujourd'hui 🌸
+                  </div>
+                ) : isOtherWorn ? (
                   <div
                     className="w-full py-2.5 rounded-xl text-center font-medium text-xs"
                     style={{ backgroundColor: '#F0F0F0', color: '#888888' }}
                   >
-                    Portée aujourd'hui 🌸
+                    Réessayer demain 🔄
                   </div>
                 ) : (
                   <button
