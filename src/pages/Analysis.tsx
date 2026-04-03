@@ -136,7 +136,9 @@ export default function Analysis() {
           ✨ Fonctionnalités Premium — Abonnement à venir
         </div>
 
-        <div className="space-y-4">
+        <WardrobeStats wardrobe={wardrobe} outfits={outfits} loading={loading} />
+
+        <div className="space-y-4 mt-4">
           {/* Basiques */}
           <div
             className="rounded-2xl p-5"
