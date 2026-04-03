@@ -422,7 +422,7 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
         </div>
 
         {/* Streak */}
-        <StreakCard />
+        <ProfileStreakCard />
 
         <button onClick={onLogout} className="w-full py-3 mt-2 mb-4 text-sm font-medium" style={{ color: '#D32F2F' }}>
           Se déconnecter
