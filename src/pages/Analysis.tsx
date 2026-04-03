@@ -16,8 +16,25 @@ const BASICS = [
   { type: 'Sac', color: null, label: 'Sac neutre', impact: 'Va avec toutes tes tenues' },
 ] as const;
 
-const OCCASIONS = ['Travail', 'Sortie', 'Sport', 'Événement', 'Mariage', 'Voyage', 'Plage'] as const;
+const OCCASIONS = ['Travail', 'Sortie', 'Sport', 'Événement', 'Cérémonie', 'Voyage', 'Plage'] as const;
 const SEASONS_LIST = ['Été', 'Automne', 'Hiver', 'Printemps'] as const;
+
+const OCCASION_SEARCH: Record<string, string> = {
+  'Travail': 'tenue travail bureau',
+  'Sortie': 'tenue sortie soirée',
+  'Sport': 'tenue sport femme',
+  'Événement': 'tenue événement femme',
+  'Cérémonie': 'tenue cérémonie femme',
+  'Voyage': 'tenue voyage confortable',
+  'Plage': 'tenue plage été',
+};
+
+const SEASON_SEARCH: Record<string, string> = {
+  'Été': 'tenue été femme',
+  'Automne': 'tenue automne femme',
+  'Hiver': 'tenue hiver femme',
+  'Printemps': 'tenue printemps femme',
+};
 
 function getCurrentSeason(): string {
   const m = new Date().getMonth();
@@ -28,7 +45,7 @@ function getCurrentSeason(): string {
 }
 
 export default function Analysis() {
-const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
+  const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
   const [profileStyles, setProfileStyles] = useState<string[]>([]);
   const [userBrands, setUserBrands] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,12 +65,12 @@ const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
 
   const getShopLinks = (searchTerm: string) => {
     const matched = userBrands.filter(b => BRAND_URLS[b]);
-    const brands = matched.length > 0 ? matched.slice(0, 2) : [{ name: 'Zalando', url: BRAND_URLS['Zalando'] }] as any;
     if (matched.length === 0) {
       return [{ name: 'Zalando', url: BRAND_URLS['Zalando'] + encodeURIComponent(searchTerm) }];
     }
     return matched.slice(0, 2).map(b => ({ name: b, url: BRAND_URLS[b] + encodeURIComponent(searchTerm) }));
   };
+
   const currentSeason = getCurrentSeason();
 
   useEffect(() => {
@@ -87,13 +104,11 @@ const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
   const missingCount = basicsStatus.filter(b => !b.owned).length;
   const allPresent = missingCount === 0;
 
-  // Occasion analysis
   const occasionStats = OCCASIONS.map(occ => {
     const count = wardrobe.filter(i => i.occasion?.includes(occ)).length;
     return { name: occ, count };
   });
 
-  // Season analysis
   const seasonStats = SEASONS_LIST.map(s => {
     const count = wardrobe.filter(i => i.season?.includes(s) || i.season?.includes('Toutes saisons')).length;
     return { name: s, count, isCurrent: s === currentSeason };
@@ -105,22 +120,24 @@ const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
         <h1 className="text-2xl font-serif font-bold mb-1" style={{ color: '#2C2C2C' }}>
           Mon analyse de garde-robe 🔍
         </h1>
-        <p className="text-sm mb-6" style={{ color: '#9B9B9B' }}>
+        <p className="text-sm mb-4" style={{ color: '#9B9B9B' }}>
           Découvre ce qui manque pour compléter ton style
         </p>
+
+        {/* Premium banner */}
+        <div
+          className="text-center text-white text-xs font-semibold mb-6"
+          style={{ backgroundColor: '#C9956C', borderRadius: 12, padding: '8px 16px' }}
+        >
+          ✨ Fonctionnalités Premium — Abonnement à venir
+        </div>
 
         <div className="space-y-4">
           {/* Basiques */}
           <div
-            className="rounded-2xl p-5 relative"
+            className="rounded-2xl p-5"
             style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
           >
-            <span
-              className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold"
-              style={{ backgroundColor: '#FDF6EC', color: '#C9956C', border: '1px solid #C9956C30' }}
-            >
-              Premium ✨
-            </span>
             <p className="font-serif font-semibold text-base mb-4" style={{ color: '#2C2C2C' }}>
               🧺 Pièces basiques manquantes
             </p>
@@ -132,9 +149,9 @@ const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
                 Ton dressing est bien équipé en basiques ! 🎉
               </p>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-3" style={{ gap: 12 }}>
                 {basicsStatus.filter(b => !b.owned).map(b => (
-                  <div key={b.label} className="flex items-start gap-2.5">
+                  <div key={b.label} className="flex items-start gap-2.5" style={{ paddingBottom: 12 }}>
                     <span className="text-sm mt-0.5">🔴</span>
                     <div className="flex-1">
                       <p className="text-sm font-semibold" style={{ color: '#2C2C2C' }}>
@@ -164,9 +181,9 @@ const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
                 {basicsStatus.some(b => b.owned) && (
                   <div className="pt-2 mt-2" style={{ borderTop: '1px solid #F0EBE5' }}>
                     {basicsStatus.filter(b => b.owned).map(b => (
-                      <div key={b.label} className="flex items-center gap-2 py-1">
+                      <div key={b.label} className="flex items-center gap-2" style={{ paddingBottom: 12 }}>
                         <span className="text-sm">✅</span>
-                        <span className="text-sm" style={{ color: '#BFBFBF' }}>{b.label} — Tu l'as déjà</span>
+                        <span className="text-sm" style={{ color: '#888888' }}>{b.label} — Tu l'as déjà</span>
                       </div>
                     ))}
                   </div>
@@ -177,39 +194,49 @@ const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
 
           {/* Occasion */}
           <div
-            className="rounded-2xl p-5 relative"
+            className="rounded-2xl p-5"
             style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
           >
-            <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold"
-              style={{ backgroundColor: '#FDF6EC', color: '#C9956C', border: '1px solid #C9956C30' }}>
-              Premium ✨
-            </span>
             <p className="font-serif font-semibold text-base mb-4" style={{ color: '#2C2C2C' }}>
               👔 Manques par occasion
             </p>
             {loading ? (
               <p className="text-sm italic" style={{ color: '#9B9B9B' }}>Analyse en cours...</p>
             ) : (
-              <div className="space-y-2.5">
+              <div>
                 {occasionStats.map(o => {
                   const icon = o.count === 0 ? '🔴' : o.count <= 2 ? '🟡' : '✅';
-                  const msg = o.count === 0
-                    ? 'On va remédier à ça !'
-                    : null;
                   return (
-                    <div key={o.name} className="flex items-start gap-2.5">
+                    <div key={o.name} className="flex items-start gap-2.5" style={{ paddingBottom: 12 }}>
                       <span className="text-sm mt-0.5">{icon}</span>
                       <div className="flex-1">
-                        <p className="text-sm font-semibold" style={{ color: o.count >= 3 ? '#BFBFBF' : '#2C2C2C' }}>
+                        <p className="text-sm font-semibold" style={{ color: o.count >= 3 ? '#888888' : '#2C2C2C' }}>
                           {o.count === 0
                             ? `Zéro tenue pour ${o.name} 😬`
                             : o.count <= 2
-                            ? `Peut mieux faire (${o.count} pièces)`
-                            : `Tu gères ! (${o.count} pièces)`}
+                            ? `${o.name} — Peut mieux faire (${o.count} pièces)`
+                            : `${o.name} — Tu gères ! (${o.count} pièces)`}
                         </p>
-                        {msg && <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>{msg}</p>}
+                        {o.count === 0 && (
+                          <>
+                            <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>On va remédier à ça !</p>
+                            <div className="flex gap-2 mt-1.5 flex-wrap">
+                              {getShopLinks(OCCASION_SEARCH[o.name] || o.name).map(link => (
+                                <a
+                                  key={link.name}
+                                  href={link.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-[11px] font-medium underline underline-offset-2"
+                                  style={{ color: '#C9956C' }}
+                                >
+                                  🛍️ Voir des idées →
+                                </a>
+                              ))}
+                            </div>
+                          </>
+                        )}
                       </div>
-                      <span className="text-xs font-medium mt-0.5" style={{ color: '#9B9B9B' }}>{o.name}</span>
                     </div>
                   );
                 })}
@@ -219,36 +246,62 @@ const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
 
           {/* Saison */}
           <div
-            className="rounded-2xl p-5 relative"
+            className="rounded-2xl p-5"
             style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
           >
-            <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold"
-              style={{ backgroundColor: '#FDF6EC', color: '#C9956C', border: '1px solid #C9956C30' }}>
-              Premium ✨
-            </span>
             <p className="font-serif font-semibold text-base mb-4" style={{ color: '#2C2C2C' }}>
               🌦️ Manques par saison
             </p>
             {loading ? (
               <p className="text-sm italic" style={{ color: '#9B9B9B' }}>Analyse en cours...</p>
             ) : (
-              <div className="space-y-2.5">
+              <div>
                 {seasonStats.map(s => {
+                  const icon = s.count <= 3 ? '🔴' : s.count <= 7 ? '🟡' : '✅';
+                  const label = s.count <= 3
+                    ? `${s.name} à compléter (${s.count} pièces)`
+                    : s.count <= 7
+                    ? `${s.name} un peu léger (${s.count} pièces)`
+                    : `${s.name} au point (${s.count} pièces)`;
+                  const sub = s.count <= 3
+                    ? 'Ajoute des pièces pour cette saison'
+                    : s.count <= 7
+                    ? 'Quelques pièces de plus seraient utiles'
+                    : null;
+
                   return (
-                    <div
-                      key={s.name}
-                      className="flex items-start gap-2.5 rounded-xl px-3 py-2"
-                      style={s.isCurrent ? { border: '1.5px solid #C9956C', backgroundColor: '#FDF6EC' } : {}}
-                    >
+                    <div key={s.name} className="flex items-start gap-2.5" style={{ paddingBottom: 12 }}>
+                      <span className="text-sm mt-0.5">{icon}</span>
                       <div className="flex-1">
-                        <p className="text-sm font-semibold flex items-center gap-1.5" style={{ color: s.count > 7 ? '#BFBFBF' : '#2C2C2C' }}>
-                          {s.count <= 3
-                            ? `Dressing ${s.name} vide 🔴 (${s.count} pièces)`
-                            : s.count <= 7
-                            ? `Dressing ${s.name} un peu léger 🟡 (${s.count} pièces)`
-                            : `Dressing ${s.name} au point ✅ (${s.count} pièces)`}
-                          {s.isCurrent && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: '#C9956C', color: '#FFF' }}>Actuelle</span>}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold" style={{ color: s.count > 7 ? '#888888' : '#2C2C2C' }}>
+                            {label}
+                          </p>
+                          {s.isCurrent && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap" style={{ backgroundColor: '#C9956C', color: '#FFF' }}>
+                              Actuelle
+                            </span>
+                          )}
+                        </div>
+                        {sub && (
+                          <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>{sub}</p>
+                        )}
+                        {s.count <= 3 && (
+                          <div className="flex gap-2 mt-1.5 flex-wrap">
+                            {getShopLinks(SEASON_SEARCH[s.name] || s.name).map(link => (
+                              <a
+                                key={link.name}
+                                href={link.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[11px] font-medium underline underline-offset-2"
+                                style={{ color: '#C9956C' }}
+                              >
+                                🛍️ Voir des idées →
+                              </a>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
@@ -259,13 +312,9 @@ const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
 
           {/* Style */}
           <div
-            className="rounded-2xl p-5 relative"
+            className="rounded-2xl p-5"
             style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
           >
-            <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold"
-              style={{ backgroundColor: '#FDF6EC', color: '#C9956C', border: '1px solid #C9956C30' }}>
-              Premium ✨
-            </span>
             <p className="font-serif font-semibold text-base mb-4" style={{ color: '#2C2C2C' }}>
               ✨ Manques par style
             </p>
@@ -303,19 +352,19 @@ const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
                 'Rock': 'un perfecto ou un t-shirt band',
               };
               return (
-                <div className="space-y-2.5">
+                <div>
                   {styleStats.map(s => {
                     const icon = s.count <= 2 ? '🔴' : s.count <= 5 ? '🟡' : '✅';
                     return (
-                      <div key={s.name} className="flex items-start gap-2.5">
+                      <div key={s.name} className="flex items-start gap-2.5" style={{ paddingBottom: 12 }}>
                         <span className="text-sm mt-0.5">{icon}</span>
                         <div className="flex-1">
-                          <p className="text-sm font-semibold" style={{ color: s.count > 5 ? '#BFBFBF' : '#2C2C2C' }}>
+                          <p className="text-sm font-semibold" style={{ color: s.count > 5 ? '#888888' : '#2C2C2C' }}>
                             {s.count <= 2
                               ? `Tu te définis ${s.name} mais ton dressing ne le montre pas encore 😅`
                               : s.count <= 5
                               ? `Ton style ${s.name} manque de pièces`
-                              : `Ton style ${s.name} est validé ✨`}
+                              : `Ton style ${s.name} est validé`}
                           </p>
                           {s.count <= 2 && (
                             <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>
