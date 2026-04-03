@@ -230,7 +230,7 @@ export default function Analysis() {
                                   className="text-[11px] font-medium underline underline-offset-2"
                                   style={{ color: '#C9956C' }}
                                 >
-                                  🛍️ Voir des idées →
+                                  🛍️ Voir sur {link.name}
                                 </a>
                               ))}
                             </div>
