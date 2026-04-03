@@ -78,6 +78,7 @@ export default function Analysis() {
     const load = async () => {
       const [w] = await Promise.all([getWardrobe()]);
       setWardrobe(w);
+      updateStreak();
       try {
         const { data: userData } = await supabase.auth.getUser();
         if (userData.user) {

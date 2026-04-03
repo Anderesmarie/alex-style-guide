@@ -146,6 +146,7 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
       });
 
       setWornTodayIdx(idx);
+      updateStreak();
 
       toast("Belle journée avec cette tenue ! 🌸", {
         duration: 3000,
