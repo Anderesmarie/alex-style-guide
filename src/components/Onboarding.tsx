@@ -94,15 +94,22 @@ export default function Onboarding({ onComplete }: Props) {
     await saveAvatar(avatar);
     const palette = getPaletteForSkin(avatar.skin);
     savePalette(palette);
-    await saveProfile({ silhouette, styles, budget, brands, taille: taille || null, corpulence: corpulence || null, morphologie: null, favorite_colors: favoriteColors });
-    // Save pseudo and favorite_colors to Supabase
+    const SILHOUETTE_TO_MORPHO: Record<string, 'A' | 'H' | 'X' | 'V' | 'O' | '8'> = {
+      'Sablier': 'X', 'Rectangle': 'H', 'Triangle': 'A',
+      'Triangle inversé': 'V', 'Ovale': 'O', 'Autre': '8',
+    };
+    const morphoCode = SILHOUETTE_TO_MORPHO[silhouette] || null;
+    await saveProfile({ silhouette, styles, budget, brands, taille: taille || null, corpulence: corpulence || null, morphologie: morphoCode, favorite_colors: favoriteColors });
+    // Save pseudo, favorite_colors and morphologie to Supabase
     try {
       const { data: userData } = await supabase.auth.getUser();
       if (userData.user) {
         await supabase.from('profiles').update({
           pseudo: pseudo.trim() || null,
           favorite_colors: favoriteColors,
+          morphologie: morphoCode,
         }).eq('id', userData.user.id);
+        console.log('Morphologie sauvegardée:', morphoCode);
       }
     } catch {}
     setShowMessage(true);
