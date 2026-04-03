@@ -4,6 +4,7 @@ import { getStylingTips, StylingTips } from '@/lib/stylingTips';
 import { getColorScore } from '@/lib/colorimetry';
 import { getSilhouetteScore, getMorphologyScore } from '@/lib/recommendations';
 import type { Season } from '@/lib/colorimetry';
+import { updateStreak } from '@/lib/streak';
 
 interface OutfitCard {
   outfit: ClothingItem[];
