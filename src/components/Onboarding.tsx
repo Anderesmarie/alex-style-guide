@@ -94,15 +94,17 @@ export default function Onboarding({ onComplete }: Props) {
     await saveAvatar(avatar);
     const palette = getPaletteForSkin(avatar.skin);
     savePalette(palette);
-    await saveProfile({ silhouette, styles, budget, brands, taille: taille || null, corpulence: corpulence || null, morphologie: null, favorite_colors: favoriteColors });
-    // Save pseudo and favorite_colors to Supabase
+    await saveProfile({ silhouette, styles, budget, brands, taille: taille || null, corpulence: corpulence || null, morphologie: silhouette || null, favorite_colors: favoriteColors });
+    // Save pseudo, favorite_colors and morphologie to Supabase
     try {
       const { data: userData } = await supabase.auth.getUser();
       if (userData.user) {
         await supabase.from('profiles').update({
           pseudo: pseudo.trim() || null,
           favorite_colors: favoriteColors,
+          morphologie: silhouette || null,
         }).eq('id', userData.user.id);
+        console.log('Morphologie sauvegardée:', silhouette);
       }
     } catch {}
     setShowMessage(true);
