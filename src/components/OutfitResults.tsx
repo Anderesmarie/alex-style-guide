@@ -6,6 +6,7 @@ import { getColorScore } from '@/lib/colorimetry';
 import { getSilhouetteScore, getMorphologyScore, getFavoriteColorScore } from '@/lib/recommendations';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { updateStreak } from '@/lib/streak';
 import type { Season } from '@/lib/colorimetry';
 
 interface OutfitResult {
