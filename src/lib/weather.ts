@@ -4,6 +4,8 @@ export interface WeatherData {
   description: string;
   emoji: string;
   city?: string;
+  tempMin?: number;
+  tempMax?: number;
 }
 
 const weatherMap: Record<number, { emoji: string; desc: string }> = {
