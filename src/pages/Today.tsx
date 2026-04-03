@@ -107,7 +107,7 @@ export default function Today() {
         if (saved) {
           setSwipeResults(saved);
           setSwipeComplete(true);
-        } else if (dailyUsed >= 3) {
+        } else if (dailyUsed >= 5) {
           // Ne rien faire — laisser l'écran afficher le message limite sans bloquer
         }
 
