@@ -268,6 +268,11 @@ export default function Today() {
             <p className="text-muted-foreground text-xs ml-[52px] mb-4">
               {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
             </p>
+            {debugProfile && (
+              <p className="text-[11px] text-muted-foreground ml-[52px] mb-2 font-mono">
+                Debug: saison={String(debugProfile.colorimetry_season)} | morpho={String(debugProfile.morphologie)} | taille={String(debugProfile.taille)} | corpulence={String(debugProfile.corpulence)} | fav_colors={JSON.stringify(debugProfile.favorite_colors)}
+              </p>
+            )}
           </>
         );
       })()}
