@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { getWardrobe } from '@/lib/storage';
-import { ClothingItem } from '@/lib/types';
+import { getWardrobe, getOutfits } from '@/lib/storage';
+import { ClothingItem, Outfit } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import { updateStreak } from '@/lib/streak';
+import WardrobeStats from '@/components/WardrobeStats';
 
 const BASICS = [
   { type: 'Jean', color: 'noir', label: 'Jean noir', impact: 'Crée 5+ tenues casual et chic' },
