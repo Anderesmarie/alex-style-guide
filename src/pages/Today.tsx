@@ -79,11 +79,11 @@ export default function Today() {
   const [loading, setLoading] = useState(true);
   const [userSeason, setUserSeason] = useState<Season | null>(null);
   const [pseudo, setPseudo] = useState<string | null>(null);
-  const [debugProfile, setDebugProfile] = useState<Record<string, any> | null>(null);
+  
 
   const today = new Date().toISOString().split('T')[0];
   const enough = wardrobe.length >= 8;
-  const canSuggest = dailyCount < 3;
+  const canSuggest = dailyCount < 5;
   const weatherTemp = ws.status === 'done' ? ws.data.temperature : null;
 
   // Load data
@@ -107,7 +107,7 @@ export default function Today() {
         if (saved) {
           setSwipeResults(saved);
           setSwipeComplete(true);
-        } else if (dailyUsed >= 3) {
+        } else if (dailyUsed >= 5) {
           // Ne rien faire — laisser l'écran afficher le message limite sans bloquer
         }
 
@@ -128,13 +128,6 @@ export default function Today() {
               setPseudo(prof.pseudo);
             }
             if (prof) {
-              setDebugProfile({
-                colorimetry_season: prof.colorimetry_season ?? null,
-                morphologie: prof.morphologie ?? null,
-                taille: prof.taille ?? null,
-                corpulence: prof.corpulence ?? null,
-                favorite_colors: prof.favorite_colors ?? null,
-              });
               setUserProfile(prev => ({
                 ...prev,
                 morphologie: prof.morphologie ?? undefined,
@@ -269,11 +262,6 @@ export default function Today() {
             <p className="text-muted-foreground text-xs ml-[52px] mb-4">
               {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
             </p>
-            {debugProfile && (
-              <p className="text-[11px] text-muted-foreground ml-[52px] mb-2 font-mono">
-                Debug: saison={String(debugProfile.colorimetry_season)} | morpho={String(debugProfile.morphologie)} | taille={String(debugProfile.taille)} | corpulence={String(debugProfile.corpulence)} | fav_colors={JSON.stringify(debugProfile.favorite_colors)}
-              </p>
-            )}
           </>
         );
       })()}
@@ -402,7 +390,7 @@ export default function Today() {
       {/* Limit message — always BELOW results, never replaces them */}
       {enough && !canSuggest && !swipeResults && (
         <p className="text-xs text-muted-foreground text-center mt-3">
-          Tu as utilisé tes 3 suggestions du jour ✨ Reviens demain pour de nouvelles idées.
+          Tu as utilisé tes 5 suggestions du jour ✨ Reviens demain pour de nouvelles idées.
         </p>
       )}
 
