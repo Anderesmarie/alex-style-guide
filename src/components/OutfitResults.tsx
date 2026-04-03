@@ -1,8 +1,11 @@
+import { useState, useEffect } from 'react';
 import { ClothingItem, UserProfile } from '@/lib/types';
 import { addOutfit, genId, saveLastOutfit } from '@/lib/storage';
 import { getStylingTips } from '@/lib/stylingTips';
 import { getColorScore } from '@/lib/colorimetry';
 import { getSilhouetteScore, getMorphologyScore, getFavoriteColorScore } from '@/lib/recommendations';
+import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 import type { Season } from '@/lib/colorimetry';
 
 interface OutfitResult {
@@ -21,6 +24,41 @@ interface Props {
 const ROSE_GOLD = '#C9956C';
 
 export default function OutfitResults({ results, weatherCode, temperature, userSeason, userProfile }: Props) {
+  const [wornTodayIdx, setWornTodayIdx] = useState<number | null>(null);
+  const [loadingWorn, setLoadingWorn] = useState(true);
+
+  const today = new Date().toISOString().split('T')[0];
+
+  // Check if an outfit was already marked as worn today
+  useEffect(() => {
+    const checkWornToday = async () => {
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData.user) { setLoadingWorn(false); return; }
+
+        const { data } = await supabase
+          .from('user_preferences')
+          .select('item_ids')
+          .eq('user_id', userData.user.id)
+          .eq('reaction', 'portee')
+          .gte('created_at', `${today}T00:00:00`)
+          .lte('created_at', `${today}T23:59:59`)
+          .limit(1);
+
+        if (data && data.length > 0) {
+          const wornIds = data[0].item_ids as string[];
+          const matchIdx = results.findIndex(r =>
+            r.outfit.length === wornIds.length &&
+            r.outfit.every(item => wornIds.includes(item.id))
+          );
+          if (matchIdx >= 0) setWornTodayIdx(matchIdx);
+        }
+      } catch {}
+      setLoadingWorn(false);
+    };
+    checkWornToday();
+  }, [today, results]);
+
   const handleSave = (items: ClothingItem[]) => {
     const ids = items.map(i => i.id);
     saveLastOutfit(ids);
@@ -32,12 +70,69 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
     });
   };
 
+  const handleWearOutfit = async (items: ClothingItem[], idx: number) => {
+    const hour = new Date().getHours();
+
+    // Already worn today — check if can change
+    if (wornTodayIdx !== null && wornTodayIdx !== idx) {
+      if (hour >= 12) {
+        toast.error("Tu as déjà choisi ta tenue du jour 😊", {
+          description: "Après midi, la tenue est définitivement enregistrée.",
+          duration: 3000,
+        });
+        return;
+      }
+      toast("Tu as déjà choisi ta tenue du jour 😊", {
+        description: "Tu peux en changer jusqu'à midi.",
+        duration: 3000,
+      });
+      // Delete old entry before inserting new one
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData.user) {
+          await supabase
+            .from('user_preferences')
+            .delete()
+            .eq('user_id', userData.user.id)
+            .eq('reaction', 'portee')
+            .gte('created_at', `${today}T00:00:00`)
+            .lte('created_at', `${today}T23:59:59`);
+        }
+      } catch {}
+    }
+
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return;
+
+      const itemIds = items.map(i => i.id);
+
+      await supabase.from('user_preferences').insert({
+        user_id: userData.user.id,
+        item_ids: itemIds,
+        reaction: 'portee',
+        created_at: new Date().toISOString(),
+      });
+
+      setWornTodayIdx(idx);
+
+      toast("Belle journée avec cette tenue ! 🌸", {
+        duration: 3000,
+        style: { backgroundColor: ROSE_GOLD, color: '#FFFFFF', border: 'none' },
+      });
+    } catch (e) {
+      console.error('Error marking outfit as worn:', e);
+      toast.error("Erreur lors de l'enregistrement");
+    }
+  };
+
   return (
     <div className="space-y-4 fade-enter">
       <h2 className="text-lg font-serif font-semibold text-center">Tes tenues du jour</h2>
       <div className="grid grid-cols-3 gap-3">
         {results.map((r, idx) => {
           const isLiked = r.liked === true;
+          const isWorn = wornTodayIdx === idx;
           const tips = getStylingTips(r.outfit, weatherCode, temperature);
           const normalizeColor = (color: string) =>
             color.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_").trim();
@@ -58,21 +153,23 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
 
           const totalScore = colorAvg + morphoAvg + favoriteAvg;
 
-          // Debug log
-          console.log('Scores carte:', { idx, colorAvg, morphoAvg, favoriteAvg, totalScore, userSeason, morphologie: userProfile?.morphologie, favoriteColors: userProfile?.favorite_colors });
-
           if (totalScore >= 3) smartBadge = 'ideal';
           else if (colorAvg >= 1 && totalScore < 3) smartBadge = 'color';
           else if (morphoAvg >= 1 && colorAvg < 1) smartBadge = 'morpho';
-          // totalScore < 1 → no badge
 
           return (
             <div
               key={idx}
               className={`bg-card rounded-xl overflow-hidden card-shadow transition-all ${
-                !isLiked ? 'opacity-50 grayscale-[40%]' : ''
+                !isLiked && !isWorn ? 'opacity-50 grayscale-[40%]' : ''
               }`}
-              style={isLiked ? { border: `2px solid ${ROSE_GOLD}` } : { border: '2px solid transparent' }}
+              style={{
+                border: isWorn
+                  ? '2px solid #4CAF50'
+                  : isLiked
+                  ? `2px solid ${ROSE_GOLD}`
+                  : '2px solid transparent',
+              }}
             >
               {/* Badge */}
               <div className="flex justify-center pt-2">
@@ -142,26 +239,32 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
                 </p>
               </div>
 
-              {/* Debug info */}
-              <div className="px-2 py-1 text-[9px] text-muted-foreground leading-snug font-mono">
-                <p>Saison: {userSeason ?? 'null'}</p>
-                <p>Morpho: {userProfile?.morphologie ?? 'null'}</p>
-                <p>Taille: {userProfile?.taille ?? 'null'}</p>
-                <p>Corpulence: {userProfile?.corpulence ?? 'null'}</p>
-                {r.outfit.map(item => (
-                  <p key={item.id}>Couleur: {item.color} → score: {userSeason ? getColorScore(normalizeColor(item.color), userSeason) : 0}</p>
-                ))}
-                <p className="font-semibold">Score total: {totalScore.toFixed(2)}</p>
-              </div>
-
-              {/* Save button */}
-              <div className="px-2 pb-2 pt-1">
+              {/* Buttons */}
+              <div className="px-2 pb-2 pt-1 space-y-1.5">
                 <button
                   onClick={() => handleSave(r.outfit)}
                   className="w-full py-2 rounded-lg bg-primary text-primary-foreground font-medium text-xs active:scale-[0.98] transition-transform"
                 >
-                  💾
+                  💾 Sauvegarder
                 </button>
+
+                {isWorn ? (
+                  <div
+                    className="w-full py-2.5 rounded-xl text-center font-medium text-xs"
+                    style={{ backgroundColor: '#F0F0F0', color: '#888888' }}
+                  >
+                    Portée aujourd'hui 🌸
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleWearOutfit(r.outfit, idx)}
+                    disabled={loadingWorn}
+                    className="w-full py-2.5 rounded-xl text-white font-medium text-xs active:scale-[0.98] transition-transform disabled:opacity-50"
+                    style={{ backgroundColor: '#4CAF50' }}
+                  >
+                    Je la mets ! ✅
+                  </button>
+                )}
               </div>
             </div>
           );
