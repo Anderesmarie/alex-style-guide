@@ -1,6 +1,5 @@
 import { ClothingItem, UserProfile } from './types';
 import { getLastOutfit, getRejected } from './storage';
-import { getCurrentSeason } from './weather';
 import { supabase } from './supabase';
 
 // ---------- Preference helpers (Supabase) ----------
