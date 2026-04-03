@@ -195,7 +195,7 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
           return (
             <div
               key={idx}
-              className={`bg-card rounded-xl overflow-hidden card-shadow transition-all ${
+              className={`relative bg-card rounded-xl overflow-hidden card-shadow transition-all ${
                 isOtherWorn ? 'opacity-60 grayscale-[30%]' : !isLiked && !isWorn ? 'opacity-50 grayscale-[40%]' : ''
               }`}
               style={{
@@ -206,7 +206,24 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
                   : '2px solid transparent',
               }}
             >
-              {/* Badge */}
+              {/* Smart badge top-right */}
+              {smartBadge === 'ideal' && (
+                <span className="absolute top-1.5 right-1.5 z-10 inline-block font-bold text-white rounded-[20px]" style={{ fontSize: '10px', padding: '3px 8px', backgroundColor: '#C9956C' }}>
+                  ⭐ Idéale
+                </span>
+              )}
+              {smartBadge === 'color' && (
+                <span className="absolute top-1.5 right-1.5 z-10 inline-block font-medium text-white rounded-[20px]" style={{ fontSize: '10px', padding: '3px 8px', backgroundColor: '#C9956C' }}>
+                  ✨ Teint
+                </span>
+              )}
+              {smartBadge === 'morpho' && (
+                <span className="absolute top-1.5 right-1.5 z-10 inline-block font-medium rounded-[20px]" style={{ fontSize: '10px', padding: '3px 8px', backgroundColor: '#F5F0EB', color: '#C9956C', border: '1px solid #C9956C' }}>
+                  📏 Morpho
+                </span>
+              )}
+
+              {/* Like/Nope Badge */}
               <div className="flex justify-center pt-2">
                 {isLiked ? (
                   <span
