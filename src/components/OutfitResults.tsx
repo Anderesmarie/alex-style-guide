@@ -162,6 +162,9 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
         {results.map((r, idx) => {
           const isLiked = r.liked === true;
           const isWorn = wornTodayIdx === idx;
+          const hasWornAny = wornTodayIdx !== null;
+          const isOtherWorn = hasWornAny && !isWorn;
+          const isSaved = savedIdxs.has(String(idx));
           const tips = getStylingTips(r.outfit, weatherCode, temperature);
           const normalizeColor = (color: string) =>
             color.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_").trim();
