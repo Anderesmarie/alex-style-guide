@@ -222,7 +222,7 @@ export async function saveDailyCounter(counter: DailyCounter): Promise<void> {
     user_id: uid,
     date: counter.date,
     count: counter.count,
-  });
+  }, { onConflict: 'user_id,date' });
 }
 
 // ---------- Last outfit / Rejected (localStorage for now) ----------

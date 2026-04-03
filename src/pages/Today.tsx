@@ -90,11 +90,13 @@ export default function Today() {
   useEffect(() => {
     const loadData = async () => {
       try {
+        console.time('data-load');
         const [w, p, c] = await Promise.all([
           getWardrobe(),
           getProfile(),
           getDailyCounter(),
         ]);
+        console.timeEnd('data-load');
         setWardrobe(w);
         setUserProfile(p);
         setDailyCount(c.date === today ? c.count : 0);
