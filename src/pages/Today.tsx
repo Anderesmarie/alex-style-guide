@@ -284,7 +284,8 @@ export default function Today() {
           <div className="flex items-center gap-4">
             <span className="text-5xl">{ws.data.emoji}</span>
             <div>
-              <p className="text-2xl font-serif font-bold">{ws.data.temperature}°C</p>
+              <p className="text-2xl font-serif font-bold">{ws.data.tempMin}°C — {ws.data.tempMax}°C</p>
+              <p className="text-xs text-muted-foreground">Habillée pour le matin 🌅</p>
               <p className="text-muted-foreground">{ws.data.description}</p>
               {ws.data.city && (
                 <p className="text-xs text-muted-foreground mt-0.5">📍 {ws.data.city}</p>
