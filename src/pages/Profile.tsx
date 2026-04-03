@@ -5,7 +5,7 @@ import AvatarCreator, { DEFAULT_AVATAR } from '@/components/AvatarCreator';
 import { AvatarData } from '@/components/AvatarSVG';
 import { determineSeason, SEASON_PALETTES, SEASON_COLOR_HEX, SEASON_LABELS } from '@/lib/colorimetry';
 import type { Season } from '@/lib/colorimetry';
-import { getStreak } from '@/lib/streak';
+import { getStreak, StreakData } from '@/lib/streak';
 import { UserProfile, STYLE_OPTIONS } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
