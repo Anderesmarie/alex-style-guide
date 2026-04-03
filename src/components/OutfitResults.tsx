@@ -23,9 +23,26 @@ interface Props {
 
 const ROSE_GOLD = '#C9956C';
 
+const SAVED_KEY = 'closify_saved_outfits';
+
+function getSavedSet(today: string): Set<string> {
+  try {
+    const raw = localStorage.getItem(SAVED_KEY);
+    if (!raw) return new Set();
+    const data = JSON.parse(raw);
+    if (data.date !== today) return new Set();
+    return new Set(data.keys as string[]);
+  } catch { return new Set(); }
+}
+
+function persistSavedSet(today: string, keys: Set<string>) {
+  localStorage.setItem(SAVED_KEY, JSON.stringify({ date: today, keys: Array.from(keys) }));
+}
+
 export default function OutfitResults({ results, weatherCode, temperature, userSeason, userProfile }: Props) {
   const [wornTodayIdx, setWornTodayIdx] = useState<number | null>(null);
   const [loadingWorn, setLoadingWorn] = useState(true);
+  const [savedIdxs, setSavedIdxs] = useState<Set<string>>(new Set());
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -59,7 +76,12 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
     checkWornToday();
   }, [today, results]);
 
-  const handleSave = (items: ClothingItem[]) => {
+  // Load saved state from localStorage
+  useEffect(() => {
+    setSavedIdxs(getSavedSet(today));
+  }, [today]);
+
+  const handleSave = (items: ClothingItem[], idx: number) => {
     const ids = items.map(i => i.id);
     saveLastOutfit(ids);
     addOutfit({
@@ -67,6 +89,13 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
       name: `Tenue du ${new Date().toLocaleDateString('fr-FR')}`,
       itemIds: ids,
       createdAt: new Date().toISOString(),
+    });
+    const key = String(idx);
+    setSavedIdxs(prev => {
+      const next = new Set(prev);
+      next.add(key);
+      persistSavedSet(today, next);
+      return next;
     });
   };
 
@@ -133,6 +162,9 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
         {results.map((r, idx) => {
           const isLiked = r.liked === true;
           const isWorn = wornTodayIdx === idx;
+          const hasWornAny = wornTodayIdx !== null;
+          const isOtherWorn = hasWornAny && !isWorn;
+          const isSaved = savedIdxs.has(String(idx));
           const tips = getStylingTips(r.outfit, weatherCode, temperature);
           const normalizeColor = (color: string) =>
             color.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_").trim();
@@ -161,7 +193,7 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
             <div
               key={idx}
               className={`bg-card rounded-xl overflow-hidden card-shadow transition-all ${
-                !isLiked && !isWorn ? 'opacity-50 grayscale-[40%]' : ''
+                isOtherWorn ? 'opacity-60 grayscale-[30%]' : !isLiked && !isWorn ? 'opacity-50 grayscale-[40%]' : ''
               }`}
               style={{
                 border: isWorn
@@ -239,21 +271,36 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
                 </p>
               </div>
 
-              {/* Buttons */}
               <div className="px-2 pb-2 pt-1 space-y-1.5">
-                <button
-                  onClick={() => handleSave(r.outfit)}
-                  className="w-full py-2 rounded-lg bg-primary text-primary-foreground font-medium text-xs active:scale-[0.98] transition-transform"
-                >
-                  💾 Sauvegarder
-                </button>
+                {isSaved ? (
+                  <div
+                    className="w-full py-2 rounded-lg text-center font-medium text-xs text-white"
+                    style={{ backgroundColor: '#4CAF50' }}
+                  >
+                    ✅ Sauvegardée !
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleSave(r.outfit, idx)}
+                    className="w-full py-2 rounded-lg bg-primary text-primary-foreground font-medium text-xs active:scale-[0.98] transition-transform"
+                  >
+                    💾 Sauvegarder
+                  </button>
+                )}
 
                 {isWorn ? (
+                  <div
+                    className="w-full py-2.5 rounded-xl text-center font-medium text-xs text-white"
+                    style={{ backgroundColor: '#4CAF50' }}
+                  >
+                    Portée aujourd'hui 🌸
+                  </div>
+                ) : isOtherWorn ? (
                   <div
                     className="w-full py-2.5 rounded-xl text-center font-medium text-xs"
                     style={{ backgroundColor: '#F0F0F0', color: '#888888' }}
                   >
-                    Portée aujourd'hui 🌸
+                    Réessayer demain 🔄
                   </div>
                 ) : (
                   <button
