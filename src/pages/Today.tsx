@@ -98,10 +98,14 @@ export default function Today() {
         setUserProfile(p);
         setDailyCount(c.date === today ? c.count : 0);
 
-        // Restore today's saved results
+        // Restore today's saved results — always show them even if limit reached
         const saved = loadTodayData(today, w);
+        const dailyUsed = c.date === today ? c.count : 0;
         if (saved) {
           setSwipeResults(saved);
+          setSwipeComplete(true);
+        } else if (dailyUsed >= 3) {
+          // Limit reached but no saved results — mark complete so limit message shows
           setSwipeComplete(true);
         }
 
