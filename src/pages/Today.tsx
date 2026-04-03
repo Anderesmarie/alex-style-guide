@@ -106,8 +106,7 @@ export default function Today() {
           setSwipeResults(saved);
           setSwipeComplete(true);
         } else if (dailyUsed >= 3) {
-          // Limit reached but no saved results — mark complete so limit message shows
-          setSwipeComplete(true);
+          // Ne rien faire — laisser l'écran afficher le message limite sans bloquer
         }
 
         // Fetch full profile (colorimetry, morpho, taille, corpulence, favorite_colors)
