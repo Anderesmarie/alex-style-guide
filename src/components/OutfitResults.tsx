@@ -23,9 +23,26 @@ interface Props {
 
 const ROSE_GOLD = '#C9956C';
 
+const SAVED_KEY = 'closify_saved_outfits';
+
+function getSavedSet(today: string): Set<string> {
+  try {
+    const raw = localStorage.getItem(SAVED_KEY);
+    if (!raw) return new Set();
+    const data = JSON.parse(raw);
+    if (data.date !== today) return new Set();
+    return new Set(data.keys as string[]);
+  } catch { return new Set(); }
+}
+
+function persistSavedSet(today: string, keys: Set<string>) {
+  localStorage.setItem(SAVED_KEY, JSON.stringify({ date: today, keys: Array.from(keys) }));
+}
+
 export default function OutfitResults({ results, weatherCode, temperature, userSeason, userProfile }: Props) {
   const [wornTodayIdx, setWornTodayIdx] = useState<number | null>(null);
   const [loadingWorn, setLoadingWorn] = useState(true);
+  const [savedIdxs, setSavedIdxs] = useState<Set<string>>(new Set());
 
   const today = new Date().toISOString().split('T')[0];
 
