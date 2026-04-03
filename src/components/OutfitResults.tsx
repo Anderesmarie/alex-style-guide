@@ -76,7 +76,12 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
     checkWornToday();
   }, [today, results]);
 
-  const handleSave = (items: ClothingItem[]) => {
+  // Load saved state from localStorage
+  useEffect(() => {
+    setSavedIdxs(getSavedSet(today));
+  }, [today]);
+
+  const handleSave = (items: ClothingItem[], idx: number) => {
     const ids = items.map(i => i.id);
     saveLastOutfit(ids);
     addOutfit({
@@ -84,6 +89,13 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
       name: `Tenue du ${new Date().toLocaleDateString('fr-FR')}`,
       itemIds: ids,
       createdAt: new Date().toISOString(),
+    });
+    const key = String(idx);
+    setSavedIdxs(prev => {
+      const next = new Set(prev);
+      next.add(key);
+      persistSavedSet(today, next);
+      return next;
     });
   };
 
