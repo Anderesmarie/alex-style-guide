@@ -77,8 +77,9 @@ export default function Analysis() {
 
   useEffect(() => {
     const load = async () => {
-      const [w] = await Promise.all([getWardrobe()]);
+      const [w, o] = await Promise.all([getWardrobe(), getOutfits()]);
       setWardrobe(w);
+      setOutfits(o);
       updateStreak();
       try {
         const { data: userData } = await supabase.auth.getUser();
