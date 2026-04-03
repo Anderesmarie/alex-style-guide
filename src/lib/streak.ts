@@ -1,89 +1,38 @@
-import { supabase } from '@/lib/supabase';
+const STREAK_KEY = 'closify_streak';
 
 export interface StreakData {
-  currentStreak: number;
-  longestStreak: number;
-  lastActionDate: string;
+  current: number;
+  longest: number;
+  lastDate: string | null;
 }
 
-export async function getStreak(): Promise<StreakData> {
+export function getStreak(): StreakData {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { currentStreak: 0, longestStreak: 0, lastActionDate: '' };
-
-    const { data } = await supabase
-      .from('streak')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-
-    if (!data) return { currentStreak: 0, longestStreak: 0, lastActionDate: '' };
-
-    return {
-      currentStreak: data.current_streak,
-      longestStreak: data.longest_streak,
-      lastActionDate: data.last_action_date,
-    };
-  } catch {
-    return { currentStreak: 0, longestStreak: 0, lastActionDate: '' };
-  }
+    const raw = localStorage.getItem(STREAK_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { current: 0, longest: 0, lastDate: null };
 }
 
-export async function updateStreak(): Promise<StreakData> {
+export function updateStreak(): StreakData {
   const today = new Date().toISOString().split('T')[0];
+  const data = getStreak();
 
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { currentStreak: 0, longestStreak: 0, lastActionDate: '' };
+  if (data.lastDate === today) return data;
 
-    const { data } = await supabase
-      .from('streak')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
+  const lastDate = data.lastDate ? new Date(data.lastDate) : null;
+  const todayDate = new Date(today);
+  const diffDays = lastDate
+    ? Math.floor((todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24))
+    : 999;
 
-    if (!data) {
-      await supabase.from('streak').insert({
-        user_id: user.id,
-        last_action_date: today,
-        current_streak: 1,
-        longest_streak: 1,
-      });
-      return { currentStreak: 1, longestStreak: 1, lastActionDate: today };
-    }
+  const newStreak = diffDays === 1 ? data.current + 1 : 1;
+  const updated: StreakData = {
+    lastDate: today,
+    current: newStreak,
+    longest: Math.max(newStreak, data.longest),
+  };
 
-    const lastDate = new Date(data.last_action_date);
-    const todayDate = new Date(today);
-    const diffDays = Math.floor(
-      (todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
-
-    if (diffDays === 0) {
-      return {
-        currentStreak: data.current_streak,
-        longestStreak: data.longest_streak,
-        lastActionDate: data.last_action_date,
-      };
-    }
-
-    if (diffDays === 1) {
-      const newStreak = data.current_streak + 1;
-      const newLongest = Math.max(newStreak, data.longest_streak);
-      await supabase.from('streak').update({
-        last_action_date: today,
-        current_streak: newStreak,
-        longest_streak: newLongest,
-      }).eq('user_id', user.id);
-      return { currentStreak: newStreak, longestStreak: newLongest, lastActionDate: today };
-    }
-
-    // Streak broken
-    await supabase.from('streak').update({
-      last_action_date: today,
-      current_streak: 1,
-    }).eq('user_id', user.id);
-    return { currentStreak: 1, longestStreak: data.longest_streak, lastActionDate: today };
-  } catch {
-    return { currentStreak: 0, longestStreak: 0, lastActionDate: '' };
-  }
+  localStorage.setItem(STREAK_KEY, JSON.stringify(updated));
+  return updated;
 }
