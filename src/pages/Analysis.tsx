@@ -47,6 +47,7 @@ function getCurrentSeason(): string {
 
 export default function Analysis() {
   const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
+  const [outfits, setOutfits] = useState<Outfit[]>([]);
   const [profileStyles, setProfileStyles] = useState<string[]>([]);
   const [userBrands, setUserBrands] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
