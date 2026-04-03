@@ -111,9 +111,9 @@ export default function Today() {
           if (userData.user) {
             const { data: prof } = await supabase
               .from('profiles')
-              .select('colorimetry_season, morphologie, taille, corpulence, favorite_colors, pseudo')
+              .select('*')
               .eq('id', userData.user.id)
-              .single();
+              .maybeSingle();
             console.log('Profil complet chargé:', prof);
             if (prof?.colorimetry_season) {
               setUserSeason(prof.colorimetry_season as Season);
