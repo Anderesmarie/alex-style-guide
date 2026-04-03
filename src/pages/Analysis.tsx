@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getWardrobe } from '@/lib/storage';
 import { ClothingItem } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
+import { updateStreak } from '@/lib/streak';
 
 const BASICS = [
   { type: 'Jean', color: 'noir', label: 'Jean noir', impact: 'Crée 5+ tenues casual et chic' },
@@ -77,6 +78,7 @@ export default function Analysis() {
     const load = async () => {
       const [w] = await Promise.all([getWardrobe()]);
       setWardrobe(w);
+      updateStreak();
       try {
         const { data: userData } = await supabase.auth.getUser();
         if (userData.user) {

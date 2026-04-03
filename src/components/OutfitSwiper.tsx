@@ -4,6 +4,7 @@ import { getStylingTips, StylingTips } from '@/lib/stylingTips';
 import { getColorScore } from '@/lib/colorimetry';
 import { getSilhouetteScore, getMorphologyScore } from '@/lib/recommendations';
 import type { Season } from '@/lib/colorimetry';
+import { updateStreak } from '@/lib/streak';
 
 interface OutfitCard {
   outfit: ClothingItem[];
@@ -40,6 +41,7 @@ export default function OutfitSwiper({ outfits, weatherCode, temperature, onComp
     setTimeout(() => {
       const updated = [...cards];
       updated[currentIndex] = { ...updated[currentIndex], liked };
+      updateStreak();
       setCards(updated);
 
       const nextIndex = currentIndex + 1;

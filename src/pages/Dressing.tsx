@@ -4,6 +4,7 @@ import { getWardrobe, addClothing, updateClothing, deleteClothing, getOutfits, s
 import { CATEGORIES } from '@/lib/categories';
 import { compressImage } from '@/lib/imageUtils';
 import { toast } from 'sonner';
+import { updateStreak } from '@/lib/streak';
 
 type View = 'grid' | 'add' | 'detail' | 'edit';
 
@@ -112,6 +113,7 @@ export default function Dressing() {
       price: price ? Number(price) : undefined,
     };
     await addClothing(item);
+    updateStreak();
     await loadWardrobe();
     resetForm();
     setView('grid');
