@@ -1,40 +1,42 @@
 import { useState, useEffect } from 'react';
-import { updateStreak } from '@/lib/streak';
+import { getStreak, StreakData } from '@/lib/streak';
 
 export default function StreakCounter() {
   const [days, setDays] = useState(0);
-  const [brokenMsg, setBrokenMsg] = useState(false);
+  const [streakBroken, setStreakBroken] = useState(false);
 
   useEffect(() => {
-    const { streak, wasBroken } = updateStreak();
-    setDays(streak.currentStreak);
-    if (wasBroken) {
-      setBrokenMsg(true);
-      const timer = setTimeout(() => setBrokenMsg(false), 5000);
-      return () => clearTimeout(timer);
-    }
+    const load = async () => {
+      const data: StreakData = await getStreak();
+      setDays(data.currentStreak);
+
+      // Check if streak is broken (last action > 1 day ago)
+      if (data.lastActionDate) {
+        const last = new Date(data.lastActionDate);
+        const today = new Date(new Date().toISOString().split('T')[0]);
+        const diff = Math.floor((today.getTime() - last.getTime()) / (1000 * 60 * 60 * 24));
+        if (diff > 1) setStreakBroken(true);
+      } else {
+        setStreakBroken(true);
+      }
+    };
+    load();
   }, []);
 
-  const emoji = days >= 30 ? '🔥✨' : '🔥';
-  const label =
-    days >= 30
-      ? `${days} jours — Tu es une pro !`
-      : days >= 7
-        ? `${days} jours de suite !`
-        : `${days} jour${days > 1 ? 's' : ''}`;
+  if (streakBroken && days === 0) {
+    return (
+      <span className="text-xs" style={{ color: '#9B9B9B' }}>
+        🔥 0 — Reprends dès aujourd'hui ! 💪
+      </span>
+    );
+  }
+
+  const trophy = days >= 30 ? ' 🏆' : '';
+  const label = `${days} jour${days > 1 ? 's' : ''}${trophy}`;
 
   return (
-    <>
-      <span className="text-sm font-medium" style={{ color: '#C9956C' }}>
-        {emoji} {label}
-      </span>
-      {brokenMsg && (
-        <div className="bg-card rounded-xl p-3 card-shadow mb-4 text-center animate-fade-in">
-          <p className="text-xs text-muted-foreground">
-            Ton streak est remis à zéro — mais ton style reste parfait 😊 Reviens demain pour recommencer !
-          </p>
-        </div>
-      )}
-    </>
+    <span className="text-sm font-medium" style={{ color: '#C9956C' }}>
+      🔥 {label}
+    </span>
   );
 }
