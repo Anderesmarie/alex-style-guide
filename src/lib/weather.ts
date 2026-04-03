@@ -4,6 +4,8 @@ export interface WeatherData {
   description: string;
   emoji: string;
   city?: string;
+  tempMin?: number;
+  tempMax?: number;
 }
 
 const weatherMap: Record<number, { emoji: string; desc: string }> = {
@@ -44,11 +46,26 @@ function parseWeather(data: any, city?: string): WeatherData {
 
 async function fetchWeatherByCoords(lat: number, lon: number, city?: string): Promise<WeatherData> {
   const res = await fetch(
-    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m&timezone=auto&forecast_days=1`
   );
   if (!res.ok) throw new Error('API indisponible');
   const data = await res.json();
-  return parseWeather(data, city);
+  let tempMin: number | null = null;
+  let tempMax: number | null = null;
+  if (data.hourly?.time && data.hourly?.temperature_2m) {
+    const dayTemps = data.hourly.time
+      .map((t: string, i: number) => ({ hour: new Date(t).getHours(), temp: data.hourly.temperature_2m[i] }))
+      .filter((x: { hour: number; temp: number }) => x.hour >= 7 && x.hour <= 22)
+      .map((x: { hour: number; temp: number }) => x.temp);
+    if (dayTemps.length > 0) {
+      tempMin = Math.round(Math.min(...dayTemps));
+      tempMax = Math.round(Math.max(...dayTemps));
+    }
+  }
+  const weather = parseWeather(data, city);
+  if (tempMin !== null) { weather.tempMin = tempMin; weather.temperature = tempMin; }
+  if (tempMax !== null) weather.tempMax = tempMax;
+  return weather;
 }
 
 export async function fetchWeatherByGeolocation(): Promise<WeatherData> {
