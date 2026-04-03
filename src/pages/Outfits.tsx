@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ClothingItem, Outfit } from '@/lib/types';
 import { getWardrobe, getOutfits, addOutfit, deleteOutfit, genId } from '@/lib/storage';
 import { generateRecommendations } from '@/lib/recommendations';
+import { updateStreak } from '@/lib/streak';
 
 type View = 'gallery' | 'create' | 'detail';
 
