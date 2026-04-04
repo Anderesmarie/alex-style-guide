@@ -189,10 +189,7 @@ export default function Today() {
     if (!canSuggest) return;
     const recs = await generateRecommendations(wardrobe, weatherTemp, 3, userProfile);
     setRecommendations(recs);
-    const newCount = dailyCount + 1;
-    setDailyCount(newCount);
-    await saveDailyCounter({ date: today, count: newCount });
-  }, [weatherTemp, canSuggest, enough, wardrobe, dailyCount, today, swipeComplete, userProfile]);
+  }, [weatherTemp, canSuggest, enough, wardrobe, today, swipeComplete, userProfile]);
 
   // Auto-generate only if no saved results for today and has quota
   useEffect(() => {
@@ -201,10 +198,13 @@ export default function Today() {
     }
   }, [loading, ws.status, enough, swipeComplete]); // eslint-disable-line
 
-  const handleSwipeComplete = (results: { outfit: ClothingItem[]; liked: boolean | null }[]) => {
+  const handleSwipeComplete = async (results: { outfit: ClothingItem[]; liked: boolean | null }[]) => {
     setSwipeResults(results);
     setSwipeComplete(true);
     saveTodayData(today, results);
+    const newCount = dailyCount + 1;
+    setDailyCount(newCount);
+    await saveDailyCounter({ date: today, count: newCount });
   };
 
   const avatarData = getAvatarFromStorage();
