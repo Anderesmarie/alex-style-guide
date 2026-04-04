@@ -113,7 +113,7 @@ export default function Today() {
         setDailyCount(c.date === today ? c.count : 0);
 
         // Restore today's saved results — always show them even if limit reached
-        const saved = loadTodayData(today, w);
+        const saved = await loadTodayData(today, w);
         const dailyUsed = c.date === today ? c.count : 0;
         if (saved) {
           setSwipeResults(saved);
