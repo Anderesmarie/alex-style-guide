@@ -31,15 +31,19 @@ interface SavedTodayData {
   results: SavedOutfitResult[];
 }
 
-const STORAGE_KEY = 'closify_daily_outfits';
-
-function loadTodayData(today: string, wardrobe: ClothingItem[]): { outfit: ClothingItem[]; liked: boolean | null }[] | null {
+async function loadTodayData(today: string, wardrobe: ClothingItem[]): Promise<{ outfit: ClothingItem[]; liked: boolean | null }[] | null> {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const data: SavedTodayData = JSON.parse(raw);
-    if (data.date !== today) return null;
-    const resolved = data.results.map(r => {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return null;
+    const { data } = await supabase
+      .from('daily_outfits')
+      .select('results')
+      .eq('user_id', userData.user.id)
+      .eq('date', today)
+      .maybeSingle();
+    if (!data) return null;
+    const results = data.results as SavedOutfitResult[];
+    const resolved = results.map(r => {
       const items = r.outfitIds.map(id => wardrobe.find(i => i.id === id)).filter(Boolean) as ClothingItem[];
       return { outfit: items, liked: r.liked };
     }).filter(r => r.outfit.length > 0);
@@ -49,15 +53,22 @@ function loadTodayData(today: string, wardrobe: ClothingItem[]): { outfit: Cloth
   }
 }
 
-function saveTodayData(today: string, results: { outfit: ClothingItem[]; liked: boolean | null }[]) {
-  const data: SavedTodayData = {
-    date: today,
-    results: results.map(r => ({
+async function saveTodayData(today: string, results: { outfit: ClothingItem[]; liked: boolean | null }[]) {
+  try {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return;
+    const payload: SavedOutfitResult[] = results.map(r => ({
       outfitIds: r.outfit.map(i => i.id),
       liked: r.liked,
-    })),
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }));
+    await supabase.from('daily_outfits').upsert({
+      user_id: userData.user.id,
+      date: today,
+      results: payload,
+    }, { onConflict: 'user_id,date' });
+  } catch (e) {
+    console.error('Error saving today data:', e);
+  }
 }
 
 function getAvatarFromStorage(): AvatarData {
