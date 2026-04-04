@@ -107,7 +107,7 @@ export default function Today() {
         if (saved) {
           setSwipeResults(saved);
           setSwipeComplete(true);
-        } else if (dailyUsed >= 5) {
+        } else if (dailyUsed >= 3) {
           // Ne rien faire — laisser l'écran afficher le message limite sans bloquer
         }
 
@@ -389,7 +389,7 @@ export default function Today() {
       )}
 
       {/* Limit message — always BELOW results, never replaces them */}
-      {enough && !canSuggest && !swipeResults && (
+      {enough && !canSuggest && !swipeComplete && !swipeResults && (
         <p className="text-xs text-muted-foreground text-center mt-3">
           Tu as utilisé tes 3 suggestions du jour ✨ Reviens demain pour de nouvelles idées.
         </p>
