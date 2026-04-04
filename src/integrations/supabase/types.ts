@@ -83,6 +83,24 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_outfits: {
+        Row: {
+          date: string
+          results: Json
+          user_id: string
+        }
+        Insert: {
+          date: string
+          results?: Json
+          user_id: string
+        }
+        Update: {
+          date?: string
+          results?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       last_outfit: {
         Row: {
           item_ids: Json | null
