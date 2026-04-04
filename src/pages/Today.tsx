@@ -198,10 +198,13 @@ export default function Today() {
     }
   }, [loading, ws.status, enough, swipeComplete]); // eslint-disable-line
 
-  const handleSwipeComplete = (results: { outfit: ClothingItem[]; liked: boolean | null }[]) => {
+  const handleSwipeComplete = async (results: { outfit: ClothingItem[]; liked: boolean | null }[]) => {
     setSwipeResults(results);
     setSwipeComplete(true);
     saveTodayData(today, results);
+    const newCount = dailyCount + 1;
+    setDailyCount(newCount);
+    await saveDailyCounter({ date: today, count: newCount });
   };
 
   const avatarData = getAvatarFromStorage();
