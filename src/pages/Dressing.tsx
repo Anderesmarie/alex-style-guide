@@ -101,6 +101,8 @@ export default function Dressing() {
     setter(arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]);
   };
 
+  const [saving, setSaving] = useState(false);
+
   const handleSave = async () => {
     if (!imageBase64 || !type || !category) return;
     const finalColor = color || customColor || 'Autre';
@@ -112,7 +114,12 @@ export default function Dressing() {
       brand: brand || undefined,
       price: price ? Number(price) : undefined,
     };
-    await addClothing(item);
+    setSaving(true);
+    try {
+      await addClothing(item);
+    } finally {
+      setSaving(false);
+    }
     updateStreak();
     await loadWardrobe();
     resetForm();
@@ -457,14 +464,14 @@ export default function Dressing() {
 
       <button
         onClick={isEdit ? handleUpdate : handleSave}
-        disabled={!imageBase64 || !type || !category}
+        disabled={saving || !imageBase64 || !type || !category}
         className={`w-full py-3.5 rounded-xl font-semibold transition-all duration-200 ${
-          imageBase64 && type && category
+          !saving && imageBase64 && type && category
             ? 'bg-primary text-primary-foreground shadow-lg active:scale-[0.98]'
             : 'bg-muted text-muted-foreground'
         }`}
       >
-        {isEdit ? 'Enregistrer les modifications' : 'Ajouter au dressing'}
+        {isEdit ? 'Enregistrer les modifications' : saving ? 'Ajout en cours...' : 'Ajouter au dressing'}
       </button>
     </div>
   );
