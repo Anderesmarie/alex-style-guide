@@ -281,6 +281,8 @@ export default function Dressing() {
         <h1 className="text-xl font-serif font-bold">{isEdit ? 'Modifier' : 'Ajouter un vêtement'}</h1>
       </div>
 
+      <PhotoGuide />
+
       {!imageBase64 ? (
         <button
           onClick={() => fileRef.current?.click()}
