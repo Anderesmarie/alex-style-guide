@@ -25,6 +25,8 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
   const [selectedStyle, setSelectedStyle] = useState('');
   const [generatedOutfit, setGeneratedOutfit] = useState<ClothingItem[] | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const hasFilter = occasion || selectedItem || selectedStyle;
 
