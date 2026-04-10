@@ -60,6 +60,10 @@ export default function Dressing() {
   const [filterColor, setFilterColor] = useState('');
   const [filterSeason, setFilterSeason] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+  const [previewBase64, setPreviewBase64] = useState('');
+  const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [previewOrigSrc, setPreviewOrigSrc] = useState('');
+  const [manualRotation, setManualRotation] = useState(0);
 
   // Delete dialog state
   const [deleteDialogItem, setDeleteDialogItem] = useState<ClothingItem | null>(null);
