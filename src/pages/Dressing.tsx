@@ -93,6 +93,7 @@ export default function Dressing() {
   const resetForm = () => {
     setImageBase64(''); setCategory(''); setSubcategory(''); setType(''); setColor(''); setCustomColor('');
     setSeason([]); setStyle([]); setOccasion([]); setBrand(''); setPrice('');
+    setPreviewBase64(''); setPreviewFile(null); setPreviewOrigSrc(''); setManualRotation(0);
   };
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
