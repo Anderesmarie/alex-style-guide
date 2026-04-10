@@ -321,8 +321,19 @@ export default function Dressing() {
       {/* Preview step */}
       {previewBase64 && !imageBase64 ? (
         <div className="mb-5">
-          <img src={previewBase64} alt="Aperçu" className="w-full aspect-square object-cover rounded-xl card-shadow mb-3" />
-          
+          <div className="relative mb-3">
+            <img src={previewBase64} alt="Aperçu" className="w-full aspect-square object-cover rounded-xl card-shadow" />
+            <svg width="100%" height="100%" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', borderRadius: '12px' }}>
+              <line x1="33%" y1="0" x2="33%" y2="100%" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
+              <line x1="66%" y1="0" x2="66%" y2="100%" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
+              <line x1="0" y1="33%" x2="100%" y2="33%" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
+              <line x1="0" y1="66%" x2="100%" y2="66%" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
+            </svg>
+            <span style={{ position: 'absolute', bottom: 8, width: '100%', left: 0, textAlign: 'center', color: 'white', fontSize: 11, textShadow: '0 1px 2px rgba(0,0,0,0.5)', pointerEvents: 'none' }}>
+              Règle des tiers — centre ton vêtement ✨
+            </span>
+          </div>
+
           {/* Rotation slider */}
           <div className="mb-3 px-1">
             <label className="text-xs font-medium text-muted-foreground mb-1 block">
