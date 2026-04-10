@@ -99,7 +99,36 @@ export default function Dressing() {
     const file = e.target.files?.[0];
     if (!file) return;
     const compressed = await compressImage(file);
-    setImageBase64(compressed);
+    setPreviewBase64(compressed);
+    setPreviewOrigSrc(compressed);
+    setPreviewFile(file);
+    setManualRotation(0);
+  };
+
+  const handleRotationChange = async (deg: number) => {
+    setManualRotation(deg);
+    if (!previewFile) return;
+    const rotated = await recompressWithRotation(previewOrigSrc, previewFile, deg);
+    setPreviewBase64(rotated);
+  };
+
+  const acceptPreview = () => {
+    setImageBase64(previewBase64);
+    setPreviewBase64('');
+    setPreviewFile(null);
+    setPreviewOrigSrc('');
+    setManualRotation(0);
+  };
+
+  const retakePreview = () => {
+    setPreviewBase64('');
+    setPreviewFile(null);
+    setPreviewOrigSrc('');
+    setManualRotation(0);
+    if (fileRef.current) {
+      fileRef.current.value = '';
+      fileRef.current.click();
+    }
   };
 
   const toggle = (arr: string[], val: string, setter: (v: string[]) => void) => {
