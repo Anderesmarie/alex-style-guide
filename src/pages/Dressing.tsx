@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { ClothingItem, COLORS, SEASONS, OCCASIONS, STYLE_OPTIONS } from '@/lib/types';
 import { getWardrobe, addClothing, updateClothing, deleteClothing, getOutfits, saveOutfits, genId } from '@/lib/storage';
 import { CATEGORIES } from '@/lib/categories';
-import { compressImage } from '@/lib/imageUtils';
+import { compressImage, recompressWithRotation } from '@/lib/imageUtils';
 import { toast } from 'sonner';
 import { updateStreak } from '@/lib/streak';
 import PhotoGuide from '@/components/PhotoGuide';
@@ -60,6 +60,10 @@ export default function Dressing() {
   const [filterColor, setFilterColor] = useState('');
   const [filterSeason, setFilterSeason] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+  const [previewBase64, setPreviewBase64] = useState('');
+  const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [previewOrigSrc, setPreviewOrigSrc] = useState('');
+  const [manualRotation, setManualRotation] = useState(0);
 
   // Delete dialog state
   const [deleteDialogItem, setDeleteDialogItem] = useState<ClothingItem | null>(null);
@@ -89,13 +93,43 @@ export default function Dressing() {
   const resetForm = () => {
     setImageBase64(''); setCategory(''); setSubcategory(''); setType(''); setColor(''); setCustomColor('');
     setSeason([]); setStyle([]); setOccasion([]); setBrand(''); setPrice('');
+    setPreviewBase64(''); setPreviewFile(null); setPreviewOrigSrc(''); setManualRotation(0);
   };
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const compressed = await compressImage(file);
-    setImageBase64(compressed);
+    setPreviewBase64(compressed);
+    setPreviewOrigSrc(compressed);
+    setPreviewFile(file);
+    setManualRotation(0);
+  };
+
+  const handleRotationChange = async (deg: number) => {
+    setManualRotation(deg);
+    if (!previewFile) return;
+    const rotated = await recompressWithRotation(previewOrigSrc, previewFile, deg);
+    setPreviewBase64(rotated);
+  };
+
+  const acceptPreview = () => {
+    setImageBase64(previewBase64);
+    setPreviewBase64('');
+    setPreviewFile(null);
+    setPreviewOrigSrc('');
+    setManualRotation(0);
+  };
+
+  const retakePreview = () => {
+    setPreviewBase64('');
+    setPreviewFile(null);
+    setPreviewOrigSrc('');
+    setManualRotation(0);
+    if (fileRef.current) {
+      fileRef.current.value = '';
+      fileRef.current.click();
+    }
   };
 
   const toggle = (arr: string[], val: string, setter: (v: string[]) => void) => {
@@ -284,7 +318,46 @@ export default function Dressing() {
 
       <PhotoGuide />
 
-      {!imageBase64 ? (
+      {/* Preview step */}
+      {previewBase64 && !imageBase64 ? (
+        <div className="mb-5">
+          <img src={previewBase64} alt="Aperçu" className="w-full aspect-square object-cover rounded-xl card-shadow mb-3" />
+          
+          {/* Rotation slider */}
+          <div className="mb-3 px-1">
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">
+              Redresser : {manualRotation}°
+            </label>
+            <input
+              type="range"
+              min={-30}
+              max={30}
+              step={1}
+              value={manualRotation}
+              onChange={(e) => handleRotationChange(Number(e.target.value))}
+              className="w-full"
+              style={{ accentColor: 'hsl(var(--primary))' }}
+            />
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={acceptPreview}
+              className="flex-1 py-2 rounded-xl font-semibold text-sm text-white active:scale-[0.98] transition-transform"
+              style={{ backgroundColor: 'hsl(var(--primary))' }}
+            >
+              ✓ Utiliser cette photo
+            </button>
+            <button
+              onClick={retakePreview}
+              className="flex-1 py-2 rounded-xl font-semibold text-sm active:scale-[0.98] transition-transform"
+              style={{ backgroundColor: 'hsl(var(--muted))', color: 'hsl(var(--foreground))' }}
+            >
+              ↩ Reprendre
+            </button>
+          </div>
+        </div>
+      ) : !imageBase64 ? (
         <button
           onClick={() => fileRef.current?.click()}
           className="w-full aspect-square rounded-xl border-2 border-dashed border-primary/30 flex flex-col items-center justify-center gap-2 bg-card card-shadow mb-5"
