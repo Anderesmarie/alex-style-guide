@@ -5,7 +5,7 @@ export default function StreakCounter() {
   const [days, setDays] = useState(0);
 
   useEffect(() => {
-    setDays(getStreak().current);
+    getStreak().then(d => setDays(d.current));
   }, []);
 
   if (days === 0) {

@@ -25,12 +25,15 @@ interface Props {
 }
 
 function ProfileStreakCard() {
-  const data = getStreak();
+  const [longest, setLongest] = useState(0);
+  useEffect(() => {
+    getStreak().then(d => setLongest(d.longest));
+  }, []);
   return (
     <div className="rounded-2xl p-5 mb-4" style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
       <p className="text-sm mb-1" style={{ color: '#9B9B9B' }}>Meilleur streak</p>
       <p className="text-2xl font-serif font-bold" style={{ color: '#C9956C' }}>
-        {data.longest} jours 🔥
+        {longest} jours 🔥
       </p>
     </div>
   );
