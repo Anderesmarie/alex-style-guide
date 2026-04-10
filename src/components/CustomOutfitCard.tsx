@@ -84,6 +84,7 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
 
   const handleRetry = () => {
     setGeneratedOutfit(null);
+    setSaved(false);
   };
 
   const tips = generatedOutfit ? getStylingTips(generatedOutfit, weatherCode, temperature) : null;
