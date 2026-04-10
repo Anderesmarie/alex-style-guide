@@ -317,7 +317,46 @@ export default function Dressing() {
 
       <PhotoGuide />
 
-      {!imageBase64 ? (
+      {/* Preview step */}
+      {previewBase64 && !imageBase64 ? (
+        <div className="mb-5">
+          <img src={previewBase64} alt="Aperçu" className="w-full aspect-square object-cover rounded-xl card-shadow mb-3" />
+          
+          {/* Rotation slider */}
+          <div className="mb-3 px-1">
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">
+              Redresser : {manualRotation}°
+            </label>
+            <input
+              type="range"
+              min={-30}
+              max={30}
+              step={1}
+              value={manualRotation}
+              onChange={(e) => handleRotationChange(Number(e.target.value))}
+              className="w-full"
+              style={{ accentColor: 'hsl(var(--primary))' }}
+            />
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={acceptPreview}
+              className="flex-1 py-2 rounded-xl font-semibold text-sm text-white active:scale-[0.98] transition-transform"
+              style={{ backgroundColor: 'hsl(var(--primary))' }}
+            >
+              ✓ Utiliser cette photo
+            </button>
+            <button
+              onClick={retakePreview}
+              className="flex-1 py-2 rounded-xl font-semibold text-sm active:scale-[0.98] transition-transform"
+              style={{ backgroundColor: 'hsl(var(--muted))', color: 'hsl(var(--foreground))' }}
+            >
+              ↩ Reprendre
+            </button>
+          </div>
+        </div>
+      ) : !imageBase64 ? (
         <button
           onClick={() => fileRef.current?.click()}
           className="w-full aspect-square rounded-xl border-2 border-dashed border-primary/30 flex flex-col items-center justify-center gap-2 bg-card card-shadow mb-5"
