@@ -134,13 +134,20 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
             >
               Réessayer 🔄
             </button>
-            <button
-              onClick={handleSave}
-              className="flex-1 py-2.5 rounded-lg font-medium text-sm text-white active:scale-[0.98] transition-transform"
-              style={{ backgroundColor: ROSE_GOLD }}
-            >
-              Sauvegarder 💾
-            </button>
+            {saved ? (
+              <div className="flex-1 py-2.5 rounded-lg font-medium text-sm text-center text-white" style={{ backgroundColor: '#2E7D32' }}>
+                ✅ Sauvegardée !
+              </div>
+            ) : (
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="flex-1 py-2.5 rounded-lg font-medium text-sm text-white active:scale-[0.98] transition-transform disabled:opacity-60"
+                style={{ backgroundColor: ROSE_GOLD }}
+              >
+                {saving ? 'Sauvegarde...' : 'Sauvegarder 💾'}
+              </button>
+            )}
           </div>
         </div>
       </div>
