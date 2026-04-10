@@ -3,6 +3,8 @@ import { ClothingItem, UserProfile, STYLE_OPTIONS } from '@/lib/types';
 import { buildCustomOutfit } from '@/lib/recommendations';
 import { addOutfit, genId, saveLastOutfit } from '@/lib/storage';
 import { getStylingTips } from '@/lib/stylingTips';
+import { updateStreak } from '@/lib/streak';
+import { toast } from 'sonner';
 
 const ROSE_GOLD = '#C9956C';
 
@@ -23,6 +25,8 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
   const [selectedStyle, setSelectedStyle] = useState('');
   const [generatedOutfit, setGeneratedOutfit] = useState<ClothingItem[] | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const hasFilter = occasion || selectedItem || selectedStyle;
 
@@ -53,19 +57,34 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
   };
 
   const handleSave = async () => {
-    if (!generatedOutfit) return;
-    const ids = generatedOutfit.map(i => i.id);
-    await saveLastOutfit(ids);
-    await addOutfit({
-      id: genId(),
-      name: `Tenue perso du ${new Date().toLocaleDateString('fr-FR')}`,
-      itemIds: ids,
-      createdAt: new Date().toISOString(),
-    });
+    if (!generatedOutfit || saving) return;
+    setSaving(true);
+    try {
+      const ids = generatedOutfit.map(i => i.id);
+      await saveLastOutfit(ids);
+      await addOutfit({
+        id: genId(),
+        name: 'Tenue perso du ' + new Date().toLocaleDateString('fr-FR'),
+        itemIds: ids,
+        createdAt: new Date().toISOString(),
+      });
+      setSaved(true);
+      updateStreak();
+      toast.success('Tenue sauvegardée ! ✨', {
+        style: { backgroundColor: '#C9956C', color: '#FFFFFF', border: 'none' },
+        duration: 2000,
+      });
+    } catch (e) {
+      console.error('Erreur sauvegarde tenue:', e);
+      toast.error('Erreur lors de la sauvegarde, réessaie.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleRetry = () => {
     setGeneratedOutfit(null);
+    setSaved(false);
   };
 
   const tips = generatedOutfit ? getStylingTips(generatedOutfit, weatherCode, temperature) : null;
@@ -115,13 +134,20 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
             >
               Réessayer 🔄
             </button>
-            <button
-              onClick={handleSave}
-              className="flex-1 py-2.5 rounded-lg font-medium text-sm text-white active:scale-[0.98] transition-transform"
-              style={{ backgroundColor: ROSE_GOLD }}
-            >
-              Sauvegarder 💾
-            </button>
+            {saved ? (
+              <div className="flex-1 py-2.5 rounded-lg font-medium text-sm text-center text-white" style={{ backgroundColor: '#2E7D32' }}>
+                ✅ Sauvegardée !
+              </div>
+            ) : (
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="flex-1 py-2.5 rounded-lg font-medium text-sm text-white active:scale-[0.98] transition-transform disabled:opacity-60"
+                style={{ backgroundColor: ROSE_GOLD }}
+              >
+                {saving ? 'Sauvegarde...' : 'Sauvegarder 💾'}
+              </button>
+            )}
           </div>
         </div>
       </div>
