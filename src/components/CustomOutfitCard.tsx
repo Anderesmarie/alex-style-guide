@@ -57,15 +57,29 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
   };
 
   const handleSave = async () => {
-    if (!generatedOutfit) return;
-    const ids = generatedOutfit.map(i => i.id);
-    await saveLastOutfit(ids);
-    await addOutfit({
-      id: genId(),
-      name: `Tenue perso du ${new Date().toLocaleDateString('fr-FR')}`,
-      itemIds: ids,
-      createdAt: new Date().toISOString(),
-    });
+    if (!generatedOutfit || saving) return;
+    setSaving(true);
+    try {
+      const ids = generatedOutfit.map(i => i.id);
+      await saveLastOutfit(ids);
+      await addOutfit({
+        id: genId(),
+        name: 'Tenue perso du ' + new Date().toLocaleDateString('fr-FR'),
+        itemIds: ids,
+        createdAt: new Date().toISOString(),
+      });
+      setSaved(true);
+      updateStreak();
+      toast.success('Tenue sauvegardée ! ✨', {
+        style: { backgroundColor: '#C9956C', color: '#FFFFFF', border: 'none' },
+        duration: 2000,
+      });
+    } catch (e) {
+      console.error('Erreur sauvegarde tenue:', e);
+      toast.error('Erreur lors de la sauvegarde, réessaie.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleRetry = () => {
