@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getWardrobe } from '@/lib/storage';
+import { supabase } from '@/lib/supabase';
 
 const MILESTONES = [
   { count: 8, label: 'Premières suggestions débloquées 👗' },
@@ -10,40 +11,66 @@ const MILESTONES = [
 
 const CELEBRATED_KEY = 'mystyl_milestones_celebrated';
 
-function getCelebrated(): number[] {
+async function getCelebrated(): Promise<number[]> {
+  try {
+    const { data: userData } = await supabase.auth.getUser();
+    if (userData.user) {
+      const { data } = await supabase
+        .from('profiles')
+        .select('milestones_celebrated')
+        .eq('id', userData.user.id)
+        .single();
+      if (data?.milestones_celebrated) {
+        const list = data.milestones_celebrated as number[];
+        localStorage.setItem(CELEBRATED_KEY, JSON.stringify(list));
+        return list;
+      }
+    }
+  } catch {}
   try {
     const raw = localStorage.getItem(CELEBRATED_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch { return []; }
 }
 
-function saveCelebrated(list: number[]) {
+async function saveCelebrated(list: number[]) {
   localStorage.setItem(CELEBRATED_KEY, JSON.stringify(list));
+  try {
+    const { data: userData } = await supabase.auth.getUser();
+    if (userData.user) {
+      await supabase.from('profiles').update({
+        milestones_celebrated: list,
+      }).eq('id', userData.user.id);
+    }
+  } catch {}
 }
 
 export default function ProgressMilestones() {
   const [count, setCount] = useState(0);
   const [celebrating, setCelebrating] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [celebrated, setCelebratedState] = useState<number[]>([]);
 
   useEffect(() => {
-    getWardrobe().then(w => {
+    Promise.all([getWardrobe(), getCelebrated()]).then(([w, c]) => {
       setCount(w.length);
+      setCelebratedState(c);
       setLoaded(true);
     });
   }, []);
 
   useEffect(() => {
     if (!loaded) return;
-    const celebrated = getCelebrated();
     const newMilestone = MILESTONES.find(m => count >= m.count && !celebrated.includes(m.count));
     if (newMilestone) {
       setCelebrating(newMilestone.label);
-      saveCelebrated([...celebrated, newMilestone.count]);
+      const updated = [...celebrated, newMilestone.count];
+      setCelebratedState(updated);
+      saveCelebrated(updated);
       const timer = setTimeout(() => setCelebrating(null), 3000);
       return () => clearTimeout(timer);
     }
-  }, [count, loaded]);
+  }, [count, loaded, celebrated]);
 
   if (!loaded) return null;
 
@@ -85,7 +112,6 @@ export default function ProgressMilestones() {
           style={{ width: `${Math.min(progress, 100)}%`, backgroundColor: '#C9956C' }}
         />
       </div>
-      {/* Show achieved milestones as dots */}
       <div className="flex gap-1 mt-1.5">
         {MILESTONES.map(m => (
           <div

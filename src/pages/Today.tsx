@@ -3,6 +3,7 @@ import { WeatherData, fetchWeatherByGeolocation, fetchWeatherByCity, getSavedCit
 import { getWardrobe, getDailyCounter, saveDailyCounter, getProfile } from '@/lib/storage';
 import { generateRecommendations } from '@/lib/recommendations';
 import { ClothingItem, UserProfile } from '@/lib/types';
+import { loadBeautyProfile } from '@/lib/stylingTips';
 import OutfitSwiper from '@/components/OutfitSwiper';
 import OutfitResults from '@/components/OutfitResults';
 import CustomOutfitCard from '@/components/CustomOutfitCard';
@@ -107,6 +108,7 @@ export default function Today() {
           getProfile(),
           getDailyCounter(),
         ]);
+        loadBeautyProfile();
         console.timeEnd('data-load');
         setWardrobe(w);
         setUserProfile(p);
