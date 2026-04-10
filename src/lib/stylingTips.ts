@@ -1,23 +1,58 @@
 import { ClothingItem } from './types';
+import { supabase } from './supabase';
 
 interface BeautyProfile {
   hairLength?: string;
   makeupLevel?: string;
 }
 
-export interface StylingTips {
-  beauty: string;
-  hair: string;
-  accessories: string;
+let cachedBeautyProfile: BeautyProfile | null = null;
+
+export async function loadBeautyProfile(): Promise<BeautyProfile> {
+  try {
+    const { data: userData } = await supabase.auth.getUser();
+    if (userData.user) {
+      const { data } = await supabase
+        .from('profiles')
+        .select('beauty_hair_length, beauty_makeup_level')
+        .eq('id', userData.user.id)
+        .single();
+      if (data) {
+        const profile: BeautyProfile = {
+          hairLength: data.beauty_hair_length ?? undefined,
+          makeupLevel: data.beauty_makeup_level ?? undefined,
+        };
+        cachedBeautyProfile = profile;
+        localStorage.setItem('mystyl_beauty_profile', JSON.stringify(profile));
+        return profile;
+      }
+    }
+  } catch {}
+  // Fallback localStorage
+  try {
+    const raw = localStorage.getItem('mystyl_beauty_profile');
+    if (raw) {
+      cachedBeautyProfile = JSON.parse(raw);
+      return cachedBeautyProfile!;
+    }
+  } catch {}
+  return {};
 }
 
 function getBeautyProfile(): BeautyProfile {
+  if (cachedBeautyProfile) return cachedBeautyProfile;
   try {
     const raw = localStorage.getItem('mystyl_beauty_profile');
     return raw ? JSON.parse(raw) : {};
   } catch {
     return {};
   }
+}
+
+export interface StylingTips {
+  beauty: string;
+  hair: string;
+  accessories: string;
 }
 
 function detectOccasion(items: ClothingItem[]): string {
@@ -42,7 +77,6 @@ type WeatherType = 'rain' | 'hot' | 'cold' | 'normal';
 
 function getWeatherType(weatherCode: number | null, temperature: number | null): WeatherType {
   if (weatherCode !== null) {
-    // Rain/storm codes
     if ([51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99].includes(weatherCode)) return 'rain';
   }
   if (temperature !== null) {
