@@ -5,6 +5,7 @@ import { CATEGORIES } from '@/lib/categories';
 import { compressImage } from '@/lib/imageUtils';
 import { toast } from 'sonner';
 import { updateStreak } from '@/lib/streak';
+import PhotoGuide from '@/components/PhotoGuide';
 
 type View = 'grid' | 'add' | 'detail' | 'edit';
 
