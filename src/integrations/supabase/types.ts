@@ -142,6 +142,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          beauty_hair_length: string | null
+          beauty_makeup_level: string | null
           brands: Json | null
           budget: number | null
           colorimetry_season: string | null
@@ -150,13 +152,19 @@ export type Database = {
           id: string
           lifestyle: string | null
           makeup: string | null
+          milestones_celebrated: Json | null
           morphologie: string | null
           pseudo: string | null
           silhouette: string | null
+          streak_current: number | null
+          streak_last_date: string | null
+          streak_longest: number | null
           styles: Json | null
           taille: string | null
         }
         Insert: {
+          beauty_hair_length?: string | null
+          beauty_makeup_level?: string | null
           brands?: Json | null
           budget?: number | null
           colorimetry_season?: string | null
@@ -165,13 +173,19 @@ export type Database = {
           id: string
           lifestyle?: string | null
           makeup?: string | null
+          milestones_celebrated?: Json | null
           morphologie?: string | null
           pseudo?: string | null
           silhouette?: string | null
+          streak_current?: number | null
+          streak_last_date?: string | null
+          streak_longest?: number | null
           styles?: Json | null
           taille?: string | null
         }
         Update: {
+          beauty_hair_length?: string | null
+          beauty_makeup_level?: string | null
           brands?: Json | null
           budget?: number | null
           colorimetry_season?: string | null
@@ -180,9 +194,13 @@ export type Database = {
           id?: string
           lifestyle?: string | null
           makeup?: string | null
+          milestones_celebrated?: Json | null
           morphologie?: string | null
           pseudo?: string | null
           silhouette?: string | null
+          streak_current?: number | null
+          streak_last_date?: string | null
+          streak_longest?: number | null
           styles?: Json | null
           taille?: string | null
         }
