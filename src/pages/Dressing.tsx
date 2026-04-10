@@ -5,6 +5,7 @@ import { CATEGORIES } from '@/lib/categories';
 import { compressImage } from '@/lib/imageUtils';
 import { toast } from 'sonner';
 import { updateStreak } from '@/lib/streak';
+import PhotoGuide from '@/components/PhotoGuide';
 
 type View = 'grid' | 'add' | 'detail' | 'edit';
 
@@ -280,6 +281,8 @@ export default function Dressing() {
         <button onClick={() => { resetForm(); setView('grid'); }} className="text-2xl">←</button>
         <h1 className="text-xl font-serif font-bold">{isEdit ? 'Modifier' : 'Ajouter un vêtement'}</h1>
       </div>
+
+      <PhotoGuide />
 
       {!imageBase64 ? (
         <button
