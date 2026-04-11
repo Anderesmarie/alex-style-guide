@@ -106,10 +106,11 @@ export default function Dressing() {
     setManualRotation(0);
   };
 
-  const handleRotationChange = async (deg: number) => {
-    setManualRotation(deg);
+  const handleRotate90 = async () => {
+    const newRotation = manualRotation + 90;
+    setManualRotation(newRotation);
     if (!previewFile) return;
-    const rotated = await recompressWithRotation(previewOrigSrc, previewFile, deg);
+    const rotated = await recompressWithRotation(previewOrigSrc, previewFile, newRotation);
     setPreviewBase64(rotated);
   };
 
