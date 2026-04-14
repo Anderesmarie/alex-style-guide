@@ -321,209 +321,137 @@ export default function Dressing() {
         <h1 className="text-xl font-serif font-bold">{isEdit ? 'Modifier' : 'Ajouter un vêtement'}</h1>
       </div>
 
-      <PhotoGuide />
+      <div className="flex flex-col gap-5 pb-24">
 
-      {/* Preview step */}
-      {previewBase64 && !imageBase64 ? (
-        <div className="mb-5">
-          <div className="relative mb-3">
-            <img src={previewBase64} alt="Aperçu" className="w-full aspect-square object-cover rounded-xl card-shadow" />
-          </div>
-
-          <div className="flex justify-center mb-3">
-            <button
-              onClick={handleRotate90}
-              className="rounded-xl py-2 px-8 font-medium active:scale-[0.97] transition-transform"
-              style={{ backgroundColor: '#F5F0EB', color: '#2C2C2C', fontSize: 15 }}
-            >
-              ↻ Tourner
-            </button>
-          </div>
-
-          <div className="flex gap-3">
-            <button
-              onClick={acceptPreview}
-              className="flex-1 py-2 rounded-xl font-semibold text-sm text-white active:scale-[0.98] transition-transform"
-              style={{ backgroundColor: 'hsl(var(--primary))' }}
-            >
-              ✓ Utiliser cette photo
-            </button>
-            <button
-              onClick={retakePreview}
-              className="flex-1 py-2 rounded-xl font-semibold text-sm active:scale-[0.98] transition-transform"
-              style={{ backgroundColor: 'hsl(var(--muted))', color: 'hsl(var(--foreground))' }}
-            >
-              ↩ Reprendre
-            </button>
-          </div>
-        </div>
-      ) : !imageBase64 ? (
-        <button
-          onClick={() => fileRef.current?.click()}
-          className="w-full aspect-square rounded-xl border-2 border-dashed border-primary/30 flex flex-col items-center justify-center gap-2 bg-card card-shadow mb-5"
-        >
-          <span className="text-4xl">📸</span>
-          <span className="text-muted-foreground text-sm">Ajouter une photo</span>
-        </button>
-      ) : (
-        <div className="relative mb-5">
-          <img src={imageBase64} alt="" className="w-full aspect-square object-cover rounded-xl card-shadow" />
-          <button
-            onClick={() => { setImageBase64(''); fileRef.current?.click(); }}
-            className="absolute top-2 right-2 bg-card/80 backdrop-blur rounded-full w-8 h-8 flex items-center justify-center text-sm"
-          >
-            ✕
-          </button>
-        </div>
-      )}
-      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
-
-      {/* Catégorie */}
-      <label className="text-sm font-semibold text-muted-foreground mb-2 block">Catégorie</label>
-      <div className="flex flex-wrap gap-2 mb-4">
-        {CATEGORIES.map(cat => (
-          <button
-            key={cat.name}
-            onClick={() => { setCategory(cat.name); setSubcategory(''); setType(''); }}
-            className={`chip text-xs flex items-center gap-1 ${category === cat.name ? 'chip-active' : ''}`}
-          >
-            {cat.icon} {cat.name}
-          </button>
-        ))}
-      </div>
-
-      {/* Type (direct, no subcategory) */}
-      {category && (() => {
-        const selectedCat = CATEGORIES.find(c => c.name === category);
-        if (!selectedCat) return null;
-        return (
-          <>
-            <label className="text-sm font-semibold text-muted-foreground mb-2 block">Type</label>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {selectedCat.types.map(item => (
-                <button
-                  key={item.label}
-                  onClick={() => setType(item.label)}
-                  className={`chip text-xs flex items-center gap-1 ${type === item.label ? 'chip-active' : ''}`}
-                >
-                  {item.label}
-                </button>
-              ))}
+        {showPhotoTips && (
+          <div className="rounded-2xl border border-[#C9956C]/30 bg-[#C9956C]/5 p-4">
+            <p className="text-sm font-medium text-[#C9956C] mb-3">
+              📸 Conseils pour une belle photo
+            </p>
+            <div className="flex flex-col gap-2 text-sm text-gray-700">
+              <p>✅ Fond uni ou neutre — sol, mur blanc ou beige</p>
+              <p className="text-amber-700">⚠️ Si ton vêtement est blanc, crème, beige ou jaune clair → fond foncé — sol en bois, mur gris</p>
+              <p>✅ Lumière naturelle si possible — près d'une fenêtre, pas de flash</p>
+              <p>✅ Vêtement à plat — étale-le pour voir sa forme entière</p>
+              <p>✅ Cadrage carré — centre le vêtement, laisse un peu de bord</p>
+              <p className="text-red-500">❌ Évite les photos floues ou sombres</p>
+              <p className="text-red-500">❌ Évite les fonds chargés ou très colorés</p>
             </div>
-          </>
-        );
-      })()}
-
-      {/* Color */}
-      <label className="text-sm font-semibold text-muted-foreground mb-2 block">Couleur</label>
-      <div className="grid grid-cols-7 gap-2.5 mb-2">
-        {COLOR_PALETTE.map(c => {
-          const selected = color === c.value;
-          return (
             <button
-              key={c.value}
-              onClick={() => { setColor(c.value); setCustomColor(''); }}
-              className="flex flex-col items-center gap-1"
+              onClick={() => setShowPhotoTips(false)}
+              className="mt-3 text-sm text-[#C9956C] font-medium"
             >
-              <div
-                className="w-10 h-10 rounded-full relative flex items-center justify-center transition-all"
-                style={{
-                  background: c.bg,
-                  border: selected ? '3px solid #C9956C' : c.value === 'blanc' ? '1.5px solid hsl(var(--border))' : '1.5px solid transparent',
-                  boxShadow: selected ? '0 0 0 2px #C9956C40' : 'none',
-                  transform: selected ? 'scale(1.1)' : 'scale(1)',
-                }}
-              >
-                {selected && <span className="text-white text-sm font-bold drop-shadow-md">✓</span>}
-              </div>
-              <span className="text-[10px] text-muted-foreground leading-tight text-center">{c.label}</span>
+              J'ai compris ✓
             </button>
-          );
-        })}
-      </div>
-      <p className="text-[10px] text-muted-foreground mb-1 mt-2 font-semibold uppercase tracking-wide">Motifs</p>
-      <div className="grid grid-cols-6 gap-2.5 mb-4">
-        {PATTERN_PALETTE.map(c => {
-          const selected = color === c.value;
-          return (
-            <button
-              key={c.value}
-              onClick={() => { setColor(c.value); setCustomColor(''); }}
-              className="flex flex-col items-center gap-1"
-            >
-              <div
-                className="w-10 h-10 rounded-full relative flex items-center justify-center transition-all overflow-hidden"
-                style={{
-                  background: c.bg,
-                  border: selected ? '3px solid #C9956C' : '1.5px solid hsl(var(--border))',
-                  boxShadow: selected ? '0 0 0 2px #C9956C40' : 'none',
-                  transform: selected ? 'scale(1.1)' : 'scale(1)',
-                }}
-              >
-                {selected && <span className="text-white text-sm font-bold drop-shadow-md">✓</span>}
-              </div>
-              <span className="text-[10px] text-muted-foreground leading-tight text-center">{c.label}</span>
-            </button>
-          );
-        })}
-      </div>
+          </div>
+        )}
 
-      {/* Season */}
-      <label className="text-sm font-semibold text-muted-foreground mb-2 block">Saison</label>
-      <div className="flex flex-wrap gap-2 mb-4">
-        {SEASONS.map(s => (
-          <button key={s} onClick={() => toggle(season, s, setSeason)} className={`chip text-xs ${season.includes(s) ? 'chip-active' : ''}`}>{s}</button>
-        ))}
-      </div>
+        {imageBase64 ? (
+          <div className="relative">
+            <img src={imageBase64} alt="vêtement" className="w-full rounded-2xl object-cover max-h-64" />
+            <button onClick={() => fileRef.current?.click()} className="absolute bottom-3 right-3 bg-white/90 text-xs px-3 py-1.5 rounded-full border border-gray-200">Changer</button>
+          </div>
+        ) : (
+          <div onClick={() => fileRef.current?.click()} className="border-2 border-dashed border-[#C9956C]/40 rounded-2xl bg-white flex flex-col items-center justify-center gap-2 cursor-pointer py-16">
+            <span className="text-4xl">📷</span>
+            <p className="text-sm font-medium text-gray-700">Ajouter une photo</p>
+          </div>
+        )}
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
 
-      {/* Style */}
-      <label className="text-sm font-semibold text-muted-foreground mb-2 block">Style</label>
-      <div className="flex flex-wrap gap-2 mb-4">
-        {STYLE_OPTIONS.map(s => (
-          <button key={s.label} onClick={() => toggle(style, s.label, setStyle)}
-            className="px-3 py-2 rounded-full text-xs font-medium transition-all duration-200 flex items-center gap-1"
-            style={style.includes(s.label)
-              ? { backgroundColor: '#C9956C', color: '#FFFFFF', border: '1.5px solid #C9956C' }
-              : { backgroundColor: '#FFFFFF', color: '#2C2C2C', border: '1.5px solid #E0D5C8' }
-            }>
-            <span>{s.emoji}</span> {s.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Occasion */}
-      <label className="text-sm font-semibold text-muted-foreground mb-2 block">Occasion</label>
-      <div className="flex flex-wrap gap-2 mb-4">
-        {OCCASIONS.map(o => (
-          <button key={o} onClick={() => toggle(occasion, o, setOccasion)} className={`chip text-xs ${occasion.includes(o) ? 'chip-active' : ''}`}>{o}</button>
-        ))}
-      </div>
-
-      {/* Brand & Price */}
-      <div className="grid grid-cols-2 gap-3 mb-6">
         <div>
-          <label className="text-sm font-semibold text-muted-foreground mb-1 block">Marque</label>
-          <input type="text" value={brand} onChange={e => setBrand(e.target.value)} placeholder="Optionnel"
-            className="w-full px-3 py-2 rounded-lg bg-card card-shadow text-sm outline-none focus:ring-2 focus:ring-primary/30" />
+          <label className="block text-sm font-medium mb-3">Catégorie <span className="text-[#C9956C]">*</span></label>
+          <div className="grid grid-cols-3 gap-2">
+            {CATEGORIES.map(cat => (
+              <button key={cat.name} type="button"
+                onClick={() => { setCategory(cat.name); setType(''); setLayer(cat.layer); }}
+                className={`p-3 rounded-2xl border text-xs flex flex-col items-center gap-1.5 transition-all ${category === cat.name ? 'border-[#C9956C] bg-[#C9956C]/10 text-[#C9956C]' : 'border-gray-200 bg-white text-gray-600'}`}>
+                <span className="text-xl">{cat.icon}</span>
+                <span className="text-center leading-tight font-medium">{cat.name.split(' ')[0]}</span>
+              </button>
+            ))}
+          </div>
         </div>
-        <div>
-          <label className="text-sm font-semibold text-muted-foreground mb-1 block">Prix (€)</label>
-          <input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="Optionnel"
-            className="w-full px-3 py-2 rounded-lg bg-card card-shadow text-sm outline-none focus:ring-2 focus:ring-primary/30" />
-        </div>
-      </div>
 
-      <button
-        onClick={isEdit ? handleUpdate : handleSave}
-        disabled={saving || !imageBase64 || !type || !category}
-        className={`w-full py-3.5 rounded-xl font-semibold transition-all duration-200 ${
-          !saving && imageBase64 && type && category
-            ? 'bg-primary text-primary-foreground shadow-lg active:scale-[0.98]'
-            : 'bg-muted text-muted-foreground'
-        }`}
-      >
-        {isEdit ? 'Enregistrer les modifications' : saving ? 'Ajout en cours...' : 'Ajouter au dressing'}
-      </button>
+        {category && (
+          <div>
+            <label className="block text-sm font-medium mb-2">Type <span className="text-[#C9956C]">*</span></label>
+            <select value={type}
+              onChange={e => { const t = e.target.value; setType(t); const found = CATEGORIES.find(c => c.name === category)?.types.find(x => x.label === t); if (found) setLayer(found.layer); }}
+              className="w-full p-3 border border-gray-200 rounded-2xl bg-white text-sm text-gray-700">
+              <option value="">Sélectionne un type</option>
+              {CATEGORIES.find(c => c.name === category)?.types.map(t => (
+                <option key={t.label} value={t.label}>{t.label}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div>
+          <label className="block text-sm font-medium mb-3">Couleur</label>
+          <div className="flex flex-wrap gap-2">
+            {COLOR_PALETTE.map(c => (
+              <button key={c.value} type="button" onClick={() => setColor(c.value)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs transition-all ${color === c.value ? 'border-[#C9956C] bg-[#C9956C]/10 text-[#C9956C]' : 'border-gray-200 bg-white text-gray-600'}`}>
+                <span className="w-3 h-3 rounded-full border border-gray-200 flex-shrink-0" style={{ backgroundColor: c.bg }} />
+                {c.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-3">Saison</label>
+          <div className="flex flex-wrap gap-2">
+            {SEASONS.map(s => (
+              <button key={s} type="button" onClick={() => toggle(season, s, setSeason)}
+                className={`px-3 py-1.5 rounded-full border text-xs transition-all ${season.includes(s) ? 'border-[#C9956C] bg-[#C9956C]/10 text-[#C9956C]' : 'border-gray-200 bg-white text-gray-600'}`}>
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-3">Style</label>
+          <div className="flex flex-wrap gap-2">
+            {STYLE_OPTIONS.map(s => (
+              <button key={s.label} type="button" onClick={() => toggle(style, s.label, setStyle)}
+                className={`px-3 py-1.5 rounded-full border text-xs transition-all ${style.includes(s.label) ? 'border-[#C9956C] bg-[#C9956C]/10 text-[#C9956C]' : 'border-gray-200 bg-white text-gray-600'}`}>
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-3">Occasion</label>
+          <div className="flex flex-wrap gap-2">
+            {OCCASIONS.map(o => (
+              <button key={o} type="button" onClick={() => toggle(occasion, o, setOccasion)}
+                className={`px-3 py-1.5 rounded-full border text-xs transition-all ${occasion.includes(o) ? 'border-[#C9956C] bg-[#C9956C]/10 text-[#C9956C]' : 'border-gray-200 bg-white text-gray-600'}`}>
+                {o}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Marque</label>
+          <input type="text" value={brand} onChange={e => setBrand(e.target.value)} placeholder="Zara, H&M, Sézane..." className="w-full p-3 border border-gray-200 rounded-2xl bg-white text-sm" />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Prix d'achat</label>
+          <input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="ex : 45" className="w-full p-3 border border-gray-200 rounded-2xl bg-white text-sm" />
+        </div>
+
+        <button onClick={isEdit ? handleUpdate : handleSave} disabled={!imageBase64 || !type || !category || saving}
+          className="w-full bg-[#2C2C2C] text-white py-4 rounded-2xl text-sm font-medium disabled:opacity-40 mt-2">
+          {isEdit ? 'Enregistrer les modifications' : saving ? 'Enregistrement...' : 'Ajouter à mon dressing'}
+        </button>
+
+      </div>
     </div>
   );
 
