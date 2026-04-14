@@ -384,50 +384,25 @@ export default function Dressing() {
             className={`chip text-xs flex items-center gap-1 ${category === cat.name ? 'chip-active' : ''}`}
           >
             {cat.icon} {cat.name}
-            {cat.isNew && <span className="ml-1 px-1.5 py-0.5 rounded-full bg-pink-500/20 text-pink-600 text-[10px] font-bold">NEW</span>}
           </button>
         ))}
       </div>
 
-      {/* Sous-catégorie */}
+      {/* Type (direct, no subcategory) */}
       {category && (() => {
         const selectedCat = CATEGORIES.find(c => c.name === category);
         if (!selectedCat) return null;
         return (
           <>
-            <label className="text-sm font-semibold text-muted-foreground mb-2 block">Sous-catégorie</label>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {selectedCat.subcategories.map(sub => (
-                <button
-                  key={sub.name}
-                  onClick={() => { setSubcategory(sub.name); setType(''); }}
-                  className={`chip text-xs ${subcategory === sub.name ? 'chip-active' : ''}`}
-                >
-                  {sub.name}
-                </button>
-              ))}
-            </div>
-          </>
-        );
-      })()}
-
-      {/* Type */}
-      {subcategory && (() => {
-        const selectedCat = CATEGORIES.find(c => c.name === category);
-        const selectedSub = selectedCat?.subcategories.find(s => s.name === subcategory);
-        if (!selectedSub) return null;
-        return (
-          <>
             <label className="text-sm font-semibold text-muted-foreground mb-2 block">Type</label>
             <div className="flex flex-wrap gap-2 mb-4">
-              {selectedSub.items.map(item => (
+              {selectedCat.types.map(item => (
                 <button
                   key={item.label}
                   onClick={() => setType(item.label)}
                   className={`chip text-xs flex items-center gap-1 ${type === item.label ? 'chip-active' : ''}`}
                 >
                   {item.label}
-                  {item.trend && <span>✨</span>}
                 </button>
               ))}
             </div>
@@ -613,7 +588,7 @@ export default function Dressing() {
           <select value={filterType} onChange={e => setFilterType(e.target.value)}
             className="px-3 py-1.5 rounded-full bg-card card-shadow text-sm outline-none">
             <option value="">Type</option>
-            {CATEGORIES.flatMap(c => c.subcategories.flatMap(s => s.items.map(i => i.label)))
+            {CATEGORIES.flatMap(c => c.types.map(t => t.label))
               .filter((v, i, a) => a.indexOf(v) === i)
               .map(t => <option key={t}>{t}</option>)}
           </select>
