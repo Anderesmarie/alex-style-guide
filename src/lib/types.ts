@@ -3,6 +3,7 @@ export interface ClothingItem {
   imageBase64: string;
   category: string;
   subcategory: string;
+  layer: number;
   type: string;
   color: string;
   season: string[];
