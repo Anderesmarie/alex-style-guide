@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { ClothingItem, COLORS, SEASONS, OCCASIONS, STYLE_OPTIONS } from '@/lib/types';
 import { getWardrobe, addClothing, updateClothing, deleteClothing, getOutfits, saveOutfits, genId } from '@/lib/storage';
-import { CATEGORIES } from '@/lib/categories';
+import { CATEGORIES, getLayerByType } from '@/lib/categories';
 import { compressImage, recompressWithRotation } from '@/lib/imageUtils';
 import { toast } from 'sonner';
 import { updateStreak } from '@/lib/streak';
@@ -143,7 +143,7 @@ export default function Dressing() {
     if (!imageBase64 || !type || !category) return;
     const finalColor = color || customColor || 'Autre';
     const item: ClothingItem = {
-      id: genId(), imageBase64, category, subcategory, type, color: finalColor,
+      id: genId(), imageBase64, category, subcategory, layer: getLayerByType(type), type, color: finalColor,
       season: season.length ? season : ['Toutes saisons'],
       style: style.length ? style : ['Casual'],
       occasion: occasion.length ? occasion : ['Quotidien'],
