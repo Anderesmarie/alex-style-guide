@@ -81,6 +81,8 @@ export default function Dressing() {
   const [occasion, setOccasion] = useState<string[]>([]);
   const [brand, setBrand] = useState('');
   const [price, setPrice] = useState('');
+  const [layer, setLayer] = useState<number>(1);
+  const [showPhotoTips, setShowPhotoTips] = useState(true);
 
   const loadWardrobe = async () => {
     const w = await getWardrobe();
@@ -94,6 +96,8 @@ export default function Dressing() {
     setImageBase64(''); setCategory(''); setSubcategory(''); setType(''); setColor(''); setCustomColor('');
     setSeason([]); setStyle([]); setOccasion([]); setBrand(''); setPrice('');
     setPreviewBase64(''); setPreviewFile(null); setPreviewOrigSrc(''); setManualRotation(0);
+    setLayer(1);
+    setShowPhotoTips(true);
   };
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -143,7 +147,7 @@ export default function Dressing() {
     if (!imageBase64 || !type || !category) return;
     const finalColor = color || customColor || 'Autre';
     const item: ClothingItem = {
-      id: genId(), imageBase64, category, subcategory, layer: getLayerByType(type), type, color: finalColor,
+      id: genId(), imageBase64, category, subcategory, layer, type, color: finalColor,
       season: season.length ? season : ['Toutes saisons'],
       style: style.length ? style : ['Casual'],
       occasion: occasion.length ? occasion : ['Quotidien'],
