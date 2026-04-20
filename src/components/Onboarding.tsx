@@ -155,8 +155,17 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
     false,                   // 9 — avatar
   ][step];
 
+  console.log('[Onboarding] silhouette image test path:', '/silhouette_X_sablier.png');
+
   return (
     <div className="min-h-screen flex flex-col bg-background px-6 py-8 fade-enter">
+      <img
+        src="/silhouette_X_sablier.png"
+        alt="test"
+        style={{ width: '100px' }}
+        onLoad={() => console.log('[Onboarding] ✅ test image loaded')}
+        onError={(e) => console.error('[Onboarding] ❌ test image failed:', (e.target as HTMLImageElement).src)}
+      />
       <div className="progress-bar mb-8">
         <div className="progress-bar-fill" style={{ width: `${((step + 1) / totalSteps) * 100}%` }} />
       </div>
