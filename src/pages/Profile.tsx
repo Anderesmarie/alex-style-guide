@@ -397,18 +397,13 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
               </span>
             )}
             {profile.taille && (
-              <span className="px-3 py-1.5 rounded-full text-xs font-semibold" style={{ backgroundColor: '#F5F0EB', color: '#2C2C2C' }}>
-                Taille {profile.taille}
+              <span className="px-3 py-1.5 rounded-full text-xs font-semibold capitalize" style={{ backgroundColor: '#F5F0EB', color: '#2C2C2C' }}>
+                {profile.taille}
               </span>
             )}
             {profile.corpulence && (
-              <span className="px-3 py-1.5 rounded-full text-xs font-semibold" style={{ backgroundColor: '#F5F0EB', color: '#2C2C2C' }}>
-                Corpulence {profile.corpulence}
-              </span>
-            )}
-            {profile.silhouette && (
-              <span className="px-3 py-1.5 rounded-full text-xs font-semibold" style={{ backgroundColor: '#F5F0EB', color: '#2C2C2C' }}>
-                {profile.silhouette}
+              <span className="px-3 py-1.5 rounded-full text-xs font-semibold capitalize" style={{ backgroundColor: '#F5F0EB', color: '#2C2C2C' }}>
+                {profile.corpulence}
               </span>
             )}
             {profile.styles.map(s => {
