@@ -7,6 +7,12 @@ import { AvatarData } from './AvatarSVG';
 import AvatarCreator from './AvatarCreator';
 import { getPaletteForSkin } from '@/lib/colorimetry';
 import ProfileEditor from './ProfileEditor';
+import sablier from '@/assets/silhouette_X_sablier.png';
+import rectangle from '@/assets/silhouette_H_rectangle.png';
+import triangle from '@/assets/silhouette_A_triangle.png';
+import triangleInverse from '@/assets/silhouette_V_triangle_inverse.png';
+import ovale from '@/assets/silhouette_O_ovale.png';
+import autre from '@/assets/silhouette_8_autre.png';
 
 const MOTIVATIONAL = [
   'Super choix, on s\'en souvient ! ✨',
@@ -155,17 +161,8 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
     false,                   // 9 — avatar
   ][step];
 
-  console.log('[Onboarding] silhouette image test path:', '/silhouette_X_sablier.png');
-
   return (
     <div className="min-h-screen flex flex-col bg-background px-6 py-8 fade-enter">
-      <img
-        src="/silhouette_X_sablier.png"
-        alt="test"
-        style={{ width: '100px' }}
-        onLoad={() => console.log('[Onboarding] ✅ test image loaded')}
-        onError={(e) => console.error('[Onboarding] ❌ test image failed:', (e.target as HTMLImageElement).src)}
-      />
       <div className="progress-bar mb-8">
         <div className="progress-bar-fill" style={{ width: `${((step + 1) / totalSteps) * 100}%` }} />
       </div>
@@ -198,12 +195,12 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
             <h1 className="text-2xl font-serif font-bold mb-6">C'est quoi ta silhouette ?</h1>
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: 'Sablier', code: 'X', img: '/silhouette_X_sablier.png' },
-                { label: 'Rectangle', code: 'H', img: '/silhouette_H_rectangle.png' },
-                { label: 'Triangle', code: 'A', img: '/silhouette_A_triangle.png' },
-                { label: 'Triangle inversé', code: 'V', img: '/silhouette_V_triangle_inverse.png' },
-                { label: 'Ovale', code: 'O', img: '/silhouette_O_ovale.png' },
-                { label: 'Autre', code: '8', img: '/silhouette_8_autre.png' },
+                { label: 'Sablier', code: 'X', img: sablier },
+                { label: 'Rectangle', code: 'H', img: rectangle },
+                { label: 'Triangle', code: 'A', img: triangle },
+                { label: 'Triangle inversé', code: 'V', img: triangleInverse },
+                { label: 'Ovale', code: 'O', img: ovale },
+                { label: 'Autre', code: '8', img: autre },
               ].map(s => {
                 const selected = silhouette === s.label;
                 return (
