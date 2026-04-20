@@ -64,9 +64,6 @@ interface Props {
 }
 
 export default function Onboarding({ onComplete, editMode = false }: Props) {
-  if (editMode) {
-    return <ProfileEditor onComplete={onComplete} />;
-  }
   const [step, setStep] = useState(0);
   const [showMessage, setShowMessage] = useState(false);
   const [pseudo, setPseudo] = useState('');
@@ -83,6 +80,10 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
   const [favoriteColors, setFavoriteColors] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const totalSteps = 10;
+
+  if (editMode) {
+    return <ProfileEditor onComplete={onComplete} />;
+  }
 
   const nextStep = () => {
     setShowMessage(true);
