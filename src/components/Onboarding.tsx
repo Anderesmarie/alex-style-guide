@@ -6,6 +6,7 @@ import { saveProfile, saveAvatar, savePalette } from '@/lib/storage';
 import { AvatarData } from './AvatarSVG';
 import AvatarCreator from './AvatarCreator';
 import { getPaletteForSkin } from '@/lib/colorimetry';
+import ProfileEditor from './ProfileEditor';
 
 const MOTIVATIONAL = [
   'Super choix, on s\'en souvient ! ✨',
@@ -59,9 +60,13 @@ const FAVORITE_COLORS = [
 
 interface Props {
   onComplete: () => void;
+  editMode?: boolean;
 }
 
-export default function Onboarding({ onComplete }: Props) {
+export default function Onboarding({ onComplete, editMode = false }: Props) {
+  if (editMode) {
+    return <ProfileEditor onComplete={onComplete} />;
+  }
   const [step, setStep] = useState(0);
   const [showMessage, setShowMessage] = useState(false);
   const [pseudo, setPseudo] = useState('');
