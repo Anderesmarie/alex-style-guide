@@ -7,12 +7,7 @@ import { AvatarData } from './AvatarSVG';
 import AvatarCreator from './AvatarCreator';
 import { getPaletteForSkin } from '@/lib/colorimetry';
 import ProfileEditor from './ProfileEditor';
-import sablier from '@/assets/silhouette_X_sablier.png';
-import rectangle from '@/assets/silhouette_H_rectangle.png';
-import triangle from '@/assets/silhouette_A_triangle.png';
-import triangleInverse from '@/assets/silhouette_V_triangle_inverse.png';
-import ovale from '@/assets/silhouette_O_ovale.png';
-import autre from '@/assets/silhouette_8_autre.png';
+import { SILHOUETTE_IMAGES } from '@/lib/silhouetteImages';
 
 const MOTIVATIONAL = [
   'Super choix, on s\'en souvient ! ✨',
