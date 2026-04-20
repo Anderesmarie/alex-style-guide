@@ -187,16 +187,31 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
         {step === 1 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">C'est quoi ta silhouette ?</h1>
-            <div className="grid grid-cols-2 gap-3">
-              {SILHOUETTES.map(s => (
-                <button key={s.label} onClick={() => setSilhouette(s.label)}
-                  className={`p-4 rounded-lg text-center transition-all duration-200 card-shadow ${
-                    silhouette === s.label ? 'bg-primary text-primary-foreground scale-[1.02]' : 'bg-card text-card-foreground hover:shadow-md'
-                  }`}>
-                  <span className="text-3xl block mb-2">{s.emoji}</span>
-                  <span className="text-sm font-medium">{s.label}</span>
-                </button>
-              ))}
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label: 'Sablier', code: 'X', img: '/silhouette_X_sablier.png' },
+                { label: 'Rectangle', code: 'H', img: '/silhouette_H_rectangle.png' },
+                { label: 'Triangle', code: 'A', img: '/silhouette_A_triangle.png' },
+                { label: 'Triangle inversé', code: 'V', img: '/silhouette_V_triangle_inverse.png' },
+                { label: 'Ovale', code: 'O', img: '/silhouette_O_ovale.png' },
+                { label: 'Autre', code: '8', img: '/silhouette_8_autre.png' },
+              ].map(s => {
+                const selected = silhouette === s.label;
+                return (
+                  <button
+                    key={s.label}
+                    onClick={() => setSilhouette(s.label)}
+                    className="p-3 rounded-xl text-center transition-all duration-200 card-shadow flex flex-col items-center gap-2"
+                    style={selected
+                      ? { border: '2px solid #C4956A', backgroundColor: '#FDF6EF' }
+                      : { border: '2px solid transparent', backgroundColor: 'hsl(var(--card))' }
+                    }
+                  >
+                    <img src={s.img} alt={s.label} className="w-full h-24 object-contain" />
+                    <span className="text-xs font-medium leading-tight">{s.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </>
         )}
