@@ -105,7 +105,7 @@ function MainApp() {
   return (
     <div className="mx-auto max-w-[430px] min-h-screen bg-background relative">
       {showOnboarding ? (
-        <Onboarding onComplete={handleOnboardingComplete} />
+        <Onboarding onComplete={handleOnboardingComplete} editMode={hasProfile} />
       ) : (
         <AppShell onEditProfile={handleEditProfile} onLogout={handleLogout} />
       )}
