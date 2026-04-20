@@ -190,12 +190,12 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
             <h1 className="text-2xl font-serif font-bold mb-6">C'est quoi ta silhouette ?</h1>
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: 'Sablier', code: 'X', img: sablier },
-                { label: 'Rectangle', code: 'H', img: rectangle },
-                { label: 'Triangle', code: 'A', img: triangle },
-                { label: 'Triangle inversé', code: 'V', img: triangleInverse },
-                { label: 'Ovale', code: 'O', img: ovale },
-                { label: 'Autre', code: '8', img: autre },
+                { label: 'Sablier', code: 'X', img: SILHOUETTE_IMAGES['Sablier'] },
+                { label: 'Rectangle', code: 'H', img: SILHOUETTE_IMAGES['Rectangle'] },
+                { label: 'Triangle', code: 'A', img: SILHOUETTE_IMAGES['Triangle'] },
+                { label: 'Triangle inversé', code: 'V', img: SILHOUETTE_IMAGES['Triangle inversé'] },
+                { label: 'Ovale', code: 'O', img: SILHOUETTE_IMAGES['Ovale'] },
+                { label: 'Autre', code: '8', img: SILHOUETTE_IMAGES['Autre'] },
               ].map(s => {
                 const selected = silhouette === s.label;
                 return (
