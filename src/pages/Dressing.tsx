@@ -55,6 +55,7 @@ const DELETE_REASONS = [
 ];
 
 export default function Dressing() {
+  const [tab, setTab] = useState<Tab>('dressing');
   const [view, setView] = useState<View>('grid');
   const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
   const [loading, setLoading] = useState(true);
