@@ -301,6 +301,8 @@ export default function Outfits() {
           <p className="text-sm mt-1">Compose ta première tenue !</p>
         </div>
       )}
+        </>
+      )}
     </div>
   );
 }
