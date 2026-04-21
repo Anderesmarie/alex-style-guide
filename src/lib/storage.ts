@@ -1,4 +1,4 @@
-import { ClothingItem, Outfit, UserProfile, DailyCounter, AvatarConfig } from './types';
+import { ClothingItem, Outfit, UserProfile, DailyCounter, AvatarConfig, CalendarEvent, Trip, TripDay } from './types';
 import { ColorPalette } from './colorimetry';
 import { supabase } from './supabase';
 
@@ -257,6 +257,127 @@ export async function addRejected(ids: string[]): Promise<void> {
     user_id: uid,
     item_ids: ids.sort(),
   });
+}
+
+// ---------- Calendar events ----------
+export async function getCalendarEvents(): Promise<CalendarEvent[]> {
+  const uid = await getUserId();
+  const { data } = await supabase.from('calendar_events').select('*').eq('user_id', uid).order('date', { ascending: true });
+  if (!data) return [];
+  return data.map(row => ({
+    id: row.id,
+    userId: row.user_id,
+    date: row.date,
+    outfitId: row.outfit_id,
+    eventName: row.event_name,
+    createdAt: row.created_at,
+  }));
+}
+
+export async function upsertCalendarEvent(event: Partial<CalendarEvent> & { date: string }): Promise<CalendarEvent> {
+  const uid = await getUserId();
+  const payload: any = {
+    user_id: uid,
+    date: event.date,
+    outfit_id: event.outfitId ?? null,
+    event_name: event.eventName ?? null,
+  };
+  if (event.id) payload.id = event.id;
+  const { data, error } = await supabase.from('calendar_events').upsert(payload).select().single();
+  if (error) throw error;
+  return {
+    id: data.id,
+    userId: data.user_id,
+    date: data.date,
+    outfitId: data.outfit_id,
+    eventName: data.event_name,
+    createdAt: data.created_at,
+  };
+}
+
+export async function deleteCalendarEvent(id: string): Promise<void> {
+  const uid = await getUserId();
+  await supabase.from('calendar_events').delete().eq('id', id).eq('user_id', uid);
+}
+
+// ---------- Trips ----------
+export async function getTrips(): Promise<Trip[]> {
+  const uid = await getUserId();
+  const { data } = await supabase.from('trips').select('*').eq('user_id', uid).order('start_date', { ascending: true });
+  if (!data) return [];
+  return data.map(row => ({
+    id: row.id,
+    userId: row.user_id,
+    destination: row.destination,
+    startDate: row.start_date,
+    endDate: row.end_date,
+    createdAt: row.created_at,
+  }));
+}
+
+export async function upsertTrip(trip: Partial<Trip> & { destination: string; startDate: string; endDate: string }): Promise<Trip> {
+  const uid = await getUserId();
+  const payload: any = {
+    user_id: uid,
+    destination: trip.destination,
+    start_date: trip.startDate,
+    end_date: trip.endDate,
+  };
+  if (trip.id) payload.id = trip.id;
+  const { data, error } = await supabase.from('trips').upsert(payload).select().single();
+  if (error) throw error;
+  return {
+    id: data.id,
+    userId: data.user_id,
+    destination: data.destination,
+    startDate: data.start_date,
+    endDate: data.end_date,
+    createdAt: data.created_at,
+  };
+}
+
+export async function deleteTrip(id: string): Promise<void> {
+  const uid = await getUserId();
+  // trip_days are removed via ON DELETE CASCADE
+  await supabase.from('trips').delete().eq('id', id).eq('user_id', uid);
+}
+
+// ---------- Trip days ----------
+export async function getTripDays(tripId: string): Promise<TripDay[]> {
+  const { data } = await supabase.from('trip_days').select('*').eq('trip_id', tripId).order('date', { ascending: true });
+  if (!data) return [];
+  return data.map(row => ({
+    id: row.id,
+    tripId: row.trip_id,
+    date: row.date,
+    outfitId: row.outfit_id,
+    eventName: row.event_name,
+    createdAt: row.created_at,
+  }));
+}
+
+export async function upsertTripDay(day: Partial<TripDay> & { tripId: string; date: string }): Promise<TripDay> {
+  const payload: any = {
+    trip_id: day.tripId,
+    date: day.date,
+    outfit_id: day.outfitId ?? null,
+    event_name: day.eventName ?? null,
+  };
+  if (day.id) payload.id = day.id;
+  const { data, error } = await supabase.from('trip_days').upsert(payload).select().single();
+  if (error) throw error;
+  return {
+    id: data.id,
+    tripId: data.trip_id,
+    date: data.date,
+    outfitId: data.outfit_id,
+    eventName: data.event_name,
+    createdAt: data.created_at,
+  };
+}
+
+export async function deleteTripDay(id: string): Promise<void> {
+  await supabase.from('trip_days').delete().eq('id', id);
 }
 
 // ---------- Auth compat (deprecated — Supabase handles sessions) ----------

@@ -52,6 +52,33 @@ export interface AuthData {
   date: string;
 }
 
+export interface CalendarEvent {
+  id: string;
+  userId: string;
+  date: string;
+  outfitId: string | null;
+  eventName: string | null;
+  createdAt: string;
+}
+
+export interface Trip {
+  id: string;
+  userId: string;
+  destination: string;
+  startDate: string;
+  endDate: string;
+  createdAt: string;
+}
+
+export interface TripDay {
+  id: string;
+  tripId: string;
+  date: string;
+  outfitId: string | null;
+  eventName: string | null;
+  createdAt: string;
+}
+
 export interface DailyCounter {
   date: string;
   count: number;
