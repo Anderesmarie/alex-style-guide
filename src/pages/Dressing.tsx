@@ -173,8 +173,9 @@ export default function Dressing() {
   const handleSave = async () => {
     if (!imageBase64 || !type || !category) return;
     const finalColor = color || customColor || 'Autre';
+    const finalImage = cleanImage ?? imageBase64;
     const item: ClothingItem = {
-      id: genId(), imageBase64, category, subcategory, layer, type, color: finalColor,
+      id: genId(), imageBase64: finalImage, category, subcategory, layer, type, color: finalColor,
       season: season.length ? season : ['Toutes saisons'],
       style: style.length ? style : ['Casual'],
       occasion: occasion.length ? occasion : ['Quotidien'],
