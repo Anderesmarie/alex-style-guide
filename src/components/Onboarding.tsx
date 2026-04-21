@@ -103,7 +103,7 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
     savePalette(palette);
     const SILHOUETTE_TO_MORPHO: Record<string, 'A' | 'H' | 'X' | 'V' | 'O' | '8'> = {
       'Sablier': 'X', 'Rectangle': 'H', 'Triangle': 'A',
-      'Triangle inversé': 'V', 'Ovale': 'O', 'Autre': '8',
+      'Triangle inversé': 'V', 'Ovale': 'O', '8': '8',
     };
     const morphoCode = SILHOUETTE_TO_MORPHO[silhouette] || null;
     await saveProfile({ silhouette, styles, budget, brands, taille: taille || null, corpulence: corpulence || null, morphologie: morphoCode, favorite_colors: favoriteColors });
