@@ -468,6 +468,39 @@ export default function Dressing() {
     </div>
   );
 
+  const renderTabs = () => (
+    <div className="flex gap-6 border-b border-border mb-5">
+      <button
+        onClick={() => setTab('dressing')}
+        className={`pb-2 text-sm font-medium transition-colors relative ${
+          tab === 'dressing' ? 'text-[#C9956C]' : 'text-muted-foreground'
+        }`}
+      >
+        Mon Dressing
+        {tab === 'dressing' && <span className="absolute -bottom-px left-0 right-0 h-0.5 bg-[#C9956C] rounded-full" />}
+      </button>
+      <button
+        onClick={() => setTab('wishlist')}
+        className={`pb-2 text-sm font-medium transition-colors relative ${
+          tab === 'wishlist' ? 'text-[#C9956C]' : 'text-muted-foreground'
+        }`}
+      >
+        Wishlist 🛍️
+        {tab === 'wishlist' && <span className="absolute -bottom-px left-0 right-0 h-0.5 bg-[#C9956C] rounded-full" />}
+      </button>
+    </div>
+  );
+
+  // Wishlist tab takes over (only when on grid view, not inside add/edit/detail)
+  if (tab === 'wishlist' && view === 'grid') {
+    return (
+      <div className="fade-enter pb-4">
+        {renderTabs()}
+        <Wishlist onPurchase={handlePurchaseFromWishlist} />
+      </div>
+    );
+  }
+
   if (view === 'add' || view === 'edit') return renderForm(view === 'edit');
 
   if (view === 'detail' && selectedItem) return (
