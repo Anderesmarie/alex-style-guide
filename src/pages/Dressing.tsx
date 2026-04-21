@@ -104,6 +104,15 @@ export default function Dressing() {
     setShowPhotoTips(true);
   };
 
+  const handlePurchaseFromWishlist = (item: WishlistItem) => {
+    resetForm();
+    setImageBase64(item.photo);
+    if (item.name) setBrand(item.name);
+    setTab('dressing');
+    setView('add');
+    toast.success('Termine de cataloguer ta nouvelle pièce ✨');
+  };
+
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
