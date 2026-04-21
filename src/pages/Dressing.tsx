@@ -123,6 +123,18 @@ export default function Dressing() {
     setPreviewOrigSrc(compressed);
     setPreviewFile(file);
     setManualRotation(0);
+
+    const base64 = compressed.includes(',') ? compressed.split(',')[1] : compressed;
+    const result = await analyze(base64);
+    if (result) {
+      setCategory(result.category);
+      setSubcategory(result.subcategory);
+      setType(result.type);
+      setColor(result.color);
+      setSeason(result.season);
+      setStyle(result.style);
+      setOccasion(result.occasion);
+    }
   };
 
   const handleRotate90 = async () => {
