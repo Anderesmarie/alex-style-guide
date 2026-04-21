@@ -7,6 +7,7 @@ import { AvatarData } from './AvatarSVG';
 import AvatarCreator from './AvatarCreator';
 import { getPaletteForSkin } from '@/lib/colorimetry';
 import ProfileEditor from './ProfileEditor';
+import SilhouetteCarousel from './SilhouetteCarousel';
 
 const MOTIVATIONAL = [
   'Super choix, on s\'en souvient ! ✨',
@@ -187,17 +188,7 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
         {step === 1 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">C'est quoi ta silhouette ?</h1>
-            <div className="grid grid-cols-2 gap-3">
-              {SILHOUETTES.map(s => (
-                <button key={s.label} onClick={() => setSilhouette(s.label)}
-                  className={`p-4 rounded-lg text-center transition-all duration-200 card-shadow ${
-                    silhouette === s.label ? 'bg-primary text-primary-foreground scale-[1.02]' : 'bg-card text-card-foreground hover:shadow-md'
-                  }`}>
-                  <img src={s.image} alt={s.label} className="w-20 h-20 object-contain mx-auto mb-2" />
-                  <span className="text-sm font-medium">{s.label}</span>
-                </button>
-              ))}
-            </div>
+            <SilhouetteCarousel value={silhouette} onChange={setSilhouette} />
           </>
         )}
 

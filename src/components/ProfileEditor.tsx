@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { getProfile, saveProfile, getAvatar, saveAvatar } from '@/lib/storage';
 import AvatarCreator, { DEFAULT_AVATAR } from './AvatarCreator';
 import { AvatarData } from './AvatarSVG';
+import SilhouetteCarousel from './SilhouetteCarousel';
 
 const FAVORITE_COLORS = [
   { name: 'Blanc', hex: '#FFFFFF' }, { name: 'Noir', hex: '#1A1A1A' },
@@ -216,18 +217,7 @@ export default function ProfileEditor({ onComplete }: Props) {
 
         {/* Silhouette */}
         <SectionCard id="silhouette" icon="👗" title="Morphologie" summary={silhouette || 'Non définie'}>
-          <div className="grid grid-cols-2 gap-2">
-            {SILHOUETTES.map(s => (
-              <button key={s.label} onClick={() => setSilhouette(s.label)}
-                className="p-3 rounded-xl text-center text-sm transition-all"
-                style={silhouette === s.label
-                  ? { border: '2px solid #C9956C', backgroundColor: '#FAF5F0' }
-                  : { border: '2px solid #E0D5C8', backgroundColor: '#FFFFFF' }}>
-                <span className="text-2xl block mb-1">{s.emoji}</span>
-                <span className="font-medium">{s.label}</span>
-              </button>
-            ))}
-          </div>
+          <SilhouetteCarousel value={silhouette} onChange={setSilhouette} />
           <SaveCancelRow onSave={() => saveSection('Morphologie')} />
         </SectionCard>
 
