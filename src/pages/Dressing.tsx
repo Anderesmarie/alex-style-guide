@@ -6,8 +6,11 @@ import { compressImage, recompressWithRotation } from '@/lib/imageUtils';
 import { toast } from 'sonner';
 import { updateStreak } from '@/lib/streak';
 import PhotoGuide from '@/components/PhotoGuide';
+import Wishlist from '@/components/Wishlist';
+import { WishlistItem } from '@/lib/wishlist';
 
 type View = 'grid' | 'add' | 'detail' | 'edit';
+type Tab = 'dressing' | 'wishlist';
 
 const COLOR_PALETTE = [
   { label: 'Blanc', value: 'blanc', bg: '#FFFFFF' },
@@ -52,6 +55,7 @@ const DELETE_REASONS = [
 ];
 
 export default function Dressing() {
+  const [tab, setTab] = useState<Tab>('dressing');
   const [view, setView] = useState<View>('grid');
   const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,6 +102,15 @@ export default function Dressing() {
     setPreviewBase64(''); setPreviewFile(null); setPreviewOrigSrc(''); setManualRotation(0);
     setLayer(1);
     setShowPhotoTips(true);
+  };
+
+  const handlePurchaseFromWishlist = (item: WishlistItem) => {
+    resetForm();
+    setImageBase64(item.photo);
+    if (item.name) setBrand(item.name);
+    setTab('dressing');
+    setView('add');
+    toast.success('Termine de cataloguer ta nouvelle pièce ✨');
   };
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -455,6 +468,39 @@ export default function Dressing() {
     </div>
   );
 
+  const renderTabs = () => (
+    <div className="flex gap-6 border-b border-border mb-5">
+      <button
+        onClick={() => setTab('dressing')}
+        className={`pb-2 text-sm font-medium transition-colors relative ${
+          tab === 'dressing' ? 'text-[#C9956C]' : 'text-muted-foreground'
+        }`}
+      >
+        Mon Dressing
+        {tab === 'dressing' && <span className="absolute -bottom-px left-0 right-0 h-0.5 bg-[#C9956C] rounded-full" />}
+      </button>
+      <button
+        onClick={() => setTab('wishlist')}
+        className={`pb-2 text-sm font-medium transition-colors relative ${
+          tab === 'wishlist' ? 'text-[#C9956C]' : 'text-muted-foreground'
+        }`}
+      >
+        Wishlist 🛍️
+        {tab === 'wishlist' && <span className="absolute -bottom-px left-0 right-0 h-0.5 bg-[#C9956C] rounded-full" />}
+      </button>
+    </div>
+  );
+
+  // Wishlist tab takes over (only when on grid view, not inside add/edit/detail)
+  if (tab === 'wishlist' && view === 'grid') {
+    return (
+      <div className="fade-enter pb-4">
+        {renderTabs()}
+        <Wishlist onPurchase={handlePurchaseFromWishlist} />
+      </div>
+    );
+  }
+
   if (view === 'add' || view === 'edit') return renderForm(view === 'edit');
 
   if (view === 'detail' && selectedItem) return (
@@ -502,6 +548,7 @@ export default function Dressing() {
   return (
     <div className="fade-enter pb-4">
       {renderDeleteDialog()}
+      {renderTabs()}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-serif font-bold">Mon Dressing</h1>
         <span className="text-sm text-muted-foreground">{wardrobe.length} pièce{wardrobe.length !== 1 ? 's' : ''}</span>
