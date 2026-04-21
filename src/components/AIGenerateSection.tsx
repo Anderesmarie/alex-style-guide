@@ -87,10 +87,6 @@ export default function AIGenerateSection({ dateKey, onUseOutfit }: Props) {
         <div className="flex-1 h-px bg-border" />
       </div>
 
-      <p className="text-xs font-medium text-foreground/80 mb-2">
-        ✨ Générer une tenue pour ce jour
-      </p>
-
       {!generated && (
         <button
           onClick={handleGenerate}
