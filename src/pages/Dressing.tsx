@@ -88,6 +88,7 @@ export default function Dressing() {
   const [price, setPrice] = useState('');
   const [layer, setLayer] = useState<number>(1);
   const [showPhotoTips, setShowPhotoTips] = useState(true);
+  const { analyze, loading: analyzing, error: analysisError, cleanImage, analysis } = useClothingAnalysis();
 
   const loadWardrobe = async () => {
     const w = await getWardrobe();
