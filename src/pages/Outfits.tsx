@@ -3,11 +3,14 @@ import { ClothingItem, Outfit } from '@/lib/types';
 import { getWardrobe, getOutfits, addOutfit, deleteOutfit, genId } from '@/lib/storage';
 import { generateRecommendations } from '@/lib/recommendations';
 import { updateStreak } from '@/lib/streak';
+import CalendarView from '@/components/CalendarView';
 
 type View = 'gallery' | 'create' | 'detail';
+type Tab = 'outfits' | 'calendar';
 
 export default function Outfits() {
   const [view, setView] = useState<View>('gallery');
+  const [tab, setTab] = useState<Tab>('outfits');
   const [outfits, setOutfits] = useState<Outfit[]>([]);
   const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -226,6 +229,38 @@ export default function Outfits() {
       {renderDeleteDialog()}
       <h1 className="text-2xl font-serif font-bold mb-4">Mes Tenues</h1>
 
+      {/* Sub-tabs */}
+      <div className="flex gap-2 mb-5">
+        <button
+          onClick={() => setTab('outfits')}
+          className={`flex-1 py-2.5 rounded-lg text-sm font-medium font-sans transition-colors ${
+            tab === 'outfits' ? 'text-white' : 'bg-transparent border border-border'
+          }`}
+          style={{
+            backgroundColor: tab === 'outfits' ? '#C9956C' : undefined,
+            color: tab === 'outfits' ? '#FFFFFF' : '#9CA3AF',
+          }}
+        >
+          Mes tenues
+        </button>
+        <button
+          onClick={() => setTab('calendar')}
+          className={`flex-1 py-2.5 rounded-lg text-sm font-medium font-sans transition-colors ${
+            tab === 'calendar' ? 'text-white' : 'bg-transparent border border-border'
+          }`}
+          style={{
+            backgroundColor: tab === 'calendar' ? '#C9956C' : undefined,
+            color: tab === 'calendar' ? '#FFFFFF' : '#9CA3AF',
+          }}
+        >
+          Calendrier
+        </button>
+      </div>
+
+      {tab === 'calendar' ? (
+        <CalendarView />
+      ) : (
+        <>
       <button
         onClick={() => setView('create')}
         className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold mb-5 active:scale-[0.98] transition-transform shadow-lg"
