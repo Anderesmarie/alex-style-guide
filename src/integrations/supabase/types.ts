@@ -65,6 +65,41 @@ export type Database = {
         }
         Relationships: []
       }
+      calendar_events: {
+        Row: {
+          created_at: string
+          date: string
+          event_name: string | null
+          id: string
+          outfit_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          event_name?: string | null
+          id?: string
+          outfit_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          event_name?: string | null
+          id?: string
+          outfit_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_events_outfit_id_fkey"
+            columns: ["outfit_id"]
+            isOneToOne: false
+            referencedRelation: "outfits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_counter: {
         Row: {
           count: number | null
@@ -224,6 +259,75 @@ export type Database = {
           id?: string
           item_ids?: Json | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      trip_days: {
+        Row: {
+          created_at: string
+          date: string
+          event_name: string | null
+          id: string
+          outfit_id: string | null
+          trip_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          event_name?: string | null
+          id?: string
+          outfit_id?: string | null
+          trip_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          event_name?: string | null
+          id?: string
+          outfit_id?: string | null
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_days_outfit_id_fkey"
+            columns: ["outfit_id"]
+            isOneToOne: false
+            referencedRelation: "outfits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_days_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trips: {
+        Row: {
+          created_at: string
+          destination: string
+          end_date: string
+          id: string
+          start_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          destination: string
+          end_date: string
+          id?: string
+          start_date: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          destination?: string
+          end_date?: string
+          id?: string
+          start_date?: string
+          user_id?: string
         }
         Relationships: []
       }
