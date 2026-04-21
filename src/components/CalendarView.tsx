@@ -138,6 +138,77 @@ export default function CalendarView() {
     }
   };
 
+  // Trip helpers
+  const openTripCreator = () => {
+    setTripDest('');
+    setTripStart('');
+    setTripEnd('');
+    setTripSheetOpen(true);
+  };
+
+  const handleCreateTrip = async () => {
+    if (!tripDest.trim()) {
+      toast.error('Choisis une destination');
+      return;
+    }
+    if (!tripStart || !tripEnd) {
+      toast.error('Choisis les dates');
+      return;
+    }
+    if (tripEnd < tripStart) {
+      toast.error('La date de retour doit être après le départ');
+      return;
+    }
+    setCreatingTrip(true);
+    try {
+      await upsertTrip({
+        destination: tripDest.trim(),
+        startDate: tripStart,
+        endDate: tripEnd,
+      });
+      const t = await getTrips();
+      setTrips(t);
+      setTripSheetOpen(false);
+      toast.success('Voyage créé ✨');
+    } catch {
+      toast.error('Erreur lors de la création');
+    } finally {
+      setCreatingTrip(false);
+    }
+  };
+
+  const handleDeleteTrip = async (trip: Trip) => {
+    if (!confirm(`Supprimer le voyage à ${trip.destination} ?`)) return;
+    try {
+      await deleteTrip(trip.id);
+      const t = await getTrips();
+      setTrips(t);
+      toast.success('Voyage supprimé');
+    } catch {
+      toast.error('Erreur');
+    }
+  };
+
+  const formatTripRange = (trip: Trip): string => {
+    const [sy, sm, sd] = trip.startDate.split('-').map(Number);
+    const [ey, em, ed] = trip.endDate.split('-').map(Number);
+    const start = new Date(sy, sm - 1, sd);
+    const end = new Date(ey, em - 1, ed);
+    return `${start.getDate()} ${MONTHS_FR[start.getMonth()]} → ${end.getDate()} ${MONTHS_FR[end.getMonth()]} ${end.getFullYear()}`;
+  };
+
+  const tripDayCount = (trip: Trip): number => {
+    const [sy, sm, sd] = trip.startDate.split('-').map(Number);
+    const [ey, em, ed] = trip.endDate.split('-').map(Number);
+    const start = new Date(sy, sm - 1, sd).getTime();
+    const end = new Date(ey, em - 1, ed).getTime();
+    return Math.round((end - start) / 86400000) + 1;
+  };
+
+  if (openTrip) {
+    return <TripDetail trip={openTrip} onBack={() => setOpenTrip(null)} />;
+  }
+
   if (loading) {
     return (
       <div className="space-y-3">
