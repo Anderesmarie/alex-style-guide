@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { ClothingItem, Outfit, Trip, TripDay } from '@/lib/types';
-import { getTripDays, getOutfits, getWardrobe, upsertTripDay } from '@/lib/storage';
+import { getTripDays, getOutfits, getWardrobe, upsertTripDay, addOutfit, genId } from '@/lib/storage';
+import AIGenerateSection from './AIGenerateSection';
 
 const DAYS_FULL_FR = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 const MONTHS_FR = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
@@ -225,6 +226,35 @@ export default function TripDetail({ trip, onBack }: Props) {
                   + Choisir une tenue
                 </button>
               )}
+
+              <AIGenerateSection
+                dateKey={key}
+                onUseOutfit={async (itemIds) => {
+                  try {
+                    const newOutfitId = genId();
+                    await addOutfit({
+                      id: newOutfitId,
+                      name: `Tenue IA · ${d.getDate()}/${d.getMonth() + 1}`,
+                      itemIds,
+                      createdAt: new Date().toISOString(),
+                    });
+                    const existing = getDayFor(key);
+                    await upsertTripDay({
+                      id: existing?.id,
+                      tripId: trip.id,
+                      date: key,
+                      outfitId: newOutfitId,
+                      eventName: existing?.eventName ?? activityDrafts[key]?.trim() ?? null,
+                    });
+                    const [ds, os] = await Promise.all([getTripDays(trip.id), getOutfits()]);
+                    setDays(ds);
+                    setOutfits(os);
+                    toast.success('Tenue assignée ✨');
+                  } catch {
+                    toast.error('Erreur');
+                  }
+                }}
+              />
             </div>
           );
         })}
