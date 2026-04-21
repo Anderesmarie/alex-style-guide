@@ -6,8 +6,11 @@ import { compressImage, recompressWithRotation } from '@/lib/imageUtils';
 import { toast } from 'sonner';
 import { updateStreak } from '@/lib/streak';
 import PhotoGuide from '@/components/PhotoGuide';
+import Wishlist from '@/components/Wishlist';
+import { WishlistItem } from '@/lib/wishlist';
 
 type View = 'grid' | 'add' | 'detail' | 'edit';
+type Tab = 'dressing' | 'wishlist';
 
 const COLOR_PALETTE = [
   { label: 'Blanc', value: 'blanc', bg: '#FFFFFF' },
