@@ -434,8 +434,21 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
         {/* Streak */}
         <ProfileStreakCard />
 
-        <button onClick={onLogout} className="w-full py-3 mt-2 mb-4 text-sm font-medium" style={{ color: '#D32F2F' }}>
+        <button onClick={onLogout} className="w-full py-3 mt-2 text-sm font-medium" style={{ color: '#D32F2F' }}>
           Se déconnecter
+        </button>
+        <button
+          onClick={async () => {
+            if (!confirm('Réinitialiser la preview ? Tes données locales seront effacées et tu reverras l\'onboarding.')) return;
+            try { localStorage.clear(); } catch {}
+            try { sessionStorage.clear(); } catch {}
+            try { await supabase.auth.signOut(); } catch {}
+            window.location.href = '/';
+          }}
+          className="w-full py-3 mb-4 text-xs font-medium underline"
+          style={{ color: '#9B9B9B' }}
+        >
+          🔄 Réinitialiser la preview
         </button>
       </div>
     </div>
