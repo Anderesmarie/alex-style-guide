@@ -72,7 +72,7 @@ export const SILHOUETTES = [
   { label: 'Triangle', emoji: 'A', image: `${SILHOUETTE_BASE_URL}silhouette_A_triangle.png` },
   { label: 'Triangle inversé', emoji: 'V', image: `${SILHOUETTE_BASE_URL}silhouette_V_triangle_inverse.png` },
   { label: 'Ovale', emoji: 'O', image: `${SILHOUETTE_BASE_URL}silhouette_O_ovale.png` },
-  { label: 'Autre', emoji: '8', image: `${SILHOUETTE_BASE_URL}silhouette_8_autre.png` },
+  { label: '8', emoji: '8', image: `${SILHOUETTE_BASE_URL}silhouette_8_autre.png` },
 ] as const;
 export const STYLE_OPTIONS = [
   { label: 'Casual chic', emoji: '*' },
