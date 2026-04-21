@@ -272,13 +272,104 @@ export default function CalendarView() {
       <div className="mt-8">
         <h2 className="font-serif text-xl font-bold mb-3">Mes voyages</h2>
         <button
-          onClick={() => toast('Bientôt disponible ✨')}
-          className="w-full py-3.5 rounded-xl text-primary-foreground font-semibold active:scale-[0.98] transition-transform shadow-lg"
+          onClick={openTripCreator}
+          className="w-full py-3.5 rounded-xl text-primary-foreground font-semibold active:scale-[0.98] transition-transform shadow-lg mb-4"
           style={{ backgroundColor: '#C9956C' }}
         >
           + Planifier un voyage
         </button>
+
+        {trips.length === 0 ? (
+          <div className="text-center py-6 text-muted-foreground">
+            <p className="text-3xl mb-2">🧳</p>
+            <p className="text-sm">Aucun voyage planifié</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {trips.map(t => {
+              const count = tripDayCount(t);
+              return (
+                <div key={t.id} className="bg-card rounded-xl p-4 card-shadow">
+                  <p className="font-serif font-semibold text-lg mb-0.5">🧳 {t.destination}</p>
+                  <p className="text-xs text-muted-foreground mb-1">{formatTripRange(t)}</p>
+                  <p className="text-xs text-muted-foreground mb-3">{count} jour{count > 1 ? 's' : ''}</p>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setOpenTrip(t)}
+                      className="px-4 py-1.5 rounded-lg text-white text-xs font-semibold active:scale-[0.97] transition-transform"
+                      style={{ backgroundColor: '#C9956C' }}
+                    >
+                      Voir
+                    </button>
+                    <button
+                      onClick={() => handleDeleteTrip(t)}
+                      className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Supprimer
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
+
+      {/* Trip creation bottom sheet */}
+      {tripSheetOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center"
+          onClick={() => !creatingTrip && setTripSheetOpen(false)}
+        >
+          <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-w-md bg-card rounded-t-3xl p-5 pb-8 animate-in slide-in-from-bottom duration-300"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="w-12 h-1.5 rounded-full bg-muted mx-auto mb-4" />
+            <h3 className="font-serif text-xl font-bold mb-4">Nouveau voyage</h3>
+
+            <label className="block text-sm font-medium mb-1.5">Destination</label>
+            <input
+              type="text"
+              value={tripDest}
+              onChange={e => setTripDest(e.target.value)}
+              placeholder="Rome, Barcelone, Londres..."
+              className="w-full px-4 py-3 rounded-lg bg-background border border-border outline-none focus:ring-2 focus:ring-primary/30 mb-4"
+            />
+
+            <div className="grid grid-cols-2 gap-3 mb-5">
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Départ</label>
+                <input
+                  type="date"
+                  value={tripStart}
+                  onChange={e => setTripStart(e.target.value)}
+                  className="w-full px-3 py-3 rounded-lg bg-background border border-border outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Retour</label>
+                <input
+                  type="date"
+                  value={tripEnd}
+                  onChange={e => setTripEnd(e.target.value)}
+                  className="w-full px-3 py-3 rounded-lg bg-background border border-border outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+            </div>
+
+            <button
+              onClick={handleCreateTrip}
+              disabled={creatingTrip}
+              className="w-full py-3.5 rounded-xl text-primary-foreground font-semibold active:scale-[0.98] transition-transform shadow-lg disabled:opacity-60"
+              style={{ backgroundColor: '#C9956C' }}
+            >
+              {creatingTrip ? 'Création...' : 'Créer mon voyage'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Bottom sheet */}
       {openDate && (
