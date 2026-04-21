@@ -257,50 +257,50 @@ export default function Outfits() {
         </button>
       </div>
 
-      {tab === 'calendar' ? (
-        <CalendarView />
-      ) : (
-        <>
-      <button
-        onClick={() => setView('create')}
-        className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold mb-5 active:scale-[0.98] transition-transform shadow-lg"
-      >
-        + Créer une tenue
-      </button>
+      {tab === 'calendar' && <CalendarView />}
 
-      {outfits.length > 0 ? (
-        <div className="space-y-3">
-          {outfits.map(outfit => {
-            const items = getItemsByIds(outfit.itemIds);
-            return (
-              <button
-                key={outfit.id}
-                onClick={() => { setSelectedOutfit(outfit); setView('detail'); }}
-                className="w-full bg-card rounded-xl p-4 card-shadow text-left active:scale-[0.98] transition-transform"
-              >
-                <p className="font-serif font-semibold mb-2">{outfit.name}</p>
-                <div className="flex gap-1.5">
-                  {items.slice(0, 4).map(item => (
-                    <img key={item.id} src={item.imageBase64} alt={item.type}
-                      className="w-12 h-12 rounded-md object-cover" />
-                  ))}
-                  {items.length > 4 && (
-                    <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center text-xs text-muted-foreground">
-                      +{items.length - 4}
+      {tab === 'outfits' && (
+        <>
+          <button
+            onClick={() => setView('create')}
+            className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold mb-5 active:scale-[0.98] transition-transform shadow-lg"
+          >
+            + Créer une tenue
+          </button>
+
+          {outfits.length > 0 ? (
+            <div className="space-y-3">
+              {outfits.map(outfit => {
+                const items = getItemsByIds(outfit.itemIds);
+                return (
+                  <button
+                    key={outfit.id}
+                    onClick={() => { setSelectedOutfit(outfit); setView('detail'); }}
+                    className="w-full bg-card rounded-xl p-4 card-shadow text-left active:scale-[0.98] transition-transform"
+                  >
+                    <p className="font-serif font-semibold mb-2">{outfit.name}</p>
+                    <div className="flex gap-1.5">
+                      {items.slice(0, 4).map(item => (
+                        <img key={item.id} src={item.imageBase64} alt={item.type}
+                          className="w-12 h-12 rounded-md object-cover" />
+                      ))}
+                      {items.length > 4 && (
+                        <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center text-xs text-muted-foreground">
+                          +{items.length - 4}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="text-center py-12 text-muted-foreground">
-          <p className="text-4xl mb-3">✨</p>
-          <p className="font-serif text-lg">Aucune tenue créée</p>
-          <p className="text-sm mt-1">Compose ta première tenue !</p>
-        </div>
-      )}
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              <p className="text-4xl mb-3">✨</p>
+              <p className="font-serif text-lg">Aucune tenue créée</p>
+              <p className="text-sm mt-1">Compose ta première tenue !</p>
+            </div>
+          )}
         </>
       )}
     </div>
