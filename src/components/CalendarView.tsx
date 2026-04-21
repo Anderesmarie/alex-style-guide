@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { CalendarEvent, ClothingItem, Outfit } from '@/lib/types';
+import { CalendarEvent, ClothingItem, Outfit, Trip } from '@/lib/types';
 import {
   getCalendarEvents,
   upsertCalendarEvent,
   deleteCalendarEvent,
   getOutfits,
   getWardrobe,
+  getTrips,
+  upsertTrip,
+  deleteTrip,
 } from '@/lib/storage';
+import TripDetail from './TripDetail';
 
 const DAYS_FR = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 const DAYS_FULL_FR = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
