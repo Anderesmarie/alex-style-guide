@@ -7,7 +7,6 @@ import { AvatarData } from './AvatarSVG';
 import AvatarCreator from './AvatarCreator';
 import { getPaletteForSkin } from '@/lib/colorimetry';
 import ProfileEditor from './ProfileEditor';
-import { SILHOUETTE_IMAGES } from '@/lib/silhouetteImages';
 
 const MOTIVATIONAL = [
   'Super choix, on s\'en souvient ! ✨',
@@ -188,31 +187,16 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
         {step === 1 && (
           <>
             <h1 className="text-2xl font-serif font-bold mb-6">C'est quoi ta silhouette ?</h1>
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { label: 'Sablier', code: 'X', img: SILHOUETTE_IMAGES['Sablier'] },
-                { label: 'Rectangle', code: 'H', img: SILHOUETTE_IMAGES['Rectangle'] },
-                { label: 'Triangle', code: 'A', img: SILHOUETTE_IMAGES['Triangle'] },
-                { label: 'Triangle inversé', code: 'V', img: SILHOUETTE_IMAGES['Triangle inversé'] },
-                { label: 'Ovale', code: 'O', img: SILHOUETTE_IMAGES['Ovale'] },
-                { label: 'Autre', code: '8', img: SILHOUETTE_IMAGES['Autre'] },
-              ].map(s => {
-                const selected = silhouette === s.label;
-                return (
-                  <button
-                    key={s.label}
-                    onClick={() => setSilhouette(s.label)}
-                    className="p-3 rounded-xl text-center transition-all duration-200 card-shadow flex flex-col items-center gap-2"
-                    style={selected
-                      ? { border: '2px solid #C4956A', backgroundColor: '#FDF6EF' }
-                      : { border: '2px solid transparent', backgroundColor: 'hsl(var(--card))' }
-                    }
-                  >
-                    <img src={s.img} alt={s.label} className="w-full h-24 object-contain" />
-                    <span className="text-xs font-medium leading-tight">{s.label}</span>
-                  </button>
-                );
-              })}
+            <div className="grid grid-cols-2 gap-3">
+              {SILHOUETTES.map(s => (
+                <button key={s.label} onClick={() => setSilhouette(s.label)}
+                  className={`p-4 rounded-lg text-center transition-all duration-200 card-shadow ${
+                    silhouette === s.label ? 'bg-primary text-primary-foreground scale-[1.02]' : 'bg-card text-card-foreground hover:shadow-md'
+                  }`}>
+                  <span className="text-3xl block mb-2">{s.emoji}</span>
+                  <span className="text-sm font-medium">{s.label}</span>
+                </button>
+              ))}
             </div>
           </>
         )}
