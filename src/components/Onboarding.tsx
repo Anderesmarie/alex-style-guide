@@ -193,7 +193,7 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
                   className={`p-4 rounded-lg text-center transition-all duration-200 card-shadow ${
                     silhouette === s.label ? 'bg-primary text-primary-foreground scale-[1.02]' : 'bg-card text-card-foreground hover:shadow-md'
                   }`}>
-                  <span className="text-3xl block mb-2">{s.emoji}</span>
+                  <img src={s.image} alt={s.label} className="w-20 h-20 object-contain mx-auto mb-2" />
                   <span className="text-sm font-medium">{s.label}</span>
                 </button>
               ))}
