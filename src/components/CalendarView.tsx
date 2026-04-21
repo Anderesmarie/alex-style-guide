@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { CalendarEvent, ClothingItem, Outfit } from '@/lib/types';
+import { CalendarEvent, ClothingItem, Outfit, Trip } from '@/lib/types';
 import {
   getCalendarEvents,
   upsertCalendarEvent,
   deleteCalendarEvent,
   getOutfits,
   getWardrobe,
+  getTrips,
+  upsertTrip,
+  deleteTrip,
 } from '@/lib/storage';
+import TripDetail from './TripDetail';
 
 const DAYS_FR = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 const DAYS_FULL_FR = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
@@ -28,6 +32,7 @@ export default function CalendarView() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [outfits, setOutfits] = useState<Outfit[]>([]);
   const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
+  const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Bottom sheet state
@@ -36,11 +41,22 @@ export default function CalendarView() {
   const [draftOutfitId, setDraftOutfitId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  // Trip creation sheet
+  const [tripSheetOpen, setTripSheetOpen] = useState(false);
+  const [tripDest, setTripDest] = useState('');
+  const [tripStart, setTripStart] = useState('');
+  const [tripEnd, setTripEnd] = useState('');
+  const [creatingTrip, setCreatingTrip] = useState(false);
+
+  // Trip detail navigation
+  const [openTrip, setOpenTrip] = useState<Trip | null>(null);
+
   const load = async () => {
-    const [ev, o, w] = await Promise.all([getCalendarEvents(), getOutfits(), getWardrobe()]);
+    const [ev, o, w, t] = await Promise.all([getCalendarEvents(), getOutfits(), getWardrobe(), getTrips()]);
     setEvents(ev);
     setOutfits(o);
     setWardrobe(w);
+    setTrips(t);
     setLoading(false);
   };
 
@@ -122,6 +138,77 @@ export default function CalendarView() {
     }
   };
 
+  // Trip helpers
+  const openTripCreator = () => {
+    setTripDest('');
+    setTripStart('');
+    setTripEnd('');
+    setTripSheetOpen(true);
+  };
+
+  const handleCreateTrip = async () => {
+    if (!tripDest.trim()) {
+      toast.error('Choisis une destination');
+      return;
+    }
+    if (!tripStart || !tripEnd) {
+      toast.error('Choisis les dates');
+      return;
+    }
+    if (tripEnd < tripStart) {
+      toast.error('La date de retour doit être après le départ');
+      return;
+    }
+    setCreatingTrip(true);
+    try {
+      await upsertTrip({
+        destination: tripDest.trim(),
+        startDate: tripStart,
+        endDate: tripEnd,
+      });
+      const t = await getTrips();
+      setTrips(t);
+      setTripSheetOpen(false);
+      toast.success('Voyage créé ✨');
+    } catch {
+      toast.error('Erreur lors de la création');
+    } finally {
+      setCreatingTrip(false);
+    }
+  };
+
+  const handleDeleteTrip = async (trip: Trip) => {
+    if (!confirm(`Supprimer le voyage à ${trip.destination} ?`)) return;
+    try {
+      await deleteTrip(trip.id);
+      const t = await getTrips();
+      setTrips(t);
+      toast.success('Voyage supprimé');
+    } catch {
+      toast.error('Erreur');
+    }
+  };
+
+  const formatTripRange = (trip: Trip): string => {
+    const [sy, sm, sd] = trip.startDate.split('-').map(Number);
+    const [ey, em, ed] = trip.endDate.split('-').map(Number);
+    const start = new Date(sy, sm - 1, sd);
+    const end = new Date(ey, em - 1, ed);
+    return `${start.getDate()} ${MONTHS_FR[start.getMonth()]} → ${end.getDate()} ${MONTHS_FR[end.getMonth()]} ${end.getFullYear()}`;
+  };
+
+  const tripDayCount = (trip: Trip): number => {
+    const [sy, sm, sd] = trip.startDate.split('-').map(Number);
+    const [ey, em, ed] = trip.endDate.split('-').map(Number);
+    const start = new Date(sy, sm - 1, sd).getTime();
+    const end = new Date(ey, em - 1, ed).getTime();
+    return Math.round((end - start) / 86400000) + 1;
+  };
+
+  if (openTrip) {
+    return <TripDetail trip={openTrip} onBack={() => setOpenTrip(null)} />;
+  }
+
   if (loading) {
     return (
       <div className="space-y-3">
@@ -185,13 +272,104 @@ export default function CalendarView() {
       <div className="mt-8">
         <h2 className="font-serif text-xl font-bold mb-3">Mes voyages</h2>
         <button
-          onClick={() => toast('Bientôt disponible ✨')}
-          className="w-full py-3.5 rounded-xl text-primary-foreground font-semibold active:scale-[0.98] transition-transform shadow-lg"
+          onClick={openTripCreator}
+          className="w-full py-3.5 rounded-xl text-primary-foreground font-semibold active:scale-[0.98] transition-transform shadow-lg mb-4"
           style={{ backgroundColor: '#C9956C' }}
         >
           + Planifier un voyage
         </button>
+
+        {trips.length === 0 ? (
+          <div className="text-center py-6 text-muted-foreground">
+            <p className="text-3xl mb-2">🧳</p>
+            <p className="text-sm">Aucun voyage planifié</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {trips.map(t => {
+              const count = tripDayCount(t);
+              return (
+                <div key={t.id} className="bg-card rounded-xl p-4 card-shadow">
+                  <p className="font-serif font-semibold text-lg mb-0.5">🧳 {t.destination}</p>
+                  <p className="text-xs text-muted-foreground mb-1">{formatTripRange(t)}</p>
+                  <p className="text-xs text-muted-foreground mb-3">{count} jour{count > 1 ? 's' : ''}</p>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setOpenTrip(t)}
+                      className="px-4 py-1.5 rounded-lg text-white text-xs font-semibold active:scale-[0.97] transition-transform"
+                      style={{ backgroundColor: '#C9956C' }}
+                    >
+                      Voir
+                    </button>
+                    <button
+                      onClick={() => handleDeleteTrip(t)}
+                      className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Supprimer
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
+
+      {/* Trip creation bottom sheet */}
+      {tripSheetOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center"
+          onClick={() => !creatingTrip && setTripSheetOpen(false)}
+        >
+          <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-w-md bg-card rounded-t-3xl p-5 pb-8 animate-in slide-in-from-bottom duration-300"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="w-12 h-1.5 rounded-full bg-muted mx-auto mb-4" />
+            <h3 className="font-serif text-xl font-bold mb-4">Nouveau voyage</h3>
+
+            <label className="block text-sm font-medium mb-1.5">Destination</label>
+            <input
+              type="text"
+              value={tripDest}
+              onChange={e => setTripDest(e.target.value)}
+              placeholder="Rome, Barcelone, Londres..."
+              className="w-full px-4 py-3 rounded-lg bg-background border border-border outline-none focus:ring-2 focus:ring-primary/30 mb-4"
+            />
+
+            <div className="grid grid-cols-2 gap-3 mb-5">
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Départ</label>
+                <input
+                  type="date"
+                  value={tripStart}
+                  onChange={e => setTripStart(e.target.value)}
+                  className="w-full px-3 py-3 rounded-lg bg-background border border-border outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Retour</label>
+                <input
+                  type="date"
+                  value={tripEnd}
+                  onChange={e => setTripEnd(e.target.value)}
+                  className="w-full px-3 py-3 rounded-lg bg-background border border-border outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+            </div>
+
+            <button
+              onClick={handleCreateTrip}
+              disabled={creatingTrip}
+              className="w-full py-3.5 rounded-xl text-primary-foreground font-semibold active:scale-[0.98] transition-transform shadow-lg disabled:opacity-60"
+              style={{ backgroundColor: '#C9956C' }}
+            >
+              {creatingTrip ? 'Création...' : 'Créer mon voyage'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Bottom sheet */}
       {openDate && (
