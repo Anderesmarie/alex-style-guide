@@ -65,12 +65,12 @@ export const SEASONS = ['Été', 'Automne', 'Hiver', 'Printemps', 'Toutes saison
 export const STYLES = ['Casual', 'Chic', 'Sport', 'Boho', 'Bureau'] as const;
 export const OCCASIONS = ['Travail', 'Sortie', 'Sport', 'Événement', 'Quotidien'] as const;
 export const SILHOUETTES = [
-  { label: 'Sablier', emoji: '⏳' },
-  { label: 'Rectangle', emoji: '▬' },
-  { label: 'Triangle', emoji: '▽' },
-  { label: 'Triangle inversé', emoji: '△' },
-  { label: 'Ovale', emoji: '⬭' },
-  { label: 'Autre', emoji: '✦' },
+  { label: 'Sablier', emoji: '⏳', image: 'https://tseermbuwyrzcrulhxba.supabase.co/storage/v1/object/public/silhouettes/silhouette_X_sablier.png' },
+  { label: 'Rectangle', emoji: '▬', image: 'https://tseermbuwyrzcrulhxba.supabase.co/storage/v1/object/public/silhouettes/silhouette_H_rectangle.png' },
+  { label: 'Triangle', emoji: '▽', image: 'https://tseermbuwyrzcrulhxba.supabase.co/storage/v1/object/public/silhouettes/silhouette_A_triangle.png' },
+  { label: 'Triangle inversé', emoji: '△', image: 'https://tseermbuwyrzcrulhxba.supabase.co/storage/v1/object/public/silhouettes/silhouette_V_triangle_inverse.png' },
+  { label: 'Ovale', emoji: '⬭', image: 'https://tseermbuwyrzcrulhxba.supabase.co/storage/v1/object/public/silhouettes/silhouette_O_ovale.png' },
+  { label: 'Autre', emoji: '✦', image: 'https://tseermbuwyrzcrulhxba.supabase.co/storage/v1/object/public/silhouettes/silhouette_8_autre.png' },
 ] as const;
 export const STYLE_OPTIONS = [
   { label: 'Casual chic', emoji: '*' },
