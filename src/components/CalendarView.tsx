@@ -32,6 +32,7 @@ export default function CalendarView() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [outfits, setOutfits] = useState<Outfit[]>([]);
   const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
+  const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Bottom sheet state
@@ -40,11 +41,22 @@ export default function CalendarView() {
   const [draftOutfitId, setDraftOutfitId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  // Trip creation sheet
+  const [tripSheetOpen, setTripSheetOpen] = useState(false);
+  const [tripDest, setTripDest] = useState('');
+  const [tripStart, setTripStart] = useState('');
+  const [tripEnd, setTripEnd] = useState('');
+  const [creatingTrip, setCreatingTrip] = useState(false);
+
+  // Trip detail navigation
+  const [openTrip, setOpenTrip] = useState<Trip | null>(null);
+
   const load = async () => {
-    const [ev, o, w] = await Promise.all([getCalendarEvents(), getOutfits(), getWardrobe()]);
+    const [ev, o, w, t] = await Promise.all([getCalendarEvents(), getOutfits(), getWardrobe(), getTrips()]);
     setEvents(ev);
     setOutfits(o);
     setWardrobe(w);
+    setTrips(t);
     setLoading(false);
   };
 
