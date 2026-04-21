@@ -548,6 +548,7 @@ export default function Dressing() {
   return (
     <div className="fade-enter pb-4">
       {renderDeleteDialog()}
+      {renderTabs()}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-serif font-bold">Mon Dressing</h1>
         <span className="text-sm text-muted-foreground">{wardrobe.length} pièce{wardrobe.length !== 1 ? 's' : ''}</span>
