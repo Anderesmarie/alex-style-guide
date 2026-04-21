@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { getProfile, saveProfile, getAvatar, saveAvatar } from '@/lib/storage';
 import AvatarCreator, { DEFAULT_AVATAR } from './AvatarCreator';
 import { AvatarData } from './AvatarSVG';
+import SilhouetteCarousel from './SilhouetteCarousel';
 
 const FAVORITE_COLORS = [
   { name: 'Blanc', hex: '#FFFFFF' }, { name: 'Noir', hex: '#1A1A1A' },
