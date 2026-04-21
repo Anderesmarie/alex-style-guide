@@ -386,6 +386,45 @@ export default function Dressing() {
         )}
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
 
+        {analyzing && (
+          <div className="flex items-center justify-center gap-3 rounded-2xl border border-[#C9956C]/30 bg-[#C9956C]/5 py-4">
+            <span className="inline-block w-5 h-5 border-2 border-[#C9956C] border-t-transparent rounded-full animate-spin" />
+            <p className="text-sm font-medium text-[#C9956C]">✨ Analyse en cours...</p>
+          </div>
+        )}
+
+        {!analyzing && cleanImage && (
+          <div className="relative">
+            <div
+              className="w-full rounded-2xl overflow-hidden max-h-64"
+              style={{
+                backgroundImage:
+                  'linear-gradient(45deg, #e5e5e5 25%, transparent 25%), linear-gradient(-45deg, #e5e5e5 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e5e5e5 75%), linear-gradient(-45deg, transparent 75%, #e5e5e5 75%)',
+                backgroundSize: '16px 16px',
+                backgroundPosition: '0 0, 0 8px, 8px -8px, -8px 0px',
+                backgroundColor: '#ffffff',
+              }}
+            >
+              <img src={cleanImage} alt="Fond supprimé" className="w-full object-contain max-h-64" />
+            </div>
+            <span className="absolute top-2 left-2 bg-white/90 text-xs px-2 py-1 rounded-full border border-gray-200 font-medium">
+              ✂️ Fond supprimé
+            </span>
+          </div>
+        )}
+
+        {!analyzing && analysis && !analysisError && (
+          <div className="rounded-xl bg-green-50 border border-green-200 px-3 py-2 text-sm text-green-700 font-medium">
+            ✅ Pré-rempli par l'IA — vérifie et modifie si besoin
+          </div>
+        )}
+
+        {!analyzing && analysisError && (
+          <div className="rounded-xl bg-orange-50 border border-orange-200 px-3 py-2 text-sm text-orange-700 font-medium">
+            ⚠️ Analyse automatique indisponible — remplis les champs manuellement
+          </div>
+        )}
+
         <div>
           <label className="block text-sm font-medium mb-3">Catégorie <span className="text-[#C9956C]">*</span></label>
           <div className="grid grid-cols-3 gap-2">
