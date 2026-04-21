@@ -7,6 +7,7 @@ import { AvatarData } from './AvatarSVG';
 import AvatarCreator from './AvatarCreator';
 import { getPaletteForSkin } from '@/lib/colorimetry';
 import ProfileEditor from './ProfileEditor';
+import SilhouetteCarousel from './SilhouetteCarousel';
 
 const MOTIVATIONAL = [
   'Super choix, on s\'en souvient ! ✨',
