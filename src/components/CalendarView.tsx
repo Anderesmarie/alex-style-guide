@@ -10,8 +10,11 @@ import {
   getTrips,
   upsertTrip,
   deleteTrip,
+  addOutfit,
+  genId,
 } from '@/lib/storage';
 import TripDetail from './TripDetail';
+import AIGenerateSection from './AIGenerateSection';
 
 const DAYS_FR = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 const DAYS_FULL_FR = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
@@ -446,6 +449,39 @@ export default function CalendarView() {
               >
                 Effacer ce jour
               </button>
+            )}
+
+            {/* AI generation — only for today and future dates */}
+            {openDate >= today && (
+              <AIGenerateSection
+                dateKey={formatDateKey(openDate)}
+                onUseOutfit={async (itemIds) => {
+                  if (!openDate) return;
+                  try {
+                    const newOutfitId = genId();
+                    await addOutfit({
+                      id: newOutfitId,
+                      name: `Tenue IA · ${openDate.getDate()}/${openDate.getMonth() + 1}`,
+                      itemIds,
+                      createdAt: new Date().toISOString(),
+                    });
+                    const existing = getEventForDate(openDate);
+                    await upsertCalendarEvent({
+                      id: existing?.id,
+                      date: formatDateKey(openDate),
+                      outfitId: newOutfitId,
+                      eventName: draftEventName.trim() || existing?.eventName || null,
+                    });
+                    const [ev, o] = await Promise.all([getCalendarEvents(), getOutfits()]);
+                    setEvents(ev);
+                    setOutfits(o);
+                    toast.success('Tenue assignée ✨');
+                    closeDayEditor();
+                  } catch {
+                    toast.error('Erreur');
+                  }
+                }}
+              />
             )}
           </div>
         </div>
