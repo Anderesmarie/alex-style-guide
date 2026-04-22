@@ -151,11 +151,7 @@ export default function Dressing() {
 
     try {
       const compressed = await compressImage(file);
-      // Met à jour displayImage seulement si la compression produit une data URL valide
-      if (compressed && compressed.startsWith('data:image')) {
-        setDisplayImage(compressed);
-        setImageBase64(compressed);
-      }
+      setImageBase64(compressed);
       setPreviewBase64(compressed);
       setPreviewOrigSrc(compressed);
 
