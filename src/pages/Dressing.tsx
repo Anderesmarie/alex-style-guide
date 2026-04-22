@@ -237,7 +237,7 @@ export default function Dressing() {
       occasion: occasion.length ? occasion : selectedItem.occasion,
       brand: brand || selectedItem.brand,
       price: price ? Number(price) : selectedItem.price,
-      imageBase64: cleanImage ?? imagePreview || selectedItem.imageBase64,
+      imageBase64: cleanImage ?? imagePreview ?? selectedItem.imageBase64,
     };
     await updateClothing(updated);
     await loadWardrobe();
