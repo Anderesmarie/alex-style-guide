@@ -6,7 +6,7 @@ import { generateRecommendations } from '@/lib/recommendations';
 import { geocodeCity, getSavedCity } from '@/lib/weather';
 
 // Premium flag — hardcoded for now, will be wired to Stripe later
-const IS_PREMIUM = false;
+const IS_PREMIUM = true;
 
 async function fetchTemperatureForDate(dateKey: string): Promise<number | null> {
   try {
