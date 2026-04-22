@@ -172,9 +172,16 @@ export default function Dressing() {
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
-    if (!imageBase64 || !type || !category) return;
-    const finalColor = color || customColor || 'Autre';
     const finalImage = cleanImage ?? imageBase64;
+    if (!finalImage) {
+      toast.error('Veuillez ajouter une photo');
+      return;
+    }
+    if (!type || !category) {
+      toast.error('Veuillez choisir une catégorie et un type');
+      return;
+    }
+    const finalColor = color || customColor || 'Autre';
     const item: ClothingItem = {
       id: genId(), imageBase64: finalImage, category, subcategory, layer, type, color: finalColor,
       season: season.length ? season : ['Toutes saisons'],
@@ -377,7 +384,27 @@ export default function Dressing() {
 
         {imageBase64 ? (
           <div className="relative">
-            <img src={imageBase64} alt="vêtement" className="w-full rounded-2xl object-cover max-h-64" />
+            <div
+              className="w-full rounded-2xl overflow-hidden max-h-64"
+              style={cleanImage ? {
+                backgroundImage:
+                  'linear-gradient(45deg, #e5e5e5 25%, transparent 25%), linear-gradient(-45deg, #e5e5e5 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e5e5e5 75%), linear-gradient(-45deg, transparent 75%, #e5e5e5 75%)',
+                backgroundSize: '16px 16px',
+                backgroundPosition: '0 0, 0 8px, 8px -8px, -8px 0px',
+                backgroundColor: '#ffffff',
+              } : undefined}
+            >
+              <img
+                src={cleanImage ?? imageBase64}
+                alt="Aperçu"
+                className={`w-full max-h-64 ${cleanImage ? 'object-contain' : 'object-cover'}`}
+              />
+            </div>
+            {cleanImage && (
+              <span className="absolute top-2 left-2 bg-white/90 text-xs px-2 py-1 rounded-full border border-gray-200 font-medium">
+                ✂️ Fond supprimé
+              </span>
+            )}
             <button onClick={() => fileRef.current?.click()} className="absolute bottom-3 right-3 bg-white/90 text-xs px-3 py-1.5 rounded-full border border-gray-200">Changer</button>
           </div>
         ) : (
@@ -392,26 +419,6 @@ export default function Dressing() {
           <div className="flex items-center justify-center gap-3 rounded-2xl border border-[#C9956C]/30 bg-[#C9956C]/5 py-4">
             <span className="inline-block w-5 h-5 border-2 border-[#C9956C] border-t-transparent rounded-full animate-spin" />
             <p className="text-sm font-medium text-[#C9956C]">✨ Analyse en cours...</p>
-          </div>
-        )}
-
-        {!analyzing && cleanImage && (
-          <div className="relative">
-            <div
-              className="w-full rounded-2xl overflow-hidden max-h-64"
-              style={{
-                backgroundImage:
-                  'linear-gradient(45deg, #e5e5e5 25%, transparent 25%), linear-gradient(-45deg, #e5e5e5 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e5e5e5 75%), linear-gradient(-45deg, transparent 75%, #e5e5e5 75%)',
-                backgroundSize: '16px 16px',
-                backgroundPosition: '0 0, 0 8px, 8px -8px, -8px 0px',
-                backgroundColor: '#ffffff',
-              }}
-            >
-              <img src={cleanImage} alt="Fond supprimé" className="w-full object-contain max-h-64" />
-            </div>
-            <span className="absolute top-2 left-2 bg-white/90 text-xs px-2 py-1 rounded-full border border-gray-200 font-medium">
-              ✂️ Fond supprimé
-            </span>
           </div>
         )}
 
