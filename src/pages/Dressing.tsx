@@ -62,6 +62,7 @@ export default function Dressing() {
   const [view, setView] = useState<View>('grid');
   const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const { analyze, loading: analyzing, error: analysisError, cleanImage, analysis } = useClothingAnalysis();
   const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
   const [filterCategory, setFilterCategory] = useState('');
   const [filterSubcategory, setFilterSubcategory] = useState('');
