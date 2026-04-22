@@ -172,9 +172,16 @@ export default function Dressing() {
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
-    if (!imageBase64 || !type || !category) return;
-    const finalColor = color || customColor || 'Autre';
     const finalImage = cleanImage ?? imageBase64;
+    if (!finalImage) {
+      toast.error('Veuillez ajouter une photo');
+      return;
+    }
+    if (!type || !category) {
+      toast.error('Veuillez choisir une catégorie et un type');
+      return;
+    }
+    const finalColor = color || customColor || 'Autre';
     const item: ClothingItem = {
       id: genId(), imageBase64: finalImage, category, subcategory, layer, type, color: finalColor,
       season: season.length ? season : ['Toutes saisons'],
