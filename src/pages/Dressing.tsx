@@ -701,11 +701,11 @@ export default function Dressing() {
       {/* Filters */}
       {wardrobe.length > 0 && (
         <div className="space-y-2 mb-4">
-          {/* Étape 1 : catégories */}
+          {/* Ligne 1 : 6 chips catégories simplifiées */}
           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
             <button
               onClick={() => { setFilterCategory(''); setFilterType(''); }}
-              className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium border transition-all ${
+              className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
                 filterCategory === ''
                   ? 'bg-[#C9956C] text-white border-[#C9956C]'
                   : 'bg-card text-muted-foreground border-border'
@@ -713,51 +713,36 @@ export default function Dressing() {
             >
               Toutes
             </button>
-            {CATEGORIES.map(cat => (
+            {FILTER_GROUPS.map(g => (
               <button
-                key={cat.name}
-                onClick={() => { setFilterCategory(cat.name); setFilterType(''); }}
-                className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium border transition-all ${
-                  filterCategory === cat.name
+                key={g.key}
+                onClick={() => { setFilterCategory(g.key); setFilterType(''); }}
+                className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                  filterCategory === g.key
                     ? 'bg-[#C9956C] text-white border-[#C9956C]'
                     : 'bg-card text-muted-foreground border-border'
                 }`}
               >
-                {cat.icon} {cat.name}
+                {g.label}
               </button>
             ))}
           </div>
 
-          {/* Étape 2 : sous-types */}
-          {activeCategory && (
+          {/* Ligne 2 : dropdown sous-type */}
+          {activeGroup && (
             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-              <button
-                onClick={() => setFilterType('')}
-                className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium border transition-all ${
-                  filterType === ''
-                    ? 'bg-[#C9956C] text-white border-[#C9956C]'
-                    : 'bg-card text-muted-foreground border-border'
-                }`}
+              <select
+                value={filterType}
+                onChange={e => setFilterType(e.target.value)}
+                className="px-3 py-1.5 rounded-full bg-card card-shadow text-sm outline-none"
               >
-                Tous
-              </button>
-              {activeCategory.types.map(t => (
-                <button
-                  key={t.label}
-                  onClick={() => setFilterType(t.label)}
-                  className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium border transition-all ${
-                    filterType === t.label
-                      ? 'bg-[#C9956C] text-white border-[#C9956C]'
-                      : 'bg-card text-muted-foreground border-border'
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
+                <option value="">Tous les {activeGroup.label.toLowerCase()}</option>
+                {activeGroupTypes.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
             </div>
           )}
 
-          {/* Couleur & Saison */}
+          {/* Ligne 3 : Couleur & Saison */}
           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
             <select value={filterColor} onChange={e => setFilterColor(e.target.value)}
               className="px-3 py-1.5 rounded-full bg-card card-shadow text-sm outline-none">
