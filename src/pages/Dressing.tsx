@@ -93,16 +93,6 @@ export default function Dressing() {
   const [layer, setLayer] = useState<number>(1);
   const [showPhotoTips, setShowPhotoTips] = useState(true);
   const [bgRemoved, setBgRemoved] = useState(false);
-  const { analyze, loading: analyzing, error: analysisError, cleanImage, analysis } = useClothingAnalysis();
-
-  // Met à jour l'image affichée seulement si cleanImage est une data URL valide
-  useEffect(() => {
-    if (cleanImage && typeof cleanImage === 'string' && cleanImage.startsWith('data:image')) {
-      setDisplayImage(cleanImage);
-      setImageBase64(cleanImage);
-      setBgRemoved(true);
-    }
-  }, [cleanImage]);
 
   const loadWardrobe = async () => {
     const w = await getWardrobe();
