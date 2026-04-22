@@ -751,8 +751,8 @@ export default function Dressing() {
                 onChange={e => setFilterType(e.target.value)}
                 className="px-3 py-1.5 rounded-full bg-card card-shadow text-sm outline-none"
               >
-                <option value="">Tous les {activeGroup.label.toLowerCase()}</option>
-                {activeGroupTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                <option value="">{activeGroup.allLabel}</option>
+                {activeGroup.types.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
             </div>
           )}
