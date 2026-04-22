@@ -301,6 +301,7 @@ export default function Dressing() {
 
   const openEdit = (item: ClothingItem) => {
     setSelectedItem(item);
+    setImagePreview(item.imageBase64);
     setImageBase64(item.imageBase64);
     setCategory(item.category || '');
     setSubcategory(item.subcategory || '');
@@ -405,7 +406,7 @@ export default function Dressing() {
           </div>
         )}
 
-        {imageBase64 ? (
+        {imagePreview ? (
           <div className="relative">
             <div
               className="w-full rounded-2xl overflow-hidden max-h-64"
@@ -418,7 +419,7 @@ export default function Dressing() {
               } : undefined}
             >
               <img
-                src={cleanImage ?? imageBase64}
+                src={cleanImage ?? imagePreview}
                 alt="Aperçu"
                 className={`w-full max-h-64 ${cleanImage ? 'object-contain' : 'object-cover'}`}
               />
@@ -544,7 +545,7 @@ export default function Dressing() {
           <input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="ex : 45" className="w-full p-3 border border-gray-200 rounded-2xl bg-white text-sm" />
         </div>
 
-        <button onClick={isEdit ? handleUpdate : handleSave} disabled={!imageBase64 || !type || !category || saving}
+        <button onClick={isEdit ? handleUpdate : handleSave} disabled={!imagePreview || !type || !category || saving}
           className="w-full bg-[#2C2C2C] text-white py-4 rounded-2xl text-sm font-medium disabled:opacity-40 mt-2">
           {isEdit ? 'Enregistrer les modifications' : saving ? 'Enregistrement...' : 'Ajouter à mon dressing'}
         </button>
