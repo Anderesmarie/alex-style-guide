@@ -344,23 +344,38 @@ export default function Dressing() {
     setView('edit');
   };
 
-  // 6 groupes simplifiés → mappés vers les vraies catégories de CATEGORIES
-  const FILTER_GROUPS: { key: string; label: string; categories: string[] }[] = [
-    { key: 'Hauts', label: 'Hauts', categories: ['Hauts', 'Pulls & sweats', 'Manteaux & vestes'] },
-    { key: 'Bas', label: 'Bas', categories: ['Bas', 'Jupes'] },
-    { key: 'Robes', label: 'Robes', categories: ['Robes & combinaisons'] },
-    { key: 'Chaussures', label: 'Chaussures', categories: ['Chaussures'] },
-    { key: 'Autres', label: 'Autres', categories: ['Sacs', 'Accessoires'] },
+  // 7 groupes simplifiés avec sous-types explicites
+  const FILTER_GROUPS: { key: string; label: string; allLabel: string; types: string[] }[] = [
+    {
+      key: 'Hauts', label: 'Hauts', allLabel: 'Tous les hauts',
+      types: ['T-shirt', 'Chemise', 'Chemisier', 'Crop top', 'Débardeur', 'Top', 'Pull col rond', 'Pull col V', 'Pull col roulé', 'Sweat', 'Hoodie', 'Cardigan', 'Maille'],
+    },
+    {
+      key: 'Bas', label: 'Bas', allLabel: 'Tous les bas',
+      types: ['Jean', 'Pantalon', 'Jogging', 'Legging', 'Jupe courte', 'Jupe longue', 'Jupe mi-longue', 'Short', 'Bermuda', 'Cycliste'],
+    },
+    {
+      key: 'Robes', label: 'Robes', allLabel: 'Toutes les robes',
+      types: ['Robe courte', 'Robe longue', 'Robe mi-longue', 'Robe de soirée', 'Combinaison', 'Combishort', 'Robe de plage'],
+    },
+    {
+      key: 'Vestes', label: 'Vestes & Manteaux', allLabel: 'Toutes les vestes',
+      types: ['Blazer', 'Veste en jean', 'Veste militaire', 'Bomber', 'Perfecto', 'Veste coupe-vent', 'Cape / Poncho', 'Trench', 'Imperméable / Ciré', 'Manteau court', 'Manteau long', 'Doudoune', 'Parka'],
+    },
+    {
+      key: 'Chaussures', label: 'Chaussures', allLabel: 'Toutes les chaussures',
+      types: ['Baskets', 'Tennis', 'Sandales', 'Tongs', 'Escarpins', 'Talons', 'Bottines', 'Bottes', 'Mocassins', 'Ballerines', 'Mules', 'Plateformes'],
+    },
+    {
+      key: 'Autres', label: 'Autres', allLabel: 'Tous',
+      types: ['Sac à main', 'Sac à dos', 'Tote bag', 'Ceinture', 'Écharpe', 'Bonnet', 'Casquette', 'Lunettes', 'Bijoux', 'Collier', "Boucles d'oreilles", 'Bracelet', 'Maillot de bain', 'Lingerie', 'Pyjama', 'Chaussettes'],
+    },
   ];
 
   const activeGroup = FILTER_GROUPS.find(g => g.key === filterCategory);
-  const activeGroupCategories = activeGroup
-    ? CATEGORIES.filter(c => activeGroup.categories.includes(c.name))
-    : [];
-  const activeGroupTypes = activeGroupCategories.flatMap(c => c.types.map(t => t.label));
 
   const filtered = wardrobe.filter(i => {
-    if (activeGroup && !activeGroup.categories.includes(i.category)) return false;
+    if (activeGroup && !activeGroup.types.includes(i.type)) return false;
     if (filterType && i.type !== filterType) return false;
     if (filterColor && i.color !== filterColor) return false;
     if (filterSeason && !i.season.includes(filterSeason)) return false;
