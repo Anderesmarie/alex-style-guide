@@ -75,6 +75,7 @@ export default function Dressing() {
   const [deleteReason, setDeleteReason] = useState<string | null>(null);
 
   // Form state
+  const [imagePreview, setImagePreview] = useState('');
   const [imageBase64, setImageBase64] = useState('');
   const [category, setCategory] = useState('');
   const [subcategory, setSubcategory] = useState('');
@@ -99,7 +100,7 @@ export default function Dressing() {
   useEffect(() => { loadWardrobe(); }, []);
 
   const resetForm = () => {
-    setImageBase64(''); setCategory(''); setSubcategory(''); setType(''); setColor(''); setCustomColor('');
+    setImagePreview(''); setImageBase64(''); setCategory(''); setSubcategory(''); setType(''); setColor(''); setCustomColor('');
     setSeason([]); setStyle([]); setOccasion([]); setBrand(''); setPrice('');
     setPreviewBase64(''); setPreviewFile(null); setPreviewOrigSrc(''); setManualRotation(0);
     setLayer(1);
@@ -108,6 +109,7 @@ export default function Dressing() {
 
   const handlePurchaseFromWishlist = (item: WishlistItem) => {
     resetForm();
+    setImagePreview(item.photo);
     setImageBase64(item.photo);
     if (item.name) setBrand(item.name);
     setTab('dressing');
@@ -119,34 +121,38 @@ export default function Dressing() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // 1. Aperçu instantané via FileReader (avant compression)
     const instantPreview = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result as string);
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
-    setImageBase64(instantPreview);
 
-    // 2. Compression en arrière-plan
-    const compressed = await compressImage(file);
-    setImageBase64(compressed);
-    setPreviewBase64(compressed);
-    setPreviewOrigSrc(compressed);
+    setImagePreview(instantPreview);
+    setImageBase64(instantPreview);
     setPreviewFile(file);
+    setPreviewOrigSrc(instantPreview);
     setManualRotation(0);
 
-    // 3. Analyse IA — si elle échoue, imageBase64 reste affichée
-    const base64 = compressed.includes(',') ? compressed.split(',')[1] : compressed;
-    const result = await analyze(base64);
-    if (result) {
-      setCategory(result.category);
-      setSubcategory(result.subcategory);
-      setType(result.type);
-      setColor(result.color);
-      setSeason(result.season);
-      setStyle(result.style);
-      setOccasion(result.occasion);
+    try {
+      const compressed = await compressImage(file);
+      setImageBase64(compressed);
+      setPreviewBase64(compressed);
+      setPreviewOrigSrc(compressed);
+
+      const base64 = compressed.includes(',') ? compressed.split(',')[1] : compressed;
+      const result = await analyze(base64);
+      if (result) {
+        setCategory(result.category);
+        setSubcategory(result.subcategory);
+        setType(result.type);
+        setColor(result.color);
+        setSeason(result.season);
+        setStyle(result.style);
+        setOccasion(result.occasion);
+      }
+    } catch {
+      // garde imagePreview visible même si la compression ou l'analyse échoue
     }
   };
 
@@ -156,9 +162,12 @@ export default function Dressing() {
     if (!previewFile) return;
     const rotated = await recompressWithRotation(previewOrigSrc, previewFile, newRotation);
     setPreviewBase64(rotated);
+    setImagePreview(rotated);
+    setImageBase64(rotated);
   };
 
   const acceptPreview = () => {
+    setImagePreview(previewBase64);
     setImageBase64(previewBase64);
     setPreviewBase64('');
     setPreviewFile(null);
@@ -167,6 +176,8 @@ export default function Dressing() {
   };
 
   const retakePreview = () => {
+    setImagePreview('');
+    setImageBase64('');
     setPreviewBase64('');
     setPreviewFile(null);
     setPreviewOrigSrc('');
@@ -184,7 +195,7 @@ export default function Dressing() {
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
-    const finalImage = cleanImage ?? imageBase64;
+    const finalImage = cleanImage ?? imagePreview;
     if (!finalImage) {
       toast.error('Veuillez ajouter une photo');
       return;
@@ -226,7 +237,7 @@ export default function Dressing() {
       occasion: occasion.length ? occasion : selectedItem.occasion,
       brand: brand || selectedItem.brand,
       price: price ? Number(price) : selectedItem.price,
-      imageBase64: imageBase64 || selectedItem.imageBase64,
+      imageBase64: cleanImage ?? imagePreview || selectedItem.imageBase64,
     };
     await updateClothing(updated);
     await loadWardrobe();
