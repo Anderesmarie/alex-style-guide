@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { ClothingItem, COLORS, SEASONS, OCCASIONS, STYLE_OPTIONS } from '@/lib/types';
 import { getWardrobe, addClothing, updateClothing, deleteClothing, getOutfits, saveOutfits, genId } from '@/lib/storage';
 import { CATEGORIES, getLayerByType } from '@/lib/categories';
+import { DRESSING_CATEGORIES, getAllTypesForCategory } from '@/lib/dressingTaxonomy';
 import { compressImage, recompressWithRotation } from '@/lib/imageUtils';
 import { toast } from 'sonner';
 import { updateStreak } from '@/lib/streak';
@@ -62,6 +63,7 @@ export default function Dressing() {
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
   const [filterCategory, setFilterCategory] = useState('');
+  const [filterSubcategory, setFilterSubcategory] = useState('');
   const [filterType, setFilterType] = useState('');
   const [filterColor, setFilterColor] = useState('');
   const [filterSeason, setFilterSeason] = useState('');
@@ -344,38 +346,20 @@ export default function Dressing() {
     setView('edit');
   };
 
-  // 7 groupes simplifiés avec sous-types explicites
-  const FILTER_GROUPS: { key: string; label: string; allLabel: string; types: string[] }[] = [
-    {
-      key: 'Hauts', label: 'Hauts', allLabel: 'Tous les hauts',
-      types: ['T-shirt', 'Chemise', 'Chemisier', 'Crop top', 'Débardeur', 'Top', 'Pull col rond', 'Pull col V', 'Pull col roulé', 'Sweat', 'Hoodie', 'Cardigan', 'Maille'],
-    },
-    {
-      key: 'Bas', label: 'Bas', allLabel: 'Tous les bas',
-      types: ['Jean', 'Pantalon', 'Jogging', 'Legging', 'Jupe courte', 'Jupe longue', 'Jupe mi-longue', 'Short', 'Bermuda', 'Cycliste'],
-    },
-    {
-      key: 'Robes', label: 'Robes', allLabel: 'Toutes les robes',
-      types: ['Robe courte', 'Robe longue', 'Robe mi-longue', 'Robe de soirée', 'Combinaison', 'Combishort', 'Robe de plage'],
-    },
-    {
-      key: 'Vestes', label: 'Vestes & Manteaux', allLabel: 'Toutes les vestes',
-      types: ['Blazer', 'Veste en jean', 'Veste militaire', 'Bomber', 'Perfecto', 'Veste coupe-vent', 'Cape / Poncho', 'Trench', 'Imperméable / Ciré', 'Manteau court', 'Manteau long', 'Doudoune', 'Parka'],
-    },
-    {
-      key: 'Chaussures', label: 'Chaussures', allLabel: 'Toutes les chaussures',
-      types: ['Baskets', 'Tennis', 'Sandales', 'Tongs', 'Escarpins', 'Talons', 'Bottines', 'Bottes', 'Mocassins', 'Ballerines', 'Mules', 'Plateformes'],
-    },
-    {
-      key: 'Autres', label: 'Autres', allLabel: 'Tous',
-      types: ['Sac à main', 'Sac à dos', 'Tote bag', 'Ceinture', 'Écharpe', 'Bonnet', 'Casquette', 'Lunettes', 'Bijoux', 'Collier', "Boucles d'oreilles", 'Bracelet', 'Maillot de bain', 'Lingerie', 'Pyjama', 'Chaussettes'],
-    },
-  ];
+  // Niveau 1 : catégorie active (depuis la taxonomie partagée)
+  const activeCategory = DRESSING_CATEGORIES.find(c => c.key === filterCategory);
+  // Niveau 2 : sous-catégorie active (uniquement si la catégorie en a)
+  const activeSubcategory = activeCategory?.subcategories?.find(s => s.key === filterSubcategory);
 
-  const activeGroup = FILTER_GROUPS.find(g => g.key === filterCategory);
+  // Liste des types autorisés selon la profondeur du filtre
+  const allowedTypes: string[] | null = (() => {
+    if (!activeCategory) return null;
+    if (activeSubcategory) return activeSubcategory.types;
+    return getAllTypesForCategory(activeCategory.key);
+  })();
 
   const filtered = wardrobe.filter(i => {
-    if (activeGroup && !activeGroup.types.includes(i.type)) return false;
+    if (allowedTypes && !allowedTypes.includes(i.type)) return false;
     if (filterType && i.type !== filterType) return false;
     if (filterColor && i.color !== filterColor) return false;
     if (filterSeason && !i.season.includes(filterSeason)) return false;
@@ -521,30 +505,51 @@ export default function Dressing() {
         <div>
           <label className="block text-sm font-medium mb-3">Catégorie <span className="text-[#C9956C]">*</span></label>
           <div className="grid grid-cols-3 gap-2">
-            {CATEGORIES.map(cat => (
-              <button key={cat.name} type="button"
-                onClick={() => { setCategory(cat.name); setType(''); setLayer(cat.layer); }}
-                className={`p-3 rounded-2xl border text-xs flex flex-col items-center gap-1.5 transition-all ${category === cat.name ? 'border-[#C9956C] bg-[#C9956C]/10 text-[#C9956C]' : 'border-gray-200 bg-white text-gray-600'}`}>
-                <span className="text-xl">{cat.icon}</span>
-                <span className="text-center leading-tight font-medium">{cat.name.split(' ')[0]}</span>
+            {DRESSING_CATEGORIES.map(cat => (
+              <button key={cat.key} type="button"
+                onClick={() => { setCategory(cat.key); setSubcategory(''); setType(''); setLayer(cat.layer); }}
+                className={`p-3 rounded-2xl border text-xs flex flex-col items-center gap-1.5 transition-all ${category === cat.key ? 'border-[#C9956C] bg-[#C9956C]/10 text-[#C9956C]' : 'border-gray-200 bg-white text-gray-600'}`}>
+                <span className="text-center leading-tight font-medium">{cat.label}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {category && (
+        {/* Sous-catégorie : seulement si la catégorie en a */}
+        {category && DRESSING_CATEGORIES.find(c => c.key === category)?.subcategories && (
           <div>
-            <label className="block text-sm font-medium mb-2">Type <span className="text-[#C9956C]">*</span></label>
-            <select value={type}
-              onChange={e => { const t = e.target.value; setType(t); const found = CATEGORIES.find(c => c.name === category)?.types.find(x => x.label === t); if (found) setLayer(found.layer); }}
+            <label className="block text-sm font-medium mb-2">Sous-catégorie <span className="text-[#C9956C]">*</span></label>
+            <select value={subcategory}
+              onChange={e => { setSubcategory(e.target.value); setType(''); }}
               className="w-full p-3 border border-gray-200 rounded-2xl bg-white text-sm text-gray-700">
-              <option value="">Sélectionne un type</option>
-              {CATEGORIES.find(c => c.name === category)?.types.map(t => (
-                <option key={t.label} value={t.label}>{t.label}</option>
+              <option value="">Sélectionne une sous-catégorie</option>
+              {DRESSING_CATEGORIES.find(c => c.key === category)?.subcategories?.map(s => (
+                <option key={s.key} value={s.key}>{s.label}</option>
               ))}
             </select>
           </div>
         )}
+
+        {/* Type précis : si catégorie sans sous-cat OU si sous-cat sélectionnée */}
+        {category && (() => {
+          const cat = DRESSING_CATEGORIES.find(c => c.key === category);
+          if (!cat) return null;
+          const types = cat.subcategories
+            ? cat.subcategories.find(s => s.key === subcategory)?.types
+            : cat.types;
+          if (!types) return null;
+          return (
+            <div>
+              <label className="block text-sm font-medium mb-2">Type <span className="text-[#C9956C]">*</span></label>
+              <select value={type}
+                onChange={e => setType(e.target.value)}
+                className="w-full p-3 border border-gray-200 rounded-2xl bg-white text-sm text-gray-700">
+                <option value="">Sélectionne un type</option>
+                {types.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+          );
+        })()}
 
         <div>
           <label className="block text-sm font-medium mb-3">Couleur</label>
@@ -728,10 +733,10 @@ export default function Dressing() {
             >
               Toutes
             </button>
-            {FILTER_GROUPS.map(g => (
+            {DRESSING_CATEGORIES.map(g => (
               <button
                 key={g.key}
-                onClick={() => { setFilterCategory(g.key); setFilterType(''); }}
+                onClick={() => { setFilterCategory(g.key); setFilterSubcategory(''); setFilterType(''); }}
                 className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
                   filterCategory === g.key
                     ? 'bg-[#C9956C] text-white border-[#C9956C]'
@@ -743,16 +748,36 @@ export default function Dressing() {
             ))}
           </div>
 
-          {/* Ligne 2 : dropdown sous-type */}
-          {activeGroup && (
+          {/* Ligne 2 : dropdown sous-catégorie (si la catégorie en a) */}
+          {activeCategory?.subcategories && (
+            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+              <select
+                value={filterSubcategory}
+                onChange={e => { setFilterSubcategory(e.target.value); setFilterType(''); }}
+                className="px-3 py-1.5 rounded-full bg-card card-shadow text-sm outline-none"
+              >
+                <option value="">{activeCategory.allLabel}</option>
+                {activeCategory.subcategories.map(s => (
+                  <option key={s.key} value={s.key}>{s.label}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Ligne 3 : dropdown type précis */}
+          {activeCategory && (activeSubcategory || !activeCategory.subcategories) && (
             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
               <select
                 value={filterType}
                 onChange={e => setFilterType(e.target.value)}
                 className="px-3 py-1.5 rounded-full bg-card card-shadow text-sm outline-none"
               >
-                <option value="">{activeGroup.allLabel}</option>
-                {activeGroup.types.map(t => <option key={t} value={t}>{t}</option>)}
+                <option value="">
+                  {activeSubcategory ? activeSubcategory.allLabel : activeCategory.allLabel}
+                </option>
+                {(activeSubcategory ? activeSubcategory.types : activeCategory.types ?? []).map(t => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
               </select>
             </div>
           )}
