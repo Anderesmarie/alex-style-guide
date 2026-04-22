@@ -344,15 +344,28 @@ export default function Dressing() {
     setView('edit');
   };
 
+  // 6 groupes simplifiés → mappés vers les vraies catégories de CATEGORIES
+  const FILTER_GROUPS: { key: string; label: string; categories: string[] }[] = [
+    { key: 'Hauts', label: 'Hauts', categories: ['Hauts', 'Pulls & sweats', 'Manteaux & vestes'] },
+    { key: 'Bas', label: 'Bas', categories: ['Bas', 'Jupes'] },
+    { key: 'Robes', label: 'Robes', categories: ['Robes & combinaisons'] },
+    { key: 'Chaussures', label: 'Chaussures', categories: ['Chaussures'] },
+    { key: 'Autres', label: 'Autres', categories: ['Sacs', 'Accessoires'] },
+  ];
+
+  const activeGroup = FILTER_GROUPS.find(g => g.key === filterCategory);
+  const activeGroupCategories = activeGroup
+    ? CATEGORIES.filter(c => activeGroup.categories.includes(c.name))
+    : [];
+  const activeGroupTypes = activeGroupCategories.flatMap(c => c.types.map(t => t.label));
+
   const filtered = wardrobe.filter(i => {
-    if (filterCategory && i.category !== filterCategory) return false;
+    if (activeGroup && !activeGroup.categories.includes(i.category)) return false;
     if (filterType && i.type !== filterType) return false;
     if (filterColor && i.color !== filterColor) return false;
     if (filterSeason && !i.season.includes(filterSeason)) return false;
     return true;
   });
-
-  const activeCategory = CATEGORIES.find(c => c.name === filterCategory);
 
   // Delete confirmation dialog
   const renderDeleteDialog = () => {
