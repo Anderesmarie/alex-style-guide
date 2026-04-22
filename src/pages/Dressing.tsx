@@ -471,24 +471,6 @@ export default function Dressing() {
         )}
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
 
-        {analyzing && (
-          <div className="flex items-center justify-center gap-3 rounded-2xl border border-[#C9956C]/30 bg-[#C9956C]/5 py-4">
-            <span className="inline-block w-5 h-5 border-2 border-[#C9956C] border-t-transparent rounded-full animate-spin" />
-            <p className="text-sm font-medium text-[#C9956C]">✨ Analyse en cours...</p>
-          </div>
-        )}
-
-        {!analyzing && analysis && !analysisError && (
-          <div className="rounded-xl bg-green-50 border border-green-200 px-3 py-2 text-sm text-green-700 font-medium">
-            ✅ Pré-rempli par l'IA — vérifie et modifie si besoin
-          </div>
-        )}
-
-        {!analyzing && analysisError && (
-          <div className="rounded-xl bg-orange-50 border border-orange-200 px-3 py-2 text-sm text-orange-700 font-medium">
-            ⚠️ Analyse automatique indisponible — remplis les champs manuellement
-          </div>
-        )}
 
         <div>
           <label className="block text-sm font-medium mb-3">Catégorie <span className="text-[#C9956C]">*</span></label>
