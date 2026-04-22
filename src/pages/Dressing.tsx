@@ -119,6 +119,7 @@ export default function Dressing() {
     const file = e.target.files?.[0];
     if (!file) return;
     const compressed = await compressImage(file);
+    setImageBase64(compressed);
     setPreviewBase64(compressed);
     setPreviewOrigSrc(compressed);
     setPreviewFile(file);
