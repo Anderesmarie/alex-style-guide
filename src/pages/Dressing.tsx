@@ -104,6 +104,15 @@ export default function Dressing() {
 
   useEffect(() => { loadWardrobe(); }, []);
 
+  // Quand l'IA renvoie une image détourée valide, on l'utilise comme aperçu
+  useEffect(() => {
+    if (cleanImage && cleanImage.startsWith('data:image')) {
+      setDisplayImage(cleanImage);
+      setImageBase64(cleanImage);
+      setBgRemoved(true);
+    }
+  }, [cleanImage]);
+
   const resetForm = () => {
     setDisplayImage(null); setImageBase64(''); setBgRemoved(false);
     setCategory(''); setSubcategory(''); setType(''); setColor(''); setCustomColor('');
