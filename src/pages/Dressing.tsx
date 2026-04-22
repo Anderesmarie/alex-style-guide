@@ -118,6 +118,17 @@ export default function Dressing() {
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // 1. Aperçu instantané via FileReader (avant compression)
+    const instantPreview = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+    setImageBase64(instantPreview);
+
+    // 2. Compression en arrière-plan
     const compressed = await compressImage(file);
     setImageBase64(compressed);
     setPreviewBase64(compressed);
@@ -125,6 +136,7 @@ export default function Dressing() {
     setPreviewFile(file);
     setManualRotation(0);
 
+    // 3. Analyse IA — si elle échoue, imageBase64 reste affichée
     const base64 = compressed.includes(',') ? compressed.split(',')[1] : compressed;
     const result = await analyze(base64);
     if (result) {
