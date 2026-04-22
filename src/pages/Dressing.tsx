@@ -144,14 +144,31 @@ export default function Dressing() {
     setPreviewOrigSrc(instantPreview);
     setManualRotation(0);
 
-    // Compression en arrière-plan (sans IA, sans suppression de fond)
+    // Compression en arrière-plan, puis analyse IA
+    let compressed = instantPreview;
     try {
-      const compressed = await compressImage(file);
+      compressed = await compressImage(file);
       setDisplayImage(compressed);
       setImageBase64(compressed);
       setPreviewOrigSrc(compressed);
     } catch {
       // garde l'aperçu instantané si la compression échoue
+    }
+
+    // Analyse IA — pré-remplissage des champs sans jamais cacher la photo
+    try {
+      const result = await analyze(compressed);
+      if (result) {
+        if (result.category) setCategory(result.category);
+        if (result.subcategory) setSubcategory(result.subcategory);
+        if (result.type) setType(result.type);
+        if (result.color) setColor(result.color);
+        if (result.season?.length) setSeason(result.season);
+        if (result.style?.length) setStyle(result.style);
+        if (result.occasion?.length) setOccasion(result.occasion);
+      }
+    } catch {
+      // l'erreur est déjà gérée dans le hook (analysisError)
     }
   };
 
