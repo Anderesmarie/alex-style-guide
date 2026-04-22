@@ -3,9 +3,11 @@ import { ClothingItem, Outfit } from '@/lib/types';
 import { getWardrobe, getOutfits, addOutfit, deleteOutfit, genId } from '@/lib/storage';
 import { generateRecommendations } from '@/lib/recommendations';
 import { updateStreak } from '@/lib/streak';
+import { getCategoryByType } from '@/lib/categories';
 import CalendarView from '@/components/CalendarView';
+import OutfitVisualLayout, { SlotKey, SlotMap, SLOT_CONFIG } from '@/components/OutfitVisualLayout';
 
-type View = 'gallery' | 'create' | 'detail';
+type View = 'gallery' | 'modeChoice' | 'createVisual' | 'createQuick' | 'detail';
 type Tab = 'outfits' | 'calendar';
 
 export default function Outfits() {
@@ -18,6 +20,10 @@ export default function Outfits() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [outfitName, setOutfitName] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<Outfit | null>(null);
+
+  // Visual layout state
+  const [slots, setSlots] = useState<SlotMap>({});
+  const [pickerSlot, setPickerSlot] = useState<SlotKey | null>(null);
 
   const loadData = async () => {
     const [w, o] = await Promise.all([getWardrobe(), getOutfits()]);
@@ -35,7 +41,7 @@ export default function Outfits() {
     setSelectedIds(next);
   };
 
-  const handleSave = async () => {
+  const handleSaveQuick = async () => {
     if (selectedIds.size < 2 || !outfitName.trim()) return;
     await addOutfit({
       id: genId(),
@@ -47,6 +53,24 @@ export default function Outfits() {
     const o = await getOutfits();
     setOutfits(o);
     setSelectedIds(new Set());
+    setOutfitName('');
+    setView('gallery');
+  };
+
+  const filledSlots = (Object.values(slots).filter(Boolean) as ClothingItem[]);
+
+  const handleSaveVisual = async () => {
+    if (filledSlots.length < 2 || !outfitName.trim()) return;
+    await addOutfit({
+      id: genId(),
+      name: outfitName.trim(),
+      itemIds: filledSlots.map(i => i.id),
+      createdAt: new Date().toISOString(),
+    });
+    updateStreak();
+    const o = await getOutfits();
+    setOutfits(o);
+    setSlots({});
     setOutfitName('');
     setView('gallery');
   };
@@ -69,6 +93,43 @@ export default function Outfits() {
 
   const getItemsByIds = (ids: string[]): ClothingItem[] =>
     ids.map(id => wardrobe.find(i => i.id === id)).filter(Boolean) as ClothingItem[];
+
+  // Build SlotMap from an outfit's itemIds for gallery preview
+  const buildSlotsFromItems = (items: ClothingItem[]): SlotMap => {
+    const result: SlotMap = {};
+    const used = new Set<string>();
+    // Try to assign items to slots based on their category
+    (Object.keys(SLOT_CONFIG) as SlotKey[]).forEach(slotKey => {
+      const cfg = SLOT_CONFIG[slotKey];
+      const candidate = items.find(it => {
+        if (used.has(it.id)) return false;
+        const cat = getCategoryByType(it.type)?.name || it.category;
+        return cfg.categories.includes(cat);
+      });
+      if (candidate) {
+        result[slotKey] = candidate;
+        used.add(candidate.id);
+      }
+    });
+    return result;
+  };
+
+  const openPicker = (slot: SlotKey) => setPickerSlot(slot);
+
+  const assignToSlot = (item: ClothingItem) => {
+    if (!pickerSlot) return;
+    setSlots(prev => ({ ...prev, [pickerSlot]: item }));
+    setPickerSlot(null);
+  };
+
+  const filteredWardrobeForPicker = (): ClothingItem[] => {
+    if (!pickerSlot) return [];
+    const cfg = SLOT_CONFIG[pickerSlot];
+    return wardrobe.filter(it => {
+      const cat = getCategoryByType(it.type)?.name || it.category;
+      return cfg.categories.includes(cat);
+    });
+  };
 
   // Delete confirmation dialog
   const renderDeleteDialog = () => {
@@ -102,6 +163,44 @@ export default function Outfits() {
     );
   };
 
+  // Bottom sheet picker (filtered wardrobe)
+  const renderPicker = () => {
+    if (!pickerSlot) return null;
+    const items = filteredWardrobeForPicker();
+    const cfg = SLOT_CONFIG[pickerSlot];
+    return (
+      <div className="fixed inset-0 z-50 flex items-end" onClick={() => setPickerSlot(null)}>
+        <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
+        <div
+          className="relative w-full bg-card rounded-t-3xl p-5 max-h-[80vh] overflow-y-auto animate-slide-in-bottom"
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="w-12 h-1 bg-muted rounded-full mx-auto mb-4" />
+          <h3 className="font-serif font-bold text-lg mb-3">
+            {cfg.icon} Choisir : {cfg.label}
+          </h3>
+          {items.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground py-8">
+              Aucune pièce dans cette catégorie
+            </p>
+          ) : (
+            <div className="grid grid-cols-3 gap-2">
+              {items.map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => assignToSlot(item)}
+                  className="aspect-square rounded-lg overflow-hidden active:scale-[0.96] transition-transform"
+                >
+                  <img src={item.imageBase64} alt={item.type} className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="fade-enter pb-4">
@@ -116,16 +215,116 @@ export default function Outfits() {
     );
   }
 
-  if (view === 'create') {
+  // Mode choice screen
+  if (view === 'modeChoice') {
+    return (
+      <div className="fade-enter pb-4">
+        <div className="flex items-center gap-3 mb-5">
+          <button onClick={() => setView('gallery')} className="text-2xl">←</button>
+          <h1 className="text-xl font-serif font-bold">Créer une tenue</h1>
+        </div>
+
+        <p className="text-sm text-muted-foreground mb-4">
+          Choisis ton mode de création
+        </p>
+
+        <div className="space-y-3">
+          <button
+            onClick={() => { setSlots({}); setOutfitName(''); setView('createVisual'); }}
+            className="w-full bg-card rounded-2xl p-5 card-shadow text-left active:scale-[0.98] transition-transform"
+          >
+            <div className="flex items-start gap-4">
+              <div className="w-16 h-16 rounded-xl bg-muted/40 flex items-center justify-center text-3xl flex-shrink-0">
+                👤
+              </div>
+              <div className="flex-1">
+                <p className="font-serif font-bold text-base mb-1">Layout visuel</p>
+                <p className="text-xs text-muted-foreground">
+                  Compose ta tenue sur une silhouette : haut, bas, chaussures, sac…
+                </p>
+              </div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => { setSelectedIds(new Set()); setOutfitName(''); setView('createQuick'); }}
+            className="w-full bg-card rounded-2xl p-5 card-shadow text-left active:scale-[0.98] transition-transform"
+          >
+            <div className="flex items-start gap-4">
+              <div className="w-16 h-16 rounded-xl bg-muted/40 flex items-center justify-center text-3xl flex-shrink-0">
+                ⚡
+              </div>
+              <div className="flex-1">
+                <p className="font-serif font-bold text-base mb-1">Sélection rapide</p>
+                <p className="text-xs text-muted-foreground">
+                  Choisis 2 à 5 pièces dans ton dressing en quelques taps
+                </p>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Visual layout creation
+  if (view === 'createVisual') {
+    const canSave = filledSlots.length >= 2 && outfitName.trim().length > 0;
+    return (
+      <div className="fade-enter pb-4">
+        {renderPicker()}
+        <div className="flex items-center gap-3 mb-5">
+          <button onClick={() => { setSlots({}); setView('modeChoice'); }} className="text-2xl">←</button>
+          <h1 className="text-xl font-serif font-bold">Layout visuel</h1>
+        </div>
+
+        <OutfitVisualLayout slots={slots} onSlotTap={openPicker} />
+
+        <p className="text-xs text-muted-foreground text-center mt-3 mb-4">
+          {filledSlots.length} pièce{filledSlots.length > 1 ? 's' : ''} · min. 2 pour sauvegarder
+        </p>
+
+        <input
+          type="text"
+          value={outfitName}
+          onChange={e => setOutfitName(e.target.value)}
+          placeholder="Ex: Bureau lundi, Soirée…"
+          className="w-full px-4 py-3 rounded-lg bg-card card-shadow outline-none focus:ring-2 focus:ring-primary/30 mb-3"
+        />
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setSlots({})}
+            className="text-xs text-muted-foreground underline px-2"
+          >
+            Effacer tout
+          </button>
+          <button
+            onClick={handleSaveVisual}
+            disabled={!canSave}
+            className={`flex-1 py-3.5 rounded-xl font-semibold transition-all duration-200 ${
+              canSave
+                ? 'text-white shadow-lg active:scale-[0.98]'
+                : 'bg-muted text-muted-foreground'
+            }`}
+            style={canSave ? { backgroundColor: '#C9956C' } : undefined}
+          >
+            Sauvegarder
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (view === 'createQuick') {
     const selected = getItemsByIds(Array.from(selectedIds));
     return (
       <div className="fade-enter pb-4 no-scrollbar overflow-y-auto">
         <div className="flex items-center gap-3 mb-5">
-          <button onClick={() => { setSelectedIds(new Set()); setView('gallery'); }} className="text-2xl">←</button>
-          <h1 className="text-xl font-serif font-bold">Créer une tenue</h1>
+          <button onClick={() => { setSelectedIds(new Set()); setView('modeChoice'); }} className="text-2xl">←</button>
+          <h1 className="text-xl font-serif font-bold">Sélection rapide</h1>
         </div>
 
-        {/* Selected preview */}
         {selected.length > 0 && (
           <div className="flex gap-2 overflow-x-auto no-scrollbar mb-4 pb-1">
             {selected.map(item => (
@@ -144,7 +343,6 @@ export default function Outfits() {
           ✨ Générer pour aujourd'hui
         </button>
 
-        {/* Wardrobe grid for selection */}
         <div className="grid grid-cols-3 gap-2 mb-5">
           {wardrobe.map(item => (
             <button
@@ -174,7 +372,7 @@ export default function Outfits() {
               className="w-full px-4 py-3 rounded-lg bg-card card-shadow outline-none focus:ring-2 focus:ring-primary/30 mb-4"
             />
             <button
-              onClick={handleSave}
+              onClick={handleSaveQuick}
               disabled={!outfitName.trim()}
               className={`w-full py-3.5 rounded-xl font-semibold transition-all duration-200 ${
                 outfitName.trim()
@@ -192,6 +390,7 @@ export default function Outfits() {
 
   if (view === 'detail' && selectedOutfit) {
     const items = getItemsByIds(selectedOutfit.itemIds);
+    const detailSlots = buildSlotsFromItems(items);
     return (
       <div className="fade-enter pb-4">
         {renderDeleteDialog()}
@@ -199,7 +398,10 @@ export default function Outfits() {
           <button onClick={() => setView('gallery')} className="text-2xl">←</button>
           <h1 className="text-xl font-serif font-bold">{selectedOutfit.name}</h1>
         </div>
-        <div className="grid grid-cols-2 gap-2 mb-4">
+
+        <OutfitVisualLayout slots={detailSlots} />
+
+        <div className="grid grid-cols-2 gap-2 mt-4 mb-4">
           {items.map(item => (
             <div key={item.id} className="rounded-lg overflow-hidden card-shadow">
               <img src={item.imageBase64} alt={item.type} className="w-full aspect-square object-cover" />
@@ -262,34 +464,25 @@ export default function Outfits() {
       {tab === 'outfits' && (
         <>
           <button
-            onClick={() => setView('create')}
+            onClick={() => setView('modeChoice')}
             className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold mb-5 active:scale-[0.98] transition-transform shadow-lg"
           >
             + Créer une tenue
           </button>
 
           {outfits.length > 0 ? (
-            <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
               {outfits.map(outfit => {
                 const items = getItemsByIds(outfit.itemIds);
+                const previewSlots = buildSlotsFromItems(items);
                 return (
                   <button
                     key={outfit.id}
                     onClick={() => { setSelectedOutfit(outfit); setView('detail'); }}
-                    className="w-full bg-card rounded-xl p-4 card-shadow text-left active:scale-[0.98] transition-transform"
+                    className="bg-card rounded-xl p-2 card-shadow text-left active:scale-[0.98] transition-transform"
                   >
-                    <p className="font-serif font-semibold mb-2">{outfit.name}</p>
-                    <div className="flex gap-1.5">
-                      {items.slice(0, 4).map(item => (
-                        <img key={item.id} src={item.imageBase64} alt={item.type}
-                          className="w-12 h-12 rounded-md object-cover" />
-                      ))}
-                      {items.length > 4 && (
-                        <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center text-xs text-muted-foreground">
-                          +{items.length - 4}
-                        </div>
-                      )}
-                    </div>
+                    <OutfitVisualLayout slots={previewSlots} size="mini" />
+                    <p className="font-serif font-semibold text-sm mt-2 px-1 truncate">{outfit.name}</p>
                   </button>
                 );
               })}
