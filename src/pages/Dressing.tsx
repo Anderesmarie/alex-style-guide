@@ -473,10 +473,28 @@ export default function Dressing() {
                 alt="Aperçu"
                 className={`w-full max-h-64 ${bgRemoved ? 'object-contain' : 'object-cover'}`}
               />
+              {analyzing && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[2px]">
+                  <div className="flex items-center gap-2 bg-white/95 px-4 py-2 rounded-full border border-[#C9956C]/30 shadow-sm">
+                    <span className="inline-block w-3 h-3 border-2 border-[#C9956C] border-t-transparent rounded-full animate-spin" />
+                    <span className="text-xs font-medium text-[#C9956C]">✨ Analyse en cours...</span>
+                  </div>
+                </div>
+              )}
             </div>
             {bgRemoved && (
               <span className="absolute top-2 left-2 bg-white/90 text-xs px-2 py-1 rounded-full border border-gray-200 font-medium">
                 ✂️ Fond supprimé
+              </span>
+            )}
+            {!analyzing && analysis && (
+              <span className="absolute top-2 right-2 bg-emerald-50 text-emerald-700 text-xs px-2 py-1 rounded-full border border-emerald-200 font-medium">
+                ✅ Pré-rempli par l'IA
+              </span>
+            )}
+            {!analyzing && analysisError && (
+              <span className="absolute top-2 right-2 bg-amber-50 text-amber-700 text-xs px-2 py-1 rounded-full border border-amber-200 font-medium">
+                ⚠️ Remplis manuellement
               </span>
             )}
             <button onClick={() => fileRef.current?.click()} className="absolute bottom-3 right-3 bg-white/90 text-xs px-3 py-1.5 rounded-full border border-gray-200">Changer</button>
