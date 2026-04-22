@@ -116,6 +116,7 @@ export default function Dressing() {
     setPreviewBase64(''); setPreviewFile(null); setPreviewOrigSrc(''); setManualRotation(0);
     setLayer(1);
     setShowPhotoTips(true);
+    setFormError(null);
   };
 
   const handlePurchaseFromWishlist = (item: WishlistItem) => {
