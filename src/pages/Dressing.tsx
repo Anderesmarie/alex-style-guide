@@ -712,10 +712,10 @@ export default function Dressing() {
             >
               Toutes
             </button>
-            {FILTER_GROUPS.map(g => (
+            {DRESSING_CATEGORIES.map(g => (
               <button
                 key={g.key}
-                onClick={() => { setFilterCategory(g.key); setFilterType(''); }}
+                onClick={() => { setFilterCategory(g.key); setFilterSubcategory(''); setFilterType(''); }}
                 className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
                   filterCategory === g.key
                     ? 'bg-[#C9956C] text-white border-[#C9956C]'
@@ -727,16 +727,36 @@ export default function Dressing() {
             ))}
           </div>
 
-          {/* Ligne 2 : dropdown sous-type */}
-          {activeGroup && (
+          {/* Ligne 2 : dropdown sous-catégorie (si la catégorie en a) */}
+          {activeCategory?.subcategories && (
+            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+              <select
+                value={filterSubcategory}
+                onChange={e => { setFilterSubcategory(e.target.value); setFilterType(''); }}
+                className="px-3 py-1.5 rounded-full bg-card card-shadow text-sm outline-none"
+              >
+                <option value="">{activeCategory.allLabel}</option>
+                {activeCategory.subcategories.map(s => (
+                  <option key={s.key} value={s.key}>{s.label}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Ligne 3 : dropdown type précis */}
+          {activeCategory && (activeSubcategory || !activeCategory.subcategories) && (
             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
               <select
                 value={filterType}
                 onChange={e => setFilterType(e.target.value)}
                 className="px-3 py-1.5 rounded-full bg-card card-shadow text-sm outline-none"
               >
-                <option value="">{activeGroup.allLabel}</option>
-                {activeGroup.types.map(t => <option key={t} value={t}>{t}</option>)}
+                <option value="">
+                  {activeSubcategory ? activeSubcategory.allLabel : activeCategory.allLabel}
+                </option>
+                {(activeSubcategory ? activeSubcategory.types : activeCategory.types ?? []).map(t => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
               </select>
             </div>
           )}
