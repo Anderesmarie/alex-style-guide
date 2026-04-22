@@ -214,20 +214,22 @@ export default function Dressing() {
   };
 
   const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const handleSave = async () => {
+    setFormError(null);
     const finalImage = displayImage;
     if (!finalImage) {
-      toast.error('Veuillez ajouter une photo');
+      setFormError('Ajoute une photo pour continuer');
       return;
     }
-    if (!type || !category) {
-      toast.error('Veuillez choisir une catégorie et un type');
+    if (!category) {
+      setFormError('Choisis une catégorie');
       return;
     }
     const finalColor = color || customColor || 'Autre';
     const item: ClothingItem = {
-      id: genId(), imageBase64: finalImage, category, subcategory, layer, type, color: finalColor,
+      id: genId(), imageBase64: finalImage, category, subcategory, layer, type: type || category, color: finalColor,
       season: season.length ? season : ['Toutes saisons'],
       style: style.length ? style : ['Casual'],
       occasion: occasion.length ? occasion : ['Quotidien'],
@@ -237,13 +239,16 @@ export default function Dressing() {
     setSaving(true);
     try {
       await addClothing(item);
+      updateStreak();
+      await loadWardrobe();
+      resetForm();
+      setView('grid');
+      toast.success('Vêtement ajouté à ton dressing ✨');
+    } catch (err) {
+      setFormError("Erreur lors de l'enregistrement. Réessaie.");
     } finally {
       setSaving(false);
     }
-    updateStreak();
-    await loadWardrobe();
-    resetForm();
-    setView('grid');
   };
 
   const handleUpdate = async () => {
