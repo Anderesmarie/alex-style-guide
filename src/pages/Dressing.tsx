@@ -573,9 +573,15 @@ export default function Dressing() {
           <input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="ex : 45" className="w-full p-3 border border-gray-200 rounded-2xl bg-white text-sm" />
         </div>
 
-        <button onClick={isEdit ? handleUpdate : handleSave} disabled={!displayImage || !type || !category || saving}
-          className="w-full bg-[#2C2C2C] text-white py-4 rounded-2xl text-sm font-medium disabled:opacity-40 mt-2">
-          {isEdit ? 'Enregistrer les modifications' : saving ? 'Enregistrement...' : 'Ajouter à mon dressing'}
+        {formError && (
+          <div className="rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-600 font-medium">
+            ⚠️ {formError}
+          </div>
+        )}
+
+        <button onClick={isEdit ? handleUpdate : handleSave} disabled={saving}
+          className="w-full bg-[#2C2C2C] text-white py-4 rounded-2xl text-sm font-medium disabled:opacity-60 mt-2">
+          {isEdit ? (saving ? 'Enregistrement...' : 'Enregistrer les modifications') : (saving ? 'Enregistrement...' : 'Sauvegarder')}
         </button>
 
       </div>
