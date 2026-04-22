@@ -136,10 +136,9 @@ export default function Dressing() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Reset bgRemoved car nouvelle photo = nouvelle analyse
     setBgRemoved(false);
 
-    // 1. Aperçu instantané — ne disparaîtra plus jamais
+    // Aperçu instantané
     const instantPreview = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result as string);
@@ -153,25 +152,14 @@ export default function Dressing() {
     setPreviewOrigSrc(instantPreview);
     setManualRotation(0);
 
+    // Compression en arrière-plan (sans IA, sans suppression de fond)
     try {
       const compressed = await compressImage(file);
+      setDisplayImage(compressed);
       setImageBase64(compressed);
-      setPreviewBase64(compressed);
       setPreviewOrigSrc(compressed);
-
-      const base64 = compressed.includes(',') ? compressed.split(',')[1] : compressed;
-      const result = await analyze(base64);
-      if (result) {
-        setCategory(result.category);
-        setSubcategory(result.subcategory);
-        setType(result.type);
-        setColor(result.color);
-        setSeason(result.season);
-        setStyle(result.style);
-        setOccasion(result.occasion);
-      }
     } catch {
-      // displayImage reste affichée
+      // garde l'aperçu instantané si la compression échoue
     }
   };
 
