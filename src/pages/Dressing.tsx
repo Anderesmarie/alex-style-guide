@@ -346,38 +346,20 @@ export default function Dressing() {
     setView('edit');
   };
 
-  // 7 groupes simplifiés avec sous-types explicites
-  const FILTER_GROUPS: { key: string; label: string; allLabel: string; types: string[] }[] = [
-    {
-      key: 'Hauts', label: 'Hauts', allLabel: 'Tous les hauts',
-      types: ['T-shirt', 'Chemise', 'Chemisier', 'Crop top', 'Débardeur', 'Top', 'Pull col rond', 'Pull col V', 'Pull col roulé', 'Sweat', 'Hoodie', 'Cardigan', 'Maille'],
-    },
-    {
-      key: 'Bas', label: 'Bas', allLabel: 'Tous les bas',
-      types: ['Jean', 'Pantalon', 'Jogging', 'Legging', 'Jupe courte', 'Jupe longue', 'Jupe mi-longue', 'Short', 'Bermuda', 'Cycliste'],
-    },
-    {
-      key: 'Robes', label: 'Robes', allLabel: 'Toutes les robes',
-      types: ['Robe courte', 'Robe longue', 'Robe mi-longue', 'Robe de soirée', 'Combinaison', 'Combishort', 'Robe de plage'],
-    },
-    {
-      key: 'Vestes', label: 'Vestes & Manteaux', allLabel: 'Toutes les vestes',
-      types: ['Blazer', 'Veste en jean', 'Veste militaire', 'Bomber', 'Perfecto', 'Veste coupe-vent', 'Cape / Poncho', 'Trench', 'Imperméable / Ciré', 'Manteau court', 'Manteau long', 'Doudoune', 'Parka'],
-    },
-    {
-      key: 'Chaussures', label: 'Chaussures', allLabel: 'Toutes les chaussures',
-      types: ['Baskets', 'Tennis', 'Sandales', 'Tongs', 'Escarpins', 'Talons', 'Bottines', 'Bottes', 'Mocassins', 'Ballerines', 'Mules', 'Plateformes'],
-    },
-    {
-      key: 'Autres', label: 'Autres', allLabel: 'Tous',
-      types: ['Sac à main', 'Sac à dos', 'Tote bag', 'Ceinture', 'Écharpe', 'Bonnet', 'Casquette', 'Lunettes', 'Bijoux', 'Collier', "Boucles d'oreilles", 'Bracelet', 'Maillot de bain', 'Lingerie', 'Pyjama', 'Chaussettes'],
-    },
-  ];
+  // Niveau 1 : catégorie active (depuis la taxonomie partagée)
+  const activeCategory = DRESSING_CATEGORIES.find(c => c.key === filterCategory);
+  // Niveau 2 : sous-catégorie active (uniquement si la catégorie en a)
+  const activeSubcategory = activeCategory?.subcategories?.find(s => s.key === filterSubcategory);
 
-  const activeGroup = FILTER_GROUPS.find(g => g.key === filterCategory);
+  // Liste des types autorisés selon la profondeur du filtre
+  const allowedTypes: string[] | null = (() => {
+    if (!activeCategory) return null;
+    if (activeSubcategory) return activeSubcategory.types;
+    return getAllTypesForCategory(activeCategory.key);
+  })();
 
   const filtered = wardrobe.filter(i => {
-    if (activeGroup && !activeGroup.types.includes(i.type)) return false;
+    if (allowedTypes && !allowedTypes.includes(i.type)) return false;
     if (filterType && i.type !== filterType) return false;
     if (filterColor && i.color !== filterColor) return false;
     if (filterSeason && !i.season.includes(filterSeason)) return false;
