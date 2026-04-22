@@ -181,13 +181,18 @@ export default function Dressing() {
     if (!previewFile) return;
     const rotated = await recompressWithRotation(previewOrigSrc, previewFile, newRotation);
     setPreviewBase64(rotated);
-    setImagePreview(rotated);
-    setImageBase64(rotated);
+    if (rotated && rotated.startsWith('data:image')) {
+      setDisplayImage(rotated);
+      setImageBase64(rotated);
+      setBgRemoved(false);
+    }
   };
 
   const acceptPreview = () => {
-    setImagePreview(previewBase64);
-    setImageBase64(previewBase64);
+    if (previewBase64 && previewBase64.startsWith('data:image')) {
+      setDisplayImage(previewBase64);
+      setImageBase64(previewBase64);
+    }
     setPreviewBase64('');
     setPreviewFile(null);
     setPreviewOrigSrc('');
@@ -195,8 +200,9 @@ export default function Dressing() {
   };
 
   const retakePreview = () => {
-    setImagePreview('');
+    setDisplayImage(null);
     setImageBase64('');
+    setBgRemoved(false);
     setPreviewBase64('');
     setPreviewFile(null);
     setPreviewOrigSrc('');
@@ -214,7 +220,7 @@ export default function Dressing() {
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
-    const finalImage = cleanImage ?? imagePreview;
+    const finalImage = displayImage;
     if (!finalImage) {
       toast.error('Veuillez ajouter une photo');
       return;
@@ -256,7 +262,7 @@ export default function Dressing() {
       occasion: occasion.length ? occasion : selectedItem.occasion,
       brand: brand || selectedItem.brand,
       price: price ? Number(price) : selectedItem.price,
-      imageBase64: cleanImage ?? imagePreview ?? selectedItem.imageBase64,
+      imageBase64: displayImage ?? selectedItem.imageBase64,
     };
     await updateClothing(updated);
     await loadWardrobe();
@@ -320,8 +326,9 @@ export default function Dressing() {
 
   const openEdit = (item: ClothingItem) => {
     setSelectedItem(item);
-    setImagePreview(item.imageBase64);
+    setDisplayImage(item.imageBase64);
     setImageBase64(item.imageBase64);
+    setBgRemoved(false);
     setCategory(item.category || '');
     setSubcategory(item.subcategory || '');
     setType(item.type);
@@ -425,11 +432,11 @@ export default function Dressing() {
           </div>
         )}
 
-        {imagePreview ? (
+        {displayImage ? (
           <div className="relative">
             <div
               className="w-full rounded-2xl overflow-hidden max-h-64"
-              style={cleanImage ? {
+              style={bgRemoved ? {
                 backgroundImage:
                   'linear-gradient(45deg, #e5e5e5 25%, transparent 25%), linear-gradient(-45deg, #e5e5e5 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e5e5e5 75%), linear-gradient(-45deg, transparent 75%, #e5e5e5 75%)',
                 backgroundSize: '16px 16px',
@@ -438,12 +445,12 @@ export default function Dressing() {
               } : undefined}
             >
               <img
-                src={cleanImage ?? imagePreview}
+                src={displayImage}
                 alt="Aperçu"
-                className={`w-full max-h-64 ${cleanImage ? 'object-contain' : 'object-cover'}`}
+                className={`w-full max-h-64 ${bgRemoved ? 'object-contain' : 'object-cover'}`}
               />
             </div>
-            {cleanImage && (
+            {bgRemoved && (
               <span className="absolute top-2 left-2 bg-white/90 text-xs px-2 py-1 rounded-full border border-gray-200 font-medium">
                 ✂️ Fond supprimé
               </span>
@@ -564,7 +571,7 @@ export default function Dressing() {
           <input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="ex : 45" className="w-full p-3 border border-gray-200 rounded-2xl bg-white text-sm" />
         </div>
 
-        <button onClick={isEdit ? handleUpdate : handleSave} disabled={!imagePreview || !type || !category || saving}
+        <button onClick={isEdit ? handleUpdate : handleSave} disabled={!displayImage || !type || !category || saving}
           className="w-full bg-[#2C2C2C] text-white py-4 rounded-2xl text-sm font-medium disabled:opacity-40 mt-2">
           {isEdit ? 'Enregistrer les modifications' : saving ? 'Enregistrement...' : 'Ajouter à mon dressing'}
         </button>
