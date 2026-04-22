@@ -61,6 +61,7 @@ export default function Dressing() {
   const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
+  const [filterCategory, setFilterCategory] = useState('');
   const [filterType, setFilterType] = useState('');
   const [filterColor, setFilterColor] = useState('');
   const [filterSeason, setFilterSeason] = useState('');
@@ -344,11 +345,14 @@ export default function Dressing() {
   };
 
   const filtered = wardrobe.filter(i => {
+    if (filterCategory && i.category !== filterCategory) return false;
     if (filterType && i.type !== filterType) return false;
     if (filterColor && i.color !== filterColor) return false;
     if (filterSeason && !i.season.includes(filterSeason)) return false;
     return true;
   });
+
+  const activeCategory = CATEGORIES.find(c => c.name === filterCategory);
 
   // Delete confirmation dialog
   const renderDeleteDialog = () => {
@@ -671,7 +675,7 @@ export default function Dressing() {
       {renderTabs()}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-serif font-bold">Mon Dressing</h1>
-        <span className="text-sm text-muted-foreground">{wardrobe.length} pièce{wardrobe.length !== 1 ? 's' : ''}</span>
+        <span className="text-sm text-muted-foreground">{filtered.length} pièce{filtered.length !== 1 ? 's' : ''}</span>
       </div>
 
       <button
@@ -683,24 +687,76 @@ export default function Dressing() {
 
       {/* Filters */}
       {wardrobe.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto no-scrollbar mb-4 pb-1">
-          <select value={filterType} onChange={e => setFilterType(e.target.value)}
-            className="px-3 py-1.5 rounded-full bg-card card-shadow text-sm outline-none">
-            <option value="">Type</option>
-            {CATEGORIES.flatMap(c => c.types.map(t => t.label))
-              .filter((v, i, a) => a.indexOf(v) === i)
-              .map(t => <option key={t}>{t}</option>)}
-          </select>
-          <select value={filterColor} onChange={e => setFilterColor(e.target.value)}
-            className="px-3 py-1.5 rounded-full bg-card card-shadow text-sm outline-none">
-            <option value="">Couleur</option>
-            {COLORS.map(c => <option key={c}>{c}</option>)}
-          </select>
-          <select value={filterSeason} onChange={e => setFilterSeason(e.target.value)}
-            className="px-3 py-1.5 rounded-full bg-card card-shadow text-sm outline-none">
-            <option value="">Saison</option>
-            {SEASONS.map(s => <option key={s}>{s}</option>)}
-          </select>
+        <div className="space-y-2 mb-4">
+          {/* Étape 1 : catégories */}
+          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+            <button
+              onClick={() => { setFilterCategory(''); setFilterType(''); }}
+              className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                filterCategory === ''
+                  ? 'bg-[#C9956C] text-white border-[#C9956C]'
+                  : 'bg-card text-muted-foreground border-border'
+              }`}
+            >
+              Toutes
+            </button>
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat.name}
+                onClick={() => { setFilterCategory(cat.name); setFilterType(''); }}
+                className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                  filterCategory === cat.name
+                    ? 'bg-[#C9956C] text-white border-[#C9956C]'
+                    : 'bg-card text-muted-foreground border-border'
+                }`}
+              >
+                {cat.icon} {cat.name}
+              </button>
+            ))}
+          </div>
+
+          {/* Étape 2 : sous-types */}
+          {activeCategory && (
+            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+              <button
+                onClick={() => setFilterType('')}
+                className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium border transition-all ${
+                  filterType === ''
+                    ? 'bg-[#C9956C] text-white border-[#C9956C]'
+                    : 'bg-card text-muted-foreground border-border'
+                }`}
+              >
+                Tous
+              </button>
+              {activeCategory.types.map(t => (
+                <button
+                  key={t.label}
+                  onClick={() => setFilterType(t.label)}
+                  className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium border transition-all ${
+                    filterType === t.label
+                      ? 'bg-[#C9956C] text-white border-[#C9956C]'
+                      : 'bg-card text-muted-foreground border-border'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Couleur & Saison */}
+          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+            <select value={filterColor} onChange={e => setFilterColor(e.target.value)}
+              className="px-3 py-1.5 rounded-full bg-card card-shadow text-sm outline-none">
+              <option value="">Couleur</option>
+              {COLORS.map(c => <option key={c}>{c}</option>)}
+            </select>
+            <select value={filterSeason} onChange={e => setFilterSeason(e.target.value)}
+              className="px-3 py-1.5 rounded-full bg-card card-shadow text-sm outline-none">
+              <option value="">Saison</option>
+              {SEASONS.map(s => <option key={s}>{s}</option>)}
+            </select>
+          </div>
         </div>
       )}
 
