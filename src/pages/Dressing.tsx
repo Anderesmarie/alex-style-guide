@@ -9,6 +9,7 @@ import { updateStreak } from '@/lib/streak';
 import PhotoGuide from '@/components/PhotoGuide';
 import Wishlist from '@/components/Wishlist';
 import { WishlistItem } from '@/lib/wishlist';
+import { useClothingAnalysis } from '@/hooks/useClothingAnalysis';
 
 
 type View = 'grid' | 'add' | 'detail' | 'edit';
