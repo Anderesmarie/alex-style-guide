@@ -505,30 +505,51 @@ export default function Dressing() {
         <div>
           <label className="block text-sm font-medium mb-3">Catégorie <span className="text-[#C9956C]">*</span></label>
           <div className="grid grid-cols-3 gap-2">
-            {CATEGORIES.map(cat => (
-              <button key={cat.name} type="button"
-                onClick={() => { setCategory(cat.name); setType(''); setLayer(cat.layer); }}
-                className={`p-3 rounded-2xl border text-xs flex flex-col items-center gap-1.5 transition-all ${category === cat.name ? 'border-[#C9956C] bg-[#C9956C]/10 text-[#C9956C]' : 'border-gray-200 bg-white text-gray-600'}`}>
-                <span className="text-xl">{cat.icon}</span>
-                <span className="text-center leading-tight font-medium">{cat.name.split(' ')[0]}</span>
+            {DRESSING_CATEGORIES.map(cat => (
+              <button key={cat.key} type="button"
+                onClick={() => { setCategory(cat.key); setSubcategory(''); setType(''); setLayer(cat.layer); }}
+                className={`p-3 rounded-2xl border text-xs flex flex-col items-center gap-1.5 transition-all ${category === cat.key ? 'border-[#C9956C] bg-[#C9956C]/10 text-[#C9956C]' : 'border-gray-200 bg-white text-gray-600'}`}>
+                <span className="text-center leading-tight font-medium">{cat.label}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {category && (
+        {/* Sous-catégorie : seulement si la catégorie en a */}
+        {category && DRESSING_CATEGORIES.find(c => c.key === category)?.subcategories && (
           <div>
-            <label className="block text-sm font-medium mb-2">Type <span className="text-[#C9956C]">*</span></label>
-            <select value={type}
-              onChange={e => { const t = e.target.value; setType(t); const found = CATEGORIES.find(c => c.name === category)?.types.find(x => x.label === t); if (found) setLayer(found.layer); }}
+            <label className="block text-sm font-medium mb-2">Sous-catégorie <span className="text-[#C9956C]">*</span></label>
+            <select value={subcategory}
+              onChange={e => { setSubcategory(e.target.value); setType(''); }}
               className="w-full p-3 border border-gray-200 rounded-2xl bg-white text-sm text-gray-700">
-              <option value="">Sélectionne un type</option>
-              {CATEGORIES.find(c => c.name === category)?.types.map(t => (
-                <option key={t.label} value={t.label}>{t.label}</option>
+              <option value="">Sélectionne une sous-catégorie</option>
+              {DRESSING_CATEGORIES.find(c => c.key === category)?.subcategories?.map(s => (
+                <option key={s.key} value={s.key}>{s.label}</option>
               ))}
             </select>
           </div>
         )}
+
+        {/* Type précis : si catégorie sans sous-cat OU si sous-cat sélectionnée */}
+        {category && (() => {
+          const cat = DRESSING_CATEGORIES.find(c => c.key === category);
+          if (!cat) return null;
+          const types = cat.subcategories
+            ? cat.subcategories.find(s => s.key === subcategory)?.types
+            : cat.types;
+          if (!types) return null;
+          return (
+            <div>
+              <label className="block text-sm font-medium mb-2">Type <span className="text-[#C9956C]">*</span></label>
+              <select value={type}
+                onChange={e => setType(e.target.value)}
+                className="w-full p-3 border border-gray-200 rounded-2xl bg-white text-sm text-gray-700">
+                <option value="">Sélectionne un type</option>
+                {types.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+          );
+        })()}
 
         <div>
           <label className="block text-sm font-medium mb-3">Couleur</label>
