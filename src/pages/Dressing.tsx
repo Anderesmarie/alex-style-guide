@@ -9,7 +9,7 @@ import { updateStreak } from '@/lib/streak';
 import PhotoGuide from '@/components/PhotoGuide';
 import Wishlist from '@/components/Wishlist';
 import { WishlistItem } from '@/lib/wishlist';
-import { useClothingAnalysis } from '@/hooks/useClothingAnalysis';
+
 
 type View = 'grid' | 'add' | 'detail' | 'edit';
 type Tab = 'dressing' | 'wishlist';
@@ -93,16 +93,6 @@ export default function Dressing() {
   const [layer, setLayer] = useState<number>(1);
   const [showPhotoTips, setShowPhotoTips] = useState(true);
   const [bgRemoved, setBgRemoved] = useState(false);
-  const { analyze, loading: analyzing, error: analysisError, cleanImage, analysis } = useClothingAnalysis();
-
-  // Met à jour l'image affichée seulement si cleanImage est une data URL valide
-  useEffect(() => {
-    if (cleanImage && typeof cleanImage === 'string' && cleanImage.startsWith('data:image')) {
-      setDisplayImage(cleanImage);
-      setImageBase64(cleanImage);
-      setBgRemoved(true);
-    }
-  }, [cleanImage]);
 
   const loadWardrobe = async () => {
     const w = await getWardrobe();
@@ -136,10 +126,9 @@ export default function Dressing() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Reset bgRemoved car nouvelle photo = nouvelle analyse
     setBgRemoved(false);
 
-    // 1. Aperçu instantané — ne disparaîtra plus jamais
+    // Aperçu instantané
     const instantPreview = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result as string);
@@ -153,25 +142,14 @@ export default function Dressing() {
     setPreviewOrigSrc(instantPreview);
     setManualRotation(0);
 
+    // Compression en arrière-plan (sans IA, sans suppression de fond)
     try {
       const compressed = await compressImage(file);
+      setDisplayImage(compressed);
       setImageBase64(compressed);
-      setPreviewBase64(compressed);
       setPreviewOrigSrc(compressed);
-
-      const base64 = compressed.includes(',') ? compressed.split(',')[1] : compressed;
-      const result = await analyze(base64);
-      if (result) {
-        setCategory(result.category);
-        setSubcategory(result.subcategory);
-        setType(result.type);
-        setColor(result.color);
-        setSeason(result.season);
-        setStyle(result.style);
-        setOccasion(result.occasion);
-      }
     } catch {
-      // displayImage reste affichée
+      // garde l'aperçu instantané si la compression échoue
     }
   };
 
@@ -483,24 +461,6 @@ export default function Dressing() {
         )}
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
 
-        {analyzing && (
-          <div className="flex items-center justify-center gap-3 rounded-2xl border border-[#C9956C]/30 bg-[#C9956C]/5 py-4">
-            <span className="inline-block w-5 h-5 border-2 border-[#C9956C] border-t-transparent rounded-full animate-spin" />
-            <p className="text-sm font-medium text-[#C9956C]">✨ Analyse en cours...</p>
-          </div>
-        )}
-
-        {!analyzing && analysis && !analysisError && (
-          <div className="rounded-xl bg-green-50 border border-green-200 px-3 py-2 text-sm text-green-700 font-medium">
-            ✅ Pré-rempli par l'IA — vérifie et modifie si besoin
-          </div>
-        )}
-
-        {!analyzing && analysisError && (
-          <div className="rounded-xl bg-orange-50 border border-orange-200 px-3 py-2 text-sm text-orange-700 font-medium">
-            ⚠️ Analyse automatique indisponible — remplis les champs manuellement
-          </div>
-        )}
 
         <div>
           <label className="block text-sm font-medium mb-3">Catégorie <span className="text-[#C9956C]">*</span></label>

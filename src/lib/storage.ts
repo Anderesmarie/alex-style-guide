@@ -126,13 +126,12 @@ export async function getWardrobe(): Promise<ClothingItem[]> {
 
 export async function addClothing(item: ClothingItem): Promise<void> {
   const uid = await getUserId();
-  await supabase.from('wardrobe').insert({
+  const { error } = await supabase.from('wardrobe').insert({
     id: item.id,
     user_id: uid,
     image_base64: item.imageBase64,
     category: item.category || null,
     subcategory: item.subcategory || null,
-    layer: item.layer ?? 1,
     type: item.type,
     color: item.color,
     season: item.season,
@@ -141,15 +140,18 @@ export async function addClothing(item: ClothingItem): Promise<void> {
     brand: item.brand || null,
     price: item.price || null,
   });
+  if (error) {
+    console.error('addClothing error:', error);
+    throw error;
+  }
 }
 
 export async function updateClothing(item: ClothingItem): Promise<void> {
   const uid = await getUserId();
-  await supabase.from('wardrobe').update({
+  const { error } = await supabase.from('wardrobe').update({
     image_base64: item.imageBase64,
     category: item.category || null,
     subcategory: item.subcategory || null,
-    layer: item.layer ?? 1,
     type: item.type,
     color: item.color,
     season: item.season,
@@ -158,6 +160,10 @@ export async function updateClothing(item: ClothingItem): Promise<void> {
     brand: item.brand || null,
     price: item.price || null,
   }).eq('id', item.id).eq('user_id', uid);
+  if (error) {
+    console.error('updateClothing error:', error);
+    throw error;
+  }
 }
 
 export async function deleteClothing(id: string): Promise<void> {
