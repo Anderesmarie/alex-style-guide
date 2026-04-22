@@ -345,11 +345,14 @@ export default function Dressing() {
   };
 
   const filtered = wardrobe.filter(i => {
+    if (filterCategory && i.category !== filterCategory) return false;
     if (filterType && i.type !== filterType) return false;
     if (filterColor && i.color !== filterColor) return false;
     if (filterSeason && !i.season.includes(filterSeason)) return false;
     return true;
   });
+
+  const activeCategory = CATEGORIES.find(c => c.name === filterCategory);
 
   // Delete confirmation dialog
   const renderDeleteDialog = () => {
