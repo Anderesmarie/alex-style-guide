@@ -75,7 +75,7 @@ export default function Dressing() {
   const [deleteReason, setDeleteReason] = useState<string | null>(null);
 
   // Form state
-  const [imagePreview, setImagePreview] = useState('');
+  const [displayImage, setDisplayImage] = useState<string | null>(null);
   const [imageBase64, setImageBase64] = useState('');
   const [category, setCategory] = useState('');
   const [subcategory, setSubcategory] = useState('');
@@ -89,7 +89,17 @@ export default function Dressing() {
   const [price, setPrice] = useState('');
   const [layer, setLayer] = useState<number>(1);
   const [showPhotoTips, setShowPhotoTips] = useState(true);
+  const [bgRemoved, setBgRemoved] = useState(false);
   const { analyze, loading: analyzing, error: analysisError, cleanImage, analysis } = useClothingAnalysis();
+
+  // Met à jour l'image affichée seulement si cleanImage est une data URL valide
+  useEffect(() => {
+    if (cleanImage && typeof cleanImage === 'string' && cleanImage.startsWith('data:image')) {
+      setDisplayImage(cleanImage);
+      setImageBase64(cleanImage);
+      setBgRemoved(true);
+    }
+  }, [cleanImage]);
 
   const loadWardrobe = async () => {
     const w = await getWardrobe();
@@ -100,7 +110,8 @@ export default function Dressing() {
   useEffect(() => { loadWardrobe(); }, []);
 
   const resetForm = () => {
-    setImagePreview(''); setImageBase64(''); setCategory(''); setSubcategory(''); setType(''); setColor(''); setCustomColor('');
+    setDisplayImage(null); setImageBase64(''); setBgRemoved(false);
+    setCategory(''); setSubcategory(''); setType(''); setColor(''); setCustomColor('');
     setSeason([]); setStyle([]); setOccasion([]); setBrand(''); setPrice('');
     setPreviewBase64(''); setPreviewFile(null); setPreviewOrigSrc(''); setManualRotation(0);
     setLayer(1);
@@ -109,7 +120,7 @@ export default function Dressing() {
 
   const handlePurchaseFromWishlist = (item: WishlistItem) => {
     resetForm();
-    setImagePreview(item.photo);
+    setDisplayImage(item.photo);
     setImageBase64(item.photo);
     if (item.name) setBrand(item.name);
     setTab('dressing');
@@ -121,6 +132,10 @@ export default function Dressing() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Reset bgRemoved car nouvelle photo = nouvelle analyse
+    setBgRemoved(false);
+
+    // 1. Aperçu instantané — ne disparaîtra plus jamais
     const instantPreview = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result as string);
@@ -128,7 +143,7 @@ export default function Dressing() {
       reader.readAsDataURL(file);
     });
 
-    setImagePreview(instantPreview);
+    setDisplayImage(instantPreview);
     setImageBase64(instantPreview);
     setPreviewFile(file);
     setPreviewOrigSrc(instantPreview);
@@ -136,7 +151,11 @@ export default function Dressing() {
 
     try {
       const compressed = await compressImage(file);
-      setImageBase64(compressed);
+      // Met à jour displayImage seulement si la compression produit une data URL valide
+      if (compressed && compressed.startsWith('data:image')) {
+        setDisplayImage(compressed);
+        setImageBase64(compressed);
+      }
       setPreviewBase64(compressed);
       setPreviewOrigSrc(compressed);
 
@@ -152,7 +171,7 @@ export default function Dressing() {
         setOccasion(result.occasion);
       }
     } catch {
-      // garde imagePreview visible même si la compression ou l'analyse échoue
+      // displayImage reste affichée
     }
   };
 
