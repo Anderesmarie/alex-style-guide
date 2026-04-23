@@ -481,7 +481,7 @@ export default function Outfits() {
                     onClick={() => { setSelectedOutfit(outfit); setView('detail'); }}
                     className="bg-card rounded-xl p-2 card-shadow text-left active:scale-[0.98] transition-transform"
                   >
-                    <OutfitVisualLayout slots={previewSlots} size="mini" />
+                    <OutfitVisualLayout slots={previewSlots} size="mini" compact />
                     <p className="font-serif font-semibold text-sm mt-2 px-1 truncate">{outfit.name}</p>
                   </button>
                 );

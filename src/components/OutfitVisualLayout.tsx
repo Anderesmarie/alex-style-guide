@@ -72,14 +72,36 @@ interface OutfitVisualLayoutProps {
   slots: SlotMap;
   onSlotTap?: (slot: SlotKey) => void;
   size?: 'normal' | 'mini';
+  /** When true, only filled slots are rendered (no empty placeholders). */
+  compact?: boolean;
 }
 
-export default function OutfitVisualLayout({ slots, onSlotTap, size = 'normal' }: OutfitVisualLayoutProps) {
+export default function OutfitVisualLayout({ slots, onSlotTap, size = 'normal', compact = false }: OutfitVisualLayoutProps) {
   const handleTap = onSlotTap || (() => {});
   const isMini = size === 'mini';
   const gap = isMini ? 'gap-1' : 'gap-2';
   const padding = isMini ? 'p-2' : 'p-4';
   const radius = isMini ? 'rounded-lg' : 'rounded-2xl';
+
+  if (compact) {
+    const order: SlotKey[] = ['outerwear', 'top', 'topAlt', 'bottom', 'shoes', 'bag'];
+    const filled = order.filter((k) => slots[k]);
+    if (filled.length === 0) {
+      return (
+        <div className={`bg-white ${radius} ${padding} ${isMini ? '' : 'shadow-sm'} aspect-square`} />
+      );
+    }
+    const cols = filled.length === 1 ? 1 : 2;
+    return (
+      <div className={`bg-white ${radius} ${padding} ${isMini ? '' : 'shadow-sm'}`}>
+        <div className={`grid ${gap}`} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+          {filled.map((k) => (
+            <SlotCell key={k} slotKey={k} item={slots[k]} onTap={handleTap} size={size} />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`bg-white ${radius} ${padding} ${isMini ? '' : 'shadow-sm'}`}>
