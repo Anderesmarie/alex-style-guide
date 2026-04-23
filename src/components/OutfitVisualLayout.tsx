@@ -84,20 +84,38 @@ export default function OutfitVisualLayout({ slots, onSlotTap, size = 'normal', 
   const radius = isMini ? 'rounded-lg' : 'rounded-2xl';
 
   if (compact) {
-    const order: SlotKey[] = ['outerwear', 'top', 'topAlt', 'bottom', 'shoes', 'bag'];
-    const filled = order.filter((k) => slots[k]);
-    if (filled.length === 0) {
+    // Garde la grille positionnelle (3 colonnes, mêmes lignes que le layout normal)
+    // mais rend invisible les cellules vides — chaque pièce conserve sa place.
+    const renderCell = (k: SlotKey) =>
+      slots[k] ? (
+        <SlotCell key={k} slotKey={k} item={slots[k]} onTap={handleTap} size={size} />
+      ) : (
+        <div key={k} className="aspect-square invisible" />
+      );
+
+    const hasAny = (Object.keys(SLOT_CONFIG) as SlotKey[]).some((k) => slots[k]);
+    if (!hasAny) {
       return (
         <div className={`bg-white ${radius} ${padding} ${isMini ? '' : 'shadow-sm'} aspect-square`} />
       );
     }
-    const cols = filled.length === 1 ? 1 : 2;
+
     return (
       <div className={`bg-white ${radius} ${padding} ${isMini ? '' : 'shadow-sm'}`}>
-        <div className={`grid ${gap}`} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
-          {filled.map((k) => (
-            <SlotCell key={k} slotKey={k} item={slots[k]} onTap={handleTap} size={size} />
-          ))}
+        <div className={`grid grid-cols-3 ${gap} mb-${isMini ? '1' : '2'}`}>
+          {renderCell('outerwear')}
+          {renderCell('top')}
+          {renderCell('topAlt')}
+        </div>
+        <div className={`grid grid-cols-3 ${gap} mb-${isMini ? '1' : '2'}`}>
+          <div className="aspect-square invisible" />
+          {renderCell('bottom')}
+          <div className="aspect-square invisible" />
+        </div>
+        <div className={`grid grid-cols-3 ${gap}`}>
+          {renderCell('shoes')}
+          <div className="aspect-square invisible" />
+          {renderCell('bag')}
         </div>
       </div>
     );
