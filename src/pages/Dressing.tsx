@@ -104,10 +104,11 @@ export default function Dressing() {
 
   useEffect(() => { loadWardrobe(); }, []);
 
-  // L'image détourée par BiRefNet revient sans EXIF — on ne l'utilise QUE pour l'affichage
-  // de comparaison "Sans fond". L'image sauvegardée reste l'image compressée bien orientée.
+  // Quand l'IA renvoie une image détourée valide, on l'utilise comme aperçu
   useEffect(() => {
     if (cleanImage && cleanImage.startsWith('data:image')) {
+      setDisplayImage(cleanImage);
+      setImageBase64(cleanImage);
       setBgRemoved(true);
     }
   }, [cleanImage]);
@@ -152,12 +153,11 @@ export default function Dressing() {
     setPreviewOrigSrc(instantPreview);
     setManualRotation(0);
 
-    // Compression en arrière-plan pour l'analyse IA et le stockage.
-    // On NE remplace PAS displayImage : l'aperçu reste l'image brute du navigateur,
-    // toujours bien orientée (le canvas de compressImage peut casser l'orientation EXIF).
+    // Compression en arrière-plan, puis analyse IA
     let compressed = instantPreview;
     try {
       compressed = await compressImage(file);
+      setDisplayImage(compressed);
       setImageBase64(compressed);
       setPreviewOrigSrc(compressed);
     } catch {
@@ -228,9 +228,7 @@ export default function Dressing() {
 
   const handleSave = async () => {
     setFormError(null);
-    const finalImage = (cleanImage && cleanImage.startsWith('data:image'))
-      ? cleanImage
-      : displayImage;
+    const finalImage = displayImage;
     if (!finalImage) {
       setFormError('Ajoute une photo pour continuer');
       return;
