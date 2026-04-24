@@ -152,11 +152,12 @@ export default function Dressing() {
     setPreviewOrigSrc(instantPreview);
     setManualRotation(0);
 
-    // Compression en arrière-plan, puis analyse IA
+    // Compression en arrière-plan pour l'analyse IA et le stockage.
+    // On NE remplace PAS displayImage : l'aperçu reste l'image brute du navigateur,
+    // toujours bien orientée (le canvas de compressImage peut casser l'orientation EXIF).
     let compressed = instantPreview;
     try {
       compressed = await compressImage(file);
-      setDisplayImage(compressed);
       setImageBase64(compressed);
       setPreviewOrigSrc(compressed);
     } catch {
