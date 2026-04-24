@@ -104,11 +104,10 @@ export default function Dressing() {
 
   useEffect(() => { loadWardrobe(); }, []);
 
-  // Quand l'IA renvoie une image détourée valide, on l'utilise comme aperçu
+  // L'image détourée par BiRefNet revient sans EXIF — on ne l'utilise QUE pour l'affichage
+  // de comparaison "Sans fond". L'image sauvegardée reste l'image compressée bien orientée.
   useEffect(() => {
     if (cleanImage && cleanImage.startsWith('data:image')) {
-      setDisplayImage(cleanImage);
-      setImageBase64(cleanImage);
       setBgRemoved(true);
     }
   }, [cleanImage]);
