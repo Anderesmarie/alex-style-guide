@@ -458,30 +458,62 @@ export default function Dressing() {
 
         {displayImage ? (
           <div className="relative">
-            <div
-              className="w-full rounded-2xl overflow-hidden max-h-64"
-              style={bgRemoved ? {
-                backgroundImage:
-                  'linear-gradient(45deg, #e5e5e5 25%, transparent 25%), linear-gradient(-45deg, #e5e5e5 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e5e5e5 75%), linear-gradient(-45deg, transparent 75%, #e5e5e5 75%)',
-                backgroundSize: '16px 16px',
-                backgroundPosition: '0 0, 0 8px, 8px -8px, -8px 0px',
-                backgroundColor: '#ffffff',
-              } : undefined}
-            >
-              <img
-                src={displayImage}
-                alt="Aperçu"
-                className={`w-full max-h-64 ${bgRemoved ? 'object-contain' : 'object-cover'}`}
-              />
-              {analyzing && (
-                <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[2px]">
-                  <div className="flex items-center gap-2 bg-white/95 px-4 py-2 rounded-full border border-[#C9956C]/30 shadow-sm">
-                    <span className="inline-block w-3 h-3 border-2 border-[#C9956C] border-t-transparent rounded-full animate-spin" />
-                    <span className="text-xs font-medium text-[#C9956C]">✨ Analyse en cours...</span>
+            {bgRemoved && cleanImage && previewOrigSrc ? (
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-col items-center">
+                  <span className="text-xs font-medium text-gray-600 mb-1">Original</span>
+                  <img
+                    src={previewOrigSrc}
+                    alt="Original"
+                    className="w-full max-h-64 object-contain rounded-2xl bg-white border border-gray-200"
+                  />
+                </div>
+                <div className="flex flex-col items-center">
+                  <span className="text-xs font-medium text-gray-600 mb-1">Sans fond</span>
+                  <div
+                    className="w-full rounded-2xl overflow-hidden border border-gray-200"
+                    style={{
+                      backgroundImage:
+                        'linear-gradient(45deg, #e5e5e5 25%, transparent 25%), linear-gradient(-45deg, #e5e5e5 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e5e5e5 75%), linear-gradient(-45deg, transparent 75%, #e5e5e5 75%)',
+                      backgroundSize: '16px 16px',
+                      backgroundPosition: '0 0, 0 8px, 8px -8px, -8px 0px',
+                      backgroundColor: '#ffffff',
+                    }}
+                  >
+                    <img
+                      src={cleanImage}
+                      alt="Sans fond"
+                      className="w-full max-h-64 object-contain"
+                    />
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div
+                className="w-full rounded-2xl overflow-hidden max-h-64"
+                style={bgRemoved ? {
+                  backgroundImage:
+                    'linear-gradient(45deg, #e5e5e5 25%, transparent 25%), linear-gradient(-45deg, #e5e5e5 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e5e5e5 75%), linear-gradient(-45deg, transparent 75%, #e5e5e5 75%)',
+                  backgroundSize: '16px 16px',
+                  backgroundPosition: '0 0, 0 8px, 8px -8px, -8px 0px',
+                  backgroundColor: '#ffffff',
+                } : undefined}
+              >
+                <img
+                  src={displayImage}
+                  alt="Aperçu"
+                  className={`w-full max-h-64 ${bgRemoved ? 'object-contain' : 'object-cover'}`}
+                />
+                {analyzing && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[2px]">
+                    <div className="flex items-center gap-2 bg-white/95 px-4 py-2 rounded-full border border-[#C9956C]/30 shadow-sm">
+                      <span className="inline-block w-3 h-3 border-2 border-[#C9956C] border-t-transparent rounded-full animate-spin" />
+                      <span className="text-xs font-medium text-[#C9956C]">✨ Analyse en cours...</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
             {bgRemoved && (
               <span className="absolute top-2 left-2 bg-white/90 text-xs px-2 py-1 rounded-full border border-gray-200 font-medium">
                 ✂️ Fond supprimé
