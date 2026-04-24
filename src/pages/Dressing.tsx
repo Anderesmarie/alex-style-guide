@@ -673,7 +673,7 @@ export default function Dressing() {
         <button onClick={() => setView('grid')} className="text-2xl">←</button>
         <h1 className="text-xl font-serif font-bold">{selectedItem.type}</h1>
       </div>
-      <img src={selectedItem.imageBase64} alt="" className="w-full aspect-square object-cover rounded-xl card-shadow mb-4" />
+      <img src={selectedItem.imageBase64} alt="" className="w-full aspect-square object-contain bg-white rounded-xl card-shadow mb-4" />
       <div className="space-y-3">
         <div><span className="text-sm text-muted-foreground">Couleur :</span> <span className="font-medium">{selectedItem.color}</span></div>
         <div><span className="text-sm text-muted-foreground">Saison :</span> <span className="font-medium">{selectedItem.season.join(', ')}</span></div>
@@ -811,9 +811,9 @@ export default function Dressing() {
             <button
               key={item.id}
               onClick={() => { setSelectedItem(item); setView('detail'); }}
-              className="aspect-square rounded-lg overflow-hidden card-shadow active:scale-[0.96] transition-transform"
+              className="aspect-square rounded-lg overflow-hidden card-shadow active:scale-[0.96] transition-transform bg-white"
             >
-              <img src={item.imageBase64} alt={item.type} className="w-full h-full object-cover" />
+              <img src={item.imageBase64} alt={item.type} className="w-full h-full object-contain" />
             </button>
           ))}
         </div>
