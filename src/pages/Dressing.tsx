@@ -228,7 +228,9 @@ export default function Dressing() {
 
   const handleSave = async () => {
     setFormError(null);
-    const finalImage = displayImage;
+    const finalImage = (cleanImage && cleanImage.startsWith('data:image'))
+      ? cleanImage
+      : displayImage;
     if (!finalImage) {
       setFormError('Ajoute une photo pour continuer');
       return;
