@@ -366,6 +366,43 @@ export default function Dressing() {
 
   useEffect(() => { loadWardrobe(); }, []);
 
+  // Options de longueur selon la sous-catégorie / catégorie sélectionnée
+  const getLengthOptions = (cat: string, sub: string): string[] | null => {
+    if (cat === 'Hauts') {
+      if (sub === 'Tops & T-shirts' || sub === 'Chemises & Blouses') return ['Crop', 'Court', 'Standard'];
+      return null;
+    }
+    if (cat === 'Robes') return ['Court', 'Standard', 'Midi', 'Maxi'];
+    if (cat === 'Manteaux') {
+      if (sub === 'Vestes') return ['Court', 'Standard', 'Midi'];
+      if (sub === 'Manteaux') return ['Court', 'Midi', 'Maxi'];
+      return null;
+    }
+    if (cat === 'Bas') {
+      if (sub === 'Jeans' || sub === 'Pantalons' || sub === 'Leggings & Joggings') return ['Court', 'Standard', 'Maxi'];
+      if (sub === 'Jupes') return ['Court', 'Standard', 'Midi', 'Maxi'];
+      if (sub === 'Shorts') return ['Court'];
+      return null;
+    }
+    return null;
+  };
+  const lengthOptions = getLengthOptions(category, subcategory);
+  const lengthDisabled = category === 'Bas' && subcategory === 'Shorts';
+
+  // Réinitialiser length quand la sous-catégorie change
+  useEffect(() => {
+    if (lengthDisabled) {
+      setLength('Court');
+      return;
+    }
+    if (!lengthOptions) {
+      if (length) setLength('');
+      return;
+    }
+    if (length && !lengthOptions.includes(length)) setLength('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category, subcategory]);
+
   // Quand l'IA renvoie une image détourée valide, on l'utilise comme aperçu
   useEffect(() => {
     if (cleanImage && cleanImage.startsWith('data:image')) {
