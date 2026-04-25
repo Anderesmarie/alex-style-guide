@@ -405,6 +405,7 @@ export default function Dressing() {
       brand: brand || selectedItem.brand,
       price: price ? Number(price) : selectedItem.price,
       imageBase64: displayImage ?? selectedItem.imageBase64,
+      pattern: pattern || selectedItem.pattern || 'uni',
     };
     await updateClothing(updated);
     await loadWardrobe();
