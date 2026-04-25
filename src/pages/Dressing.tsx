@@ -175,7 +175,11 @@ export default function Dressing() {
         if (result.category) setCategory(result.category);
         if (result.subcategory) setSubcategory(result.subcategory);
         if (result.type) setType(result.type);
-        if (result.color) setColor(result.color);
+        if (result.color) {
+          // L'IA renvoie une couleur unique : on la place comme première sélection (max 3)
+          const aiColors = String(result.color).split(',').map(s => s.trim()).filter(Boolean).slice(0, 3);
+          if (aiColors.length) setColors(aiColors);
+        }
         if (result.season?.length) setSeason(result.season);
         if (result.style?.length) setStyle(result.style);
         if (result.occasion?.length) setOccasion(result.occasion);
