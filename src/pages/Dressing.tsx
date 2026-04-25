@@ -482,6 +482,7 @@ export default function Dressing() {
       .filter(v => v && COLOR_PALETTE.some(c => c.value === v))
       .slice(0, 3);
     setColors(parsed);
+    setPattern(item.pattern && PATTERN_PALETTE.some(p => p.value === item.pattern) ? item.pattern : 'uni');
     setSeason([...item.season]);
     setStyle([...item.style]);
     setOccasion([...item.occasion]);
