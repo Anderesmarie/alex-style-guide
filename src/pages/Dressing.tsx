@@ -1003,8 +1003,64 @@ export default function Dressing() {
           </div>
         </div>
 
+        <hr className="border-t border-gray-200" />
+
         <div>
-          <label className="block text-sm font-medium mb-3">Saison</label>
+          <label className="block text-sm font-medium mb-3">Longueur</label>
+          <div className="flex flex-wrap gap-2">
+            {['Crop', 'Court', 'Standard', 'Midi', 'Maxi'].map(l => {
+              const selected = length === l;
+              return (
+                <button
+                  key={l}
+                  type="button"
+                  onClick={() => setLength(selected ? '' : l)}
+                  aria-pressed={selected}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: 20,
+                    fontSize: 13,
+                    backgroundColor: selected ? '#FDF5F0' : 'transparent',
+                    border: selected ? '2px solid #C9956C' : '0.5px solid #CCCCCC',
+                    color: selected ? '#C9956C' : '#444',
+                  }}
+                >
+                  {l}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <hr className="border-t border-gray-200" />
+
+        <div>
+          <label className="block text-sm font-medium mb-3">Coupe</label>
+          <div className="flex flex-wrap gap-2">
+            {['Ajusté', 'Standard', 'Oversize'].map(f => {
+              const selected = fit === f;
+              return (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => setFit(selected ? '' : f)}
+                  aria-pressed={selected}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: 20,
+                    fontSize: 13,
+                    backgroundColor: selected ? '#FDF5F0' : 'transparent',
+                    border: selected ? '2px solid #C9956C' : '0.5px solid #CCCCCC',
+                    color: selected ? '#C9956C' : '#444',
+                  }}
+                >
+                  {f}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
           <div className="flex flex-wrap gap-2">
             {SEASONS.map(s => (
               <button key={s} type="button" onClick={() => toggle(season, s, setSeason)}
