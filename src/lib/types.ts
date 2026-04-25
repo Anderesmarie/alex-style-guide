@@ -12,6 +12,7 @@ export interface ClothingItem {
   brand?: string;
   price?: number;
   matiere?: string;
+  pattern?: string;
 }
 
 export interface Outfit {
