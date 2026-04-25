@@ -435,24 +435,22 @@ export default function Outfits() {
       <div className="flex gap-2 mb-5">
         <button
           onClick={() => setTab('outfits')}
-          className={`flex-1 py-2.5 rounded-lg text-sm font-medium font-sans transition-colors ${
-            tab === 'outfits' ? 'text-white' : 'bg-transparent border border-border'
-          }`}
+          className="flex-1 py-2.5 rounded-lg text-sm font-medium font-sans transition-colors"
           style={{
-            backgroundColor: tab === 'outfits' ? '#C9956C' : undefined,
-            color: tab === 'outfits' ? '#FFFFFF' : '#9CA3AF',
+            backgroundColor: tab === 'outfits' ? '#C9956C' : 'transparent',
+            color: tab === 'outfits' ? '#FFFFFF' : '#C9956C',
+            border: '1px solid #C9956C',
           }}
         >
           Mes tenues
         </button>
         <button
           onClick={() => setTab('calendar')}
-          className={`flex-1 py-2.5 rounded-lg text-sm font-medium font-sans transition-colors ${
-            tab === 'calendar' ? 'text-white' : 'bg-transparent border border-border'
-          }`}
+          className="flex-1 py-2.5 rounded-lg text-sm font-medium font-sans transition-colors"
           style={{
-            backgroundColor: tab === 'calendar' ? '#C9956C' : undefined,
-            color: tab === 'calendar' ? '#FFFFFF' : '#9CA3AF',
+            backgroundColor: tab === 'calendar' ? '#C9956C' : 'transparent',
+            color: tab === 'calendar' ? '#FFFFFF' : '#C9956C',
+            border: '1px solid #C9956C',
           }}
         >
           Calendrier
