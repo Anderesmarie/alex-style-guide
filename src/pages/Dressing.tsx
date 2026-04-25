@@ -611,7 +611,7 @@ export default function Dressing() {
           <div className="flex flex-wrap gap-2.5">
             {COLOR_PALETTE.map(c => {
               const selected = colors.includes(c.value);
-              const isWhite = c.value === 'blanc';
+              const isLight = ['blanc', 'creme', 'nude', 'beige'].includes(c.value);
               const toggleColor = () => {
                 if (selected) {
                   setColors(colors.filter(v => v !== c.value));
@@ -622,26 +622,34 @@ export default function Dressing() {
                 }
               };
               return (
-                <button
+                <div
                   key={c.value}
-                  type="button"
-                  onClick={toggleColor}
-                  title={c.label}
-                  aria-label={c.label}
-                  aria-pressed={selected}
-                  className="rounded-full transition-all"
-                  style={{
-                    width: 28,
-                    height: 28,
-                    backgroundColor: c.hex,
-                    border: selected
-                      ? '2px solid #C9956C'
-                      : isWhite
-                        ? '1px solid #D1D5DB'
-                        : '1px solid transparent',
-                    boxShadow: selected ? '0 0 0 2px #FFFFFF inset' : 'none',
-                  }}
-                />
+                  className="flex flex-col items-center"
+                  style={{ gap: 4 }}
+                >
+                  <button
+                    type="button"
+                    onClick={toggleColor}
+                    title={c.label}
+                    aria-label={c.label}
+                    aria-pressed={selected}
+                    className="rounded-full transition-all"
+                    style={{
+                      width: 28,
+                      height: 28,
+                      backgroundColor: c.hex,
+                      border: selected
+                        ? '2px solid #C9956C'
+                        : isLight
+                          ? '1px solid #CCCCCC'
+                          : '1px solid transparent',
+                      boxShadow: selected ? '0 0 0 2px #FFFFFF inset' : 'none',
+                    }}
+                  />
+                  <span style={{ fontSize: 10, color: '#999', textAlign: 'center' }}>
+                    {c.label}
+                  </span>
+                </div>
               );
             })}
           </div>
