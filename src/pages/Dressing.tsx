@@ -664,24 +664,28 @@ export default function Dressing() {
   );
 
   const renderTabs = () => (
-    <div className="flex gap-6 border-b border-border mb-5">
+    <div className="flex gap-2 mb-5">
       <button
         onClick={() => setTab('dressing')}
-        className={`pb-2 text-sm font-medium transition-colors relative ${
-          tab === 'dressing' ? 'text-[#C9956C]' : 'text-muted-foreground'
-        }`}
+        className="flex-1 py-2.5 rounded-lg text-sm font-medium font-sans transition-colors"
+        style={{
+          backgroundColor: tab === 'dressing' ? '#C9956C' : 'transparent',
+          color: tab === 'dressing' ? '#FFFFFF' : '#C9956C',
+          border: tab === 'dressing' ? '1px solid #C9956C' : '1px solid #C9956C',
+        }}
       >
         Mon Dressing
-        {tab === 'dressing' && <span className="absolute -bottom-px left-0 right-0 h-0.5 bg-[#C9956C] rounded-full" />}
       </button>
       <button
         onClick={() => setTab('wishlist')}
-        className={`pb-2 text-sm font-medium transition-colors relative ${
-          tab === 'wishlist' ? 'text-[#C9956C]' : 'text-muted-foreground'
-        }`}
+        className="flex-1 py-2.5 rounded-lg text-sm font-medium font-sans transition-colors"
+        style={{
+          backgroundColor: tab === 'wishlist' ? '#C9956C' : 'transparent',
+          color: tab === 'wishlist' ? '#FFFFFF' : '#C9956C',
+          border: tab === 'wishlist' ? '1px solid #C9956C' : '1px solid #C9956C',
+        }}
       >
         Wishlist 🛍️
-        {tab === 'wishlist' && <span className="absolute -bottom-px left-0 right-0 h-0.5 bg-[#C9956C] rounded-full" />}
       </button>
     </div>
   );
