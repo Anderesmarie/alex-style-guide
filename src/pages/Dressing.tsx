@@ -1020,9 +1020,9 @@ export default function Dressing() {
                     padding: '6px 14px',
                     borderRadius: 20,
                     fontSize: 13,
-                    backgroundColor: selected ? '#FDF5F0' : 'transparent',
-                    border: selected ? '2px solid #C9956C' : '0.5px solid #CCCCCC',
-                    color: selected ? '#C9956C' : '#444',
+                    backgroundColor: selected ? '#FDF5F0' : '#FFFFFF',
+                    border: selected ? '2px solid #C9956C' : '0.5px solid #DDDDDD',
+                    color: selected ? '#C9956C' : '#2C2C2C',
                   }}
                 >
                   {l}
@@ -1049,9 +1049,9 @@ export default function Dressing() {
                     padding: '6px 14px',
                     borderRadius: 20,
                     fontSize: 13,
-                    backgroundColor: selected ? '#FDF5F0' : 'transparent',
-                    border: selected ? '2px solid #C9956C' : '0.5px solid #CCCCCC',
-                    color: selected ? '#C9956C' : '#444',
+                    backgroundColor: selected ? '#FDF5F0' : '#FFFFFF',
+                    border: selected ? '2px solid #C9956C' : '0.5px solid #DDDDDD',
+                    color: selected ? '#C9956C' : '#2C2C2C',
                   }}
                 >
                   {f}
