@@ -604,15 +604,46 @@ export default function Dressing() {
         })()}
 
         <div>
-          <label className="block text-sm font-medium mb-3">Couleur</label>
-          <div className="flex flex-wrap gap-2">
-            {COLOR_PALETTE.map(c => (
-              <button key={c.value} type="button" onClick={() => setColor(c.value)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs transition-all ${color === c.value ? 'border-[#C9956C] bg-[#C9956C]/10 text-[#C9956C]' : 'border-gray-200 bg-white text-gray-600'}`}>
-                <span className="w-3 h-3 rounded-full border border-gray-200 flex-shrink-0" style={{ backgroundColor: c.bg }} />
-                {c.label}
-              </button>
-            ))}
+          <div className="flex items-baseline justify-between mb-3">
+            <label className="block text-sm font-medium">Couleur</label>
+            <span className="text-xs text-gray-400">{colors.length}/3</span>
+          </div>
+          <div className="flex flex-wrap gap-2.5">
+            {COLOR_PALETTE.map(c => {
+              const selected = colors.includes(c.value);
+              const isWhite = c.value === 'blanc';
+              const toggleColor = () => {
+                if (selected) {
+                  setColors(colors.filter(v => v !== c.value));
+                } else if (colors.length < 3) {
+                  setColors([...colors, c.value]);
+                } else {
+                  toast.info('Tu peux sélectionner 3 couleurs maximum');
+                }
+              };
+              return (
+                <button
+                  key={c.value}
+                  type="button"
+                  onClick={toggleColor}
+                  title={c.label}
+                  aria-label={c.label}
+                  aria-pressed={selected}
+                  className="rounded-full transition-all"
+                  style={{
+                    width: 28,
+                    height: 28,
+                    backgroundColor: c.hex,
+                    border: selected
+                      ? '2px solid #C9956C'
+                      : isWhite
+                        ? '1px solid #D1D5DB'
+                        : '1px solid transparent',
+                    boxShadow: selected ? '0 0 0 2px #FFFFFF inset' : 'none',
+                  }}
+                />
+              );
+            })}
           </div>
         </div>
 
