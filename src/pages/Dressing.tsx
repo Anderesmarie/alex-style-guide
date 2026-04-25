@@ -626,6 +626,8 @@ export default function Dressing() {
     setColors(parsed);
     setPattern(item.pattern && PATTERN_PALETTE.some(p => p.value === item.pattern) ? item.pattern : 'uni');
     setTexture(item.texture && TEXTURE_PALETTE.some(t => t.value === item.texture) ? item.texture : '');
+    setLength(item.length || '');
+    setFit(item.fit || '');
     setSeason([...item.season]);
     setStyle([...item.style]);
     setOccasion([...item.occasion]);
