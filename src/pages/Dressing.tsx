@@ -307,6 +307,7 @@ function TextureSwatch({ value }: { value: string }) {
   );
 }
 
+const DELETE_REASONS = [
   { emoji: '📏', label: 'Trop petit / trop grand' },
   { emoji: '💔', label: 'Je ne l\'aime plus' },
   { emoji: '🎁', label: 'Donné' },
