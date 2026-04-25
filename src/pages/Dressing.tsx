@@ -16,28 +16,32 @@ type View = 'grid' | 'add' | 'detail' | 'edit';
 type Tab = 'dressing' | 'wishlist';
 
 const COLOR_PALETTE = [
-  { label: 'Blanc', value: 'blanc', bg: '#FFFFFF' },
-  { label: 'Noir', value: 'noir', bg: '#2C2C2C' },
-  { label: 'Gris', value: 'gris', bg: '#9B9B9B' },
-  { label: 'Beige', value: 'beige', bg: '#F5F0EB' },
-  { label: 'Camel', value: 'camel', bg: '#C8A882' },
-  { label: 'Bleu', value: 'bleu', bg: '#3B6BA5' },
-  { label: 'Marine', value: 'marine', bg: '#1B2A4A' },
-  { label: 'Rouge', value: 'rouge', bg: '#C0392B' },
-  { label: 'Bordeaux', value: 'bordeaux', bg: '#722F37' },
-  { label: 'Rose', value: 'rose', bg: '#E8A0B4' },
-  { label: 'Vert', value: 'vert', bg: '#2E7D32' },
-  { label: 'Kaki', value: 'kaki', bg: '#6B7C3A' },
-  { label: 'Jaune', value: 'jaune', bg: '#F4C430' },
-  { label: 'Marron', value: 'marron', bg: '#6B3F2A' },
-  { label: 'Violet', value: 'violet', bg: '#6B3FA0' },
-  { label: 'Corail', value: 'corail', bg: '#E8734A' },
-  { label: 'Terracotta', value: 'terracotta', bg: '#C1440E' },
-  { label: 'Lavande', value: 'lavande', bg: '#B8A0CC' },
-  { label: 'Turquoise', value: 'turquoise', bg: '#00CED1' },
-  { label: 'Rose gold', value: 'rose_gold', bg: '#C9956C' },
-  { label: 'Crème', value: 'creme', bg: '#F5F5DC' },
-  { label: 'Fuchsia', value: 'fuchsia', bg: '#FF69B4' },
+  { label: 'Blanc', value: 'blanc', hex: '#FFFFFF' },
+  { label: 'Noir', value: 'noir', hex: '#2C2C2C' },
+  { label: 'Gris', value: 'gris', hex: '#9B9B9B' },
+  { label: 'Beige', value: 'beige', hex: '#F5F0EB' },
+  { label: 'Crème', value: 'creme', hex: '#FFFDD0' },
+  { label: 'Nude', value: 'nude', hex: '#E8C9A0' },
+  { label: 'Camel', value: 'camel', hex: '#C8A882' },
+  { label: 'Corail', value: 'corail', hex: '#FF6B6B' },
+  { label: 'Terracotta', value: 'terracotta', hex: '#C8603A' },
+  { label: 'Rouge', value: 'rouge', hex: '#D32F2F' },
+  { label: 'Bordeaux', value: 'bordeaux', hex: '#7B1734' },
+  { label: 'Jaune', value: 'jaune', hex: '#F9D71C' },
+  { label: 'Rose', value: 'rose', hex: '#F48FB1' },
+  { label: 'Fuchsia', value: 'fuchsia', hex: '#E91E8C' },
+  { label: 'Rose gold', value: 'rose-gold', hex: '#C9956C' },
+  { label: 'Marron', value: 'marron', hex: '#795548' },
+  { label: 'Bleu ciel', value: 'bleu-ciel', hex: '#87CEEB' },
+  { label: 'Bleu', value: 'bleu', hex: '#3B6BA5' },
+  { label: 'Marine', value: 'marine', hex: '#1B2A4A' },
+  { label: 'Turquoise', value: 'turquoise', hex: '#00BCD4' },
+  { label: 'Vert', value: 'vert', hex: '#4CAF50' },
+  { label: 'Kaki', value: 'kaki', hex: '#8D9440' },
+  { label: 'Violet', value: 'violet', hex: '#9C27B0' },
+  { label: 'Lavande', value: 'lavande', hex: '#B39DDB' },
+  { label: 'Argenté', value: 'argente', hex: '#C0C0C0' },
+  { label: 'Doré', value: 'dore', hex: '#FFD700' },
 ];
 
 const PATTERN_PALETTE = [
@@ -85,7 +89,7 @@ export default function Dressing() {
   const [category, setCategory] = useState('');
   const [subcategory, setSubcategory] = useState('');
   const [type, setType] = useState('');
-  const [color, setColor] = useState('');
+  const [colors, setColors] = useState<string[]>([]);
   const [customColor, setCustomColor] = useState('');
   const [season, setSeason] = useState<string[]>([]);
   const [style, setStyle] = useState<string[]>([]);
@@ -115,7 +119,7 @@ export default function Dressing() {
 
   const resetForm = () => {
     setDisplayImage(null); setImageBase64(''); setBgRemoved(false);
-    setCategory(''); setSubcategory(''); setType(''); setColor(''); setCustomColor('');
+    setCategory(''); setSubcategory(''); setType(''); setColors([]); setCustomColor('');
     setSeason([]); setStyle([]); setOccasion([]); setBrand(''); setPrice('');
     setPreviewBase64(''); setPreviewFile(null); setPreviewOrigSrc(''); setManualRotation(0);
     setLayer(1);
@@ -171,7 +175,11 @@ export default function Dressing() {
         if (result.category) setCategory(result.category);
         if (result.subcategory) setSubcategory(result.subcategory);
         if (result.type) setType(result.type);
-        if (result.color) setColor(result.color);
+        if (result.color) {
+          // L'IA renvoie une couleur unique : on la place comme première sélection (max 3)
+          const aiColors = String(result.color).split(',').map(s => s.trim()).filter(Boolean).slice(0, 3);
+          if (aiColors.length) setColors(aiColors);
+        }
         if (result.season?.length) setSeason(result.season);
         if (result.style?.length) setStyle(result.style);
         if (result.occasion?.length) setOccasion(result.occasion);
@@ -237,7 +245,7 @@ export default function Dressing() {
       setFormError('Choisis une catégorie');
       return;
     }
-    const finalColor = color || customColor || 'Autre';
+    const finalColor = colors.length ? colors.join(', ') : (customColor || 'Autre');
     const item: ClothingItem = {
       id: genId(), imageBase64: finalImage, category, subcategory, layer, type: type || category, color: finalColor,
       season: season.length ? season : ['Toutes saisons'],
@@ -263,7 +271,7 @@ export default function Dressing() {
 
   const handleUpdate = async () => {
     if (!selectedItem) return;
-    const finalColor = color || customColor || selectedItem.color;
+    const finalColor = colors.length ? colors.join(', ') : (customColor || selectedItem.color);
     const updated: ClothingItem = {
       ...selectedItem, category: category || selectedItem.category,
       subcategory: subcategory || selectedItem.subcategory,
@@ -343,7 +351,13 @@ export default function Dressing() {
     setCategory(item.category || '');
     setSubcategory(item.subcategory || '');
     setType(item.type);
-    setColor(item.color);
+    // Reconstruit la sélection multiple depuis le champ stocké (joint par virgule)
+    const parsed = (item.color || '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(v => v && COLOR_PALETTE.some(c => c.value === v))
+      .slice(0, 3);
+    setColors(parsed);
     setSeason([...item.season]);
     setStyle([...item.style]);
     setOccasion([...item.occasion]);
@@ -590,15 +604,46 @@ export default function Dressing() {
         })()}
 
         <div>
-          <label className="block text-sm font-medium mb-3">Couleur</label>
-          <div className="flex flex-wrap gap-2">
-            {COLOR_PALETTE.map(c => (
-              <button key={c.value} type="button" onClick={() => setColor(c.value)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs transition-all ${color === c.value ? 'border-[#C9956C] bg-[#C9956C]/10 text-[#C9956C]' : 'border-gray-200 bg-white text-gray-600'}`}>
-                <span className="w-3 h-3 rounded-full border border-gray-200 flex-shrink-0" style={{ backgroundColor: c.bg }} />
-                {c.label}
-              </button>
-            ))}
+          <div className="flex items-baseline justify-between mb-3">
+            <label className="block text-sm font-medium">Couleur</label>
+            <span className="text-xs text-gray-400">{colors.length}/3</span>
+          </div>
+          <div className="flex flex-wrap gap-2.5">
+            {COLOR_PALETTE.map(c => {
+              const selected = colors.includes(c.value);
+              const isWhite = c.value === 'blanc';
+              const toggleColor = () => {
+                if (selected) {
+                  setColors(colors.filter(v => v !== c.value));
+                } else if (colors.length < 3) {
+                  setColors([...colors, c.value]);
+                } else {
+                  toast.info('Tu peux sélectionner 3 couleurs maximum');
+                }
+              };
+              return (
+                <button
+                  key={c.value}
+                  type="button"
+                  onClick={toggleColor}
+                  title={c.label}
+                  aria-label={c.label}
+                  aria-pressed={selected}
+                  className="rounded-full transition-all"
+                  style={{
+                    width: 28,
+                    height: 28,
+                    backgroundColor: c.hex,
+                    border: selected
+                      ? '2px solid #C9956C'
+                      : isWhite
+                        ? '1px solid #D1D5DB'
+                        : '1px solid transparent',
+                    boxShadow: selected ? '0 0 0 2px #FFFFFF inset' : 'none',
+                  }}
+                />
+              );
+            })}
           </div>
         </div>
 
