@@ -174,7 +174,139 @@ function PatternSwatch({ value }: { value: string }) {
   );
 }
 
-const DELETE_REASONS = [
+const TEXTURE_PALETTE: { label: string; value: string }[] = [
+  { label: 'Coton', value: 'coton' },
+  { label: 'Denim', value: 'denim' },
+  { label: 'Maille', value: 'maille' },
+  { label: 'Satin', value: 'satin' },
+  { label: 'Velours', value: 'velours' },
+  { label: 'Cuir', value: 'cuir' },
+  { label: 'Lin', value: 'lin' },
+  { label: 'Synthétique', value: 'synthetique' },
+];
+
+// Rend l'aperçu d'une texture dans un cercle SVG 28x28 (clip circulaire)
+function TextureSwatch({ value }: { value: string }) {
+  const size = 28;
+  const r = size / 2;
+  const clipId = `clip-tex-${value}`;
+  const renderInner = () => {
+    switch (value) {
+      case 'coton': {
+        const lines: JSX.Element[] = [];
+        for (let i = 4; i < size; i += 4) {
+          lines.push(<line key={`h${i}`} x1={0} y1={i} x2={size} y2={i} stroke="#D9D9D9" strokeWidth={0.5} />);
+          lines.push(<line key={`v${i}`} x1={i} y1={0} x2={i} y2={size} stroke="#D9D9D9" strokeWidth={0.5} />);
+        }
+        return (
+          <>
+            <rect width={size} height={size} fill="#F5F5F5" />
+            {lines}
+          </>
+        );
+      }
+      case 'denim': {
+        const lines: JSX.Element[] = [];
+        for (let i = -size; i < size * 2; i += 3) {
+          lines.push(
+            <line key={i} x1={i} y1={0} x2={i + size} y2={size} stroke="#FFFFFF" strokeWidth={0.5} opacity={0.6} />
+          );
+        }
+        return (
+          <>
+            <rect width={size} height={size} fill="#3B6BA5" />
+            {lines}
+          </>
+        );
+      }
+      case 'maille': {
+        const waves: JSX.Element[] = [];
+        for (let y = 4; y < size; y += 5) {
+          waves.push(
+            <path
+              key={y}
+              d={`M0 ${y} Q ${size / 4} ${y - 2}, ${size / 2} ${y} T ${size} ${y}`}
+              stroke="#C8A882"
+              strokeWidth={1}
+              fill="none"
+            />
+          );
+        }
+        return (
+          <>
+            <rect width={size} height={size} fill="#F5E6D3" />
+            {waves}
+          </>
+        );
+      }
+      case 'satin':
+        return (
+          <>
+            <rect width={size} height={size} fill="#F8E8F0" />
+            <polygon points={`0,${size} ${size * 0.4},${size} ${size},${size * 0.4} ${size},0 ${size * 0.6},0 0,${size * 0.6}`} fill="#FFFFFF" opacity={0.7} />
+          </>
+        );
+      case 'velours': {
+        const stries: JSX.Element[] = [];
+        for (let x = 2; x < size; x += 3) {
+          stries.push(<line key={x} x1={x} y1={0} x2={x} y2={size} stroke="#FFFFFF" strokeWidth={0.4} opacity={0.4} />);
+        }
+        return (
+          <>
+            <rect width={size} height={size} fill="#7B1734" />
+            {stries}
+          </>
+        );
+      }
+      case 'cuir':
+        return (
+          <>
+            <rect width={size} height={size} fill="#3C2000" />
+            <line x1={0} y1={r} x2={size} y2={r} stroke="#FFFFFF" strokeWidth={0.4} opacity={0.25} />
+          </>
+        );
+      case 'lin': {
+        const threads: JSX.Element[] = [];
+        for (let i = 0; i < size; i += 4) {
+          threads.push(<line key={`h${i}`} x1={0} y1={i} x2={size} y2={i} stroke="#C8A882" strokeWidth={0.6} />);
+          threads.push(<line key={`v${i}`} x1={i} y1={0} x2={i} y2={size} stroke="#C8A882" strokeWidth={0.6} />);
+        }
+        return (
+          <>
+            <rect width={size} height={size} fill="#F5F0EB" />
+            {threads}
+          </>
+        );
+      }
+      case 'synthetique': {
+        const grid: JSX.Element[] = [];
+        for (let i = 2; i < size; i += 3) {
+          grid.push(<line key={`h${i}`} x1={0} y1={i} x2={size} y2={i} stroke="#3B6BA5" strokeWidth={0.3} opacity={0.6} />);
+          grid.push(<line key={`v${i}`} x1={i} y1={0} x2={i} y2={size} stroke="#3B6BA5" strokeWidth={0.3} opacity={0.6} />);
+        }
+        return (
+          <>
+            <rect width={size} height={size} fill="#E8F0FE" />
+            {grid}
+          </>
+        );
+      }
+      default:
+        return <rect width={size} height={size} fill="#F5F5F5" />;
+    }
+  };
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <defs>
+        <clipPath id={clipId}>
+          <circle cx={r} cy={r} r={r} />
+        </clipPath>
+      </defs>
+      <g clipPath={`url(#${clipId})`}>{renderInner()}</g>
+    </svg>
+  );
+}
+
   { emoji: '📏', label: 'Trop petit / trop grand' },
   { emoji: '💔', label: 'Je ne l\'aime plus' },
   { emoji: '🎁', label: 'Donné' },
