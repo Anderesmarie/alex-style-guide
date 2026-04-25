@@ -510,6 +510,7 @@ export default function Dressing() {
       brand: brand || undefined,
       price: price ? Number(price) : undefined,
       pattern: pattern || 'uni',
+      texture: texture || undefined,
     };
     setSaving(true);
     try {
