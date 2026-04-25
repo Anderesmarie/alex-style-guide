@@ -780,6 +780,45 @@ export default function Dressing() {
           </div>
         </div>
 
+        <hr className="border-t border-gray-200" />
+
+        <div>
+          <label className="block text-sm font-medium mb-3">Motif</label>
+          <div className="flex flex-wrap gap-2.5">
+            {PATTERN_PALETTE.map(p => {
+              const selected = pattern === p.value;
+              return (
+                <div
+                  key={p.value}
+                  className="flex flex-col items-center"
+                  style={{ gap: 4 }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setPattern(p.value)}
+                    title={p.label}
+                    aria-label={p.label}
+                    aria-pressed={selected}
+                    className="rounded-full transition-all flex items-center justify-center overflow-hidden"
+                    style={{
+                      width: 28,
+                      height: 28,
+                      backgroundColor: selected ? '#FDF5F0' : 'transparent',
+                      border: selected ? '2px solid #C9956C' : '1px solid transparent',
+                      padding: 0,
+                    }}
+                  >
+                    <PatternSwatch value={p.value} />
+                  </button>
+                  <span style={{ fontSize: 10, color: '#999', textAlign: 'center' }}>
+                    {p.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         <div>
           <label className="block text-sm font-medium mb-3">Saison</label>
           <div className="flex flex-wrap gap-2">
