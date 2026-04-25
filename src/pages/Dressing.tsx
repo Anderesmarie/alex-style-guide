@@ -174,6 +174,139 @@ function PatternSwatch({ value }: { value: string }) {
   );
 }
 
+const TEXTURE_PALETTE: { label: string; value: string }[] = [
+  { label: 'Coton', value: 'coton' },
+  { label: 'Denim', value: 'denim' },
+  { label: 'Maille', value: 'maille' },
+  { label: 'Satin', value: 'satin' },
+  { label: 'Velours', value: 'velours' },
+  { label: 'Cuir', value: 'cuir' },
+  { label: 'Lin', value: 'lin' },
+  { label: 'Synthétique', value: 'synthetique' },
+];
+
+// Rend l'aperçu d'une texture dans un cercle SVG 28x28 (clip circulaire)
+function TextureSwatch({ value }: { value: string }) {
+  const size = 28;
+  const r = size / 2;
+  const clipId = `clip-tex-${value}`;
+  const renderInner = () => {
+    switch (value) {
+      case 'coton': {
+        const lines: JSX.Element[] = [];
+        for (let i = 4; i < size; i += 4) {
+          lines.push(<line key={`h${i}`} x1={0} y1={i} x2={size} y2={i} stroke="#D9D9D9" strokeWidth={0.5} />);
+          lines.push(<line key={`v${i}`} x1={i} y1={0} x2={i} y2={size} stroke="#D9D9D9" strokeWidth={0.5} />);
+        }
+        return (
+          <>
+            <rect width={size} height={size} fill="#F5F5F5" />
+            {lines}
+          </>
+        );
+      }
+      case 'denim': {
+        const lines: JSX.Element[] = [];
+        for (let i = -size; i < size * 2; i += 3) {
+          lines.push(
+            <line key={i} x1={i} y1={0} x2={i + size} y2={size} stroke="#FFFFFF" strokeWidth={0.5} opacity={0.6} />
+          );
+        }
+        return (
+          <>
+            <rect width={size} height={size} fill="#3B6BA5" />
+            {lines}
+          </>
+        );
+      }
+      case 'maille': {
+        const waves: JSX.Element[] = [];
+        for (let y = 4; y < size; y += 5) {
+          waves.push(
+            <path
+              key={y}
+              d={`M0 ${y} Q ${size / 4} ${y - 2}, ${size / 2} ${y} T ${size} ${y}`}
+              stroke="#C8A882"
+              strokeWidth={1}
+              fill="none"
+            />
+          );
+        }
+        return (
+          <>
+            <rect width={size} height={size} fill="#F5E6D3" />
+            {waves}
+          </>
+        );
+      }
+      case 'satin':
+        return (
+          <>
+            <rect width={size} height={size} fill="#F8E8F0" />
+            <polygon points={`0,${size} ${size * 0.4},${size} ${size},${size * 0.4} ${size},0 ${size * 0.6},0 0,${size * 0.6}`} fill="#FFFFFF" opacity={0.7} />
+          </>
+        );
+      case 'velours': {
+        const stries: JSX.Element[] = [];
+        for (let x = 2; x < size; x += 3) {
+          stries.push(<line key={x} x1={x} y1={0} x2={x} y2={size} stroke="#FFFFFF" strokeWidth={0.4} opacity={0.4} />);
+        }
+        return (
+          <>
+            <rect width={size} height={size} fill="#7B1734" />
+            {stries}
+          </>
+        );
+      }
+      case 'cuir':
+        return (
+          <>
+            <rect width={size} height={size} fill="#3C2000" />
+            <line x1={0} y1={r} x2={size} y2={r} stroke="#FFFFFF" strokeWidth={0.4} opacity={0.25} />
+          </>
+        );
+      case 'lin': {
+        const threads: JSX.Element[] = [];
+        for (let i = 0; i < size; i += 4) {
+          threads.push(<line key={`h${i}`} x1={0} y1={i} x2={size} y2={i} stroke="#C8A882" strokeWidth={0.6} />);
+          threads.push(<line key={`v${i}`} x1={i} y1={0} x2={i} y2={size} stroke="#C8A882" strokeWidth={0.6} />);
+        }
+        return (
+          <>
+            <rect width={size} height={size} fill="#F5F0EB" />
+            {threads}
+          </>
+        );
+      }
+      case 'synthetique': {
+        const grid: JSX.Element[] = [];
+        for (let i = 2; i < size; i += 3) {
+          grid.push(<line key={`h${i}`} x1={0} y1={i} x2={size} y2={i} stroke="#3B6BA5" strokeWidth={0.3} opacity={0.6} />);
+          grid.push(<line key={`v${i}`} x1={i} y1={0} x2={i} y2={size} stroke="#3B6BA5" strokeWidth={0.3} opacity={0.6} />);
+        }
+        return (
+          <>
+            <rect width={size} height={size} fill="#E8F0FE" />
+            {grid}
+          </>
+        );
+      }
+      default:
+        return <rect width={size} height={size} fill="#F5F5F5" />;
+    }
+  };
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <defs>
+        <clipPath id={clipId}>
+          <circle cx={r} cy={r} r={r} />
+        </clipPath>
+      </defs>
+      <g clipPath={`url(#${clipId})`}>{renderInner()}</g>
+    </svg>
+  );
+}
+
 const DELETE_REASONS = [
   { emoji: '📏', label: 'Trop petit / trop grand' },
   { emoji: '💔', label: 'Je ne l\'aime plus' },
@@ -212,6 +345,7 @@ export default function Dressing() {
   const [type, setType] = useState('');
   const [colors, setColors] = useState<string[]>([]);
   const [pattern, setPattern] = useState<string>('uni');
+  const [texture, setTexture] = useState<string>('');
   const [customColor, setCustomColor] = useState('');
   const [season, setSeason] = useState<string[]>([]);
   const [style, setStyle] = useState<string[]>([]);
@@ -241,7 +375,7 @@ export default function Dressing() {
 
   const resetForm = () => {
     setDisplayImage(null); setImageBase64(''); setBgRemoved(false);
-    setCategory(''); setSubcategory(''); setType(''); setColors([]); setPattern('uni'); setCustomColor('');
+    setCategory(''); setSubcategory(''); setType(''); setColors([]); setPattern('uni'); setTexture(''); setCustomColor('');
     setSeason([]); setStyle([]); setOccasion([]); setBrand(''); setPrice('');
     setPreviewBase64(''); setPreviewFile(null); setPreviewOrigSrc(''); setManualRotation(0);
     setLayer(1);
@@ -376,6 +510,7 @@ export default function Dressing() {
       brand: brand || undefined,
       price: price ? Number(price) : undefined,
       pattern: pattern || 'uni',
+      texture: texture || undefined,
     };
     setSaving(true);
     try {
@@ -406,6 +541,7 @@ export default function Dressing() {
       price: price ? Number(price) : selectedItem.price,
       imageBase64: displayImage ?? selectedItem.imageBase64,
       pattern: pattern || selectedItem.pattern || 'uni',
+      texture: texture || selectedItem.texture,
     };
     await updateClothing(updated);
     await loadWardrobe();
@@ -483,6 +619,7 @@ export default function Dressing() {
       .slice(0, 3);
     setColors(parsed);
     setPattern(item.pattern && PATTERN_PALETTE.some(p => p.value === item.pattern) ? item.pattern : 'uni');
+    setTexture(item.texture && TEXTURE_PALETTE.some(t => t.value === item.texture) ? item.texture : '');
     setSeason([...item.season]);
     setStyle([...item.style]);
     setOccasion([...item.occasion]);
@@ -812,6 +949,45 @@ export default function Dressing() {
                   </button>
                   <span style={{ fontSize: 10, color: '#999', textAlign: 'center' }}>
                     {p.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <hr className="border-t border-gray-200" />
+
+        <div>
+          <label className="block text-sm font-medium mb-3">Texture</label>
+          <div className="flex flex-wrap gap-2.5">
+            {TEXTURE_PALETTE.map(t => {
+              const selected = texture === t.value;
+              return (
+                <div
+                  key={t.value}
+                  className="flex flex-col items-center"
+                  style={{ gap: 4 }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setTexture(selected ? '' : t.value)}
+                    title={t.label}
+                    aria-label={t.label}
+                    aria-pressed={selected}
+                    className="rounded-full transition-all flex items-center justify-center overflow-hidden"
+                    style={{
+                      width: 28,
+                      height: 28,
+                      backgroundColor: selected ? '#FDF5F0' : 'transparent',
+                      border: selected ? '2px solid #C9956C' : '1px solid transparent',
+                      padding: 0,
+                    }}
+                  >
+                    <TextureSwatch value={t.value} />
+                  </button>
+                  <span style={{ fontSize: 10, color: '#999', textAlign: 'center' }}>
+                    {t.label}
                   </span>
                 </div>
               );

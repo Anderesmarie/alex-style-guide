@@ -13,6 +13,7 @@ export interface ClothingItem {
   price?: number;
   matiere?: string;
   pattern?: string;
+  texture?: string;
 }
 
 export interface Outfit {
