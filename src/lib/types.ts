@@ -14,6 +14,8 @@ export interface ClothingItem {
   matiere?: string;
   pattern?: string;
   texture?: string;
+  length?: string;
+  fit?: string;
 }
 
 export interface Outfit {
