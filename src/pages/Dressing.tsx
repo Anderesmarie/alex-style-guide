@@ -44,14 +44,135 @@ const COLOR_PALETTE = [
   { label: 'Doré', value: 'dore', hex: '#FFD700' },
 ];
 
-const PATTERN_PALETTE = [
-  { label: 'Léopard', value: 'leopard', bg: 'radial-gradient(circle at 30% 40%, #6B3F2A 3px, transparent 3px), radial-gradient(circle at 70% 60%, #6B3F2A 2px, transparent 2px), #C8A882' },
-  { label: 'Fleuri', value: 'fleuri', bg: 'radial-gradient(circle at 25% 30%, #E8A0B4 3px, transparent 3px), radial-gradient(circle at 65% 50%, #E8A0B4 2px, transparent 2px), radial-gradient(circle at 45% 75%, #E8A0B4 3px, transparent 3px), #FFFFFF' },
-  { label: 'Rayé', value: 'raye', bg: 'repeating-linear-gradient(90deg, #2C2C2C 0px, #2C2C2C 3px, #FFFFFF 3px, #FFFFFF 6px)' },
-  { label: 'Carreaux', value: 'carreaux', bg: 'repeating-linear-gradient(0deg, transparent, transparent 8px, #3B6BA555 8px, #3B6BA555 9px), repeating-linear-gradient(90deg, transparent, transparent 8px, #3B6BA555 8px, #3B6BA555 9px), #D6E4F0' },
-  { label: 'Géométrique', value: 'geometrique', bg: 'repeating-linear-gradient(45deg, #C9956C 0px, #C9956C 4px, #F5F0EB 4px, #F5F0EB 8px)' },
-  { label: 'Multicolore', value: 'multicolore', bg: 'linear-gradient(135deg, #C0392B, #F4C430, #2E7D32, #3B6BA5, #6B3FA0)' },
+const PATTERN_PALETTE: { label: string; value: string }[] = [
+  { label: 'Uni', value: 'uni' },
+  { label: 'Rayé', value: 'raye' },
+  { label: 'Carreaux', value: 'carreaux' },
+  { label: 'Fleuri', value: 'fleuri' },
+  { label: 'Léopard', value: 'leopard' },
+  { label: 'Zébré', value: 'zebre' },
+  { label: 'Tie-dye', value: 'tie-dye' },
+  { label: 'Graphique', value: 'graphique' },
+  { label: 'Géométrique', value: 'geometrique' },
+  { label: 'Pied-de-poule', value: 'pied-de-poule' },
 ];
+
+// Rend l'aperçu d'un motif dans un cercle SVG 28x28 (clip circulaire)
+function PatternSwatch({ value }: { value: string }) {
+  const size = 28;
+  const r = size / 2;
+  const clipId = `clip-${value}`;
+  const renderInner = () => {
+    switch (value) {
+      case 'uni':
+        return <rect width={size} height={size} fill="#E8E8E8" />;
+      case 'raye':
+        return (
+          <>
+            <rect width={size} height={size} fill="#FFFFFF" />
+            <rect x={4} y={0} width={4} height={size} fill="#9B9B9B" />
+            <rect x={12} y={0} width={4} height={size} fill="#9B9B9B" />
+            <rect x={20} y={0} width={4} height={size} fill="#9B9B9B" />
+          </>
+        );
+      case 'carreaux': {
+        const cells: JSX.Element[] = [];
+        for (let y = 0; y < size; y += 6) {
+          for (let x = 0; x < size; x += 6) {
+            const isBlue = ((x / 6) + (y / 6)) % 2 === 0;
+            cells.push(
+              <rect key={`${x}-${y}`} x={x} y={y} width={6} height={6} fill={isBlue ? '#3B6BA5' : '#FFFFFF'} />
+            );
+          }
+        }
+        return <>{cells}</>;
+      }
+      case 'fleuri':
+        return (
+          <>
+            <rect width={size} height={size} fill="#FFF0F5" />
+            <circle cx={14} cy={6} r={2.5} fill="#E91E8C" />
+            <circle cx={14} cy={22} r={2.5} fill="#E91E8C" />
+            <circle cx={6} cy={14} r={2.5} fill="#E91E8C" />
+            <circle cx={22} cy={14} r={2.5} fill="#E91E8C" />
+            <circle cx={14} cy={14} r={2} fill="#F9D71C" />
+          </>
+        );
+      case 'leopard':
+        return (
+          <>
+            <rect width={size} height={size} fill="#D4A017" />
+            <ellipse cx={8} cy={8} rx={3} ry={2} fill="#3C2000" />
+            <ellipse cx={20} cy={9} rx={2.5} ry={2} fill="#3C2000" />
+            <ellipse cx={9} cy={20} rx={2.5} ry={2} fill="#3C2000" />
+            <ellipse cx={20} cy={20} rx={3} ry={2} fill="#3C2000" />
+          </>
+        );
+      case 'zebre': {
+        const stripes: JSX.Element[] = [];
+        for (let i = -size; i < size * 2; i += 8) {
+          stripes.push(
+            <rect key={i} x={i} y={-size} width={4} height={size * 3} fill="#000000" transform={`rotate(45 ${size / 2} ${size / 2})`} />
+          );
+        }
+        return (
+          <>
+            <rect width={size} height={size} fill="#FFFFFF" />
+            {stripes}
+          </>
+        );
+      }
+      case 'tie-dye':
+        return (
+          <>
+            <rect width={size} height={size} fill="#FFFFFF" />
+            <circle cx={r} cy={r} r={12} fill="#3B6BA5" />
+            <circle cx={r} cy={r} r={8} fill="#9C27B0" />
+            <circle cx={r} cy={r} r={4} fill="#F48FB1" />
+          </>
+        );
+      case 'graphique':
+        return (
+          <>
+            <rect width={size} height={size} fill="#000000" />
+            <rect x={0} y={9} width={size} height={3} fill="#FFFFFF" />
+            <rect x={0} y={17} width={size} height={3} fill="#FFFFFF" />
+          </>
+        );
+      case 'geometrique':
+        return (
+          <>
+            <rect width={size} height={size} fill="#E8E8E8" />
+            <polygon points={`${r},6 22,22 6,22`} fill="#3B6BA5" />
+          </>
+        );
+      case 'pied-de-poule': {
+        const cells: JSX.Element[] = [];
+        for (let y = 0; y < size; y += 4) {
+          for (let x = 0; x < size; x += 4) {
+            const isBlack = ((x / 4) + (y / 4)) % 2 === 0;
+            cells.push(
+              <rect key={`${x}-${y}`} x={x} y={y} width={4} height={4} fill={isBlack ? '#000000' : '#FFFFFF'} />
+            );
+          }
+        }
+        return <>{cells}</>;
+      }
+      default:
+        return <rect width={size} height={size} fill="#E8E8E8" />;
+    }
+  };
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <defs>
+        <clipPath id={clipId}>
+          <circle cx={r} cy={r} r={r} />
+        </clipPath>
+      </defs>
+      <g clipPath={`url(#${clipId})`}>{renderInner()}</g>
+    </svg>
+  );
+}
 
 const DELETE_REASONS = [
   { emoji: '📏', label: 'Trop petit / trop grand' },
