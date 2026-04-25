@@ -541,6 +541,7 @@ export default function Dressing() {
       price: price ? Number(price) : selectedItem.price,
       imageBase64: displayImage ?? selectedItem.imageBase64,
       pattern: pattern || selectedItem.pattern || 'uni',
+      texture: texture || selectedItem.texture,
     };
     await updateClothing(updated);
     await loadWardrobe();
