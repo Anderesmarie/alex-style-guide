@@ -375,6 +375,7 @@ export default function Dressing() {
       occasion: occasion.length ? occasion : ['Quotidien'],
       brand: brand || undefined,
       price: price ? Number(price) : undefined,
+      pattern: pattern || 'uni',
     };
     setSaving(true);
     try {
