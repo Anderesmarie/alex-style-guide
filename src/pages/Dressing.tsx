@@ -546,6 +546,8 @@ export default function Dressing() {
       imageBase64: displayImage ?? selectedItem.imageBase64,
       pattern: pattern || selectedItem.pattern || 'uni',
       texture: texture || selectedItem.texture,
+      length: length || selectedItem.length,
+      fit: fit || selectedItem.fit,
     };
     await updateClothing(updated);
     await loadWardrobe();
