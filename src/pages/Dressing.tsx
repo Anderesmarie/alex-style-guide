@@ -211,6 +211,7 @@ export default function Dressing() {
   const [subcategory, setSubcategory] = useState('');
   const [type, setType] = useState('');
   const [colors, setColors] = useState<string[]>([]);
+  const [pattern, setPattern] = useState<string>('uni');
   const [customColor, setCustomColor] = useState('');
   const [season, setSeason] = useState<string[]>([]);
   const [style, setStyle] = useState<string[]>([]);
