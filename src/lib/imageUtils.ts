@@ -1,135 +1,151 @@
-function readExifOrientation(file: File): Promise<number> {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const view = new DataView(e.target?.result as ArrayBuffer);
-      if (view.getUint16(0, false) !== 0xFFD8) { resolve(1); return; }
-      let offset = 2;
-      while (offset < view.byteLength) {
-        if (view.getUint16(offset, false) === 0xFFE1) {
-          const exifOffset = offset + 10;
-          const little = view.getUint16(exifOffset, false) === 0x4949;
-          const tags = view.getUint16(exifOffset + 8, little);
-          for (let i = 0; i < tags; i++) {
-            const tagOffset = exifOffset + 10 + i * 12;
-            if (tagOffset + 12 > view.byteLength) break;
-            if (view.getUint16(tagOffset, little) === 0x0112) {
-              resolve(view.getUint16(tagOffset + 8, little));
-              return;
-            }
-          }
-          resolve(1); return;
-        }
-        offset += 2 + view.getUint16(offset + 2, false);
-      }
-      resolve(1);
-    };
-    reader.onerror = () => resolve(1);
-    reader.readAsArrayBuffer(file.slice(0, 65536));
-  });
-}
-
-function applyOrientation(
-  canvas: HTMLCanvasElement,
-  ctx: CanvasRenderingContext2D,
-  img: HTMLImageElement,
-  orientation: number,
-  size: number,
-  sx: number,
-  sy: number,
-  cropSize: number,
-  extraRotation: number,
-) {
-  canvas.width = size;
-  canvas.height = size;
-
-  ctx.save();
-  ctx.translate(size / 2, size / 2);
-
-  // EXIF rotation
-  if (orientation === 3) ctx.rotate(Math.PI);
-  else if (orientation === 6) ctx.rotate(Math.PI / 2);
-  else if (orientation === 8) ctx.rotate(-Math.PI / 2);
-
-  // Manual rotation
-  if (extraRotation) ctx.rotate((extraRotation * Math.PI) / 180);
-
-  ctx.filter = 'brightness(1.10) contrast(1.05) saturate(1.05)';
-  ctx.drawImage(img, sx, sy, cropSize, cropSize, -size / 2, -size / 2, size, size);
-  ctx.restore();
-}
+// src/lib/imageUtils.ts
+// Compression image + correction orientation EXIF via Canvas
+// maxSize : 800px par défaut (400px pour les photos inspiration style)
+// Format sortie : JPEG qualité 0.7
+// Conserve le ratio original, corrige la rotation EXIF
 
 export function compressImage(file: File, maxSize = 800): Promise<string> {
   return new Promise((resolve, reject) => {
-    readExifOrientation(file).then((orientation) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          let { width, height } = img;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const arrayBuffer = e.target?.result as ArrayBuffer;
 
-          // For orientation 6/8, swap dimensions
-          if (orientation === 6 || orientation === 8) {
-            [width, height] = [height, width];
+      // 1. Lire l'orientation EXIF
+      const orientation = getExifOrientation(arrayBuffer);
+
+      // 2. Créer l'image depuis le fichier
+      const blob = new Blob([arrayBuffer], { type: file.type });
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const canvas = document.createElement('canvas');
+        let { width, height } = img;
+
+        // 3. Si rotation 90° ou 270°, inverser width/height
+        const rotated = [5, 6, 7, 8].includes(orientation);
+        let drawWidth = rotated ? height : width;
+        let drawHeight = rotated ? width : height;
+
+        // 4. Redimensionner si nécessaire
+        if (drawWidth > maxSize || drawHeight > maxSize) {
+          if (drawWidth > drawHeight) {
+            drawHeight = (drawHeight / drawWidth) * maxSize;
+            drawWidth = maxSize;
+          } else {
+            drawWidth = (drawWidth / drawHeight) * maxSize;
+            drawHeight = maxSize;
           }
+        }
 
-          // Square crop centered with 5% zoom
-          let cropSize = Math.min(img.naturalWidth, img.naturalHeight);
-          let sx = (img.naturalWidth - cropSize) / 2;
-          let sy = (img.naturalHeight - cropSize) / 2;
-          sx += cropSize * 0.025;
-          sy += cropSize * 0.025;
-          cropSize *= 0.95;
+        canvas.width = drawWidth;
+        canvas.height = drawHeight;
+        const ctx = canvas.getContext('2d')!;
 
-          const outSize = Math.min(maxSize, Math.min(width, height));
+        // 5. Appliquer la transformation selon l'orientation EXIF
+        applyExifTransform(ctx, orientation, drawWidth, drawHeight);
 
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d')!;
-          applyOrientation(canvas, ctx, img, orientation, outSize, sx, sy, cropSize, 0);
+        // 6. Dessiner l'image corrigée
+        if (rotated) {
+          ctx.drawImage(img, 0, 0, drawHeight, drawWidth);
+        } else {
+          ctx.drawImage(img, 0, 0, drawWidth, drawHeight);
+        }
 
-          resolve(canvas.toDataURL('image/jpeg', 0.82));
-        };
-        img.onerror = reject;
-        img.src = e.target?.result as string;
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
       };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
+
+      img.onerror = reject;
+      img.src = url;
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file); // ← ArrayBuffer pour lire l'EXIF
   });
 }
 
+// Lit le tag EXIF Orientation depuis le binaire du fichier
+function getExifOrientation(buffer: ArrayBuffer): number {
+  const view = new DataView(buffer);
+  if (view.getUint16(0, false) !== 0xFFD8) return 1; // Pas un JPEG
+
+  let offset = 2;
+  while (offset < view.byteLength) {
+    if (view.getUint16(offset, false) === 0xFFE1) {
+      const little = view.getUint16(offset + 10, false) === 0x4949;
+      const tags = view.getUint16(offset + 14, little);
+      for (let i = 0; i < tags; i++) {
+        if (view.getUint16(offset + 16 + i * 12, little) === 0x0112) {
+          return view.getUint16(offset + 16 + i * 12 + 8, little);
+        }
+      }
+    }
+    offset += 2 + view.getUint16(offset + 2, false);
+  }
+  return 1; // Orientation par défaut : normale
+}
+
+// Applique la rotation/flip canvas selon la valeur EXIF
+function applyExifTransform(
+  ctx: CanvasRenderingContext2D,
+  orientation: number,
+  width: number,
+  height: number,
+) {
+  switch (orientation) {
+    case 2: ctx.transform(-1, 0, 0, 1, width, 0); break;
+    case 3: ctx.transform(-1, 0, 0, -1, width, height); break;
+    case 4: ctx.transform(1, 0, 0, -1, 0, height); break;
+    case 5: ctx.transform(0, 1, 1, 0, 0, 0); break;
+    case 6: ctx.transform(0, 1, -1, 0, height, 0); break;
+    case 7: ctx.transform(0, -1, -1, 0, height, width); break;
+    case 8: ctx.transform(0, -1, 1, 0, 0, width); break;
+    default: break; // orientation 1 = rien à faire
+  }
+}
+
+// Réapplique une rotation manuelle (en degrés) sur une image déjà compressée.
+// Conserve le ratio de l'image source.
 export function recompressWithRotation(
   imgSrc: string,
-  file: File,
+  _file: File,
   rotation: number,
   maxSize = 800,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    readExifOrientation(file).then((orientation) => {
-      const img = new Image();
-      img.onload = () => {
-        let { width, height } = img;
-        if (orientation === 6 || orientation === 8) {
-          [width, height] = [height, width];
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+
+      // Si rotation 90° ou 270°, on inverse les dimensions de sortie
+      const swap = Math.abs(rotation % 180) === 90;
+      let outW = swap ? height : width;
+      let outH = swap ? width : height;
+
+      if (outW > maxSize || outH > maxSize) {
+        if (outW > outH) {
+          outH = (outH / outW) * maxSize;
+          outW = maxSize;
+        } else {
+          outW = (outW / outH) * maxSize;
+          outH = maxSize;
         }
+      }
 
-        let cropSize = Math.min(img.naturalWidth, img.naturalHeight);
-        let sx = (img.naturalWidth - cropSize) / 2;
-        let sy = (img.naturalHeight - cropSize) / 2;
-        sx += cropSize * 0.025;
-        sy += cropSize * 0.025;
-        cropSize *= 0.95;
+      const canvas = document.createElement('canvas');
+      canvas.width = outW;
+      canvas.height = outH;
+      const ctx = canvas.getContext('2d')!;
 
-        const outSize = Math.min(maxSize, Math.min(width, height));
+      ctx.translate(outW / 2, outH / 2);
+      ctx.rotate((rotation * Math.PI) / 180);
+      const drawW = swap ? outH : outW;
+      const drawH = swap ? outW : outH;
+      ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
 
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d')!;
-        applyOrientation(canvas, ctx, img, orientation, outSize, sx, sy, cropSize, rotation);
-
-        resolve(canvas.toDataURL('image/jpeg', 0.82));
-      };
-      img.onerror = reject;
-      img.src = imgSrc;
-    });
+      resolve(canvas.toDataURL('image/jpeg', 0.7));
+    };
+    img.onerror = reject;
+    img.src = imgSrc;
   });
 }
