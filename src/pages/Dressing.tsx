@@ -1061,6 +1061,8 @@ export default function Dressing() {
           </div>
         </div>
 
+        <div>
+          <label className="block text-sm font-medium mb-3">Saison</label>
           <div className="flex flex-wrap gap-2">
             {SEASONS.map(s => (
               <button key={s} type="button" onClick={() => toggle(season, s, setSeason)}
