@@ -346,6 +346,8 @@ export default function Dressing() {
   const [colors, setColors] = useState<string[]>([]);
   const [pattern, setPattern] = useState<string>('uni');
   const [texture, setTexture] = useState<string>('');
+  const [length, setLength] = useState<string>('');
+  const [fit, setFit] = useState<string>('');
   const [customColor, setCustomColor] = useState('');
   const [season, setSeason] = useState<string[]>([]);
   const [style, setStyle] = useState<string[]>([]);
@@ -375,7 +377,7 @@ export default function Dressing() {
 
   const resetForm = () => {
     setDisplayImage(null); setImageBase64(''); setBgRemoved(false);
-    setCategory(''); setSubcategory(''); setType(''); setColors([]); setPattern('uni'); setTexture(''); setCustomColor('');
+    setCategory(''); setSubcategory(''); setType(''); setColors([]); setPattern('uni'); setTexture(''); setLength(''); setFit(''); setCustomColor('');
     setSeason([]); setStyle([]); setOccasion([]); setBrand(''); setPrice('');
     setPreviewBase64(''); setPreviewFile(null); setPreviewOrigSrc(''); setManualRotation(0);
     setLayer(1);
@@ -511,6 +513,8 @@ export default function Dressing() {
       price: price ? Number(price) : undefined,
       pattern: pattern || 'uni',
       texture: texture || undefined,
+      length: length || undefined,
+      fit: fit || undefined,
     };
     setSaving(true);
     try {
@@ -542,6 +546,8 @@ export default function Dressing() {
       imageBase64: displayImage ?? selectedItem.imageBase64,
       pattern: pattern || selectedItem.pattern || 'uni',
       texture: texture || selectedItem.texture,
+      length: length || selectedItem.length,
+      fit: fit || selectedItem.fit,
     };
     await updateClothing(updated);
     await loadWardrobe();
@@ -620,6 +626,8 @@ export default function Dressing() {
     setColors(parsed);
     setPattern(item.pattern && PATTERN_PALETTE.some(p => p.value === item.pattern) ? item.pattern : 'uni');
     setTexture(item.texture && TEXTURE_PALETTE.some(t => t.value === item.texture) ? item.texture : '');
+    setLength(item.length || '');
+    setFit(item.fit || '');
     setSeason([...item.season]);
     setStyle([...item.style]);
     setOccasion([...item.occasion]);
@@ -990,6 +998,64 @@ export default function Dressing() {
                     {t.label}
                   </span>
                 </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <hr className="border-t border-gray-200" />
+
+        <div>
+          <label className="block text-sm font-medium mb-3">Longueur</label>
+          <div className="flex flex-wrap gap-2">
+            {['Crop', 'Court', 'Standard', 'Midi', 'Maxi'].map(l => {
+              const selected = length === l;
+              return (
+                <button
+                  key={l}
+                  type="button"
+                  onClick={() => setLength(selected ? '' : l)}
+                  aria-pressed={selected}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: 20,
+                    fontSize: 13,
+                    backgroundColor: selected ? '#FDF5F0' : 'transparent',
+                    border: selected ? '2px solid #C9956C' : '0.5px solid #CCCCCC',
+                    color: selected ? '#C9956C' : '#444',
+                  }}
+                >
+                  {l}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <hr className="border-t border-gray-200" />
+
+        <div>
+          <label className="block text-sm font-medium mb-3">Coupe</label>
+          <div className="flex flex-wrap gap-2">
+            {['Ajusté', 'Standard', 'Oversize'].map(f => {
+              const selected = fit === f;
+              return (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => setFit(selected ? '' : f)}
+                  aria-pressed={selected}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: 20,
+                    fontSize: 13,
+                    backgroundColor: selected ? '#FDF5F0' : 'transparent',
+                    border: selected ? '2px solid #C9956C' : '0.5px solid #CCCCCC',
+                    color: selected ? '#C9956C' : '#444',
+                  }}
+                >
+                  {f}
+                </button>
               );
             })}
           </div>
