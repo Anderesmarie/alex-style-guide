@@ -513,6 +513,8 @@ export default function Dressing() {
       price: price ? Number(price) : undefined,
       pattern: pattern || 'uni',
       texture: texture || undefined,
+      length: length || undefined,
+      fit: fit || undefined,
     };
     setSaving(true);
     try {
