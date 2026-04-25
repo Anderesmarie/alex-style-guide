@@ -956,8 +956,45 @@ export default function Dressing() {
           </div>
         </div>
 
+        <hr className="border-t border-gray-200" />
+
         <div>
-          <label className="block text-sm font-medium mb-3">Saison</label>
+          <label className="block text-sm font-medium mb-3">Texture</label>
+          <div className="flex flex-wrap gap-2.5">
+            {TEXTURE_PALETTE.map(t => {
+              const selected = texture === t.value;
+              return (
+                <div
+                  key={t.value}
+                  className="flex flex-col items-center"
+                  style={{ gap: 4 }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setTexture(selected ? '' : t.value)}
+                    title={t.label}
+                    aria-label={t.label}
+                    aria-pressed={selected}
+                    className="rounded-full transition-all flex items-center justify-center overflow-hidden"
+                    style={{
+                      width: 28,
+                      height: 28,
+                      backgroundColor: selected ? '#FDF5F0' : 'transparent',
+                      border: selected ? '2px solid #C9956C' : '1px solid transparent',
+                      padding: 0,
+                    }}
+                  >
+                    <TextureSwatch value={t.value} />
+                  </button>
+                  <span style={{ fontSize: 10, color: '#999', textAlign: 'center' }}>
+                    {t.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
           <div className="flex flex-wrap gap-2">
             {SEASONS.map(s => (
               <button key={s} type="button" onClick={() => toggle(season, s, setSeason)}
