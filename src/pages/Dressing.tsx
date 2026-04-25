@@ -351,7 +351,13 @@ export default function Dressing() {
     setCategory(item.category || '');
     setSubcategory(item.subcategory || '');
     setType(item.type);
-    setColor(item.color);
+    // Reconstruit la sélection multiple depuis le champ stocké (joint par virgule)
+    const parsed = (item.color || '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(v => v && COLOR_PALETTE.some(c => c.value === v))
+      .slice(0, 3);
+    setColors(parsed);
     setSeason([...item.season]);
     setStyle([...item.style]);
     setOccasion([...item.occasion]);
