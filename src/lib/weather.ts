@@ -6,6 +6,7 @@ export interface WeatherData {
   city?: string;
   tempMin?: number;
   tempMax?: number;
+  amplitude?: number;
 }
 
 const weatherMap: Record<number, { emoji: string; desc: string }> = {
@@ -63,8 +64,9 @@ async function fetchWeatherByCoords(lat: number, lon: number, city?: string): Pr
     }
   }
   const weather = parseWeather(data, city);
-  if (tempMin !== null) { weather.tempMin = tempMin; weather.temperature = tempMin; }
+  if (tempMin !== null) weather.tempMin = tempMin;
   if (tempMax !== null) weather.tempMax = tempMax;
+  if (tempMin !== null && tempMax !== null) weather.amplitude = tempMax - tempMin;
   return weather;
 }
 
