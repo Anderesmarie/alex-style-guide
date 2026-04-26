@@ -1039,41 +1039,37 @@ export default function Dressing() {
           </div>
         </div>
 
-        {lengthOptions && (
-          <>
-            <hr className="border-t border-gray-200" />
+        <hr className="border-t border-gray-200" />
 
-            <div>
-              <label className="block text-sm font-medium mb-3">Longueur</label>
-              <div className="flex flex-wrap gap-2">
-                {lengthOptions.map(l => {
-                  const selected = length === l || (lengthDisabled && l === 'Court');
-                  return (
-                    <button
-                      key={l}
-                      type="button"
-                      disabled={lengthDisabled}
-                      onClick={() => !lengthDisabled && setLength(selected ? '' : l)}
-                      aria-pressed={selected}
-                      style={{
-                        padding: '6px 14px',
-                        borderRadius: 20,
-                        fontSize: 13,
-                        backgroundColor: selected ? '#FDF5F0' : '#FFFFFF',
-                        border: selected ? '2px solid #C9956C' : '0.5px solid #DDDDDD',
-                        color: selected ? '#C9956C' : '#2C2C2C',
-                        opacity: lengthDisabled ? 0.6 : 1,
-                        cursor: lengthDisabled ? 'not-allowed' : 'pointer',
-                      }}
-                    >
-                      {l}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </>
-        )}
+        <div>
+          <label className="block text-sm font-medium mb-3">Longueur</label>
+          <div className="flex flex-wrap gap-2">
+            {lengthOptions.map(l => {
+              const selected = length === l || (lengthDisabled && l === 'Court');
+              return (
+                <button
+                  key={l}
+                  type="button"
+                  disabled={lengthDisabled}
+                  onClick={() => !lengthDisabled && setLength(selected ? '' : l)}
+                  aria-pressed={selected}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: 20,
+                    fontSize: 13,
+                    backgroundColor: selected ? '#FDF5F0' : '#FFFFFF',
+                    border: selected ? '2px solid #C9956C' : '0.5px solid #DDDDDD',
+                    color: selected ? '#C9956C' : '#2C2C2C',
+                    opacity: lengthDisabled ? 0.6 : 1,
+                    cursor: lengthDisabled ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  {l}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         <hr className="border-t border-gray-200" />
 
