@@ -300,6 +300,12 @@ export default function Today() {
               <p className="text-2xl font-serif font-bold">{ws.data.tempMin}°C — {ws.data.tempMax}°C</p>
               <p className="text-xs text-muted-foreground">Habillée pour le matin 🌅</p>
               <p className="text-muted-foreground">{ws.data.description}</p>
+              {typeof ws.data.amplitude === 'number' && ws.data.amplitude >= 15 && (
+                <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>Grande amplitude aujourd'hui 🧥</p>
+              )}
+              {typeof ws.data.amplitude === 'number' && ws.data.amplitude >= 8 && ws.data.amplitude < 15 && (
+                <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>Pensez à une couche amovible 🧣</p>
+              )}
               {ws.data.city && (
                 <p className="text-xs text-muted-foreground mt-0.5">📍 {ws.data.city}</p>
               )}
