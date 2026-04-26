@@ -367,24 +367,27 @@ export default function Dressing() {
   useEffect(() => { loadWardrobe(); }, []);
 
   // Options de longueur selon la sous-catégorie / catégorie sélectionnée
-  const getLengthOptions = (cat: string, sub: string): string[] | null => {
+  // Si aucune sous-catégorie n'est sélectionnée, on affiche les options par défaut
+  const DEFAULT_LENGTH_OPTIONS = ['Crop', 'Court', 'Standard', 'Midi', 'Maxi'];
+  const getLengthOptions = (cat: string, sub: string): string[] => {
+    if (!sub) return DEFAULT_LENGTH_OPTIONS;
     if (cat === 'Hauts') {
       if (sub === 'Tops & T-shirts' || sub === 'Chemises & Blouses') return ['Crop', 'Court', 'Standard'];
-      return null;
+      return DEFAULT_LENGTH_OPTIONS;
     }
     if (cat === 'Robes') return ['Court', 'Standard', 'Midi', 'Maxi'];
     if (cat === 'Manteaux') {
       if (sub === 'Vestes') return ['Court', 'Standard', 'Midi'];
       if (sub === 'Manteaux') return ['Court', 'Midi', 'Maxi'];
-      return null;
+      return DEFAULT_LENGTH_OPTIONS;
     }
     if (cat === 'Bas') {
       if (sub === 'Jeans' || sub === 'Pantalons' || sub === 'Leggings & Joggings') return ['Court', 'Standard', 'Maxi'];
       if (sub === 'Jupes') return ['Court', 'Standard', 'Midi', 'Maxi'];
       if (sub === 'Shorts') return ['Court'];
-      return null;
+      return DEFAULT_LENGTH_OPTIONS;
     }
-    return null;
+    return DEFAULT_LENGTH_OPTIONS;
   };
   const lengthOptions = getLengthOptions(category, subcategory);
   const lengthDisabled = category === 'Bas' && subcategory === 'Shorts';
@@ -393,10 +396,6 @@ export default function Dressing() {
   useEffect(() => {
     if (lengthDisabled) {
       setLength('Court');
-      return;
-    }
-    if (!lengthOptions) {
-      if (length) setLength('');
       return;
     }
     if (length && !lengthOptions.includes(length)) setLength('');
@@ -1040,41 +1039,37 @@ export default function Dressing() {
           </div>
         </div>
 
-        {lengthOptions && (
-          <>
-            <hr className="border-t border-gray-200" />
+        <hr className="border-t border-gray-200" />
 
-            <div>
-              <label className="block text-sm font-medium mb-3">Longueur</label>
-              <div className="flex flex-wrap gap-2">
-                {lengthOptions.map(l => {
-                  const selected = length === l || (lengthDisabled && l === 'Court');
-                  return (
-                    <button
-                      key={l}
-                      type="button"
-                      disabled={lengthDisabled}
-                      onClick={() => !lengthDisabled && setLength(selected ? '' : l)}
-                      aria-pressed={selected}
-                      style={{
-                        padding: '6px 14px',
-                        borderRadius: 20,
-                        fontSize: 13,
-                        backgroundColor: selected ? '#FDF5F0' : '#FFFFFF',
-                        border: selected ? '2px solid #C9956C' : '0.5px solid #DDDDDD',
-                        color: selected ? '#C9956C' : '#2C2C2C',
-                        opacity: lengthDisabled ? 0.6 : 1,
-                        cursor: lengthDisabled ? 'not-allowed' : 'pointer',
-                      }}
-                    >
-                      {l}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </>
-        )}
+        <div>
+          <label className="block text-sm font-medium mb-3">Longueur</label>
+          <div className="flex flex-wrap gap-2">
+            {lengthOptions.map(l => {
+              const selected = length === l || (lengthDisabled && l === 'Court');
+              return (
+                <button
+                  key={l}
+                  type="button"
+                  disabled={lengthDisabled}
+                  onClick={() => !lengthDisabled && setLength(selected ? '' : l)}
+                  aria-pressed={selected}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: 20,
+                    fontSize: 13,
+                    backgroundColor: selected ? '#FDF5F0' : '#FFFFFF',
+                    border: selected ? '2px solid #C9956C' : '0.5px solid #DDDDDD',
+                    color: selected ? '#C9956C' : '#2C2C2C',
+                    opacity: lengthDisabled ? 0.6 : 1,
+                    cursor: lengthDisabled ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  {l}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         <hr className="border-t border-gray-200" />
 
