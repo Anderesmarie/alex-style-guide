@@ -372,12 +372,12 @@ export default function Dressing() {
   const getLengthOptions = (cat: string, sub: string): string[] => {
     if (!sub) return DEFAULT_LENGTH_OPTIONS;
     if (cat === 'Hauts') {
-      if (sub === 'Tops & T-shirts' || sub === 'Chemises & Blouses') return ['Crop', 'Court', 'Standard'];
+      if (sub === 'Tops & T-shirts' || sub === 'Chemises & Blouses' || sub === 'Pulls & Mailles') return ['Crop', 'Court', 'Standard', 'Long'];
       return DEFAULT_LENGTH_OPTIONS;
     }
     if (cat === 'Robes') return ['Court', 'Standard', 'Midi', 'Maxi'];
     if (cat === 'Manteaux') {
-      if (sub === 'Vestes') return ['Court', 'Standard', 'Midi'];
+      if (sub === 'Vestes') return ['Court', 'Standard', 'Long'];
       if (sub === 'Manteaux') return ['Court', 'Midi', 'Maxi'];
       return DEFAULT_LENGTH_OPTIONS;
     }
