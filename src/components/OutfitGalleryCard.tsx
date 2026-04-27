@@ -11,7 +11,8 @@ interface Props {
 
 type Placement = {
   item: ClothingItem;
-  size: number;
+  width: number;
+  height: number;
   style: React.CSSProperties;
   zIndex: number;
 };
@@ -43,102 +44,138 @@ function buildPlacements(items: ClothingItem[]): Placement[] {
   };
   items.forEach(it => buckets[bucketOf(it)].push(it));
 
-  // Jewelry / accessories (small, top, dispersed left & right)
+  // Layering order (z-index, low → high):
+  // 1 jewelry/accessories (background, small)
+  // 2 shoes (under bottom)
+  // 3 bottom
+  // 4 top (overlaps bottom slightly)
+  // 5 jacket (overlaps top)
+  // 6 bag (front, on the side)
+
+  // Jewelry / petits accessoires (très petits, dispersés en haut)
   buckets.jewelry.forEach((it, i) => {
     const left = i % 2 === 0;
     placements.push({
       item: it,
-      size: 80,
+      width: 60,
+      height: 60,
       zIndex: 1,
       style: {
         position: 'absolute',
-        top: `${10 + Math.floor(i / 2) * 70}px`,
-        [left ? 'left' : 'right']: `${8 + Math.floor(i / 2) * 10}px`,
+        top: `${8 + Math.floor(i / 2) * 60}px`,
+        [left ? 'left' : 'right']: `${10 + Math.floor(i / 2) * 8}px`,
       },
     });
   });
 
-  // Jacket (large, left, slight overlap top)
-  buckets.jacket.forEach((it, i) => {
-    placements.push({
-      item: it,
-      size: 200,
-      zIndex: 2,
-      style: { position: 'absolute', top: `${30 + i * 20}px`, left: '4%' },
-    });
-  });
-
-  // Top (large, center / right)
+  // Top (haut centré, 180px)
   buckets.top.forEach((it, i) => {
     placements.push({
       item: it,
-      size: 200,
-      zIndex: 3,
-      style: { position: 'absolute', top: `${60 + i * 20}px`, right: '8%' },
-    });
-  });
-
-  // Dress (large, center) - treat like top+bottom combined
-  buckets.dress.forEach((it, i) => {
-    placements.push({
-      item: it,
-      size: 220,
-      zIndex: 3,
-      style: {
-        position: 'absolute',
-        top: `${60 + i * 20}px`,
-        left: '50%',
-        transform: 'translateX(-50%)',
-      },
-    });
-  });
-
-  // Bottom (large, center, below top with slight overlap)
-  buckets.bottom.forEach((it, i) => {
-    placements.push({
-      item: it,
-      size: 200,
+      width: 180,
+      height: 180,
       zIndex: 4,
       style: {
         position: 'absolute',
-        top: `${210 + i * 20}px`,
+        top: `${40 + i * 16}px`,
         left: '50%',
         transform: 'translateX(-50%)',
       },
     });
   });
 
-  // Shoes (medium, bottom-left)
+  // Bottom (bas centré, 220px, chevauche le haut par le dessous)
+  buckets.bottom.forEach((it, i) => {
+    placements.push({
+      item: it,
+      width: 220,
+      height: 220,
+      zIndex: 3,
+      style: {
+        position: 'absolute',
+        // top haut commence à ~40, fait 180 → fin à 220
+        // on remonte le bas de ~40px pour overlap léger
+        top: `${180 + i * 16}px`,
+        left: '50%',
+        transform: 'translateX(-50%)',
+      },
+    });
+  });
+
+  // Dress (robe centrée, plus haute)
+  buckets.dress.forEach((it, i) => {
+    placements.push({
+      item: it,
+      width: 220,
+      height: 320,
+      zIndex: 3,
+      style: {
+        position: 'absolute',
+        top: `${50 + i * 16}px`,
+        left: '50%',
+        transform: 'translateX(-50%)',
+      },
+    });
+  });
+
+  // Jacket / Manteau (220px, à gauche, par-dessus le haut)
+  buckets.jacket.forEach((it, i) => {
+    placements.push({
+      item: it,
+      width: 220,
+      height: 220,
+      zIndex: 5,
+      style: {
+        position: 'absolute',
+        top: `${30 + i * 16}px`,
+        left: '2%',
+      },
+    });
+  });
+
+  // Shoes (110px, sous le bas, légèrement devant)
   buckets.shoes.forEach((it, i) => {
     placements.push({
       item: it,
-      size: 130,
-      zIndex: 5,
-      style: { position: 'absolute', bottom: `${10 + i * 20}px`, left: '6%' },
+      width: 110,
+      height: 110,
+      zIndex: 4, // devant le bas
+      style: {
+        position: 'absolute',
+        bottom: `${4 + i * 12}px`,
+        left: i === 0 ? '50%' : `${20 + i * 10}%`,
+        transform: i === 0 ? 'translateX(-50%)' : 'none',
+      },
     });
   });
 
-  // Bag (medium, bottom-right)
+  // Bag (110px, bottom-right, au premier plan)
   buckets.bag.forEach((it, i) => {
     placements.push({
       item: it,
-      size: 130,
-      zIndex: 5,
-      style: { position: 'absolute', bottom: `${10 + i * 20}px`, right: '6%' },
+      width: 110,
+      height: 110,
+      zIndex: 6,
+      style: {
+        position: 'absolute',
+        bottom: `${20 + i * 14}px`,
+        right: `${4 + i * 8}%`,
+      },
     });
   });
 
-  // Other (dispersed)
+  // Other (petits, dispersés)
   buckets.other.forEach((it, i) => {
     placements.push({
       item: it,
-      size: 100,
+      width: 60,
+      height: 60,
       zIndex: 2,
       style: {
         position: 'absolute',
         top: `${120 + i * 50}px`,
-        left: i % 2 === 0 ? '12%' : 'auto',
-        right: i % 2 === 1 ? '12%' : 'auto',
+        left: i % 2 === 0 ? '8%' : 'auto',
+        right: i % 2 === 1 ? '8%' : 'auto',
       },
     });
   });
@@ -205,11 +242,11 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
               src={p.item.imageBase64}
               alt={p.item.type}
               style={{
-                width: p.size,
-                height: p.size,
+                width: p.width,
+                height: p.height,
                 objectFit: 'contain',
                 zIndex: p.zIndex,
-                filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.12))',
+                filter: 'drop-shadow(0 6px 8px rgba(0,0,0,0.15))',
                 ...p.style,
               }}
             />
