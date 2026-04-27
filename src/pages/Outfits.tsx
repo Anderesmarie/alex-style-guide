@@ -35,7 +35,21 @@ export default function Outfits() {
     setLoading(false);
   };
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    loadData();
+    (async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (u.user) {
+        const { data: prof } = await supabase.from('profiles').select('pseudo').eq('id', u.user.id).maybeSingle();
+        if (prof?.pseudo) setPseudo(prof.pseudo);
+      }
+    })();
+  }, []);
+
+  const handleToggleLike = async (outfit: Outfit, next: boolean) => {
+    setOutfits(prev => prev.map(o => o.id === outfit.id ? { ...o, liked: next } : o));
+    try { await setOutfitLiked(outfit.id, next); } catch {}
+  };
 
   const toggleItem = (id: string) => {
     const next = new Set(selectedIds);
