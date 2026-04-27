@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { ClothingItem, Outfit } from '@/lib/types';
-import { getWardrobe, getOutfits, addOutfit, deleteOutfit, genId } from '@/lib/storage';
+import { getWardrobe, getOutfits, addOutfit, deleteOutfit, setOutfitLiked, genId } from '@/lib/storage';
 import { generateRecommendations } from '@/lib/recommendations';
 import { updateStreak } from '@/lib/streak';
 import { getCategoryByType } from '@/lib/categories';
+import { supabase } from '@/integrations/supabase/client';
 import CalendarView from '@/components/CalendarView';
 import OutfitVisualLayout, { SlotKey, SlotMap, SLOT_CONFIG } from '@/components/OutfitVisualLayout';
+import OutfitGalleryCard from '@/components/OutfitGalleryCard';
 
 type View = 'gallery' | 'modeChoice' | 'createVisual' | 'createQuick' | 'detail';
 type Tab = 'outfits' | 'calendar';
