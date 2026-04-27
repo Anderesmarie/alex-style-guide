@@ -22,6 +22,7 @@ export default function Outfits() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [outfitName, setOutfitName] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<Outfit | null>(null);
+  const [pseudo, setPseudo] = useState<string | null>(null);
 
   // Visual layout state
   const [slots, setSlots] = useState<SlotMap>({});
