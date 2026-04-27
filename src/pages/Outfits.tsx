@@ -486,19 +486,18 @@ export default function Outfits() {
           </button>
 
           {outfits.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3">
+            <div>
               {outfits.map(outfit => {
                 const items = getItemsByIds(outfit.itemIds);
-                const previewSlots = buildSlotsFromItems(items);
                 return (
-                  <button
+                  <OutfitGalleryCard
                     key={outfit.id}
+                    outfit={outfit}
+                    items={items}
+                    pseudo={pseudo}
                     onClick={() => { setSelectedOutfit(outfit); setView('detail'); }}
-                    className="bg-card rounded-xl p-2 card-shadow text-left active:scale-[0.98] transition-transform"
-                  >
-                    <OutfitVisualLayout slots={previewSlots} size="mini" compact />
-                    <p className="font-serif font-semibold text-sm mt-2 px-1 truncate">{outfit.name}</p>
-                  </button>
+                    onToggleLike={(next) => handleToggleLike(outfit, next)}
+                  />
                 );
               })}
             </div>
