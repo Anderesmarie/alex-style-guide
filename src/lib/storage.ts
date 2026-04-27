@@ -181,6 +181,7 @@ export async function getOutfits(): Promise<Outfit[]> {
     name: row.name,
     itemIds: row.item_ids as string[],
     createdAt: row.created_at,
+    liked: (row as any).liked ?? false,
   }));
 }
 
@@ -192,6 +193,11 @@ export async function addOutfit(outfit: Outfit): Promise<void> {
     name: outfit.name,
     item_ids: outfit.itemIds,
   });
+}
+
+export async function setOutfitLiked(id: string, liked: boolean): Promise<void> {
+  const uid = await getUserId();
+  await supabase.from('outfits').update({ liked }).eq('id', id).eq('user_id', uid);
 }
 
 export async function deleteOutfit(id: string): Promise<void> {
