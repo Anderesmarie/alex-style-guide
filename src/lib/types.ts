@@ -23,6 +23,7 @@ export interface Outfit {
   name: string;
   itemIds: string[];
   createdAt: string;
+  liked?: boolean;
 }
 
 export interface UserProfile {

@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { ClothingItem, Outfit } from '@/lib/types';
-import { getWardrobe, getOutfits, addOutfit, deleteOutfit, genId } from '@/lib/storage';
+import { getWardrobe, getOutfits, addOutfit, deleteOutfit, setOutfitLiked, genId } from '@/lib/storage';
 import { generateRecommendations } from '@/lib/recommendations';
 import { updateStreak } from '@/lib/streak';
 import { getCategoryByType } from '@/lib/categories';
+import { supabase } from '@/integrations/supabase/client';
 import CalendarView from '@/components/CalendarView';
 import OutfitVisualLayout, { SlotKey, SlotMap, SLOT_CONFIG } from '@/components/OutfitVisualLayout';
+import OutfitGalleryCard from '@/components/OutfitGalleryCard';
 
 type View = 'gallery' | 'modeChoice' | 'createVisual' | 'createQuick' | 'detail';
 type Tab = 'outfits' | 'calendar';
@@ -20,6 +22,7 @@ export default function Outfits() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [outfitName, setOutfitName] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<Outfit | null>(null);
+  const [pseudo, setPseudo] = useState<string | null>(null);
 
   // Visual layout state
   const [slots, setSlots] = useState<SlotMap>({});
@@ -32,7 +35,21 @@ export default function Outfits() {
     setLoading(false);
   };
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    loadData();
+    (async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (u.user) {
+        const { data: prof } = await supabase.from('profiles').select('pseudo').eq('id', u.user.id).maybeSingle();
+        if (prof?.pseudo) setPseudo(prof.pseudo);
+      }
+    })();
+  }, []);
+
+  const handleToggleLike = async (outfit: Outfit, next: boolean) => {
+    setOutfits(prev => prev.map(o => o.id === outfit.id ? { ...o, liked: next } : o));
+    try { await setOutfitLiked(outfit.id, next); } catch {}
+  };
 
   const toggleItem = (id: string) => {
     const next = new Set(selectedIds);
@@ -469,19 +486,18 @@ export default function Outfits() {
           </button>
 
           {outfits.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3">
+            <div>
               {outfits.map(outfit => {
                 const items = getItemsByIds(outfit.itemIds);
-                const previewSlots = buildSlotsFromItems(items);
                 return (
-                  <button
+                  <OutfitGalleryCard
                     key={outfit.id}
+                    outfit={outfit}
+                    items={items}
+                    pseudo={pseudo}
                     onClick={() => { setSelectedOutfit(outfit); setView('detail'); }}
-                    className="bg-card rounded-xl p-2 card-shadow text-left active:scale-[0.98] transition-transform"
-                  >
-                    <OutfitVisualLayout slots={previewSlots} size="mini" compact />
-                    <p className="font-serif font-semibold text-sm mt-2 px-1 truncate">{outfit.name}</p>
-                  </button>
+                    onToggleLike={(next) => handleToggleLike(outfit, next)}
+                  />
                 );
               })}
             </div>
