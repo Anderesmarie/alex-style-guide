@@ -1192,6 +1192,7 @@ export default function Dressing() {
   if (tab === 'wishlist' && view === 'grid') {
     return (
       <div className="fade-enter pb-4">
+        <h1 className="text-2xl font-serif font-bold mb-4">Ma Garde-robe</h1>
         {renderTabs()}
         <Wishlist onPurchase={handlePurchaseFromWishlist} />
       </div>
@@ -1245,9 +1246,9 @@ export default function Dressing() {
   return (
     <div className="fade-enter pb-4">
       {renderDeleteDialog()}
+      <h1 className="text-2xl font-serif font-bold mb-4">Ma Garde-robe</h1>
       {renderTabs()}
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-serif font-bold">Mon Dressing</h1>
         <span className="text-sm text-muted-foreground">{filtered.length} pièce{filtered.length !== 1 ? 's' : ''}</span>
       </div>
 
