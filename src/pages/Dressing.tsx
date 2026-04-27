@@ -1192,6 +1192,7 @@ export default function Dressing() {
   if (tab === 'wishlist' && view === 'grid') {
     return (
       <div className="fade-enter pb-4">
+        <h1 className="text-2xl font-serif font-bold mb-4">Ma Garde-robe</h1>
         {renderTabs()}
         <Wishlist onPurchase={handlePurchaseFromWishlist} />
       </div>
