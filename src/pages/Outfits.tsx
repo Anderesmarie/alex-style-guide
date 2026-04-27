@@ -429,7 +429,7 @@ export default function Outfits() {
   return (
     <div className="fade-enter pb-4">
       {renderDeleteDialog()}
-      <h1 className="text-2xl font-serif font-bold mb-4">Mes Tenues</h1>
+      <h1 className="text-2xl font-serif font-bold mb-4">Mes Looks</h1>
 
       {/* Sub-tabs */}
       <div className="flex gap-2 mb-5">
