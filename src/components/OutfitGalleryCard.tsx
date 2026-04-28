@@ -9,12 +9,23 @@ interface Props {
   onToggleLike?: (next: boolean) => void;
 }
 
-type Placement = {
-  item: ClothingItem;
-  size: number;
-  style: React.CSSProperties;
-  zIndex: number;
-};
+const dropShadow = 'drop-shadow(0 4px 6px rgba(0,0,0,0.10))';
+
+function Piece({ item, height }: { item: ClothingItem; height: number }) {
+  return (
+    <img
+      src={item.imageBase64}
+      alt={item.type}
+      style={{
+        height,
+        width: 'auto',
+        maxWidth: '100%',
+        objectFit: 'contain',
+        filter: dropShadow,
+      }}
+    />
+  );
+}
 
 // Decide bucket based on category name
 function bucketOf(item: ClothingItem): 'jewelry' | 'jacket' | 'top' | 'bottom' | 'shoes' | 'bag' | 'dress' | 'other' {
@@ -29,8 +40,7 @@ function bucketOf(item: ClothingItem): 'jewelry' | 'jacket' | 'top' | 'bottom' |
   return 'other';
 }
 
-function buildPlacements(items: ClothingItem[]): Placement[] {
-  const placements: Placement[] = [];
+function bucketize(items: ClothingItem[]) {
   const buckets = {
     jewelry: [] as ClothingItem[],
     jacket: [] as ClothingItem[],
@@ -42,116 +52,32 @@ function buildPlacements(items: ClothingItem[]): Placement[] {
     other: [] as ClothingItem[],
   };
   items.forEach(it => buckets[bucketOf(it)].push(it));
-
-  // Jewelry / accessories (small, top, dispersed left & right)
-  buckets.jewelry.forEach((it, i) => {
-    const left = i % 2 === 0;
-    placements.push({
-      item: it,
-      size: 80,
-      zIndex: 1,
-      style: {
-        position: 'absolute',
-        top: `${10 + Math.floor(i / 2) * 70}px`,
-        [left ? 'left' : 'right']: `${8 + Math.floor(i / 2) * 10}px`,
-      },
-    });
-  });
-
-  // Jacket (large, left, slight overlap top)
-  buckets.jacket.forEach((it, i) => {
-    placements.push({
-      item: it,
-      size: 200,
-      zIndex: 2,
-      style: { position: 'absolute', top: `${30 + i * 20}px`, left: '4%' },
-    });
-  });
-
-  // Top (large, center / right)
-  buckets.top.forEach((it, i) => {
-    placements.push({
-      item: it,
-      size: 200,
-      zIndex: 3,
-      style: { position: 'absolute', top: `${60 + i * 20}px`, right: '8%' },
-    });
-  });
-
-  // Dress (large, center) - treat like top+bottom combined
-  buckets.dress.forEach((it, i) => {
-    placements.push({
-      item: it,
-      size: 220,
-      zIndex: 3,
-      style: {
-        position: 'absolute',
-        top: `${60 + i * 20}px`,
-        left: '50%',
-        transform: 'translateX(-50%)',
-      },
-    });
-  });
-
-  // Bottom (large, center, below top with slight overlap)
-  buckets.bottom.forEach((it, i) => {
-    placements.push({
-      item: it,
-      size: 200,
-      zIndex: 4,
-      style: {
-        position: 'absolute',
-        top: `${210 + i * 20}px`,
-        left: '50%',
-        transform: 'translateX(-50%)',
-      },
-    });
-  });
-
-  // Shoes (medium, bottom-left)
-  buckets.shoes.forEach((it, i) => {
-    placements.push({
-      item: it,
-      size: 130,
-      zIndex: 5,
-      style: { position: 'absolute', bottom: `${10 + i * 20}px`, left: '6%' },
-    });
-  });
-
-  // Bag (medium, bottom-right)
-  buckets.bag.forEach((it, i) => {
-    placements.push({
-      item: it,
-      size: 130,
-      zIndex: 5,
-      style: { position: 'absolute', bottom: `${10 + i * 20}px`, right: '6%' },
-    });
-  });
-
-  // Other (dispersed)
-  buckets.other.forEach((it, i) => {
-    placements.push({
-      item: it,
-      size: 100,
-      zIndex: 2,
-      style: {
-        position: 'absolute',
-        top: `${120 + i * 50}px`,
-        left: i % 2 === 0 ? '12%' : 'auto',
-        right: i % 2 === 1 ? '12%' : 'auto',
-      },
-    });
-  });
-
-  return placements;
+  return buckets;
 }
 
 export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onToggleLike }: Props) {
-  const placements = buildPlacements(items);
+  const buckets = bucketize(items);
   const liked = !!outfit.liked;
   const displayName =
     outfit.name?.trim() ||
     new Date(outfit.createdAt).toLocaleDateString('fr-FR');
+
+  // Pulls go to LEFT zone per spec; tops bucket includes both pulls & tops, split them
+  const isPull = (it: ClothingItem) =>
+    (getCategoryByType(it.type)?.name || it.category) === 'Pulls & sweats';
+  const pulls = buckets.top.filter(isPull);
+  const tops = buckets.top.filter(it => !isPull(it));
+
+  const leftPiece = buckets.jacket[0] || pulls[0] || null;
+  const topPiece = tops[0] || null;
+  const bottomPiece = buckets.bottom[0] || null;
+  const dressPiece = buckets.dress[0] || null;
+  const shoesPiece = buckets.shoes[0] || null;
+  const bagPiece = buckets.bag[0] || null;
+  const accessories = buckets.jewelry;
+  const isEmpty =
+    !leftPiece && !topPiece && !bottomPiece && !dressPiece &&
+    !shoesPiece && !bagPiece && accessories.length === 0;
 
   return (
     <div className="mb-4">
@@ -192,28 +118,61 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
           {liked ? '❤️' : '🤍'}
         </button>
 
-        {/* Canvas with pieces */}
-        <div className="relative w-full" style={{ height: 380 }}>
-          {placements.length === 0 && (
-            <div className="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm">
+        {/* Fixed-zone layout */}
+        <div className="w-full" style={{ paddingBottom: 48 }}>
+          {isEmpty ? (
+            <div
+              className="flex items-center justify-center text-muted-foreground text-sm"
+              style={{ height: 380 }}
+            >
               Tenue vide
             </div>
+          ) : (
+            <>
+              <div className="flex w-full" style={{ gap: 8 }}>
+                {/* LEFT ZONE 30% */}
+                <div
+                  className="flex items-center justify-center"
+                  style={{ width: '30%', minHeight: 320 }}
+                >
+                  {leftPiece && <Piece item={leftPiece} height={180} />}
+                </div>
+
+                {/* CENTER-RIGHT ZONE 70% */}
+                <div
+                  className="flex flex-col items-center"
+                  style={{ width: '70%', gap: 4 }}
+                >
+                  {dressPiece ? (
+                    <Piece item={dressPiece} height={260} />
+                  ) : (
+                    <>
+                      {topPiece && <Piece item={topPiece} height={140} />}
+                      {bottomPiece && <Piece item={bottomPiece} height={180} />}
+                    </>
+                  )}
+                  {shoesPiece && <Piece item={shoesPiece} height={110} />}
+                </div>
+              </div>
+
+              {/* BOTTOM ZONE: bag left, accessories right */}
+              {(bagPiece || accessories.length > 0) && (
+                <div
+                  className="flex items-end justify-between w-full"
+                  style={{ marginTop: 12 }}
+                >
+                  <div className="flex items-end">
+                    {bagPiece && <Piece item={bagPiece} height={80} />}
+                  </div>
+                  <div className="flex items-end gap-2">
+                    {accessories.map(a => (
+                      <Piece key={a.id} item={a} height={50} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
-          {placements.map((p, idx) => (
-            <img
-              key={`${p.item.id}-${idx}`}
-              src={p.item.imageBase64}
-              alt={p.item.type}
-              style={{
-                width: p.size,
-                height: p.size,
-                objectFit: 'contain',
-                zIndex: p.zIndex,
-                filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.12))',
-                ...p.style,
-              }}
-            />
-          ))}
         </div>
 
         {/* Bottom band */}
