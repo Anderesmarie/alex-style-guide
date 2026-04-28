@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { DndContext, useDraggable, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, useDraggable, DragEndEvent, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { ClothingItem, OutfitLayoutPiece } from '@/lib/types';
 import { getCategoryByType } from '@/lib/categories';
@@ -87,7 +87,10 @@ interface Props {
 }
 
 export default function OutfitFreeCanvas({ pieces, onChange, selectedId, onSelectId }: Props) {
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 8 } }),
+  );
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleDragEnd = (e: DragEndEvent) => {
