@@ -89,7 +89,7 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
           background: '#FFFFFF',
           borderRadius: 16,
           boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-          padding: 24,
+          padding: 16,
         }}
       >
         {/* Like button */}
@@ -128,12 +128,12 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
               Tenue vide
             </div>
           ) : (
-            <>
+            <div className="relative w-full" style={{ minHeight: 380 }}>
               <div className="flex w-full" style={{ gap: 8 }}>
-                {/* LEFT ZONE 30% */}
+                {/* LEFT ZONE 30% — aligned to top with center column */}
                 <div
-                  className="flex items-center justify-center"
-                  style={{ width: '30%', minHeight: 320 }}
+                  className="flex items-start justify-center"
+                  style={{ width: '30%' }}
                 >
                   {leftPiece && <Piece item={leftPiece} height={180} />}
                 </div>
@@ -141,37 +141,45 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
                 {/* CENTER-RIGHT ZONE 70% */}
                 <div
                   className="flex flex-col items-center"
-                  style={{ width: '70%', gap: 4 }}
+                  style={{ width: '70%', gap: 0 }}
                 >
                   {dressPiece ? (
                     <Piece item={dressPiece} height={260} />
                   ) : (
                     <>
                       {topPiece && <Piece item={topPiece} height={140} />}
-                      {bottomPiece && <Piece item={bottomPiece} height={180} />}
+                      {bottomPiece && (
+                        <div style={{ marginTop: -8 }}>
+                          <Piece item={bottomPiece} height={180} />
+                        </div>
+                      )}
                     </>
                   )}
-                  {shoesPiece && <Piece item={shoesPiece} height={110} />}
+                  {shoesPiece && (
+                    <div style={{ marginTop: -8 }}>
+                      <Piece item={shoesPiece} height={110} />
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* BOTTOM ZONE: bag left, accessories right */}
-              {(bagPiece || accessories.length > 0) && (
-                <div
-                  className="flex items-end justify-between w-full"
-                  style={{ marginTop: 12 }}
-                >
-                  <div className="flex items-end">
-                    {bagPiece && <Piece item={bagPiece} height={80} />}
-                  </div>
-                  <div className="flex items-end gap-2">
-                    {accessories.map(a => (
-                      <Piece key={a.id} item={a} height={50} />
-                    ))}
-                  </div>
+              {/* BOTTOM ZONE: bag left, accessories bottom-right grouped */}
+              {bagPiece && (
+                <div className="absolute" style={{ left: 0, bottom: 0 }}>
+                  <Piece item={bagPiece} height={80} />
                 </div>
               )}
-            </>
+              {accessories.length > 0 && (
+                <div
+                  className="absolute flex items-end gap-1"
+                  style={{ right: 0, bottom: 0 }}
+                >
+                  {accessories.map(a => (
+                    <Piece key={a.id} item={a} height={40} />
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </div>
 
