@@ -79,6 +79,10 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
     !leftPiece && !topPiece && !bottomPiece && !dressPiece &&
     !shoesPiece && !bagPiece && accessories.length === 0;
 
+  // Free layout pieces (drag & drop saved positions)
+  const layout = outfit.layoutData;
+  const hasFreeLayout = !!layout && Array.isArray(layout.pieces) && layout.pieces.length > 0;
+
   return (
     <div className="mb-4">
       <div
@@ -118,9 +122,39 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
           {liked ? '❤️' : '🤍'}
         </button>
 
-        {/* Fixed-zone layout */}
+        {/* Layout */}
         <div className="w-full" style={{ paddingBottom: 48 }}>
-          {isEmpty ? (
+          {hasFreeLayout ? (
+            <div
+              className="relative w-full mx-auto"
+              style={{
+                aspectRatio: `${layout!.canvasW} / ${layout!.canvasH}`,
+                maxWidth: layout!.canvasW,
+              }}
+            >
+              {layout!.pieces.map(p => {
+                const it = items.find(i => i.id === p.itemId);
+                if (!it) return null;
+                return (
+                  <img
+                    key={p.itemId}
+                    src={it.imageBase64}
+                    alt={it.type}
+                    style={{
+                      position: 'absolute',
+                      left: `${p.x}%`,
+                      top: `${p.y}%`,
+                      width: `${(p.size / layout!.canvasW) * 100}%`,
+                      height: 'auto',
+                      zIndex: p.z,
+                      filter: dropShadow,
+                      pointerEvents: 'none',
+                    }}
+                  />
+                );
+              })}
+            </div>
+          ) : isEmpty ? (
             <div
               className="flex items-center justify-center text-muted-foreground text-sm"
               style={{ height: 380 }}

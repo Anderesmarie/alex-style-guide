@@ -182,6 +182,7 @@ export async function getOutfits(): Promise<Outfit[]> {
     itemIds: row.item_ids as string[],
     createdAt: row.created_at,
     liked: (row as any).liked ?? false,
+    layoutData: ((row as any).layout_data ?? null) as Outfit['layoutData'],
   }));
 }
 
@@ -192,6 +193,7 @@ export async function addOutfit(outfit: Outfit): Promise<void> {
     user_id: uid,
     name: outfit.name,
     item_ids: outfit.itemIds,
+    layout_data: (outfit.layoutData ?? null) as any,
   });
 }
 
