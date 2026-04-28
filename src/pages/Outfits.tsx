@@ -421,7 +421,7 @@ export default function Outfits() {
       <div className="fade-enter pb-4">
         {renderPicker()}
         <div className="flex items-center gap-3 mb-5">
-          <button onClick={() => { setSlots({}); setView('modeChoice'); }} className="text-2xl">←</button>
+          <button onClick={() => { setSlots({}); setView('gallery'); setModeSheetOpen(true); }} className="text-2xl">←</button>
           <h1 className="text-xl font-serif font-bold">Layout visuel</h1>
         </div>
 
@@ -468,7 +468,7 @@ export default function Outfits() {
     return (
       <div className="fade-enter pb-4 no-scrollbar overflow-y-auto">
         <div className="flex items-center gap-3 mb-5">
-          <button onClick={() => { setSelectedIds(new Set()); setView('modeChoice'); }} className="text-2xl">←</button>
+          <button onClick={() => { setSelectedIds(new Set()); setView('gallery'); setModeSheetOpen(true); }} className="text-2xl">←</button>
           <h1 className="text-xl font-serif font-bold">Sélection rapide</h1>
         </div>
 
@@ -609,7 +609,7 @@ export default function Outfits() {
       {tab === 'outfits' && (
         <>
           <button
-            onClick={() => setView('modeChoice')}
+            onClick={() => setModeSheetOpen(true)}
             className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold mb-5 active:scale-[0.98] transition-transform shadow-lg"
           >
             + Créer une tenue
