@@ -18,12 +18,27 @@ export interface ClothingItem {
   fit?: string;
 }
 
+export interface OutfitLayoutPiece {
+  itemId: string;
+  x: number; // percentage 0-100 of canvas width (top-left of piece)
+  y: number; // percentage 0-100 of canvas height
+  size: number; // width in px (height auto)
+  z: number;
+}
+
+export interface OutfitLayoutData {
+  canvasW: number; // reference canvas width in px
+  canvasH: number; // reference canvas height in px
+  pieces: OutfitLayoutPiece[];
+}
+
 export interface Outfit {
   id: string;
   name: string;
   itemIds: string[];
   createdAt: string;
   liked?: boolean;
+  layoutData?: OutfitLayoutData | null;
 }
 
 export interface UserProfile {
