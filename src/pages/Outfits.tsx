@@ -30,6 +30,14 @@ export default function Outfits() {
   const [slots, setSlots] = useState<SlotMap>({});
   const [pickerSlot, setPickerSlot] = useState<SlotKey | null>(null);
 
+  // Mode choice bottom sheet
+  const [modeSheetOpen, setModeSheetOpen] = useState(false);
+
+  // Free-canvas state
+  const [freePieces, setFreePieces] = useState<Array<{ itemId: string; item: ClothingItem; x: number; y: number; size: number; z: number }>>([]);
+  const [freeSelectedId, setFreeSelectedId] = useState<string | null>(null);
+  const [freeChip, setFreeChip] = useState<ChipKey | null>(null);
+
   const loadData = async () => {
     const [w, o] = await Promise.all([getWardrobe(), getOutfits()]);
     setWardrobe(w);
