@@ -242,54 +242,174 @@ export default function Outfits() {
     );
   }
 
-  // Mode choice screen
-  if (view === 'modeChoice') {
+  // Free canvas creation
+  if (view === 'createFree') {
+    const canSave = freePieces.length >= 2 && outfitName.trim().length > 0;
+    const filteredWardrobe = freeChip ? wardrobe.filter(w => chipMatchesItem(freeChip, w)) : [];
+
+    const addPieceFromItem = (item: ClothingItem) => {
+      if (freePieces.some(p => p.itemId === item.id)) {
+        setFreeChip(null);
+        return;
+      }
+      const cat = _getCat(item.type)?.name || item.category || '';
+      const def = defaultPositionForCategory(cat);
+      setFreePieces(prev => [...prev, {
+        itemId: item.id,
+        item,
+        x: def.xPct,
+        y: def.yPct,
+        size: def.size,
+        z: def.z,
+      }]);
+      setFreeChip(null);
+    };
+
+    const removeSelected = () => {
+      if (!freeSelectedId) return;
+      setFreePieces(prev => prev.filter(p => p.itemId !== freeSelectedId));
+      setFreeSelectedId(null);
+    };
+
+    const resizeSelected = (delta: number) => {
+      if (!freeSelectedId) return;
+      setFreePieces(prev => prev.map(p => p.itemId === freeSelectedId
+        ? { ...p, size: Math.max(40, Math.min(280, p.size + delta)) }
+        : p));
+    };
+
+    const handleSaveFree = async () => {
+      if (!canSave) return;
+      await addOutfit({
+        id: genId(),
+        name: outfitName.trim(),
+        itemIds: freePieces.map(p => p.itemId),
+        createdAt: new Date().toISOString(),
+        layoutData: {
+          canvasW: CANVAS_W,
+          canvasH: CANVAS_H,
+          pieces: freePieces.map(p => ({
+            itemId: p.itemId, x: p.x, y: p.y, size: p.size, z: p.z,
+          })),
+        },
+      });
+      updateStreak();
+      const o = await getOutfits();
+      setOutfits(o);
+      setFreePieces([]);
+      setFreeSelectedId(null);
+      setOutfitName('');
+      setView('gallery');
+    };
+
     return (
       <div className="fade-enter pb-4">
-        <div className="flex items-center gap-3 mb-5">
-          <button onClick={() => setView('gallery')} className="text-2xl">←</button>
-          <h1 className="text-xl font-serif font-bold">Créer une tenue</h1>
+        <div className="flex items-center gap-3 mb-4">
+          <button onClick={() => { setFreePieces([]); setFreeSelectedId(null); setView('gallery'); setModeSheetOpen(true); }} className="text-2xl">←</button>
+          <h1 className="text-xl font-serif font-bold">Disposition libre ✨</h1>
         </div>
 
-        <p className="text-sm text-muted-foreground mb-4">
-          Choisis ton mode de création
-        </p>
+        <OutfitFreeCanvas
+          pieces={freePieces}
+          onChange={(next) => setFreePieces(next.map(n => ({
+            ...n,
+            item: freePieces.find(p => p.itemId === n.itemId)!.item,
+          })))}
+          selectedId={freeSelectedId}
+          onSelectId={setFreeSelectedId}
+        />
 
-        <div className="space-y-3">
-          <button
-            onClick={() => { setSlots({}); setOutfitName(''); setView('createVisual'); }}
-            className="w-full bg-card rounded-2xl p-5 card-shadow text-left active:scale-[0.98] transition-transform"
-          >
-            <div className="flex items-start gap-4">
-              <div className="w-16 h-16 rounded-xl bg-muted/40 flex items-center justify-center text-3xl flex-shrink-0">
-                👤
-              </div>
-              <div className="flex-1">
-                <p className="font-serif font-bold text-base mb-1">Layout visuel</p>
-                <p className="text-xs text-muted-foreground">
-                  Compose ta tenue sur une silhouette : haut, bas, chaussures, sac…
-                </p>
-              </div>
-            </div>
-          </button>
+        {/* Selection actions */}
+        {freeSelectedId && (
+          <div className="flex items-center justify-center gap-2 mt-3">
+            <button
+              onClick={() => resizeSelected(-20)}
+              className="w-10 h-10 rounded-full bg-card card-shadow text-lg active:scale-90 transition-transform"
+              aria-label="Réduire"
+            >−</button>
+            <button
+              onClick={() => resizeSelected(20)}
+              className="w-10 h-10 rounded-full bg-card card-shadow text-lg active:scale-90 transition-transform"
+              aria-label="Agrandir"
+            >+</button>
+            <button
+              onClick={removeSelected}
+              className="px-4 h-10 rounded-full bg-destructive/15 text-destructive text-sm font-semibold active:scale-95 transition-transform"
+            >🗑️ Retirer</button>
+          </div>
+        )}
 
-          <button
-            onClick={() => { setSelectedIds(new Set()); setOutfitName(''); setView('createQuick'); }}
-            className="w-full bg-card rounded-2xl p-5 card-shadow text-left active:scale-[0.98] transition-transform"
-          >
-            <div className="flex items-start gap-4">
-              <div className="w-16 h-16 rounded-xl bg-muted/40 flex items-center justify-center text-3xl flex-shrink-0">
-                ⚡
-              </div>
-              <div className="flex-1">
-                <p className="font-serif font-bold text-base mb-1">Sélection rapide</p>
-                <p className="text-xs text-muted-foreground">
-                  Choisis 2 à 5 pièces dans ton dressing en quelques taps
-                </p>
-              </div>
-            </div>
-          </button>
+        {/* Category chips */}
+        <div className="flex gap-2 overflow-x-auto no-scrollbar mt-4 pb-1">
+          {CHIPS.map(c => (
+            <button
+              key={c.key}
+              onClick={() => setFreeChip(c.key)}
+              className="flex-shrink-0 px-4 py-2 rounded-full text-xs font-medium transition-colors"
+              style={{
+                border: '1px solid #C9956C',
+                color: '#C9956C',
+                background: 'transparent',
+              }}
+            >
+              {c.label}
+            </button>
+          ))}
         </div>
+
+        {/* Picker bottom sheet */}
+        {freeChip && (
+          <div className="fixed inset-0 z-50 flex items-end" onClick={() => setFreeChip(null)}>
+            <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
+            <div
+              className="relative w-full bg-card rounded-t-3xl p-5 max-h-[70vh] overflow-y-auto animate-slide-in-bottom"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="w-12 h-1 bg-muted rounded-full mx-auto mb-4" />
+              <h3 className="font-serif font-bold text-lg mb-3">
+                {CHIPS.find(c => c.key === freeChip)?.label}
+              </h3>
+              {filteredWardrobe.length === 0 ? (
+                <p className="text-center text-sm text-muted-foreground py-8">
+                  Aucune pièce dans cette catégorie
+                </p>
+              ) : (
+                <div className="grid grid-cols-3 gap-2">
+                  {filteredWardrobe.map(item => (
+                    <button
+                      key={item.id}
+                      onClick={() => addPieceFromItem(item)}
+                      className="aspect-square rounded-lg overflow-hidden bg-white active:scale-[0.96] transition-transform"
+                    >
+                      <img src={item.imageBase64} alt={item.type} className="w-full h-full object-contain" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        <input
+          type="text"
+          value={outfitName}
+          onChange={e => setOutfitName(e.target.value)}
+          placeholder="Nom de la tenue (ex: Soirée samedi)"
+          className="w-full px-4 py-3 rounded-lg bg-card card-shadow outline-none focus:ring-2 focus:ring-primary/30 mt-4 mb-3"
+        />
+
+        <button
+          onClick={handleSaveFree}
+          disabled={!canSave}
+          className={`w-full py-3.5 rounded-xl font-semibold transition-all duration-200 ${
+            canSave
+              ? 'text-white shadow-lg active:scale-[0.98]'
+              : 'bg-muted text-muted-foreground'
+          }`}
+          style={canSave ? { backgroundColor: '#C9956C' } : undefined}
+        >
+          Sauvegarder
+        </button>
       </div>
     );
   }
