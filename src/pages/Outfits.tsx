@@ -572,10 +572,69 @@ export default function Outfits() {
     );
   }
 
+  // Mode choice bottom sheet (shared)
+  const renderModeSheet = () => {
+    if (!modeSheetOpen) return null;
+    return (
+      <div className="fixed inset-0 z-50 flex items-end" onClick={() => setModeSheetOpen(false)}>
+        <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
+        <div
+          className="relative w-full bg-card rounded-t-3xl p-5 animate-slide-in-bottom"
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="w-12 h-1 bg-muted rounded-full mx-auto mb-4" />
+          <h3 className="font-serif font-bold text-lg mb-1">Créer une tenue</h3>
+          <p className="text-xs text-muted-foreground mb-4">Choisis ton mode de création</p>
+
+          <div className="space-y-3">
+            <button
+              onClick={() => {
+                setModeSheetOpen(false);
+                setSlots({}); setSelectedIds(new Set()); setOutfitName('');
+                setView('createQuick');
+              }}
+              className="w-full bg-secondary/40 rounded-2xl p-4 text-left active:scale-[0.98] transition-transform"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-card flex items-center justify-center text-2xl flex-shrink-0">
+                  ▦
+                </div>
+                <div className="flex-1">
+                  <p className="font-serif font-bold text-base">Layout guidé</p>
+                  <p className="text-xs text-muted-foreground">Sélection rapide de pièces</p>
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => {
+                setModeSheetOpen(false);
+                setFreePieces([]); setFreeSelectedId(null); setOutfitName('');
+                setView('createFree');
+              }}
+              className="w-full bg-secondary/40 rounded-2xl p-4 text-left active:scale-[0.98] transition-transform"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-card flex items-center justify-center text-2xl flex-shrink-0">
+                  ✨
+                </div>
+                <div className="flex-1">
+                  <p className="font-serif font-bold text-base">Disposition libre</p>
+                  <p className="text-xs text-muted-foreground">Compose en drag & drop sur un canvas blanc</p>
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Gallery
   return (
     <div className="fade-enter pb-4">
       {renderDeleteDialog()}
+      {renderModeSheet()}
       <h1 className="text-2xl font-serif font-bold mb-4">Mes Looks</h1>
 
       {/* Sub-tabs */}
