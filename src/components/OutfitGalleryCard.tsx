@@ -9,12 +9,23 @@ interface Props {
   onToggleLike?: (next: boolean) => void;
 }
 
-type Placement = {
-  item: ClothingItem;
-  size: number;
-  style: React.CSSProperties;
-  zIndex: number;
-};
+const dropShadow = 'drop-shadow(0 4px 6px rgba(0,0,0,0.10))';
+
+function Piece({ item, height }: { item: ClothingItem; height: number }) {
+  return (
+    <img
+      src={item.imageBase64}
+      alt={item.type}
+      style={{
+        height,
+        width: 'auto',
+        maxWidth: '100%',
+        objectFit: 'contain',
+        filter: dropShadow,
+      }}
+    />
+  );
+}
 
 // Decide bucket based on category name
 function bucketOf(item: ClothingItem): 'jewelry' | 'jacket' | 'top' | 'bottom' | 'shoes' | 'bag' | 'dress' | 'other' {
