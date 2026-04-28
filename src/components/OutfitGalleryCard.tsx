@@ -56,11 +56,28 @@ function bucketize(items: ClothingItem[]) {
 }
 
 export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onToggleLike }: Props) {
-  const placements = buildPlacements(items);
+  const buckets = bucketize(items);
   const liked = !!outfit.liked;
   const displayName =
     outfit.name?.trim() ||
     new Date(outfit.createdAt).toLocaleDateString('fr-FR');
+
+  // Pulls go to LEFT zone per spec; tops bucket includes both pulls & tops, split them
+  const isPull = (it: ClothingItem) =>
+    (getCategoryByType(it.type)?.name || it.category) === 'Pulls & sweats';
+  const pulls = buckets.top.filter(isPull);
+  const tops = buckets.top.filter(it => !isPull(it));
+
+  const leftPiece = buckets.jacket[0] || pulls[0] || null;
+  const topPiece = tops[0] || null;
+  const bottomPiece = buckets.bottom[0] || null;
+  const dressPiece = buckets.dress[0] || null;
+  const shoesPiece = buckets.shoes[0] || null;
+  const bagPiece = buckets.bag[0] || null;
+  const accessories = buckets.jewelry;
+  const isEmpty =
+    !leftPiece && !topPiece && !bottomPiece && !dressPiece &&
+    !shoesPiece && !bagPiece && accessories.length === 0;
 
   return (
     <div className="mb-4">
@@ -101,28 +118,61 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
           {liked ? '❤️' : '🤍'}
         </button>
 
-        {/* Canvas with pieces */}
-        <div className="relative w-full" style={{ height: 380 }}>
-          {placements.length === 0 && (
-            <div className="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm">
+        {/* Fixed-zone layout */}
+        <div className="w-full" style={{ paddingBottom: 48 }}>
+          {isEmpty ? (
+            <div
+              className="flex items-center justify-center text-muted-foreground text-sm"
+              style={{ height: 380 }}
+            >
               Tenue vide
             </div>
+          ) : (
+            <>
+              <div className="flex w-full" style={{ gap: 8 }}>
+                {/* LEFT ZONE 30% */}
+                <div
+                  className="flex items-center justify-center"
+                  style={{ width: '30%', minHeight: 320 }}
+                >
+                  {leftPiece && <Piece item={leftPiece} height={180} />}
+                </div>
+
+                {/* CENTER-RIGHT ZONE 70% */}
+                <div
+                  className="flex flex-col items-center"
+                  style={{ width: '70%', gap: 4 }}
+                >
+                  {dressPiece ? (
+                    <Piece item={dressPiece} height={260} />
+                  ) : (
+                    <>
+                      {topPiece && <Piece item={topPiece} height={140} />}
+                      {bottomPiece && <Piece item={bottomPiece} height={180} />}
+                    </>
+                  )}
+                  {shoesPiece && <Piece item={shoesPiece} height={110} />}
+                </div>
+              </div>
+
+              {/* BOTTOM ZONE: bag left, accessories right */}
+              {(bagPiece || accessories.length > 0) && (
+                <div
+                  className="flex items-end justify-between w-full"
+                  style={{ marginTop: 12 }}
+                >
+                  <div className="flex items-end">
+                    {bagPiece && <Piece item={bagPiece} height={80} />}
+                  </div>
+                  <div className="flex items-end gap-2">
+                    {accessories.map(a => (
+                      <Piece key={a.id} item={a} height={50} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
-          {placements.map((p, idx) => (
-            <img
-              key={`${p.item.id}-${idx}`}
-              src={p.item.imageBase64}
-              alt={p.item.type}
-              style={{
-                width: p.size,
-                height: p.size,
-                objectFit: 'contain',
-                zIndex: p.zIndex,
-                filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.12))',
-                ...p.style,
-              }}
-            />
-          ))}
         </div>
 
         {/* Bottom band */}
