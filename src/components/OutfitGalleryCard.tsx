@@ -89,7 +89,7 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
           background: '#FFFFFF',
           borderRadius: 16,
           boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-          padding: 24,
+          padding: 16,
         }}
       >
         {/* Like button */}
