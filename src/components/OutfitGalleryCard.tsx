@@ -58,7 +58,7 @@ function bucketize(items: ClothingItem[]) {
   return buckets;
 }
 
-export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onToggleLike }: Props) {
+export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onToggleLike, badgeLabel, hideLike, hideName }: Props) {
   const buckets = bucketize(items);
   const liked = !!outfit.liked;
   const displayName =
@@ -232,7 +232,7 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
           }}
         >
           <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#9CA3AF' }}>
-            ✨ Créée par MyStyl
+            {badgeLabel || '✨ Créée par MyStyl'}
           </span>
           <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#9CA3AF' }}>
             @{pseudo || 'moi'}
