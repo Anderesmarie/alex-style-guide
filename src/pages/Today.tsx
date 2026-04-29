@@ -96,7 +96,8 @@ export default function Today() {
 
   const today = new Date().toISOString().split('T')[0];
   const enough = wardrobe.length >= 8;
-  const canSuggest = dailyCount < 3;
+  // TEMP: limite augmentée à 99 pour les tests (remettre à 3 ensuite)
+  const canSuggest = dailyCount < 99;
   const weatherTemp = ws.status === 'done' ? ws.data.temperature : null;
 
   // Load data
