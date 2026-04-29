@@ -636,7 +636,13 @@ export function buildCustomOutfit(
     }
   }
 
-  const optionals: string[] = ['COUCHES', 'CHAUSSURES', 'ACCESSOIRES'];
+  // Always try to fill shoes (required for valid outfit)
+  if (!filledGroups.has('CHAUSSURES')) {
+    const pick = scored.find(s => getGroup(s.item) === 'CHAUSSURES' && !usedIds.has(s.item.id));
+    if (pick) { outfit.push(pick.item); usedIds.add(pick.item.id); filledGroups.add('CHAUSSURES'); }
+  }
+
+  const optionals: string[] = ['COUCHES', 'ACCESSOIRES'];
   for (const groupKey of optionals) {
     if (filledGroups.has(groupKey) || outfit.length >= 5) continue;
     const pick = scored.find(s => getGroup(s.item) === groupKey && !usedIds.has(s.item.id));
