@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { DndContext, useDraggable, DragEndEvent, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, useDraggable, DragEndEvent, DragStartEvent, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { ClothingItem, OutfitLayoutPiece } from '@/lib/types';
 import { getCategoryByType } from '@/lib/categories';
@@ -89,11 +89,25 @@ interface Props {
 export default function OutfitFreeCanvas({ pieces, onChange, selectedId, onSelectId }: Props) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
   );
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const lockScroll = () => {
+    document.body.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
+  };
+  const unlockScroll = () => {
+    document.body.style.overflow = '';
+    document.body.style.touchAction = '';
+  };
+
+  const handleDragStart = (_e: DragStartEvent) => {
+    lockScroll();
+  };
+
   const handleDragEnd = (e: DragEndEvent) => {
+    unlockScroll();
     const { active, delta } = e;
     onChange(pieces.map(p => {
       if (p.itemId !== active.id) return p;
@@ -106,7 +120,7 @@ export default function OutfitFreeCanvas({ pieces, onChange, selectedId, onSelec
   };
 
   return (
-    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragCancel={unlockScroll}>
       <div
         ref={containerRef}
         onClick={() => onSelectId(null)}
@@ -120,6 +134,9 @@ export default function OutfitFreeCanvas({ pieces, onChange, selectedId, onSelec
           borderRadius: 16,
           boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
           overflow: 'hidden',
+          touchAction: 'none',
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
         }}
       >
         {pieces.length === 0 && (
