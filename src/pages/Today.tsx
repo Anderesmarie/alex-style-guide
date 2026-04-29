@@ -84,7 +84,7 @@ export default function Today() {
   const [ws, setWs] = useState<WeatherState>({ status: 'loading' });
   const [cityInput, setCityInput] = useState('');
   const [recommendations, setRecommendations] = useState<ClothingItem[][]>([]);
-  const [swipeResults, setSwipeResults] = useState<{ outfit: ClothingItem[]; liked: boolean | null }[] | null>(null);
+  const [swipeResults, setSwipeResults] = useState<{ outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null }[] | null>(null);
   const [swipeComplete, setSwipeComplete] = useState(false);
   const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -205,7 +205,11 @@ export default function Today() {
     setRecommendations(recs);
     // Auto-treat as completed (vertical scroll feed, no swiping)
     if (recs.length > 0) {
-      const results = recs.map(outfit => ({ outfit, liked: null as boolean | null }));
+      const results = recs.map(outfit => ({
+        outfit,
+        liked: null as boolean | null,
+        layoutData: buildDefaultLayoutData(outfit),
+      }));
       setSwipeResults(results);
       setSwipeComplete(true);
       await saveTodayData(today, results);
@@ -222,7 +226,7 @@ export default function Today() {
     }
   }, [loading, ws.status, enough, swipeComplete]); // eslint-disable-line
 
-  const handleResultsChange = (next: { outfit: ClothingItem[]; liked: boolean | null }[]) => {
+  const handleResultsChange = (next: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null }[]) => {
     setSwipeResults(next);
     saveTodayData(today, next);
   };
