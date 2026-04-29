@@ -4,8 +4,7 @@ import { getWardrobe, getDailyCounter, saveDailyCounter, getProfile } from '@/li
 import { generateRecommendations } from '@/lib/recommendations';
 import { ClothingItem, UserProfile } from '@/lib/types';
 import { loadBeautyProfile } from '@/lib/stylingTips';
-import OutfitSwiper from '@/components/OutfitSwiper';
-import OutfitResults from '@/components/OutfitResults';
+import OutfitDailyFeed from '@/components/OutfitDailyFeed';
 import CustomOutfitCard from '@/components/CustomOutfitCard';
 import ProgressMilestones from '@/components/ProgressMilestones';
 import StreakCounter from '@/components/StreakCounter';
@@ -202,7 +201,17 @@ export default function Today() {
     if (!canSuggest) return;
     const recs = await generateRecommendations(wardrobe, weatherTemp, 3, userProfile);
     setRecommendations(recs);
-  }, [weatherTemp, canSuggest, enough, wardrobe, today, swipeComplete, userProfile]);
+    // Auto-treat as completed (vertical scroll feed, no swiping)
+    if (recs.length > 0) {
+      const results = recs.map(outfit => ({ outfit, liked: null as boolean | null }));
+      setSwipeResults(results);
+      setSwipeComplete(true);
+      await saveTodayData(today, results);
+      const newCount = dailyCount + 1;
+      setDailyCount(newCount);
+      await saveDailyCounter({ date: today, count: newCount });
+    }
+  }, [weatherTemp, canSuggest, enough, wardrobe, today, swipeComplete, userProfile, dailyCount]);
 
   // Auto-generate only if no saved results for today and has quota
   useEffect(() => {
@@ -211,13 +220,9 @@ export default function Today() {
     }
   }, [loading, ws.status, enough, swipeComplete]); // eslint-disable-line
 
-  const handleSwipeComplete = async (results: { outfit: ClothingItem[]; liked: boolean | null }[]) => {
-    setSwipeResults(results);
-    setSwipeComplete(true);
-    await saveTodayData(today, results);
-    const newCount = dailyCount + 1;
-    setDailyCount(newCount);
-    await saveDailyCounter({ date: today, count: newCount });
+  const handleResultsChange = (next: { outfit: ClothingItem[]; liked: boolean | null }[]) => {
+    setSwipeResults(next);
+    saveTodayData(today, next);
   };
 
   const avatarData = getAvatarFromStorage();
@@ -370,30 +375,18 @@ export default function Today() {
         </div>
       )}
 
-      {/* Swiper for new suggestions */}
-      {enough && !swipeComplete && recommendations.length > 0 && (
-        <div className="space-y-2">
-          <h2 className="text-lg font-serif font-semibold text-center">Suggestions du jour</h2>
-          <OutfitSwiper
-            outfits={recommendations}
-            weatherCode={ws.status === 'done' ? ws.data.weathercode : null}
-            temperature={weatherTemp}
-            onComplete={handleSwipeComplete}
-            userSeason={userSeason}
-            userProfile={userProfile}
-          />
-        </div>
-      )}
-
-      {/* Saved results — always visible */}
+      {/* Vertical scroll feed of suggested outfits */}
       {swipeComplete && swipeResults && (
         <>
-          <OutfitResults
+          <OutfitDailyFeed
             results={swipeResults}
             weatherCode={ws.status === 'done' ? ws.data.weathercode : null}
             temperature={weatherTemp}
             userSeason={userSeason}
             userProfile={userProfile}
+            pseudo={pseudo}
+            wardrobe={wardrobe}
+            onResultsChange={handleResultsChange}
           />
           {/* Custom outfit card — always after auto results */}
           <div className="mt-4">

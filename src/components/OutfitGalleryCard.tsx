@@ -7,6 +7,9 @@ interface Props {
   pseudo?: string | null;
   onClick?: () => void;
   onToggleLike?: (next: boolean) => void;
+  badgeLabel?: string;
+  hideLike?: boolean;
+  hideName?: boolean;
 }
 
 const dropShadow = 'drop-shadow(0 4px 6px rgba(0,0,0,0.10))';
@@ -55,7 +58,7 @@ function bucketize(items: ClothingItem[]) {
   return buckets;
 }
 
-export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onToggleLike }: Props) {
+export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onToggleLike, badgeLabel, hideLike, hideName }: Props) {
   const buckets = bucketize(items);
   const liked = !!outfit.liked;
   const displayName =
@@ -97,30 +100,32 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
         }}
       >
         {/* Like button */}
-        <button
-          onClick={e => {
-            e.stopPropagation();
-            onToggleLike?.(!liked);
-          }}
-          aria-label={liked ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-          className="absolute z-20 active:scale-90 transition-transform"
-          style={{
-            top: 12,
-            right: 12,
-            fontSize: 22,
-            lineHeight: 1,
-            background: 'rgba(255,255,255,0.9)',
-            borderRadius: 999,
-            width: 36,
-            height: 36,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-          }}
-        >
-          {liked ? '❤️' : '🤍'}
-        </button>
+        {!hideLike && (
+          <button
+            onClick={e => {
+              e.stopPropagation();
+              onToggleLike?.(!liked);
+            }}
+            aria-label={liked ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+            className="absolute z-20 active:scale-90 transition-transform"
+            style={{
+              top: 12,
+              right: 12,
+              fontSize: 22,
+              lineHeight: 1,
+              background: 'rgba(255,255,255,0.9)',
+              borderRadius: 999,
+              width: 36,
+              height: 36,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+            }}
+          >
+            {liked ? '❤️' : '🤍'}
+          </button>
+        )}
 
         {/* Layout */}
         <div className="w-full" style={{ paddingBottom: 48 }}>
@@ -229,7 +234,7 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
           }}
         >
           <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#9CA3AF' }}>
-            ✨ Créée par MyStyl
+            {badgeLabel || '✨ Créée par MyStyl'}
           </span>
           <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#9CA3AF' }}>
             @{pseudo || 'moi'}
@@ -238,16 +243,18 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
       </div>
 
       {/* Outfit name below card */}
-      <p
-        className="text-center mt-2"
-        style={{
-          fontFamily: 'Playfair Display, serif',
-          fontSize: 14,
-          color: '#2C2C2C',
-        }}
-      >
-        {displayName}
-      </p>
+      {!hideName && (
+        <p
+          className="text-center mt-2"
+          style={{
+            fontFamily: 'Playfair Display, serif',
+            fontSize: 14,
+            color: '#2C2C2C',
+          }}
+        >
+          {displayName}
+        </p>
+      )}
     </div>
   );
 }
