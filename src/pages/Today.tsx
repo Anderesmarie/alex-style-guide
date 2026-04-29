@@ -4,8 +4,7 @@ import { getWardrobe, getDailyCounter, saveDailyCounter, getProfile } from '@/li
 import { generateRecommendations } from '@/lib/recommendations';
 import { ClothingItem, UserProfile } from '@/lib/types';
 import { loadBeautyProfile } from '@/lib/stylingTips';
-import OutfitSwiper from '@/components/OutfitSwiper';
-import OutfitResults from '@/components/OutfitResults';
+import OutfitDailyFeed from '@/components/OutfitDailyFeed';
 import CustomOutfitCard from '@/components/CustomOutfitCard';
 import ProgressMilestones from '@/components/ProgressMilestones';
 import StreakCounter from '@/components/StreakCounter';
