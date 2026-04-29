@@ -1,6 +1,54 @@
-import { ClothingItem, UserProfile } from './types';
+import { ClothingItem, OutfitLayoutData, OutfitLayoutPiece, UserProfile } from './types';
 import { getLastOutfit, getRejected } from './storage';
 import { supabase } from './supabase';
+import { getCategoryByType } from './categories';
+
+// Reference canvas (must match OutfitFreeCanvas CANVAS_W / CANVAS_H)
+const DEFAULT_CANVAS_W = 360;
+const DEFAULT_CANVAS_H = 500;
+
+// Default px positions per slot on a 360x500 canvas
+type Slot = 'top' | 'jacket' | 'bottom' | 'dress' | 'shoes' | 'bag' | 'accessory';
+const SLOT_DEFAULTS: Record<Slot, { x: number; y: number; width: number; z: number }> = {
+  top:       { x: 20,  y: 20,  width: 150, z: 3 },
+  jacket:    { x: 220, y: 20,  width: 150, z: 2 },
+  bottom:    { x: 80,  y: 200, width: 160, z: 2 },
+  dress:     { x: 80,  y: 60,  width: 200, z: 3 },
+  shoes:     { x: 20,  y: 400, width: 120, z: 2 },
+  bag:       { x: 250, y: 320, width: 110, z: 4 },
+  accessory: { x: 270, y: 420, width: 80,  z: 5 },
+};
+
+function slotForItem(item: ClothingItem): Slot {
+  const cat = getCategoryByType(item.type)?.name || item.category || '';
+  if (cat === 'Manteaux & vestes') return 'jacket';
+  if (cat === 'Robes & combinaisons') return 'dress';
+  if (cat === 'Hauts' || cat === 'Pulls & sweats') return 'top';
+  if (cat === 'Bas' || cat === 'Jupes') return 'bottom';
+  if (cat === 'Chaussures') return 'shoes';
+  if (cat === 'Sacs') return 'bag';
+  if (cat === 'Accessoires') return 'accessory';
+  return 'accessory';
+}
+
+export function buildDefaultLayoutData(items: ClothingItem[]): OutfitLayoutData {
+  const pieces: OutfitLayoutPiece[] = items.map((item, i) => {
+    const slot = slotForItem(item);
+    const def = SLOT_DEFAULTS[slot];
+    return {
+      itemId: item.id,
+      x: (def.x / DEFAULT_CANVAS_W) * 100,
+      y: (def.y / DEFAULT_CANVAS_H) * 100,
+      size: def.width,
+      z: def.z + i, // unique z to avoid overlaps
+    };
+  });
+  return {
+    canvasW: DEFAULT_CANVAS_W,
+    canvasH: DEFAULT_CANVAS_H,
+    pieces,
+  };
+}
 
 // ---------- Preference helpers (Supabase) ----------
 

@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { WeatherData, fetchWeatherByGeolocation, fetchWeatherByCity, getSavedCity, saveCity } from '@/lib/weather';
 import { getWardrobe, getDailyCounter, saveDailyCounter, getProfile } from '@/lib/storage';
-import { generateRecommendations } from '@/lib/recommendations';
-import { ClothingItem, UserProfile } from '@/lib/types';
+import { generateRecommendations, buildDefaultLayoutData } from '@/lib/recommendations';
+import { ClothingItem, OutfitLayoutData, UserProfile } from '@/lib/types';
 import { loadBeautyProfile } from '@/lib/stylingTips';
 import OutfitDailyFeed from '@/components/OutfitDailyFeed';
 import CustomOutfitCard from '@/components/CustomOutfitCard';
@@ -24,6 +24,7 @@ type WeatherState =
 interface SavedOutfitResult {
   outfitIds: string[];
   liked: boolean | null;
+  layoutData?: OutfitLayoutData | null;
 }
 
 interface SavedTodayData {
@@ -31,7 +32,7 @@ interface SavedTodayData {
   results: SavedOutfitResult[];
 }
 
-async function loadTodayData(today: string, wardrobe: ClothingItem[]): Promise<{ outfit: ClothingItem[]; liked: boolean | null }[] | null> {
+async function loadTodayData(today: string, wardrobe: ClothingItem[]): Promise<{ outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null }[] | null> {
   try {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return null;
@@ -45,7 +46,7 @@ async function loadTodayData(today: string, wardrobe: ClothingItem[]): Promise<{
     const results = data.results as SavedOutfitResult[];
     const resolved = results.map(r => {
       const items = r.outfitIds.map(id => wardrobe.find(i => i.id === id)).filter(Boolean) as ClothingItem[];
-      return { outfit: items, liked: r.liked };
+      return { outfit: items, liked: r.liked, layoutData: r.layoutData ?? null };
     }).filter(r => r.outfit.length > 0);
     return resolved.length > 0 ? resolved : null;
   } catch {
@@ -53,13 +54,14 @@ async function loadTodayData(today: string, wardrobe: ClothingItem[]): Promise<{
   }
 }
 
-async function saveTodayData(today: string, results: { outfit: ClothingItem[]; liked: boolean | null }[]) {
+async function saveTodayData(today: string, results: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null }[]) {
   try {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
     const payload: SavedOutfitResult[] = results.map(r => ({
       outfitIds: r.outfit.map(i => i.id),
       liked: r.liked,
+      layoutData: r.layoutData ?? null,
     }));
     await supabase.from('daily_outfits').upsert({
       user_id: userData.user.id,
@@ -82,7 +84,7 @@ export default function Today() {
   const [ws, setWs] = useState<WeatherState>({ status: 'loading' });
   const [cityInput, setCityInput] = useState('');
   const [recommendations, setRecommendations] = useState<ClothingItem[][]>([]);
-  const [swipeResults, setSwipeResults] = useState<{ outfit: ClothingItem[]; liked: boolean | null }[] | null>(null);
+  const [swipeResults, setSwipeResults] = useState<{ outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null }[] | null>(null);
   const [swipeComplete, setSwipeComplete] = useState(false);
   const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -203,7 +205,11 @@ export default function Today() {
     setRecommendations(recs);
     // Auto-treat as completed (vertical scroll feed, no swiping)
     if (recs.length > 0) {
-      const results = recs.map(outfit => ({ outfit, liked: null as boolean | null }));
+      const results = recs.map(outfit => ({
+        outfit,
+        liked: null as boolean | null,
+        layoutData: buildDefaultLayoutData(outfit),
+      }));
       setSwipeResults(results);
       setSwipeComplete(true);
       await saveTodayData(today, results);
@@ -220,7 +226,7 @@ export default function Today() {
     }
   }, [loading, ws.status, enough, swipeComplete]); // eslint-disable-line
 
-  const handleResultsChange = (next: { outfit: ClothingItem[]; liked: boolean | null }[]) => {
+  const handleResultsChange = (next: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null }[]) => {
     setSwipeResults(next);
     saveTodayData(today, next);
   };
