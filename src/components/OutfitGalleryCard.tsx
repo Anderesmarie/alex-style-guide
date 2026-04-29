@@ -100,30 +100,32 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
         }}
       >
         {/* Like button */}
-        <button
-          onClick={e => {
-            e.stopPropagation();
-            onToggleLike?.(!liked);
-          }}
-          aria-label={liked ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-          className="absolute z-20 active:scale-90 transition-transform"
-          style={{
-            top: 12,
-            right: 12,
-            fontSize: 22,
-            lineHeight: 1,
-            background: 'rgba(255,255,255,0.9)',
-            borderRadius: 999,
-            width: 36,
-            height: 36,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-          }}
-        >
-          {liked ? '❤️' : '🤍'}
-        </button>
+        {!hideLike && (
+          <button
+            onClick={e => {
+              e.stopPropagation();
+              onToggleLike?.(!liked);
+            }}
+            aria-label={liked ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+            className="absolute z-20 active:scale-90 transition-transform"
+            style={{
+              top: 12,
+              right: 12,
+              fontSize: 22,
+              lineHeight: 1,
+              background: 'rgba(255,255,255,0.9)',
+              borderRadius: 999,
+              width: 36,
+              height: 36,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+            }}
+          >
+            {liked ? '❤️' : '🤍'}
+          </button>
+        )}
 
         {/* Layout */}
         <div className="w-full" style={{ paddingBottom: 48 }}>
