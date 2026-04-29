@@ -256,22 +256,14 @@ export default function OutfitDailyFeed({
 
           return (
             <div key={idx} className={isDisliked ? 'opacity-50' : ''}>
-              {/* Reuse the gallery card but override the bottom badge text via a wrapper */}
-              <div className="relative">
-                <OutfitGalleryCard
-                  outfit={fakeOutfit}
-                  items={r.outfit}
-                  pseudo={pseudo}
-                />
-                {/* Override bottom "Créée par" with "Générée par" */}
-                <div
-                  className="absolute left-4 right-4 flex items-center justify-between px-4 pointer-events-none"
-                  style={{
-                    bottom: 32, // sits over the existing badge — actually we just leave it and overlay text
-                    height: 40,
-                  }}
-                />
-              </div>
+              <OutfitGalleryCard
+                outfit={fakeOutfit}
+                items={r.outfit}
+                pseudo={pseudo}
+                badgeLabel="✨ Générée par MyStyl"
+                hideLike
+                hideName
+              />
 
               {/* Action buttons */}
               <div className="mt-3 space-y-2">
