@@ -452,6 +452,25 @@ function scoreByProfile(
   return score;
 }
 
+/**
+ * Validate that an outfit contains the required pieces:
+ * - At least 1 top OR 1 dress/combinaison
+ * - At least 1 bottom (if no dress)
+ * - At least 1 pair of shoes
+ */
+export function isValidOutfit(outfit: ClothingItem[]): boolean {
+  if (!outfit || outfit.length === 0) return false;
+  const groups = outfit.map(getGroup);
+  const hasTop = groups.includes('HAUTS');
+  const hasBottom = groups.includes('BAS');
+  const hasDress = groups.includes('ROBES');
+  const hasShoes = groups.includes('CHAUSSURES');
+
+  if (!hasShoes) return false;
+  if (hasDress) return true;
+  return hasTop && hasBottom;
+}
+
 function collectOutfits(
   pool: ClothingItem[],
   targetCount: number,
@@ -467,6 +486,7 @@ function collectOutfits(
     attempts++;
     const outfit = buildOneOutfit(pool, new Set<string>(), temperature);
     if (!outfit) continue;
+    if (!isValidOutfit(outfit)) continue;
 
     const key = outfit.map(i => i.id).sort().join(',');
     if (blockedKeys.has(key) || seenKeys.has(key)) continue;
@@ -616,7 +636,13 @@ export function buildCustomOutfit(
     }
   }
 
-  const optionals: string[] = ['COUCHES', 'CHAUSSURES', 'ACCESSOIRES'];
+  // Always try to fill shoes (required for valid outfit)
+  if (!filledGroups.has('CHAUSSURES')) {
+    const pick = scored.find(s => getGroup(s.item) === 'CHAUSSURES' && !usedIds.has(s.item.id));
+    if (pick) { outfit.push(pick.item); usedIds.add(pick.item.id); filledGroups.add('CHAUSSURES'); }
+  }
+
+  const optionals: string[] = ['COUCHES', 'ACCESSOIRES'];
   for (const groupKey of optionals) {
     if (filledGroups.has(groupKey) || outfit.length >= 5) continue;
     const pick = scored.find(s => getGroup(s.item) === groupKey && !usedIds.has(s.item.id));
@@ -624,4 +650,42 @@ export function buildCustomOutfit(
   }
 
   return outfit;
+}
+
+/**
+ * Build a custom outfit and validate it. Retries up to 5 times
+ * (varying the central piece if not provided) before giving up.
+ * Returns null if no valid outfit can be built.
+ */
+export function buildValidCustomOutfit(
+  wardrobe: ClothingItem[],
+  centralPiece: ClothingItem | null,
+  occasion: string,
+  style: string,
+  excludeIds: Set<string>,
+  maxAttempts = 5,
+): ClothingItem[] | null {
+  const pickCentral = (): ClothingItem | null => {
+    if (centralPiece) return centralPiece;
+    let candidates = wardrobe.filter(i => !excludeIds.has(i.id));
+    if (occasion) {
+      const filtered = candidates.filter(i => i.occasion?.some(o => o === occasion));
+      if (filtered.length > 0) candidates = filtered;
+    }
+    if (style) {
+      const filtered = candidates.filter(i => i.style?.some(s => s === style));
+      if (filtered.length > 0) candidates = filtered;
+    }
+    if (candidates.length === 0) candidates = wardrobe;
+    if (candidates.length === 0) return null;
+    return candidates[Math.floor(Math.random() * candidates.length)];
+  };
+
+  for (let i = 0; i < maxAttempts; i++) {
+    const central = pickCentral();
+    if (!central) return null;
+    const outfit = buildCustomOutfit(wardrobe, central, occasion, style, excludeIds);
+    if (isValidOutfit(outfit)) return outfit;
+  }
+  return null;
 }

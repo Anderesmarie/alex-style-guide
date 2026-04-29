@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { ClothingItem, UserProfile, STYLE_OPTIONS } from '@/lib/types';
-import { buildCustomOutfit } from '@/lib/recommendations';
+import { buildValidCustomOutfit } from '@/lib/recommendations';
 import { addOutfit, genId, saveLastOutfit } from '@/lib/storage';
 import { getStylingTips } from '@/lib/stylingTips';
 import { updateStreak } from '@/lib/streak';
@@ -34,23 +34,22 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
     if (!hasFilter) return;
     setGenerating(true);
 
-    // Pick a central piece: selected item, or random from wardrobe matching filters
-    let central = selectedItem;
-    if (!central) {
-      let candidates = [...wardrobe];
-      if (occasion) candidates = candidates.filter(i => i.occasion?.some(o => o === occasion));
-      if (selectedStyle) candidates = candidates.filter(i => i.style?.some(s => s === selectedStyle));
-      if (candidates.length === 0) candidates = wardrobe;
-      central = candidates[Math.floor(Math.random() * candidates.length)];
-    }
-
-    const outfit = buildCustomOutfit(
+    const outfit = buildValidCustomOutfit(
       wardrobe,
-      central,
+      selectedItem,
       occasion || 'Quotidien',
       selectedStyle || '',
-      new Set<string>()
+      new Set<string>(),
+      5,
     );
+
+    if (!outfit) {
+      toast("Pas assez de pièces pour une tenue complète ✨ Ajoute un haut, un bas et des chaussures !", {
+        duration: 3500,
+      });
+      setGenerating(false);
+      return;
+    }
 
     setGeneratedOutfit(outfit);
     setGenerating(false);
