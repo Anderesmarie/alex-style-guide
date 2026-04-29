@@ -452,6 +452,25 @@ function scoreByProfile(
   return score;
 }
 
+/**
+ * Validate that an outfit contains the required pieces:
+ * - At least 1 top OR 1 dress/combinaison
+ * - At least 1 bottom (if no dress)
+ * - At least 1 pair of shoes
+ */
+export function isValidOutfit(outfit: ClothingItem[]): boolean {
+  if (!outfit || outfit.length === 0) return false;
+  const groups = outfit.map(getGroup);
+  const hasTop = groups.includes('HAUTS');
+  const hasBottom = groups.includes('BAS');
+  const hasDress = groups.includes('ROBES');
+  const hasShoes = groups.includes('CHAUSSURES');
+
+  if (!hasShoes) return false;
+  if (hasDress) return true;
+  return hasTop && hasBottom;
+}
+
 function collectOutfits(
   pool: ClothingItem[],
   targetCount: number,
@@ -467,6 +486,7 @@ function collectOutfits(
     attempts++;
     const outfit = buildOneOutfit(pool, new Set<string>(), temperature);
     if (!outfit) continue;
+    if (!isValidOutfit(outfit)) continue;
 
     const key = outfit.map(i => i.id).sort().join(',');
     if (blockedKeys.has(key) || seenKeys.has(key)) continue;
