@@ -1,6 +1,4 @@
-import { useRef, useState } from 'react';
-import { DndContext, useDraggable, DragEndEvent, DragStartEvent, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { CSS } from '@dnd-kit/utilities';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import { ClothingItem, OutfitLayoutPiece } from '@/lib/types';
 import { getCategoryByType } from '@/lib/categories';
 
@@ -20,7 +18,6 @@ export const CHIPS: { key: ChipKey; label: string; matches: string[] }[] = [
 ];
 
 export function defaultPositionForCategory(catName: string): { xPct: number; yPct: number; size: number; z: number } {
-  // x/y = top-left in % of canvas
   if (catName === 'Manteaux & vestes') return { xPct: 5, yPct: 18, size: 170, z: 2 };
   if (catName === 'Hauts' || catName === 'Pulls & sweats') return { xPct: 35, yPct: 12, size: 140, z: 3 };
   if (catName === 'Robes & combinaisons') return { xPct: 28, yPct: 14, size: 180, z: 3 };
@@ -35,50 +32,6 @@ interface CanvasPiece extends OutfitLayoutPiece {
   item: ClothingItem;
 }
 
-interface DraggablePieceProps {
-  piece: CanvasPiece;
-  selected: boolean;
-  onSelect: () => void;
-}
-
-function DraggablePiece({ piece, selected, onSelect }: DraggablePieceProps) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: piece.itemId });
-  const px = (piece.x / 100) * CANVAS_W;
-  const py = (piece.y / 100) * CANVAS_H;
-
-  return (
-    <div
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      onClick={(e) => { e.stopPropagation(); onSelect(); }}
-      onPointerDown={(e) => e.stopPropagation()}
-      style={{
-        position: 'absolute',
-        left: px,
-        top: py,
-        width: piece.size,
-        zIndex: piece.z + (selected ? 50 : 0),
-        transform: CSS.Translate.toString(transform),
-        cursor: isDragging ? 'grabbing' : 'grab',
-        touchAction: 'none',
-        outline: selected ? '2px solid #C9956C' : 'none',
-        outlineOffset: 4,
-        borderRadius: 8,
-        filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.10))',
-        userSelect: 'none',
-      }}
-    >
-      <img
-        src={piece.item.imageBase64}
-        alt={piece.item.type}
-        draggable={false}
-        style={{ width: '100%', height: 'auto', display: 'block', pointerEvents: 'none' }}
-      />
-    </div>
-  );
-}
-
 interface Props {
   pieces: CanvasPiece[];
   onChange: (pieces: CanvasPiece[]) => void;
@@ -86,12 +39,20 @@ interface Props {
   onSelectId: (id: string | null) => void;
 }
 
+interface DragState {
+  itemId: string;
+  startClientX: number;
+  startClientY: number;
+  startX: number; // px on canvas
+  startY: number; // px on canvas
+}
+
 export default function OutfitFreeCanvas({ pieces, onChange, selectedId, onSelectId }: Props) {
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
-  );
   const containerRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<DragState | null>(null);
+  const [dragId, setDragId] = useState<string | null>(null);
+  // live offset during drag (px)
+  const [dragOffset, setDragOffset] = useState<{ dx: number; dy: number }>({ dx: 0, dy: 0 });
 
   const lockScroll = () => {
     document.body.style.overflow = 'hidden';
@@ -102,58 +63,168 @@ export default function OutfitFreeCanvas({ pieces, onChange, selectedId, onSelec
     document.body.style.touchAction = '';
   };
 
-  const handleDragStart = (_e: DragStartEvent) => {
+  const endDrag = useCallback((commit: boolean) => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    if (commit) {
+      const finalX = drag.startX + dragOffsetRef.current.dx;
+      const finalY = drag.startY + dragOffsetRef.current.dy;
+      const clampedX = Math.max(0, Math.min(CANVAS_W - 20, finalX));
+      const clampedY = Math.max(0, Math.min(CANVAS_H - 20, finalY));
+      onChange(pieces.map(p =>
+        p.itemId === drag.itemId
+          ? { ...p, x: (clampedX / CANVAS_W) * 100, y: (clampedY / CANVAS_H) * 100 }
+          : p
+      ));
+    }
+    dragRef.current = null;
+    dragOffsetRef.current = { dx: 0, dy: 0 };
+    setDragId(null);
+    setDragOffset({ dx: 0, dy: 0 });
+    unlockScroll();
+  }, [pieces, onChange]);
+
+  // ref mirror to avoid stale state in window handlers
+  const dragOffsetRef = useRef({ dx: 0, dy: 0 });
+
+  useEffect(() => {
+    if (!dragId) return;
+
+    const onMove = (clientX: number, clientY: number) => {
+      const drag = dragRef.current;
+      if (!drag) return;
+      const dx = clientX - drag.startClientX;
+      const dy = clientY - drag.startClientY;
+      dragOffsetRef.current = { dx, dy };
+      setDragOffset({ dx, dy });
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      e.preventDefault();
+      onMove(e.clientX, e.clientY);
+    };
+    const handleMouseUp = (e: MouseEvent) => {
+      e.preventDefault();
+      endDrag(true);
+    };
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 0) return;
+      e.preventDefault();
+      onMove(e.touches[0].clientX, e.touches[0].clientY);
+    };
+    const handleTouchEnd = (e: TouchEvent) => {
+      e.preventDefault();
+      endDrag(true);
+    };
+    const handleTouchCancel = () => endDrag(false);
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('touchend', handleTouchEnd, { passive: false });
+    window.addEventListener('touchcancel', handleTouchCancel);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchcancel', handleTouchCancel);
+    };
+  }, [dragId, endDrag]);
+
+  const startDrag = (piece: CanvasPiece, clientX: number, clientY: number) => {
+    const startX = (piece.x / 100) * CANVAS_W;
+    const startY = (piece.y / 100) * CANVAS_H;
+    dragRef.current = {
+      itemId: piece.itemId,
+      startClientX: clientX,
+      startClientY: clientY,
+      startX,
+      startY,
+    };
+    dragOffsetRef.current = { dx: 0, dy: 0 };
+    setDragId(piece.itemId);
+    setDragOffset({ dx: 0, dy: 0 });
+    onSelectId(piece.itemId);
     lockScroll();
   };
 
-  const handleDragEnd = (e: DragEndEvent) => {
-    unlockScroll();
-    const { active, delta } = e;
-    onChange(pieces.map(p => {
-      if (p.itemId !== active.id) return p;
-      const newX = (p.x / 100) * CANVAS_W + delta.x;
-      const newY = (p.y / 100) * CANVAS_H + delta.y;
-      const clampedX = Math.max(0, Math.min(CANVAS_W - 20, newX));
-      const clampedY = Math.max(0, Math.min(CANVAS_H - 20, newY));
-      return { ...p, x: (clampedX / CANVAS_W) * 100, y: (clampedY / CANVAS_H) * 100 };
-    }));
-  };
-
   return (
-    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragCancel={unlockScroll}>
-      <div
-        ref={containerRef}
-        onClick={() => onSelectId(null)}
-        style={{
-          position: 'relative',
-          width: '100%',
-          maxWidth: CANVAS_W,
-          height: CANVAS_H,
-          margin: '0 auto',
-          background: '#FFFFFF',
-          borderRadius: 16,
-          boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-          overflow: 'hidden',
-          touchAction: 'none',
-          userSelect: 'none',
-          WebkitUserSelect: 'none',
-        }}
-      >
-        {pieces.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm">
-            Tape une catégorie pour ajouter une pièce ✨
-          </div>
-        )}
-        {pieces.map(p => (
-          <DraggablePiece
+    <div
+      ref={containerRef}
+      onClick={() => onSelectId(null)}
+      style={{
+        position: 'relative',
+        width: '100%',
+        maxWidth: CANVAS_W,
+        height: CANVAS_H,
+        margin: '0 auto',
+        background: '#FFFFFF',
+        borderRadius: 16,
+        boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+        overflow: 'hidden',
+        touchAction: 'none',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+      }}
+    >
+      {pieces.length === 0 && (
+        <div className="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm">
+          Tape une catégorie pour ajouter une pièce ✨
+        </div>
+      )}
+      {pieces.map(p => {
+        const isDragging = dragId === p.itemId;
+        const baseX = (p.x / 100) * CANVAS_W;
+        const baseY = (p.y / 100) * CANVAS_H;
+        const left = isDragging ? baseX + dragOffset.dx : baseX;
+        const top = isDragging ? baseY + dragOffset.dy : baseY;
+        const selected = selectedId === p.itemId;
+
+        return (
+          <div
             key={p.itemId}
-            piece={p}
-            selected={selectedId === p.itemId}
-            onSelect={() => onSelectId(p.itemId)}
-          />
-        ))}
-      </div>
-    </DndContext>
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              startDrag(p, e.clientX, e.clientY);
+            }}
+            onTouchStart={(e) => {
+              e.stopPropagation();
+              if (e.touches.length === 0) return;
+              startDrag(p, e.touches[0].clientX, e.touches[0].clientY);
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelectId(p.itemId);
+            }}
+            style={{
+              position: 'absolute',
+              left: `${left}px`,
+              top: `${top}px`,
+              width: p.size,
+              zIndex: p.z + (selected || isDragging ? 50 : 0),
+              cursor: isDragging ? 'grabbing' : 'grab',
+              touchAction: 'none',
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              outline: selected ? '2px solid #C9956C' : 'none',
+              outlineOffset: 4,
+              borderRadius: 8,
+              filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.10))',
+            }}
+          >
+            <img
+              src={p.item.imageBase64}
+              alt={p.item.type}
+              draggable={false}
+              style={{ width: '100%', height: 'auto', display: 'block', pointerEvents: 'none' }}
+            />
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
