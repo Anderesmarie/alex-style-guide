@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { DndContext, useDraggable, DragEndEvent, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, useDraggable, DragEndEvent, DragStartEvent, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { ClothingItem, OutfitLayoutPiece } from '@/lib/types';
 import { getCategoryByType } from '@/lib/categories';
