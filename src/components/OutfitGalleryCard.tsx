@@ -243,16 +243,18 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
       </div>
 
       {/* Outfit name below card */}
-      <p
-        className="text-center mt-2"
-        style={{
-          fontFamily: 'Playfair Display, serif',
-          fontSize: 14,
-          color: '#2C2C2C',
-        }}
-      >
-        {displayName}
-      </p>
+      {!hideName && (
+        <p
+          className="text-center mt-2"
+          style={{
+            fontFamily: 'Playfair Display, serif',
+            fontSize: 14,
+            color: '#2C2C2C',
+          }}
+        >
+          {displayName}
+        </p>
+      )}
     </div>
   );
 }
