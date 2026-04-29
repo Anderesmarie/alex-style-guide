@@ -255,8 +255,41 @@ export default function Today() {
     );
   }
 
+  const resetDailyForTest = async () => {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData.user) {
+        await supabase
+          .from('daily_counter')
+          .upsert({ user_id: userData.user.id, date: today, count: 0 }, { onConflict: 'user_id,date' });
+        await supabase
+          .from('daily_outfits')
+          .delete()
+          .eq('user_id', userData.user.id)
+          .eq('date', today);
+      }
+      await saveDailyCounter({ date: today, count: 0 });
+      setDailyCount(0);
+      setSwipeResults(null);
+      setSwipeComplete(false);
+      setRecommendations([]);
+      setTimeout(() => generate(), 0);
+    } catch (e) {
+      console.error('Reset error:', e);
+    }
+  };
+
   return (
     <div className="fade-enter pb-4">
+      {/* TEMP test button — remove before prod */}
+      <div className="flex justify-end mb-2">
+        <button
+          onClick={resetDailyForTest}
+          className="text-xs text-muted-foreground underline active:opacity-60"
+        >
+          🔄 Reset tenues (test)
+        </button>
+      </div>
       {(() => {
         const hour = new Date().getHours();
         const name = pseudo || 'toi';
