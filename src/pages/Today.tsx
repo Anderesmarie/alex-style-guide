@@ -201,7 +201,17 @@ export default function Today() {
     if (!canSuggest) return;
     const recs = await generateRecommendations(wardrobe, weatherTemp, 3, userProfile);
     setRecommendations(recs);
-  }, [weatherTemp, canSuggest, enough, wardrobe, today, swipeComplete, userProfile]);
+    // Auto-treat as completed (vertical scroll feed, no swiping)
+    if (recs.length > 0) {
+      const results = recs.map(outfit => ({ outfit, liked: null as boolean | null }));
+      setSwipeResults(results);
+      setSwipeComplete(true);
+      await saveTodayData(today, results);
+      const newCount = dailyCount + 1;
+      setDailyCount(newCount);
+      await saveDailyCounter({ date: today, count: newCount });
+    }
+  }, [weatherTemp, canSuggest, enough, wardrobe, today, swipeComplete, userProfile, dailyCount]);
 
   // Auto-generate only if no saved results for today and has quota
   useEffect(() => {
@@ -210,13 +220,9 @@ export default function Today() {
     }
   }, [loading, ws.status, enough, swipeComplete]); // eslint-disable-line
 
-  const handleSwipeComplete = async (results: { outfit: ClothingItem[]; liked: boolean | null }[]) => {
-    setSwipeResults(results);
-    setSwipeComplete(true);
-    await saveTodayData(today, results);
-    const newCount = dailyCount + 1;
-    setDailyCount(newCount);
-    await saveDailyCounter({ date: today, count: newCount });
+  const handleResultsChange = (next: { outfit: ClothingItem[]; liked: boolean | null }[]) => {
+    setSwipeResults(next);
+    saveTodayData(today, next);
   };
 
   const avatarData = getAvatarFromStorage();
