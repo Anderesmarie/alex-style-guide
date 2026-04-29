@@ -375,30 +375,18 @@ export default function Today() {
         </div>
       )}
 
-      {/* Swiper for new suggestions */}
-      {enough && !swipeComplete && recommendations.length > 0 && (
-        <div className="space-y-2">
-          <h2 className="text-lg font-serif font-semibold text-center">Suggestions du jour</h2>
-          <OutfitSwiper
-            outfits={recommendations}
-            weatherCode={ws.status === 'done' ? ws.data.weathercode : null}
-            temperature={weatherTemp}
-            onComplete={handleSwipeComplete}
-            userSeason={userSeason}
-            userProfile={userProfile}
-          />
-        </div>
-      )}
-
-      {/* Saved results — always visible */}
+      {/* Vertical scroll feed of suggested outfits */}
       {swipeComplete && swipeResults && (
         <>
-          <OutfitResults
+          <OutfitDailyFeed
             results={swipeResults}
             weatherCode={ws.status === 'done' ? ws.data.weathercode : null}
             temperature={weatherTemp}
             userSeason={userSeason}
             userProfile={userProfile}
+            pseudo={pseudo}
+            wardrobe={wardrobe}
+            onResultsChange={handleResultsChange}
           />
           {/* Custom outfit card — always after auto results */}
           <div className="mt-4">
