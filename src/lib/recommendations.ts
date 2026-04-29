@@ -651,3 +651,41 @@ export function buildCustomOutfit(
 
   return outfit;
 }
+
+/**
+ * Build a custom outfit and validate it. Retries up to 5 times
+ * (varying the central piece if not provided) before giving up.
+ * Returns null if no valid outfit can be built.
+ */
+export function buildValidCustomOutfit(
+  wardrobe: ClothingItem[],
+  centralPiece: ClothingItem | null,
+  occasion: string,
+  style: string,
+  excludeIds: Set<string>,
+  maxAttempts = 5,
+): ClothingItem[] | null {
+  const pickCentral = (): ClothingItem | null => {
+    if (centralPiece) return centralPiece;
+    let candidates = wardrobe.filter(i => !excludeIds.has(i.id));
+    if (occasion) {
+      const filtered = candidates.filter(i => i.occasion?.some(o => o === occasion));
+      if (filtered.length > 0) candidates = filtered;
+    }
+    if (style) {
+      const filtered = candidates.filter(i => i.style?.some(s => s === style));
+      if (filtered.length > 0) candidates = filtered;
+    }
+    if (candidates.length === 0) candidates = wardrobe;
+    if (candidates.length === 0) return null;
+    return candidates[Math.floor(Math.random() * candidates.length)];
+  };
+
+  for (let i = 0; i < maxAttempts; i++) {
+    const central = pickCentral();
+    if (!central) return null;
+    const outfit = buildCustomOutfit(wardrobe, central, occasion, style, excludeIds);
+    if (isValidOutfit(outfit)) return outfit;
+  }
+  return null;
+}
