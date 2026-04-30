@@ -198,12 +198,6 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
               if (jacketPiece) leftRows.push({ item: jacketPiece, h: jacketH });
               if (beltPiece) leftRows.push({ item: beltPiece, h: 80 });
 
-              // Center column: top (or dress treated as top), bottom, shoes (centered, 60% width of 40% col → wider than col → just 100% of col here)
-              const centerRows: { item: ClothingItem; h: number; centeredWidth?: string }[] = [];
-              if (topPiece) centerRows.push({ item: topPiece, h: dressPiece ? 320 : 150 });
-              if (bottomPiece) centerRows.push({ item: bottomPiece, h: 170 });
-              if (shoesPiece) centerRows.push({ item: shoesPiece, h: 120 });
-
               // Right column: pull, bag, jewelry, accessoryPlus
               const rightRows: { item: ClothingItem; h: number }[] = [];
               if (pullPiece) rightRows.push({ item: pullPiece, h: 150 });
