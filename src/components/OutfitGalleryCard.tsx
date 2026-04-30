@@ -115,7 +115,7 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
         onClick={onClick}
         className="relative w-full overflow-hidden cursor-pointer active:scale-[0.99] transition-transform"
         style={{
-          height: 380,
+          height: 480,
           background: '#FFFFFF',
           borderRadius: 16,
           boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
@@ -191,55 +191,90 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
             </div>
           ) : (
             (() => {
-              // Fixed pixel sizes per slot
-              const jacketH = jacketPiece && isLongOuterwear(jacketPiece) ? 200 : 160;
+              // Absolute percentage-based positions inside a 380px-tall stage
+              type Slot = {
+                key: string;
+                item: ClothingItem;
+                top: string;
+                left: string;
+                width: string;
+                maxHeight: number;
+                z: number;
+              };
+              const slots: Slot[] = [];
 
-              const leftRows: { item: ClothingItem; h: number }[] = [];
-              if (jacketPiece) leftRows.push({ item: jacketPiece, h: jacketH });
-              if (beltPiece) leftRows.push({ item: beltPiece, h: 70 });
-
-              const rightRows: { item: ClothingItem; h: number }[] = [];
-              if (pullPiece) rightRows.push({ item: pullPiece, h: 160 });
-              if (bagPiece) rightRows.push({ item: bagPiece, h: 130 });
-              if (jewelryPiece) rightRows.push({ item: jewelryPiece, h: 70 });
-              if (accessoryPlusPiece) rightRows.push({ item: accessoryPlusPiece, h: 70 });
-
-              const renderCol = (
-                rows: { item: ClothingItem; h: number }[],
-                widthPx: number,
-              ) => (
-                <div style={{ width: widthPx, flex: `0 0 ${widthPx}px`, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {rows.map((r, i) => (
-                    <div key={`${r.item.id}-${i}`} style={{ width: widthPx, height: r.h }}>
-                      <SlotImg item={r.item} />
-                    </div>
-                  ))}
-                </div>
-              );
-
-              const centerTopH = dressPiece ? 320 : 180;
+              if (jacketPiece) {
+                const long = isLongOuterwear(jacketPiece);
+                slots.push({
+                  key: 'jacket',
+                  item: jacketPiece,
+                  top: '4%',
+                  left: '2%',
+                  width: long ? '38%' : '35%',
+                  maxHeight: long ? 280 : 160,
+                  z: 2,
+                });
+              }
+              if (pullPiece) {
+                slots.push({ key: 'pull', item: pullPiece, top: '4%', left: '62%', width: '36%', maxHeight: 160, z: 2 });
+              }
+              if (topPiece) {
+                slots.push({
+                  key: 'top',
+                  item: topPiece,
+                  top: '6%',
+                  left: dressPiece ? '28%' : '30%',
+                  width: dressPiece ? '44%' : '40%',
+                  maxHeight: dressPiece ? 320 : 180,
+                  z: 3,
+                });
+              }
+              if (bottomPiece) {
+                slots.push({ key: 'bottom', item: bottomPiece, top: '44%', left: '22%', width: '44%', maxHeight: 200, z: 3 });
+              }
+              if (shoesPiece) {
+                slots.push({ key: 'shoes', item: shoesPiece, top: '78%', left: '20%', width: '42%', maxHeight: 110, z: 4 });
+              }
+              if (beltPiece) {
+                slots.push({ key: 'belt', item: beltPiece, top: '40%', left: '4%', width: '28%', maxHeight: 70, z: 4 });
+              }
+              if (bagPiece) {
+                slots.push({ key: 'bag', item: bagPiece, top: '50%', left: '70%', width: '28%', maxHeight: 130, z: 4 });
+              }
+              if (jewelryPiece) {
+                slots.push({ key: 'jewelry', item: jewelryPiece, top: '78%', left: '72%', width: '24%', maxHeight: 70, z: 5 });
+              }
+              if (accessoryPlusPiece) {
+                slots.push({ key: 'acc', item: accessoryPlusPiece, top: '88%', left: '72%', width: '24%', maxHeight: 70, z: 5 });
+              }
 
               return (
-                <div className="flex items-start justify-center" style={{ gap: 4, width: '100%' }}>
-                  {renderCol(leftRows, 120)}
-                  <div style={{ width: 180, flex: '0 0 180px', display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
-                    {topPiece && (
-                      <div style={{ width: 180, height: centerTopH }}>
-                        <SlotImg item={topPiece} />
-                      </div>
-                    )}
-                    {bottomPiece && (
-                      <div style={{ width: 180, height: 200 }}>
-                        <SlotImg item={bottomPiece} />
-                      </div>
-                    )}
-                    {shoesPiece && (
-                      <div style={{ width: 180, height: 130 }}>
-                        <SlotImg item={shoesPiece} />
-                      </div>
-                    )}
-                  </div>
-                  {renderCol(rightRows, 120)}
+                <div style={{ position: 'relative', width: '100%', height: 380 }}>
+                  {slots.map(s => (
+                    <div
+                      key={s.key}
+                      style={{
+                        position: 'absolute',
+                        top: s.top,
+                        left: s.left,
+                        width: s.width,
+                        maxHeight: s.maxHeight,
+                        zIndex: s.z,
+                      }}
+                    >
+                      <img
+                        src={s.item.imageBase64}
+                        alt={s.item.type}
+                        style={{
+                          width: '100%',
+                          maxHeight: s.maxHeight,
+                          objectFit: 'contain',
+                          filter: dropShadow,
+                          display: 'block',
+                        }}
+                      />
+                    </div>
+                  ))}
                 </div>
               );
             })()
