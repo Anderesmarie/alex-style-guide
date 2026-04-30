@@ -119,7 +119,7 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
           background: '#FFFFFF',
           borderRadius: 16,
           boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-          padding: 16,
+          padding: 12,
         }}
       >
         {/* Like button */}
@@ -191,66 +191,55 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
             </div>
           ) : (
             (() => {
-              const jacketH = jacketPiece && isLongOuterwear(jacketPiece) ? 190 : 150;
+              // Fixed pixel sizes per slot
+              const jacketH = jacketPiece && isLongOuterwear(jacketPiece) ? 200 : 160;
 
-              // Left column rows: jacket then belt; if no jacket, belt rises to top.
               const leftRows: { item: ClothingItem; h: number }[] = [];
               if (jacketPiece) leftRows.push({ item: jacketPiece, h: jacketH });
-              if (beltPiece) leftRows.push({ item: beltPiece, h: 80 });
+              if (beltPiece) leftRows.push({ item: beltPiece, h: 70 });
 
-              // Right column: pull, bag, jewelry, accessoryPlus
               const rightRows: { item: ClothingItem; h: number }[] = [];
-              if (pullPiece) rightRows.push({ item: pullPiece, h: 150 });
-              if (bagPiece) rightRows.push({ item: bagPiece, h: 150 });
-              if (jewelryPiece) rightRows.push({ item: jewelryPiece, h: 80 });
-              if (accessoryPlusPiece) rightRows.push({ item: accessoryPlusPiece, h: 80 });
+              if (pullPiece) rightRows.push({ item: pullPiece, h: 160 });
+              if (bagPiece) rightRows.push({ item: bagPiece, h: 130 });
+              if (jewelryPiece) rightRows.push({ item: jewelryPiece, h: 70 });
+              if (accessoryPlusPiece) rightRows.push({ item: accessoryPlusPiece, h: 70 });
 
               const renderCol = (
                 rows: { item: ClothingItem; h: number }[],
-                width: string,
+                widthPx: number,
               ) => (
-                <div style={{ width, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ width: widthPx, flex: `0 0 ${widthPx}px`, display: 'flex', flexDirection: 'column', gap: 6 }}>
                   {rows.map((r, i) => (
-                    <div key={`${r.item.id}-${i}`} style={{ width: '100%', height: r.h }}>
+                    <div key={`${r.item.id}-${i}`} style={{ width: widthPx, height: r.h }}>
                       <SlotImg item={r.item} />
                     </div>
                   ))}
                 </div>
               );
 
-              const centerTopHeight = dressPiece ? 320 : 200;
-              // eslint-disable-next-line no-console
-              console.log('Pièce centre:', topPiece?.type, topPiece?.id);
-              // eslint-disable-next-line no-console
-              console.log('Hauteur appliquée:', centerTopHeight);
+              const centerTopH = dressPiece ? 320 : 180;
 
               return (
-                <div className="flex w-full items-start" style={{ gap: 8, width: '100%' }}>
-                  {renderCol(leftRows, '30%')}
-                  {/* Center col: 40% width, chaussures centered (60% width inside) */}
-                  <div style={{ width: '40%', flex: '0 0 40%', display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
+                <div className="flex items-start justify-center" style={{ gap: 4, width: '100%' }}>
+                  {renderCol(leftRows, 120)}
+                  <div style={{ width: 180, flex: '0 0 180px', display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
                     {topPiece && (
-                      <div style={{ width: '100%', minHeight: 150, height: centerTopHeight }}>
+                      <div style={{ width: 180, height: centerTopH }}>
                         <SlotImg item={topPiece} />
                       </div>
                     )}
-                    {pullPiece && !dressPiece && (
-                      <div style={{ width: '100%', minHeight: 150, height: 170 }}>
-                        <SlotImg item={pullPiece} />
-                      </div>
-                    )}
                     {bottomPiece && (
-                      <div style={{ width: '100%', height: 170 }}>
+                      <div style={{ width: 180, height: 200 }}>
                         <SlotImg item={bottomPiece} />
                       </div>
                     )}
                     {shoesPiece && (
-                      <div style={{ width: '60%', height: 120 }}>
+                      <div style={{ width: 180, height: 130 }}>
                         <SlotImg item={shoesPiece} />
                       </div>
                     )}
                   </div>
-                  {renderCol(rightRows, '30%')}
+                  {renderCol(rightRows, 120)}
                 </div>
               );
             })()
