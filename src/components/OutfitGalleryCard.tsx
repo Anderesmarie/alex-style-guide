@@ -190,58 +190,65 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
               Tenue vide
             </div>
           ) : (
-            <div className="relative w-full" style={{ minHeight: 380 }}>
-              <div className="flex w-full" style={{ gap: 8 }}>
-                {/* LEFT ZONE 30% — aligned to top with center column */}
-                <div
-                  className="flex items-start justify-center"
-                  style={{ width: '30%' }}
-                >
-                  {leftPiece && <Piece item={leftPiece} height={180} />}
-                </div>
+            (() => {
+              const jacketH = jacketPiece && isLongOuterwear(jacketPiece) ? 190 : 150;
 
-                {/* CENTER-RIGHT ZONE 70% */}
-                <div
-                  className="flex flex-col items-center"
-                  style={{ width: '70%', gap: 0 }}
-                >
-                  {dressPiece ? (
-                    <Piece item={dressPiece} height={260} />
-                  ) : (
-                    <>
-                      {topPiece && <Piece item={topPiece} height={140} />}
-                      {bottomPiece && (
-                        <div style={{ marginTop: -8 }}>
-                          <Piece item={bottomPiece} height={180} />
-                        </div>
-                      )}
-                    </>
-                  )}
-                  {shoesPiece && (
-                    <div style={{ marginTop: -8 }}>
-                      <Piece item={shoesPiece} height={110} />
+              // Left column rows: jacket then belt; if no jacket, belt rises to top.
+              const leftRows: { item: ClothingItem; h: number }[] = [];
+              if (jacketPiece) leftRows.push({ item: jacketPiece, h: jacketH });
+              if (beltPiece) leftRows.push({ item: beltPiece, h: 80 });
+
+              // Center column: top (or dress treated as top), bottom, shoes (centered, 60% width of 40% col → wider than col → just 100% of col here)
+              const centerRows: { item: ClothingItem; h: number; centeredWidth?: string }[] = [];
+              if (topPiece) centerRows.push({ item: topPiece, h: dressPiece ? 320 : 150 });
+              if (bottomPiece) centerRows.push({ item: bottomPiece, h: 170 });
+              if (shoesPiece) centerRows.push({ item: shoesPiece, h: 120 });
+
+              // Right column: pull, bag, jewelry, accessoryPlus
+              const rightRows: { item: ClothingItem; h: number }[] = [];
+              if (pullPiece) rightRows.push({ item: pullPiece, h: 150 });
+              if (bagPiece) rightRows.push({ item: bagPiece, h: 150 });
+              if (jewelryPiece) rightRows.push({ item: jewelryPiece, h: 80 });
+              if (accessoryPlusPiece) rightRows.push({ item: accessoryPlusPiece, h: 80 });
+
+              const renderCol = (
+                rows: { item: ClothingItem; h: number }[],
+                width: string,
+              ) => (
+                <div style={{ width, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {rows.map((r, i) => (
+                    <div key={`${r.item.id}-${i}`} style={{ width: '100%', height: r.h }}>
+                      <SlotImg item={r.item} />
                     </div>
-                  )}
-                </div>
-              </div>
-
-              {/* BOTTOM ZONE: bag left, accessories bottom-right grouped */}
-              {bagPiece && (
-                <div className="absolute" style={{ left: 0, bottom: 0 }}>
-                  <Piece item={bagPiece} height={80} />
-                </div>
-              )}
-              {accessories.length > 0 && (
-                <div
-                  className="absolute flex items-end gap-1"
-                  style={{ right: 0, bottom: 0 }}
-                >
-                  {accessories.map(a => (
-                    <Piece key={a.id} item={a} height={40} />
                   ))}
                 </div>
-              )}
-            </div>
+              );
+
+              return (
+                <div className="flex w-full items-start" style={{ gap: 8 }}>
+                  {renderCol(leftRows, '30%')}
+                  {/* Center col with chaussures centered (60% width inside the 40% col) */}
+                  <div style={{ width: '40%', display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
+                    {topPiece && (
+                      <div style={{ width: '100%', height: dressPiece ? 320 : 150 }}>
+                        <SlotImg item={topPiece} />
+                      </div>
+                    )}
+                    {bottomPiece && (
+                      <div style={{ width: '100%', height: 170 }}>
+                        <SlotImg item={bottomPiece} />
+                      </div>
+                    )}
+                    {shoesPiece && (
+                      <div style={{ width: '60%', height: 120 }}>
+                        <SlotImg item={shoesPiece} />
+                      </div>
+                    )}
+                  </div>
+                  {renderCol(rightRows, '30%')}
+                </div>
+              );
+            })()
           )}
         </div>
 
