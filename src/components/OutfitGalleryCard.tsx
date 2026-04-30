@@ -67,7 +67,10 @@ function bucketOf(item: ClothingItem): 'jewelry' | 'belt' | 'accessoryPlus' | 'j
 function bucketize(items: ClothingItem[]) {
   const buckets = {
     jewelry: [] as ClothingItem[],
+    belt: [] as ClothingItem[],
+    accessoryPlus: [] as ClothingItem[],
     jacket: [] as ClothingItem[],
+    pull: [] as ClothingItem[],
     top: [] as ClothingItem[],
     bottom: [] as ClothingItem[],
     dress: [] as ClothingItem[],
