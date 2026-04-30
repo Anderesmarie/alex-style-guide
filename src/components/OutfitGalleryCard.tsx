@@ -115,7 +115,7 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
         onClick={onClick}
         className="relative w-full overflow-hidden cursor-pointer active:scale-[0.99] transition-transform"
         style={{
-          minHeight: 450,
+          height: 380,
           background: '#FFFFFF',
           borderRadius: 16,
           boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
