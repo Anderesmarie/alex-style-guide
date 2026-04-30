@@ -14,32 +14,53 @@ interface Props {
 
 const dropShadow = 'drop-shadow(0 4px 6px rgba(0,0,0,0.10))';
 
-function Piece({ item, height }: { item: ClothingItem; height: number }) {
+// Long outerwear types (190px); others are short jackets (150px)
+const LONG_OUTERWEAR = new Set([
+  'Manteau long',
+  'Manteau court',
+  'Parka',
+  'Trench',
+  'Doudoune',
+  'Imperméable / Ciré',
+  'Cape / Poncho',
+]);
+
+function isLongOuterwear(item: ClothingItem) {
+  return LONG_OUTERWEAR.has(item.type);
+}
+
+// Image rendered to fit a fixed-size slot (object-contain, drop shadow)
+function SlotImg({ item }: { item: ClothingItem }) {
   return (
     <img
       src={item.imageBase64}
       alt={item.type}
       style={{
-        height,
-        width: 'auto',
-        maxWidth: '100%',
+        width: '100%',
+        height: '100%',
         objectFit: 'contain',
         filter: dropShadow,
+        display: 'block',
       }}
     />
   );
 }
 
 // Decide bucket based on category name
-function bucketOf(item: ClothingItem): 'jewelry' | 'jacket' | 'top' | 'bottom' | 'shoes' | 'bag' | 'dress' | 'other' {
+function bucketOf(item: ClothingItem): 'jewelry' | 'belt' | 'accessoryPlus' | 'jacket' | 'top' | 'bottom' | 'shoes' | 'bag' | 'dress' | 'pull' | 'other' {
   const cat = getCategoryByType(item.type)?.name || item.category || '';
   if (cat === 'Manteaux & vestes') return 'jacket';
-  if (cat === 'Pulls & sweats' || cat === 'Hauts') return 'top';
+  if (cat === 'Pulls & sweats') return 'pull';
+  if (cat === 'Hauts') return 'top';
   if (cat === 'Bas' || cat === 'Jupes') return 'bottom';
   if (cat === 'Robes & combinaisons') return 'dress';
   if (cat === 'Chaussures') return 'shoes';
   if (cat === 'Sacs') return 'bag';
-  if (cat === 'Accessoires') return 'jewelry';
+  if (cat === 'Accessoires') {
+    if (item.type === 'Ceinture') return 'belt';
+    if (item.type === 'Bijoux') return 'jewelry';
+    return 'accessoryPlus';
+  }
   return 'other';
 }
 
