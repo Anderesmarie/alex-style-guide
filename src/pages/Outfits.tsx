@@ -464,70 +464,7 @@ export default function Outfits() {
   }
 
   if (view === 'createQuick') {
-    const selected = getItemsByIds(Array.from(selectedIds));
-    return (
-      <div className="fade-enter pb-4 no-scrollbar overflow-y-auto">
-        <div className="flex items-center gap-3 mb-5">
-          <button onClick={() => { setSelectedIds(new Set()); setView('gallery'); setModeSheetOpen(true); }} className="text-2xl">←</button>
-          <h1 className="text-xl font-serif font-bold">Sélection rapide</h1>
-        </div>
-
-        {selected.length > 0 && (
-          <div className="flex gap-2 overflow-x-auto no-scrollbar mb-4 pb-1">
-            {selected.map(item => (
-              <img key={item.id} src={item.imageBase64} alt={item.type}
-                className="w-16 h-16 rounded-lg object-cover flex-shrink-0 ring-2 ring-primary" />
-            ))}
-          </div>
-        )}
-
-        <p className="text-sm text-muted-foreground mb-3">
-          Sélectionne 2 à 8 pièces ({selectedIds.size}/8)
-        </p>
-
-        <div className="grid grid-cols-3 gap-2 mb-5">
-          {wardrobe.map(item => (
-            <button
-              key={item.id}
-              onClick={() => toggleItem(item.id)}
-              className={`aspect-square rounded-lg overflow-hidden relative active:scale-[0.96] transition-transform ${
-                selectedIds.has(item.id) ? 'ring-3 ring-primary' : ''
-              }`}
-            >
-              <img src={item.imageBase64} alt={item.type} className="w-full h-full object-cover" />
-              {selectedIds.has(item.id) && (
-                <div className="absolute top-1 right-1 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
-                  ✓
-                </div>
-              )}
-            </button>
-          ))}
-        </div>
-
-        {selectedIds.size >= 2 && (
-          <>
-            <input
-              type="text"
-              value={outfitName}
-              onChange={e => setOutfitName(e.target.value)}
-              placeholder="Nom de la tenue (ex: Bureau lundi)"
-              className="w-full px-4 py-3 rounded-lg bg-card card-shadow outline-none focus:ring-2 focus:ring-primary/30 mb-4"
-            />
-            <button
-              onClick={handleSaveQuick}
-              disabled={!outfitName.trim()}
-              className={`w-full py-3.5 rounded-xl font-semibold transition-all duration-200 ${
-                outfitName.trim()
-                  ? 'bg-primary text-primary-foreground shadow-lg active:scale-[0.98]'
-                  : 'bg-muted text-muted-foreground'
-              }`}
-            >
-              Sauvegarder la tenue
-            </button>
-          </>
-        )}
-      </div>
-    );
+    return renderQuickZones();
   }
 
   if (view === 'detail' && selectedOutfit) {
