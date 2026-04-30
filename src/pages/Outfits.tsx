@@ -471,9 +471,236 @@ export default function Outfits() {
     );
   }
 
+  // ----- Quick-zones helpers -----
+  const ZONE_META: Record<ZoneKey, { label: string; emoji: string; cats: string[]; types?: string[] }> = {
+    jacket: { label: 'Veste / Manteau', emoji: '🧥', cats: ['Manteaux & vestes'] },
+    belt: { label: 'Ceinture', emoji: '👔', cats: ['Accessoires'], types: ['Ceinture'] },
+    top: { label: 'Haut', emoji: '👕', cats: ['Hauts', 'Robes & combinaisons'] },
+    bottom: { label: 'Bas', emoji: '👖', cats: ['Bas', 'Jupes'] },
+    shoes: { label: 'Chaussures', emoji: '👟', cats: ['Chaussures'] },
+    pull: { label: 'Pull', emoji: '🧶', cats: ['Pulls & sweats'] },
+    bag: { label: 'Sac', emoji: '👜', cats: ['Sacs'] },
+    jewelry: { label: 'Bijoux', emoji: '💍', cats: ['Accessoires'], types: ['Bijoux'] },
+    accessory: { label: 'Accessoire', emoji: '🧢', cats: ['Accessoires'] },
+  };
+
+  const zoneFilteredItems = (zk: ZoneKey): ClothingItem[] => {
+    const meta = ZONE_META[zk];
+    return wardrobe.filter(it => {
+      const cat = getCategoryByType(it.type)?.name || it.category || '';
+      if (!meta.cats.includes(cat)) return false;
+      if (meta.types && !meta.types.includes(it.type)) return false;
+      if (zk === 'accessory' && (it.type === 'Ceinture' || it.type === 'Bijoux')) return false;
+      return true;
+    });
+  };
+
+  const filledZoneCount = Object.values(zones).filter(Boolean).length;
+
+  const assignToZone = (item: ClothingItem) => {
+    if (!zonePicker) return;
+    if (filledZoneCount >= 8 && !zones[zonePicker]) return;
+    setZones(prev => ({ ...prev, [zonePicker]: item.id }));
+    setZonePicker(null);
+  };
+
+  const clearZone = (zk: ZoneKey) => {
+    setZones(prev => ({ ...prev, [zk]: null }));
+  };
+
+  const resetQuickZones = () => {
+    setZones({
+      jacket: null, belt: null, top: null, bottom: null, shoes: null,
+      pull: null, bag: null, jewelry: null, accessory: null,
+    });
+    setOutfitName('');
+  };
+
+  const handleSaveZones = async () => {
+    const ids = (Object.values(zones).filter(Boolean) as string[]);
+    if (ids.length < 2 || !outfitName.trim()) return;
+    await addOutfit({
+      id: genId(),
+      name: outfitName.trim(),
+      itemIds: ids,
+      createdAt: new Date().toISOString(),
+    });
+    updateStreak();
+    const o = await getOutfits();
+    setOutfits(o);
+    resetQuickZones();
+    setView('gallery');
+  };
+
+  const Zone = ({ zk, h }: { zk: ZoneKey; h: number }) => {
+    const id = zones[zk];
+    const item = id ? wardrobe.find(i => i.id === id) : null;
+    const meta = ZONE_META[zk];
+    return (
+      <div
+        style={{ width: '100%', height: h, position: 'relative' }}
+        onClick={() => { if (!item) setZonePicker(zk); }}
+        className={!item ? 'cursor-pointer active:scale-[0.98] transition-transform' : ''}
+      >
+        {item ? (
+          <>
+            <img
+              src={item.imageBase64}
+              alt={item.type}
+              style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+            />
+            <button
+              onClick={(e) => { e.stopPropagation(); clearZone(zk); }}
+              aria-label="Retirer"
+              style={{
+                position: 'absolute', top: 2, right: 2,
+                width: 24, height: 24, borderRadius: 999,
+                background: 'rgba(255,255,255,0.9)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 12, lineHeight: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+              }}
+            >
+              🗑️
+            </button>
+          </>
+        ) : (
+          <div
+            style={{
+              width: '100%', height: '100%',
+              background: '#F5F5F5', borderRadius: 8,
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', gap: 4,
+            }}
+          >
+            <span style={{ fontSize: Math.min(28, h * 0.35), opacity: 0.45 }}>{meta.emoji}</span>
+            <div
+              style={{
+                width: 26, height: 26, borderRadius: 999,
+                background: '#C9956C', color: '#fff',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 18, fontWeight: 600, lineHeight: 1,
+              }}
+            >
+              +
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderQuickZones = () => {
+    const canSave = filledZoneCount >= 2 && !!outfitName.trim();
+    const pickerItems = zonePicker ? zoneFilteredItems(zonePicker) : [];
+    return (
+      <div className="fade-enter pb-4 no-scrollbar overflow-y-auto">
+        <div className="flex items-center gap-3 mb-4">
+          <button
+            onClick={() => { resetQuickZones(); setView('gallery'); setModeSheetOpen(true); }}
+            className="text-2xl"
+          >
+            ←
+          </button>
+          <h1 className="text-xl font-serif font-bold">Compose ta tenue</h1>
+        </div>
+
+        <div
+          style={{
+            width: '100%', height: 480,
+            background: '#FFFFFF', borderRadius: 16,
+            boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+            padding: 12, marginBottom: 16,
+          }}
+        >
+          <div className="flex items-start" style={{ gap: 6, width: '100%', height: '100%' }}>
+            <div style={{ flex: '0 0 30%', display: 'flex', flexDirection: 'column', gap: 6, height: '100%' }}>
+              <Zone zk="jacket" h={300} />
+              <Zone zk="belt" h={70} />
+            </div>
+            <div style={{ flex: '0 0 40%', display: 'flex', flexDirection: 'column', gap: 6, height: '100%' }}>
+              <Zone zk="top" h={170} />
+              <Zone zk="bottom" h={180} />
+              <Zone zk="shoes" h={110} />
+            </div>
+            <div style={{ flex: '0 0 30%', display: 'flex', flexDirection: 'column', gap: 6, height: '100%' }}>
+              <Zone zk="pull" h={150} />
+              <Zone zk="bag" h={120} />
+              <Zone zk="jewelry" h={70} />
+              <Zone zk="accessory" h={70} />
+            </div>
+          </div>
+        </div>
+
+        <p className="text-sm text-muted-foreground mb-3 text-center">
+          {filledZoneCount} pièce{filledZoneCount > 1 ? 's' : ''} ajoutée{filledZoneCount > 1 ? 's' : ''} · min 2, max 8
+        </p>
+
+        <input
+          type="text"
+          value={outfitName}
+          onChange={e => setOutfitName(e.target.value)}
+          placeholder="Nom de la tenue (ex: Bureau lundi)"
+          className="w-full px-4 py-3 rounded-lg bg-card card-shadow outline-none focus:ring-2 focus:ring-primary/30 mb-4"
+        />
+
+        <button
+          onClick={handleSaveZones}
+          disabled={!canSave}
+          className={`w-full py-3.5 rounded-xl font-semibold transition-all duration-200 ${
+            canSave
+              ? 'bg-primary text-primary-foreground shadow-lg active:scale-[0.98]'
+              : 'bg-muted text-muted-foreground'
+          }`}
+        >
+          Sauvegarder
+        </button>
+
+        {zonePicker && (
+          <div className="fixed inset-0 z-50 flex items-end" onClick={() => setZonePicker(null)}>
+            <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
+            <div
+              onClick={e => e.stopPropagation()}
+              className="relative w-full bg-card rounded-t-2xl p-4 max-h-[80vh] overflow-y-auto"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-serif font-bold text-lg">
+                  {ZONE_META[zonePicker].emoji} {ZONE_META[zonePicker].label}
+                </h3>
+                <button onClick={() => setZonePicker(null)} className="text-2xl leading-none">×</button>
+              </div>
+              {pickerItems.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-6 text-center">
+                  Aucune pièce dans cette catégorie.
+                </p>
+              ) : (
+                <div className="grid grid-cols-3 gap-2 pb-4">
+                  {pickerItems.map(item => (
+                    <button
+                      key={item.id}
+                      onClick={() => assignToZone(item)}
+                      className="aspect-square rounded-lg overflow-hidden bg-white card-shadow active:scale-[0.96] transition-transform"
+                    >
+                      <img
+                        src={item.imageBase64}
+                        alt={item.type}
+                        className="w-full h-full"
+                        style={{ objectFit: 'contain' }}
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   if (view === 'createQuick') {
     return renderQuickZones();
   }
+
 
   if (view === 'detail' && selectedOutfit) {
     const items = getItemsByIds(selectedOutfit.itemIds);
