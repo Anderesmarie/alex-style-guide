@@ -210,7 +210,7 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
                   item: jacketPiece,
                   top: '4%',
                   left: '2%',
-                  width: long ? '38%' : '35%',
+                  width: long ? '38%' : '30%',
                   maxHeight: long ? 280 : 160,
                   z: 2,
                 });
@@ -219,11 +219,12 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
                 slots.push({ key: 'pull', item: pullPiece, top: '4%', left: '62%', width: '36%', maxHeight: 160, z: 2 });
               }
               if (topPiece) {
+                const hasShortJacket = jacketPiece && !isLongOuterwear(jacketPiece);
                 slots.push({
                   key: 'top',
                   item: topPiece,
                   top: '6%',
-                  left: dressPiece ? '28%' : '30%',
+                  left: dressPiece ? '28%' : hasShortJacket ? '35%' : '30%',
                   width: dressPiece ? '44%' : '40%',
                   maxHeight: dressPiece ? 320 : 180,
                   z: 3,
