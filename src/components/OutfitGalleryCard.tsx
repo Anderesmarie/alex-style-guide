@@ -86,22 +86,21 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
     outfit.name?.trim() ||
     new Date(outfit.createdAt).toLocaleDateString('fr-FR');
 
-  // Pulls go to LEFT zone per spec; tops bucket includes both pulls & tops, split them
-  const isPull = (it: ClothingItem) =>
-    (getCategoryByType(it.type)?.name || it.category) === 'Pulls & sweats';
-  const pulls = buckets.top.filter(isPull);
-  const tops = buckets.top.filter(it => !isPull(it));
-
-  const leftPiece = buckets.jacket[0] || pulls[0] || null;
-  const topPiece = tops[0] || null;
-  const bottomPiece = buckets.bottom[0] || null;
+  // For the dress case (no separate top/bottom): treat dress as the "top" slot in centre
   const dressPiece = buckets.dress[0] || null;
+  const topPiece = dressPiece || buckets.top[0] || null;
+  const bottomPiece = dressPiece ? null : buckets.bottom[0] || null;
+  const pullPiece = buckets.pull[0] || null;
+  const jacketPiece = buckets.jacket[0] || null;
   const shoesPiece = buckets.shoes[0] || null;
   const bagPiece = buckets.bag[0] || null;
-  const accessories = buckets.jewelry;
+  const beltPiece = buckets.belt[0] || null;
+  const jewelryPiece = buckets.jewelry[0] || null;
+  const accessoryPlusPiece = buckets.accessoryPlus[0] || null;
+
   const isEmpty =
-    !leftPiece && !topPiece && !bottomPiece && !dressPiece &&
-    !shoesPiece && !bagPiece && accessories.length === 0;
+    !jacketPiece && !topPiece && !bottomPiece && !pullPiece &&
+    !shoesPiece && !bagPiece && !beltPiece && !jewelryPiece && !accessoryPlusPiece;
 
   // Free layout pieces (drag & drop saved positions)
   const layout = outfit.layoutData;
