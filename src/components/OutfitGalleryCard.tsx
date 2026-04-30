@@ -206,102 +206,107 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
 
               const mannequinShadow = 'drop-shadow(0 8px 12px rgba(0,0,0,0.14))';
               const slots: Slot[] = [];
-              const hasOuter = !!jacketPiece;
-              const hasTopOrPull = !!(topPiece || pullPiece);
-              const hasBottom = !!bottomPiece;
               const isDress = !!dressPiece;
+              const hasTorso = !!(topPiece || pullPiece || isDress);
+              const hasBottom = !!bottomPiece;
 
-              // BOTTOM (behind) — centered
-              if (bottomPiece) {
+              // ---- VERTICAL CHAIN: torso -> bottom -> shoes (no gaps) ----
+              // Torso starts at TOP_START, each next piece starts where previous ends - OVERLAP
+              const TORSO_TOP = 6;          // %
+              const TORSO_HEIGHT = 26;      // % (top/pull)
+              const DRESS_HEIGHT = 50;      // %
+              const BOTTOM_HEIGHT = 30;     // %
+              const SHOES_HEIGHT = 16;      // %
+              const OVERLAP = 5;            // % overlap between pieces
+
+              let cursor = TORSO_TOP;
+
+              // OUTERWEAR (manteau) — derrière le haut, centré, légère rotation
+              if (jacketPiece) {
                 slots.push({
-                  key: 'bottom', item: bottomPiece,
-                  left: '50%', top: '34%', width: '36%',
-                  maxHeight: 230, z: 1, rotate: 0,
+                  key: 'jacket', item: jacketPiece,
+                  left: '50%',
+                  top: `${TORSO_TOP - 1}%`,
+                  width: '46%',
+                  maxHeight: 240, z: 2, rotate: -3,
                 });
               }
 
-              // OUTERWEAR (manteau / veste)
-              if (jacketPiece) {
-                if (hasTopOrPull) {
+              // TOP / PULL / DRESS — devant, centré
+              if (isDress) {
+                slots.push({
+                  key: 'dress', item: dressPiece!,
+                  left: '50%', top: `${cursor}%`, width: '42%',
+                  maxHeight: 320, z: 4, rotate: 0,
+                });
+                cursor = cursor + DRESS_HEIGHT - OVERLAP;
+              } else {
+                if (pullPiece) {
                   slots.push({
-                    key: 'jacket', item: jacketPiece,
-                    left: '42%', top: '6%', width: '38%',
-                    maxHeight: 220, z: 2, rotate: -3,
+                    key: 'pull', item: pullPiece,
+                    left: '50%', top: `${cursor}%`, width: '38%',
+                    maxHeight: 170, z: 3, rotate: 0,
                   });
-                } else {
+                }
+                if (topPiece) {
                   slots.push({
-                    key: 'jacket', item: jacketPiece,
-                    left: '50%', top: '6%', width: '40%',
-                    maxHeight: 220, z: 2, rotate: 0,
+                    key: 'top', item: topPiece,
+                    left: '50%', top: `${cursor}%`, width: '38%',
+                    maxHeight: 170, z: 4, rotate: 0,
                   });
+                }
+                if (topPiece || pullPiece) {
+                  cursor = cursor + TORSO_HEIGHT - OVERLAP;
                 }
               }
 
-              // PULL (intermediate layer) — slightly offset if a top is also present
-              if (pullPiece && !isDress) {
+              // BOTTOM — collé au haut
+              if (bottomPiece && !isDress) {
                 slots.push({
-                  key: 'pull', item: pullPiece,
-                  left: hasOuter ? '54%' : '50%',
-                  top: '8%', width: topPiece ? '30%' : '34%',
-                  maxHeight: 160, z: 3, rotate: 0,
+                  key: 'bottom', item: bottomPiece,
+                  left: '50%', top: `${cursor}%`, width: '36%',
+                  maxHeight: 230, z: 3, rotate: 0,
                 });
+                cursor = cursor + BOTTOM_HEIGHT - OVERLAP;
               }
 
-              // TOP / DRESS (front torso)
-              if (isDress) {
-                // Dress replaces top + bottom
-                slots.push({
-                  key: 'dress', item: dressPiece!,
-                  left: '50%', top: '10%', width: '42%',
-                  maxHeight: 320, z: 3, rotate: 0,
-                });
-              } else if (topPiece) {
-                slots.push({
-                  key: 'top', item: topPiece,
-                  left: hasOuter ? '54%' : '50%',
-                  top: '8%', width: hasOuter ? '32%' : '34%',
-                  maxHeight: 160, z: 3, rotate: 0,
-                });
-              }
-
-              // SHOES (front, bottom) — raise if no bottom present
+              // SHOES — collées au bas (ou remontées si pas de bas)
               if (shoesPiece) {
+                // si rien au-dessus, on remonte
+                let shoesTop = hasTorso || hasBottom ? cursor + 2 : 35;
+                // jamais en dehors du cadre
+                if (shoesTop + SHOES_HEIGHT > 92) shoesTop = 92 - SHOES_HEIGHT;
                 slots.push({
                   key: 'shoes', item: shoesPiece,
-                  left: '50%',
-                  top: hasBottom || isDress ? '70%' : '58%',
-                  width: '34%', maxHeight: 120, z: 5, rotate: 0,
+                  left: '50%', top: `${shoesTop}%`,
+                  width: '32%', maxHeight: 120, z: 5, rotate: 0,
                 });
               }
 
-              // BAG (right side)
+              // ---- ACCESSOIRES (côtés uniquement) ----
               if (bagPiece) {
                 slots.push({
                   key: 'bag', item: bagPiece,
-                  left: '76%', top: '42%', width: '22%',
-                  maxHeight: 120, z: 4, rotate: 4,
+                  left: '82%', top: '46%', width: '20%',
+                  maxHeight: 120, z: 6, rotate: 4,
                 });
               }
-
-              // BELT (left side, mid)
               if (beltPiece) {
                 slots.push({
                   key: 'belt', item: beltPiece,
-                  left: '25%', top: '48%', width: '20%',
-                  maxHeight: 90, z: 4, rotate: -8,
+                  left: '50%', top: '40%', width: '24%',
+                  maxHeight: 40, z: 6, rotate: 0,
                 });
               }
-
-              // ACCESSOIRES (jewelry + others) — left column, stacked vertically
               const accs: ClothingItem[] = [];
               if (jewelryPiece) accs.push(jewelryPiece);
               if (accessoryPlusPiece) accs.push(accessoryPlusPiece);
               accs.forEach((acc, i) => {
                 slots.push({
                   key: `acc-${i}`, item: acc,
-                  left: '25%',
-                  top: `${12 + i * 10}%`,
-                  width: '16%', maxHeight: 90, z: 4, rotate: -6,
+                  left: '15%',
+                  top: `${18 + i * 14}%`,
+                  width: '14%', maxHeight: 80, z: 6, rotate: -6,
                 });
               });
 
