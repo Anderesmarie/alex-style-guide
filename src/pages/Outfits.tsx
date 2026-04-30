@@ -485,11 +485,6 @@ export default function Outfits() {
           Sélectionne 2 à 5 pièces ({selectedIds.size}/5)
         </p>
 
-        <button onClick={handleGenerate}
-          className="w-full py-2.5 rounded-lg bg-secondary text-secondary-foreground font-medium text-sm mb-4 active:scale-[0.98] transition-transform">
-          ✨ Générer pour aujourd'hui
-        </button>
-
         <div className="grid grid-cols-3 gap-2 mb-5">
           {wardrobe.map(item => (
             <button
