@@ -218,14 +218,25 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
                 </div>
               );
 
+              const centerTopHeight = dressPiece ? 320 : 200;
+              // eslint-disable-next-line no-console
+              console.log('Pièce centre:', topPiece?.type, topPiece?.id);
+              // eslint-disable-next-line no-console
+              console.log('Hauteur appliquée:', centerTopHeight);
+
               return (
-                <div className="flex w-full items-start" style={{ gap: 8 }}>
+                <div className="flex w-full items-start" style={{ gap: 8, width: '100%' }}>
                   {renderCol(leftRows, '30%')}
-                  {/* Center col with chaussures centered (60% width inside the 40% col) */}
-                  <div style={{ width: '40%', display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
+                  {/* Center col: 40% width, chaussures centered (60% width inside) */}
+                  <div style={{ width: '40%', flex: '0 0 40%', display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
                     {topPiece && (
-                      <div style={{ width: '100%', height: dressPiece ? 320 : 150 }}>
+                      <div style={{ width: '100%', minHeight: 150, height: centerTopHeight }}>
                         <SlotImg item={topPiece} />
+                      </div>
+                    )}
+                    {pullPiece && !dressPiece && (
+                      <div style={{ width: '100%', minHeight: 150, height: 170 }}>
+                        <SlotImg item={pullPiece} />
                       </div>
                     )}
                     {bottomPiece && (
