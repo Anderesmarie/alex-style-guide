@@ -38,6 +38,14 @@ export default function Outfits() {
   const [freeSelectedId, setFreeSelectedId] = useState<string | null>(null);
   const [freeChip, setFreeChip] = useState<ChipKey | null>(null);
 
+  // Quick-zones state (createQuick view)
+  type ZoneKey = 'jacket' | 'belt' | 'top' | 'bottom' | 'shoes' | 'pull' | 'bag' | 'jewelry' | 'accessory';
+  const [zones, setZones] = useState<Record<ZoneKey, string | null>>({
+    jacket: null, belt: null, top: null, bottom: null, shoes: null,
+    pull: null, bag: null, jewelry: null, accessory: null,
+  });
+  const [zonePicker, setZonePicker] = useState<ZoneKey | null>(null);
+
   const loadData = async () => {
     const [w, o] = await Promise.all([getWardrobe(), getOutfits()]);
     setWardrobe(w);
