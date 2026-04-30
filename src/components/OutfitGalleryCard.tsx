@@ -14,39 +14,63 @@ interface Props {
 
 const dropShadow = 'drop-shadow(0 4px 6px rgba(0,0,0,0.10))';
 
-function Piece({ item, height }: { item: ClothingItem; height: number }) {
+// Long outerwear types (190px); others are short jackets (150px)
+const LONG_OUTERWEAR = new Set([
+  'Manteau long',
+  'Manteau court',
+  'Parka',
+  'Trench',
+  'Doudoune',
+  'Imperméable / Ciré',
+  'Cape / Poncho',
+]);
+
+function isLongOuterwear(item: ClothingItem) {
+  return LONG_OUTERWEAR.has(item.type);
+}
+
+// Image rendered to fit a fixed-size slot (object-contain, drop shadow)
+function SlotImg({ item }: { item: ClothingItem }) {
   return (
     <img
       src={item.imageBase64}
       alt={item.type}
       style={{
-        height,
-        width: 'auto',
-        maxWidth: '100%',
+        width: '100%',
+        height: '100%',
         objectFit: 'contain',
         filter: dropShadow,
+        display: 'block',
       }}
     />
   );
 }
 
 // Decide bucket based on category name
-function bucketOf(item: ClothingItem): 'jewelry' | 'jacket' | 'top' | 'bottom' | 'shoes' | 'bag' | 'dress' | 'other' {
+function bucketOf(item: ClothingItem): 'jewelry' | 'belt' | 'accessoryPlus' | 'jacket' | 'top' | 'bottom' | 'shoes' | 'bag' | 'dress' | 'pull' | 'other' {
   const cat = getCategoryByType(item.type)?.name || item.category || '';
   if (cat === 'Manteaux & vestes') return 'jacket';
-  if (cat === 'Pulls & sweats' || cat === 'Hauts') return 'top';
+  if (cat === 'Pulls & sweats') return 'pull';
+  if (cat === 'Hauts') return 'top';
   if (cat === 'Bas' || cat === 'Jupes') return 'bottom';
   if (cat === 'Robes & combinaisons') return 'dress';
   if (cat === 'Chaussures') return 'shoes';
   if (cat === 'Sacs') return 'bag';
-  if (cat === 'Accessoires') return 'jewelry';
+  if (cat === 'Accessoires') {
+    if (item.type === 'Ceinture') return 'belt';
+    if (item.type === 'Bijoux') return 'jewelry';
+    return 'accessoryPlus';
+  }
   return 'other';
 }
 
 function bucketize(items: ClothingItem[]) {
   const buckets = {
     jewelry: [] as ClothingItem[],
+    belt: [] as ClothingItem[],
+    accessoryPlus: [] as ClothingItem[],
     jacket: [] as ClothingItem[],
+    pull: [] as ClothingItem[],
     top: [] as ClothingItem[],
     bottom: [] as ClothingItem[],
     dress: [] as ClothingItem[],
@@ -65,22 +89,21 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
     outfit.name?.trim() ||
     new Date(outfit.createdAt).toLocaleDateString('fr-FR');
 
-  // Pulls go to LEFT zone per spec; tops bucket includes both pulls & tops, split them
-  const isPull = (it: ClothingItem) =>
-    (getCategoryByType(it.type)?.name || it.category) === 'Pulls & sweats';
-  const pulls = buckets.top.filter(isPull);
-  const tops = buckets.top.filter(it => !isPull(it));
-
-  const leftPiece = buckets.jacket[0] || pulls[0] || null;
-  const topPiece = tops[0] || null;
-  const bottomPiece = buckets.bottom[0] || null;
+  // For the dress case (no separate top/bottom): treat dress as the "top" slot in centre
   const dressPiece = buckets.dress[0] || null;
+  const topPiece = dressPiece || buckets.top[0] || null;
+  const bottomPiece = dressPiece ? null : buckets.bottom[0] || null;
+  const pullPiece = buckets.pull[0] || null;
+  const jacketPiece = buckets.jacket[0] || null;
   const shoesPiece = buckets.shoes[0] || null;
   const bagPiece = buckets.bag[0] || null;
-  const accessories = buckets.jewelry;
+  const beltPiece = buckets.belt[0] || null;
+  const jewelryPiece = buckets.jewelry[0] || null;
+  const accessoryPlusPiece = buckets.accessoryPlus[0] || null;
+
   const isEmpty =
-    !leftPiece && !topPiece && !bottomPiece && !dressPiece &&
-    !shoesPiece && !bagPiece && accessories.length === 0;
+    !jacketPiece && !topPiece && !bottomPiece && !pullPiece &&
+    !shoesPiece && !bagPiece && !beltPiece && !jewelryPiece && !accessoryPlusPiece;
 
   // Free layout pieces (drag & drop saved positions)
   const layout = outfit.layoutData;
@@ -167,58 +190,59 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
               Tenue vide
             </div>
           ) : (
-            <div className="relative w-full" style={{ minHeight: 380 }}>
-              <div className="flex w-full" style={{ gap: 8 }}>
-                {/* LEFT ZONE 30% — aligned to top with center column */}
-                <div
-                  className="flex items-start justify-center"
-                  style={{ width: '30%' }}
-                >
-                  {leftPiece && <Piece item={leftPiece} height={180} />}
-                </div>
+            (() => {
+              const jacketH = jacketPiece && isLongOuterwear(jacketPiece) ? 190 : 150;
 
-                {/* CENTER-RIGHT ZONE 70% */}
-                <div
-                  className="flex flex-col items-center"
-                  style={{ width: '70%', gap: 0 }}
-                >
-                  {dressPiece ? (
-                    <Piece item={dressPiece} height={260} />
-                  ) : (
-                    <>
-                      {topPiece && <Piece item={topPiece} height={140} />}
-                      {bottomPiece && (
-                        <div style={{ marginTop: -8 }}>
-                          <Piece item={bottomPiece} height={180} />
-                        </div>
-                      )}
-                    </>
-                  )}
-                  {shoesPiece && (
-                    <div style={{ marginTop: -8 }}>
-                      <Piece item={shoesPiece} height={110} />
+              // Left column rows: jacket then belt; if no jacket, belt rises to top.
+              const leftRows: { item: ClothingItem; h: number }[] = [];
+              if (jacketPiece) leftRows.push({ item: jacketPiece, h: jacketH });
+              if (beltPiece) leftRows.push({ item: beltPiece, h: 80 });
+
+              // Right column: pull, bag, jewelry, accessoryPlus
+              const rightRows: { item: ClothingItem; h: number }[] = [];
+              if (pullPiece) rightRows.push({ item: pullPiece, h: 150 });
+              if (bagPiece) rightRows.push({ item: bagPiece, h: 150 });
+              if (jewelryPiece) rightRows.push({ item: jewelryPiece, h: 80 });
+              if (accessoryPlusPiece) rightRows.push({ item: accessoryPlusPiece, h: 80 });
+
+              const renderCol = (
+                rows: { item: ClothingItem; h: number }[],
+                width: string,
+              ) => (
+                <div style={{ width, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {rows.map((r, i) => (
+                    <div key={`${r.item.id}-${i}`} style={{ width: '100%', height: r.h }}>
+                      <SlotImg item={r.item} />
                     </div>
-                  )}
-                </div>
-              </div>
-
-              {/* BOTTOM ZONE: bag left, accessories bottom-right grouped */}
-              {bagPiece && (
-                <div className="absolute" style={{ left: 0, bottom: 0 }}>
-                  <Piece item={bagPiece} height={80} />
-                </div>
-              )}
-              {accessories.length > 0 && (
-                <div
-                  className="absolute flex items-end gap-1"
-                  style={{ right: 0, bottom: 0 }}
-                >
-                  {accessories.map(a => (
-                    <Piece key={a.id} item={a} height={40} />
                   ))}
                 </div>
-              )}
-            </div>
+              );
+
+              return (
+                <div className="flex w-full items-start" style={{ gap: 8 }}>
+                  {renderCol(leftRows, '30%')}
+                  {/* Center col with chaussures centered (60% width inside the 40% col) */}
+                  <div style={{ width: '40%', display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
+                    {topPiece && (
+                      <div style={{ width: '100%', height: dressPiece ? 320 : 150 }}>
+                        <SlotImg item={topPiece} />
+                      </div>
+                    )}
+                    {bottomPiece && (
+                      <div style={{ width: '100%', height: 170 }}>
+                        <SlotImg item={bottomPiece} />
+                      </div>
+                    )}
+                    {shoesPiece && (
+                      <div style={{ width: '60%', height: 120 }}>
+                        <SlotImg item={shoesPiece} />
+                      </div>
+                    )}
+                  </div>
+                  {renderCol(rightRows, '30%')}
+                </div>
+              );
+            })()
           )}
         </div>
 
