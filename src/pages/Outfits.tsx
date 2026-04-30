@@ -64,7 +64,7 @@ export default function Outfits() {
   const toggleItem = (id: string) => {
     const next = new Set(selectedIds);
     if (next.has(id)) next.delete(id);
-    else if (next.size < 5) next.add(id);
+    else if (next.size < 8) next.add(id);
     setSelectedIds(next);
   };
 
@@ -482,7 +482,7 @@ export default function Outfits() {
         )}
 
         <p className="text-sm text-muted-foreground mb-3">
-          Sélectionne 2 à 5 pièces ({selectedIds.size}/5)
+          Sélectionne 2 à 8 pièces ({selectedIds.size}/8)
         </p>
 
         <div className="grid grid-cols-3 gap-2 mb-5">
