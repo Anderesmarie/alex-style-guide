@@ -32,6 +32,7 @@ export default function Outfits() {
 
   // Mode choice bottom sheet
   const [modeSheetOpen, setModeSheetOpen] = useState(false);
+  const [modeSheetState, setModeSheetState] = useState<'collapsed' | 'half' | 'full'>('collapsed');
 
   // Free-canvas state
   const [freePieces, setFreePieces] = useState<Array<{ itemId: string; item: ClothingItem; x: number; y: number; size: number; z: number }>>([]);
@@ -739,58 +740,123 @@ export default function Outfits() {
     );
   }
 
-  // Mode choice bottom sheet (shared)
+  // Mode choice bottom sheet (shared) — draggable: collapsed / half / full
   const renderModeSheet = () => {
     if (!modeSheetOpen) return null;
+
+    const heightVh = modeSheetState === 'full' ? 95 : modeSheetState === 'half' ? 60 : 30;
+
+    const cycleUp = () => {
+      setModeSheetState(s => s === 'collapsed' ? 'half' : s === 'half' ? 'full' : 'full');
+    };
+    const cycleDown = () => {
+      setModeSheetState(s => s === 'full' ? 'half' : s === 'half' ? 'collapsed' : 'collapsed');
+    };
+
+    // Touch / pointer drag on the handle
+    let startY: number | null = null;
+    const onPointerDown = (e: React.PointerEvent) => {
+      startY = e.clientY;
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    };
+    const onPointerUp = (e: React.PointerEvent) => {
+      if (startY === null) return;
+      const dy = e.clientY - startY;
+      startY = null;
+      if (dy < -30) cycleUp();
+      else if (dy > 30) cycleDown();
+    };
+
+    const closeSheet = () => {
+      setModeSheetOpen(false);
+      setModeSheetState('collapsed');
+    };
+
+    const openCreate = (mode: 'quick' | 'free') => {
+      closeSheet();
+      if (mode === 'quick') {
+        setSlots({}); setSelectedIds(new Set()); setOutfitName('');
+        setView('createQuick');
+      } else {
+        setFreePieces([]); setFreeSelectedId(null); setOutfitName('');
+        setView('createFree');
+      }
+    };
+
     return (
-      <div className="fixed inset-0 z-50 flex items-end" onClick={() => setModeSheetOpen(false)}>
+      <div className="fixed inset-0 z-50 flex items-end" onClick={closeSheet}>
         <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
         <div
-          className="relative w-full bg-card rounded-t-3xl p-5 animate-slide-in-bottom"
+          className="relative w-full bg-card rounded-t-3xl flex flex-col animate-slide-in-bottom transition-[height] duration-300 ease-out"
+          style={{ height: `${heightVh}vh` }}
           onClick={e => e.stopPropagation()}
         >
-          <div className="w-12 h-1 bg-muted rounded-full mx-auto mb-4" />
-          <h3 className="font-serif font-bold text-lg mb-1">Créer une tenue</h3>
-          <p className="text-xs text-muted-foreground mb-4">Choisis ton mode de création</p>
+          {/* Draggable handle */}
+          <div
+            className="pt-3 pb-2 cursor-grab active:cursor-grabbing select-none touch-none"
+            onPointerDown={onPointerDown}
+            onPointerUp={onPointerUp}
+            onClick={cycleUp}
+          >
+            <div className="w-12 h-1.5 bg-muted rounded-full mx-auto" />
+          </div>
 
-          <div className="space-y-3">
-            <button
-              onClick={() => {
-                setModeSheetOpen(false);
-                setSlots({}); setSelectedIds(new Set()); setOutfitName('');
-                setView('createQuick');
-              }}
-              className="w-full bg-secondary/40 rounded-2xl p-4 text-left active:scale-[0.98] transition-transform"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-card flex items-center justify-center text-2xl flex-shrink-0">
-                  ▦
-                </div>
-                <div className="flex-1">
-                  <p className="font-serif font-bold text-base">Layout guidé</p>
-                  <p className="text-xs text-muted-foreground">Sélection rapide de pièces</p>
-                </div>
-              </div>
-            </button>
+          {/* Header */}
+          <div className="px-5 pb-3">
+            <h3 className="font-serif font-bold text-lg mb-1">Créer une tenue</h3>
+            <p className="text-xs text-muted-foreground">Choisis ton mode de création</p>
+          </div>
 
-            <button
-              onClick={() => {
-                setModeSheetOpen(false);
-                setFreePieces([]); setFreeSelectedId(null); setOutfitName('');
-                setView('createFree');
-              }}
-              className="w-full bg-secondary/40 rounded-2xl p-4 text-left active:scale-[0.98] transition-transform"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-card flex items-center justify-center text-2xl flex-shrink-0">
-                  ✨
+          {/* Scrollable content */}
+          <div className="flex-1 overflow-y-auto px-5 pb-6">
+            <div className="space-y-3">
+              <button
+                onClick={() => openCreate('quick')}
+                className="w-full bg-secondary/40 rounded-2xl p-4 text-left active:scale-[0.98] transition-transform"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-card flex items-center justify-center text-2xl flex-shrink-0">
+                    ▦
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-serif font-bold text-base">Layout guidé</p>
+                    <p className="text-xs text-muted-foreground">Sélection rapide de pièces</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="font-serif font-bold text-base">Disposition libre</p>
-                  <p className="text-xs text-muted-foreground">Compose en drag & drop sur un canvas blanc</p>
+              </button>
+
+              <button
+                onClick={() => openCreate('free')}
+                className="w-full bg-secondary/40 rounded-2xl p-4 text-left active:scale-[0.98] transition-transform"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-card flex items-center justify-center text-2xl flex-shrink-0">
+                    ✨
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-serif font-bold text-base">Disposition libre</p>
+                    <p className="text-xs text-muted-foreground">Compose en drag & drop sur un canvas blanc</p>
+                  </div>
                 </div>
-              </div>
-            </button>
+              </button>
+
+              {/* Quick wardrobe preview — visible when sheet is expanded */}
+              {(modeSheetState === 'half' || modeSheetState === 'full') && wardrobe.length > 0 && (
+                <div className="pt-4">
+                  <p className="text-xs text-muted-foreground mb-2 font-medium">Aperçu de ton dressing</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {wardrobe.map(item => (
+                      <div
+                        key={item.id}
+                        className="aspect-square rounded-lg overflow-hidden bg-secondary/30"
+                      >
+                        <img src={item.imageBase64} alt={item.type} className="w-full h-full object-contain" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
