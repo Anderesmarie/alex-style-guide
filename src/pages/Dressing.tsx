@@ -1346,7 +1346,8 @@ export default function Dressing() {
             <button
               key={item.id}
               onClick={() => { setSelectedItem(item); setView('detail'); }}
-              className="aspect-square rounded-lg overflow-hidden card-shadow active:scale-[0.96] transition-transform bg-white"
+              className="aspect-square rounded-lg overflow-hidden card-shadow active:scale-[0.96] transition-transform"
+              style={{ background: '#ff0000' }}
             >
               <img src={item.imageBase64} alt={item.type} className="w-full h-full object-contain" />
             </button>
