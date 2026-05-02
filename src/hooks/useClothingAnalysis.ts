@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
+import { autocropTransparentImage } from '@/lib/imageUtils'
 
 export interface ClothingAnalysis {
   category: string
@@ -32,7 +33,13 @@ export function useClothingAnalysis() {
       )
       if (error) throw new Error(error.message)
       if (!data?.analysis) throw new Error('Analyse incomplète')
-      setCleanImage(data.cleanImage ?? null)
+      const sourceImage = data.cleanImage ?? base64Image
+      try {
+        const cropped = await autocropTransparentImage(sourceImage)
+        setCleanImage(cropped)
+      } catch {
+        setCleanImage(sourceImage)
+      }
       setAnalysis(data.analysis)
       return data.analysis as ClothingAnalysis
     } catch (err) {
