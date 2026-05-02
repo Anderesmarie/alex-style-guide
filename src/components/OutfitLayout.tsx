@@ -35,10 +35,10 @@ interface SlotDef {
 }
 
 const SLOTS: Record<SlotId, SlotDef> = {
-  H1:   { id: 'H1',   x: 13, y: 37, w: 11, h: 11, icon: '👕', required: true },
+  H1:   { id: 'H1',   x: 14, y: 37, w: 11, h: 11, icon: '👕', required: true },
   H2:   { id: 'H2',   x: 2,  y: 37, w: 11, h: 11, icon: '👕' },
-  H3:   { id: 'H3',   x: 25, y: 37, w: 11, h: 11, icon: '👕' },
-  B:    { id: 'B',    x: 13, y: 17, w: 11, h: 18, icon: '👖', required: true },
+  H3:   { id: 'H3',   x: 26, y: 37, w: 11, h: 11, icon: '👕' },
+  B:    { id: 'B',    x: 13, y: 19, w: 11, h: 18, icon: '👖', required: true },
   ACH:  { id: 'ACH',  x: 13, y: 6,  w: 11, h: 11, icon: '👟', suggestion: true, suggestionText: 'Pense à ajouter une paire de chaussures' },
   ASAC: { id: 'ASAC', x: 25, y: 21, w: 9, h: 9,  icon: '👜', suggestion: true, suggestionText: 'Pense à ajouter un sac' },
   ACEN: { id: 'ACEN', x: 26, y: 10, w: 7, h: 7,  icon: '〰️' },
