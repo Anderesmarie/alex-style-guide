@@ -102,23 +102,21 @@ function SlotBox({ def, item }: SlotBoxProps) {
   const width = def.w * U;
   const height = def.h * U;
 
-  // Empty + not required + not suggestion → render nothing
-  if (!item && !def.required && !def.suggestion) return null;
+  const baseStyle = {
+    left,
+    top,
+    width,
+    height,
+    border: '1.5px dashed #9ca3af',
+    borderRadius: 8,
+    background: 'transparent',
+    overflow: 'hidden' as const,
+  };
 
   // Filled
   if (item) {
     return (
-      <div
-        className="absolute flex flex-col items-center justify-center"
-        style={{
-          left,
-          top,
-          width,
-          height,
-          borderRadius: 8,
-          overflow: 'hidden',
-        }}
-      >
+      <div className="absolute flex flex-col items-center justify-center" style={baseStyle}>
         {item.imageBase64 ? (
           <img
             src={item.imageBase64}
@@ -137,18 +135,7 @@ function SlotBox({ def, item }: SlotBoxProps) {
   // Empty required (H1, B) — dashed
   if (def.required) {
     return (
-      <div
-        className="absolute flex items-center justify-center"
-        style={{
-          left,
-          top,
-          width,
-          height,
-          border: '1.5px dashed #d1d5db',
-          borderRadius: 8,
-          background: 'transparent',
-        }}
-      >
+      <div className="absolute flex items-center justify-center" style={baseStyle}>
         <span style={{ fontSize: Math.min(width, height) * 0.4, opacity: 0.4 }}>
           {def.icon}
         </span>
@@ -157,25 +144,19 @@ function SlotBox({ def, item }: SlotBoxProps) {
   }
 
   // Empty suggestion (ACH, ASAC) — dashed with "?"
-  return (
-    <div
-      className="absolute flex items-center justify-center"
-      style={{
-        left,
-        top,
-        width,
-        height,
-        border: '1.5px dashed #d1d5db',
-        borderRadius: 8,
-        background: 'transparent',
-        color: '#9ca3af',
-        fontSize: 22,
-        fontWeight: 500,
-      }}
-    >
-      ?
-    </div>
-  );
+  if (def.suggestion) {
+    return (
+      <div
+        className="absolute flex items-center justify-center"
+        style={{ ...baseStyle, color: '#9ca3af', fontSize: 22, fontWeight: 500 }}
+      >
+        ?
+      </div>
+    );
+  }
+
+  // Empty optional — show dashed border only
+  return <div className="absolute" style={baseStyle} />;
 }
 
 export default function OutfitLayout({
