@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { updateStreak } from '@/lib/streak';
 import type { Season } from '@/lib/colorimetry';
 import OutfitGalleryCard from '@/components/OutfitGalleryCard';
+import OutfitLayout, { mapItemsToLayout } from '@/components/OutfitLayout';
 import OutfitFreeCanvas, {
   CHIPS,
   ChipKey,
@@ -254,16 +255,21 @@ export default function OutfitDailyFeed({
             layoutData: r.layoutData ?? null,
           };
 
+          const layoutProps = mapItemsToLayout(r.outfit);
+
           return (
             <div key={idx} className={isDisliked ? 'opacity-50' : ''}>
-              <OutfitGalleryCard
-                outfit={fakeOutfit}
-                items={r.outfit}
-                pseudo={pseudo}
-                badgeLabel="✨ Générée par MyStyl"
-                hideLike
-                hideName
-              />
+              <div className="bg-card rounded-2xl card-shadow p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span
+                    className="inline-block text-[11px] font-medium px-2 py-1 rounded-full"
+                    style={{ backgroundColor: '#F5F0EB', color: ROSE_GOLD }}
+                  >
+                    ✨ Générée par MyStyl
+                  </span>
+                </div>
+                <OutfitLayout {...layoutProps} />
+              </div>
 
               {/* Action buttons */}
               <div className="mt-3 space-y-2">
