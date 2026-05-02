@@ -58,6 +58,37 @@ export interface OutfitLayoutProps {
   echarpe?: ClothingItem;
   bijoux?: ClothingItem;
   couvre_chef?: ClothingItem;
+  debugMode?: boolean;
+}
+
+const DEBUG_COLORS: Record<SlotId, string> = {
+  H1: '#60a5fa', H2: '#60a5fa', H3: '#60a5fa',
+  B: '#34d399',
+  ACH: '#fb923c',
+  ASAC: '#f472b6',
+  ACEN: '#facc15', A1: '#facc15', A2: '#facc15', A3: '#facc15',
+};
+
+function DebugSlot({ def }: { def: SlotDef }) {
+  const left = def.x * U;
+  const top = (ROWS - def.y - def.h) * U;
+  const width = def.w * U;
+  const height = def.h * U;
+  const color = DEBUG_COLORS[def.id];
+  return (
+    <div
+      className="absolute flex items-center justify-center"
+      style={{
+        left, top, width, height,
+        background: color,
+        opacity: 0.4,
+        border: `1px solid ${color}`,
+        borderRadius: 8,
+      }}
+    >
+      <span style={{ fontSize: 11, fontWeight: 700, color: '#1f2937' }}>{def.id}</span>
+    </div>
+  );
 }
 
 interface SlotBoxProps {
@@ -154,11 +185,27 @@ export default function OutfitLayout({
   bas,
   chaussures, sac,
   ceinture, echarpe, bijoux, couvre_chef,
+  debugMode = false,
 }: OutfitLayoutProps) {
   // Suggestions text under the grid
   const suggestions: string[] = [];
   if (!chaussures) suggestions.push('💡 ' + SLOTS.ACH.suggestionText);
   if (!sac) suggestions.push('💡 ' + SLOTS.ASAC.suggestionText);
+
+  if (debugMode) {
+    return (
+      <div className="flex flex-col items-center w-full">
+        <div
+          className="relative mx-auto"
+          style={{ width: W, height: H, maxWidth: '100%' }}
+        >
+          {(Object.keys(SLOTS) as SlotId[]).map(id => (
+            <DebugSlot key={id} def={SLOTS[id]} />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center w-full">
