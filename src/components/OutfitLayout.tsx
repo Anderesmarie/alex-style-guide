@@ -185,11 +185,27 @@ export default function OutfitLayout({
   bas,
   chaussures, sac,
   ceinture, echarpe, bijoux, couvre_chef,
+  debugMode = false,
 }: OutfitLayoutProps) {
   // Suggestions text under the grid
   const suggestions: string[] = [];
   if (!chaussures) suggestions.push('💡 ' + SLOTS.ACH.suggestionText);
   if (!sac) suggestions.push('💡 ' + SLOTS.ASAC.suggestionText);
+
+  if (debugMode) {
+    return (
+      <div className="flex flex-col items-center w-full">
+        <div
+          className="relative mx-auto"
+          style={{ width: W, height: H, maxWidth: '100%' }}
+        >
+          {(Object.keys(SLOTS) as SlotId[]).map(id => (
+            <DebugSlot key={id} def={SLOTS[id]} />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center w-full">
