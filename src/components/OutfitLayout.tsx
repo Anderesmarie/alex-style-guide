@@ -109,15 +109,13 @@ function SlotBox({ def, item }: SlotBoxProps) {
   if (item) {
     return (
       <div
-        className="absolute flex flex-col items-center justify-center bg-white"
+        className="absolute flex flex-col items-center justify-center"
         style={{
           left,
           top,
           width,
           height,
-          border: '1px solid #e5e7eb',
           borderRadius: 8,
-          padding: 4,
           overflow: 'hidden',
         }}
       >
