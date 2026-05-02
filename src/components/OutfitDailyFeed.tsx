@@ -5,7 +5,6 @@ import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { updateStreak } from '@/lib/streak';
 import type { Season } from '@/lib/colorimetry';
-import OutfitGalleryCard from '@/components/OutfitGalleryCard';
 import OutfitLayout, { mapItemsToLayout } from '@/components/OutfitLayout';
 import OutfitFreeCanvas, {
   CHIPS,
@@ -246,15 +245,6 @@ export default function OutfitDailyFeed({
         {results.map((r, idx) => {
           const isWorn = wornIdx === idx;
           const isDisliked = dislikedIdxs.has(idx);
-          const fakeOutfit = {
-            id: `daily-${idx}`,
-            name: '',
-            itemIds: r.outfit.map(i => i.id),
-            createdAt: new Date().toISOString(),
-            liked: false,
-            layoutData: r.layoutData ?? null,
-          };
-
           const layoutProps = mapItemsToLayout(r.outfit);
 
           return (
