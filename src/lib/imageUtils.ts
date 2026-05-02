@@ -149,3 +149,52 @@ export function recompressWithRotation(
     img.src = imgSrc;
   });
 }
+
+export async function autocropTransparentImage(base64: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = img.width
+      canvas.height = img.height
+      const ctx = canvas.getContext('2d')!
+      ctx.drawImage(img, 0, 0)
+
+      const { data, width, height } = ctx.getImageData(0, 0, img.width, img.height)
+
+      let minX = width, minY = height, maxX = 0, maxY = 0
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const alpha = data[(y * width + x) * 4 + 3]
+          if (alpha > 10) {
+            if (x < minX) minX = x
+            if (x > maxX) maxX = x
+            if (y < minY) minY = y
+            if (y > maxY) maxY = y
+          }
+        }
+      }
+
+      if (maxX <= minX || maxY <= minY) {
+        resolve(base64)
+        return
+      }
+
+      const padX = Math.round((maxX - minX) * 0.05)
+      const padY = Math.round((maxY - minY) * 0.05)
+      const cropX = Math.max(0, minX - padX)
+      const cropY = Math.max(0, minY - padY)
+      const cropW = Math.min(width, maxX + padX) - cropX
+      const cropH = Math.min(height, maxY + padY) - cropY
+
+      const out = document.createElement('canvas')
+      out.width = cropW
+      out.height = cropH
+      const outCtx = out.getContext('2d')!
+      outCtx.drawImage(canvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH)
+      resolve(out.toDataURL('image/png'))
+    }
+    img.onerror = reject
+    img.src = base64
+  })
+}
