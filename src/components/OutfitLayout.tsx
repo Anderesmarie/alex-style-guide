@@ -35,16 +35,16 @@ interface SlotDef {
 }
 
 const SLOTS: Record<SlotId, SlotDef> = {
-  H1:   { id: 'H1',   x: 14, y: 37, w: 11, h: 11, icon: '👕', required: true },
-  H2:   { id: 'H2',   x: 2,  y: 37, w: 11, h: 11, icon: '👕' },
-  H3:   { id: 'H3',   x: 26, y: 37, w: 11, h: 11, icon: '👕' },
-  B:    { id: 'B',    x: 13, y: 19, w: 11, h: 18, icon: '👖', required: true },
-  ACH:  { id: 'ACH',  x: 13, y: 6,  w: 11, h: 11, icon: '👟', suggestion: true, suggestionText: 'Pense à ajouter une paire de chaussures' },
-  ASAC: { id: 'ASAC', x: 25, y: 21, w: 9, h: 9,  icon: '👜', suggestion: true, suggestionText: 'Pense à ajouter un sac' },
-  ACEN: { id: 'ACEN', x: 26, y: 10, w: 7, h: 7,  icon: '〰️' },
-  A1:   { id: 'A1',   x: 4,  y: 16, w: 7, h: 7,  icon: '🧣' },
-  A2:   { id: 'A2',   x: 2,  y: 27, w: 7, h: 7,  icon: '💍' },
-  A3:   { id: 'A3',   x: 2,  y: 5,  w: 7, h: 7,  icon: '🎩' },
+  H1:   { id: 'H1',   x: 14, y: 39, w: 9,  h: 9,  icon: '👕', required: true },
+  H2:   { id: 'H2',   x: 3,  y: 39, w: 9,  h: 9,  icon: '👕' },
+  H3:   { id: 'H3',   x: 25, y: 39, w: 9,  h: 9,  icon: '👕' },
+  B:    { id: 'B',    x: 14, y: 17, w: 9,  h: 18, icon: '👖', required: true },
+  ACH:  { id: 'ACH',  x: 14, y: 4,  w: 9,  h: 9,  icon: '👟', suggestion: true, suggestionText: 'Pense à ajouter une paire de chaussures' },
+  ASAC: { id: 'ASAC', x: 25, y: 21, w: 9,  h: 9,  icon: '👜', suggestion: true, suggestionText: 'Pense à ajouter un sac' },
+  ACEN: { id: 'ACEN', x: 26, y: 10, w: 7,  h: 7,  icon: '〰️' },
+  A1:   { id: 'A1',   x: 4,  y: 16, w: 7,  h: 7,  icon: '🧣' },
+  A2:   { id: 'A2',   x: 2,  y: 27, w: 7,  h: 7,  icon: '💍' },
+  A3:   { id: 'A3',   x: 2,  y: 5,  w: 7,  h: 7,  icon: '🎩' },
 };
 
 export interface OutfitLayoutProps {
