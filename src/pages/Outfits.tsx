@@ -32,6 +32,7 @@ export default function Outfits() {
 
   // Mode choice bottom sheet
   const [modeSheetOpen, setModeSheetOpen] = useState(false);
+  const [modeSheetState, setModeSheetState] = useState<'collapsed' | 'half' | 'full'>('collapsed');
 
   // Free-canvas state
   const [freePieces, setFreePieces] = useState<Array<{ itemId: string; item: ClothingItem; x: number; y: number; size: number; z: number }>>([]);
