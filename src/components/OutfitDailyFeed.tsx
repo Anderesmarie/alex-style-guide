@@ -258,7 +258,7 @@ export default function OutfitDailyFeed({
                     ✨ Générée par MyStyl
                   </span>
                 </div>
-                <OutfitLayout {...layoutProps} debugMode />
+                <OutfitLayout {...layoutProps} />
               </div>
 
               {/* Action buttons */}
