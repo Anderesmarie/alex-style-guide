@@ -22,7 +22,7 @@ type SlotId =
   | 'H1' | 'H2' | 'H3'
   | 'B'
   | 'ACH' | 'ASAC'
-  | 'ACEN' | 'A1' | 'A2' | 'A3';
+  | 'A1' | 'A2' | 'A3';
 
 interface SlotDef {
   id: SlotId;
