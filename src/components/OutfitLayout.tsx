@@ -67,7 +67,7 @@ const DEBUG_COLORS: Record<SlotId, string> = {
   B: '#34d399',
   ACH: '#fb923c',
   ASAC: '#f472b6',
-  ACEN: '#facc15', A1: '#facc15', A2: '#facc15', A3: '#facc15',
+  A1: '#facc15', A2: '#facc15', A3: '#facc15',
 };
 
 function DebugSlot({ def }: { def: SlotDef }) {
