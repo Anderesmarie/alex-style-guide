@@ -1,3 +1,5 @@
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { useDrag, usePinch } from '@use-gesture/react';
 import { ClothingItem } from '@/lib/types';
 import { getCategoryByType } from '@/lib/categories';
 
@@ -91,72 +93,177 @@ function DebugSlot({ def }: { def: SlotDef }) {
   );
 }
 
-interface SlotBoxProps {
+interface PieceState {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  zIndex: number;
+}
+
+interface PieceConfig {
+  key: string;
   def: SlotDef;
   item?: ClothingItem;
 }
 
-function SlotBox({ def, item }: SlotBoxProps) {
-  const left = def.x * U;
-  const top = (ROWS - def.y - def.h) * U;
-  const width = def.w * U;
-  const height = def.h * U;
-
-  const baseStyle = {
-    left,
-    top,
-    width,
-    height,
-    border: '1.5px dashed #9ca3af',
-    borderRadius: 8,
-    background: 'transparent',
-    overflow: 'hidden' as const,
+function initialState(def: SlotDef): PieceState {
+  return {
+    x: def.x * U,
+    y: (ROWS - def.y - def.h) * U,
+    width: def.w * U,
+    height: def.h * U,
+    zIndex: 1,
   };
+}
 
-  // Filled
-  if (item) {
-    return (
-      <div className="absolute flex flex-col items-center justify-center" style={baseStyle}>
-        {item.imageBase64 ? (
-          <img
-            src={item.imageBase64}
-            alt={item.type}
-            className="w-full h-full object-contain"
-          />
-        ) : (
-          <span style={{ fontSize: Math.min(width, height) * 0.45 }}>
-            {def.icon}
-          </span>
-        )}
-      </div>
-    );
-  }
+const MIN_SIZE = 30;
+const MAX_SIZE = 400;
 
-  // Empty required (H1, B) — dashed
-  if (def.required) {
-    return (
-      <div className="absolute flex items-center justify-center" style={baseStyle}>
-        <span style={{ fontSize: Math.min(width, height) * 0.4, opacity: 0.4 }}>
-          {def.icon}
-        </span>
-      </div>
-    );
-  }
+interface DraggablePieceProps {
+  config: PieceConfig;
+  state: PieceState;
+  onChange: (next: PieceState) => void;
+  onSelect: () => void;
+  selected: boolean;
+}
 
-  // Empty suggestion (ACH, ASAC) — dashed with "?"
-  if (def.suggestion) {
-    return (
-      <div
-        className="absolute flex items-center justify-center"
-        style={{ ...baseStyle, color: '#9ca3af', fontSize: 22, fontWeight: 500 }}
-      >
-        ?
-      </div>
-    );
-  }
+function DraggablePiece({ config, state, onChange, onSelect, selected }: DraggablePieceProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { def, item } = config;
 
-  // Empty optional — show dashed border only
-  return <div className="absolute" style={baseStyle} />;
+  useDrag(
+    ({ offset: [ox, oy], first }) => {
+      if (first) onSelect();
+      const x = Math.max(0, Math.min(W - state.width, ox));
+      const y = Math.max(0, Math.min(H - state.height, oy));
+      onChange({ ...state, x, y });
+    },
+    {
+      target: ref,
+      from: () => [state.x, state.y],
+      eventOptions: { passive: false },
+      pointer: { touch: true },
+    }
+  );
+
+  usePinch(
+    ({ offset: [scale], first }) => {
+      if (first) onSelect();
+      const ratio = Math.max(0.3, Math.min(4, scale));
+      const baseW = def.w * U;
+      const baseH = def.h * U;
+      const newW = Math.max(MIN_SIZE, Math.min(MAX_SIZE, baseW * ratio));
+      const newH = Math.max(MIN_SIZE, Math.min(MAX_SIZE, baseH * ratio));
+      onChange({ ...state, width: newW, height: newH });
+    },
+    {
+      target: ref,
+      scaleBounds: { min: 0.3, max: 4 },
+      from: () => [state.width / (def.w * U), 0],
+      eventOptions: { passive: false },
+    }
+  );
+
+  // Desktop wheel resize when selected
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !selected) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const delta = -e.deltaY * 0.5;
+      const ratio = (state.width + delta) / state.width;
+      const newW = Math.max(MIN_SIZE, Math.min(MAX_SIZE, state.width * ratio));
+      const newH = Math.max(MIN_SIZE, Math.min(MAX_SIZE, state.height * ratio));
+      onChange({ ...state, width: newW, height: newH });
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [selected, state, onChange]);
+
+  // Corner resize handle (desktop)
+  const handleResize = useCallback(
+    (e: React.PointerEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const startW = state.width;
+      const startH = state.height;
+      onSelect();
+
+      const onMove = (ev: PointerEvent) => {
+        const dx = ev.clientX - startX;
+        const dy = ev.clientY - startY;
+        const delta = Math.max(dx, dy);
+        const newW = Math.max(MIN_SIZE, Math.min(MAX_SIZE, startW + delta));
+        const newH = Math.max(MIN_SIZE, Math.min(MAX_SIZE, startH + delta * (startH / startW)));
+        onChange({ ...state, width: newW, height: newH });
+      };
+      const onUp = () => {
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+      };
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    },
+    [state, onChange, onSelect]
+  );
+
+  const content = item ? (
+    <img
+      src={item.imageBase64}
+      alt={item.type}
+      draggable={false}
+      style={{ width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none', userSelect: 'none' }}
+    />
+  ) : (
+    <div className="w-full h-full flex items-center justify-center" style={{ opacity: 0.4 }}>
+      <span style={{ fontSize: Math.min(state.width, state.height) * 0.4 }}>{def.icon}</span>
+    </div>
+  );
+
+  return (
+    <div
+      ref={ref}
+      onPointerDown={onSelect}
+      style={{
+        position: 'absolute',
+        left: state.x,
+        top: state.y,
+        width: state.width,
+        height: state.height,
+        zIndex: state.zIndex,
+        touchAction: 'none',
+        cursor: 'grab',
+        border: selected ? '1.5px solid #C9956C' : '1.5px dashed #9ca3af',
+        borderRadius: 8,
+        overflow: 'hidden',
+        background: 'transparent',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+      }}
+    >
+      {content}
+      {selected && (
+        <div
+          onPointerDown={handleResize}
+          style={{
+            position: 'absolute',
+            right: -6,
+            bottom: -6,
+            width: 16,
+            height: 16,
+            borderRadius: 8,
+            background: '#C9956C',
+            cursor: 'nwse-resize',
+            touchAction: 'none',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+          }}
+        />
+      )}
+    </div>
+  );
 }
 
 export default function OutfitLayout({
@@ -166,6 +273,57 @@ export default function OutfitLayout({
   ceinture, echarpe, bijoux, couvre_chef,
   debugMode = false,
 }: OutfitLayoutProps) {
+  // Build the list of pieces to render (only required + provided)
+  const pieces = useMemo<PieceConfig[]>(() => {
+    const list: PieceConfig[] = [
+      { key: 'H1', def: SLOTS.H1, item: h1 },
+      { key: 'B', def: SLOTS.B, item: bas },
+      { key: 'ACH', def: SLOTS.ACH, item: chaussures },
+      { key: 'ASAC', def: SLOTS.ASAC, item: sac },
+    ];
+    if (h2) list.push({ key: 'H2', def: SLOTS.H2, item: h2 });
+    if (h3) list.push({ key: 'H3', def: SLOTS.H3, item: h3 });
+    if (ceinture) list.push({ key: 'ACEN', def: SLOTS.ACEN, item: ceinture });
+    if (echarpe) list.push({ key: 'A1', def: SLOTS.A1, item: echarpe });
+    if (bijoux) list.push({ key: 'A2', def: SLOTS.A2, item: bijoux });
+    if (couvre_chef) list.push({ key: 'A3', def: SLOTS.A3, item: couvre_chef });
+    return list;
+  }, [h1, h2, h3, bas, chaussures, sac, ceinture, echarpe, bijoux, couvre_chef]);
+
+  const [states, setStates] = useState<Record<string, PieceState>>({});
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const zCounter = useRef(10);
+
+  // Sync states when pieces list changes (add/remove items)
+  useEffect(() => {
+    setStates(prev => {
+      const next: Record<string, PieceState> = {};
+      for (const p of pieces) {
+        next[p.key] = prev[p.key] ?? initialState(p.def);
+      }
+      return next;
+    });
+  }, [pieces]);
+
+  const updateState = useCallback((key: string, next: PieceState) => {
+    setStates(prev => ({ ...prev, [key]: next }));
+  }, []);
+
+  const select = useCallback((key: string) => {
+    setSelectedKey(key);
+    zCounter.current += 1;
+    const z = zCounter.current;
+    setStates(prev => prev[key] ? { ...prev, [key]: { ...prev[key], zIndex: z } } : prev);
+  }, []);
+
+  const reset = useCallback(() => {
+    const next: Record<string, PieceState> = {};
+    for (const p of pieces) next[p.key] = initialState(p.def);
+    setStates(next);
+    setSelectedKey(null);
+    zCounter.current = 10;
+  }, [pieces]);
+
   // Suggestions text under the grid
   const suggestions: string[] = [];
   if (!chaussures) suggestions.push('💡 ' + SLOTS.ACH.suggestionText);
@@ -190,24 +348,40 @@ export default function OutfitLayout({
     <div className="flex flex-col items-center w-full">
       <div
         className="relative mx-auto"
-        style={{ width: W, height: H, maxWidth: '100%' }}
+        onPointerDown={(e) => {
+          if (e.target === e.currentTarget) setSelectedKey(null);
+        }}
+        style={{
+          width: W,
+          height: H,
+          maxWidth: '100%',
+          touchAction: 'none',
+          overflow: 'hidden',
+        }}
       >
-        {/* Required + suggestion slots first (so filled overlap won't matter) */}
-        <SlotBox def={SLOTS.H1} item={h1} />
-        <SlotBox def={SLOTS.B} item={bas} />
-        <SlotBox def={SLOTS.ACH} item={chaussures} />
-        <SlotBox def={SLOTS.ASAC} item={sac} />
-
-        {/* Optional tops — only if provided */}
-        {h2 && <SlotBox def={SLOTS.H2} item={h2} />}
-        {h3 && <SlotBox def={SLOTS.H3} item={h3} />}
-
-        {/* Accessories — invisible if absent */}
-        {ceinture && <SlotBox def={SLOTS.ACEN} item={ceinture} />}
-        {echarpe && <SlotBox def={SLOTS.A1} item={echarpe} />}
-        {bijoux && <SlotBox def={SLOTS.A2} item={bijoux} />}
-        {couvre_chef && <SlotBox def={SLOTS.A3} item={couvre_chef} />}
+        {pieces.map(p => {
+          const st = states[p.key];
+          if (!st) return null;
+          return (
+            <DraggablePiece
+              key={p.key}
+              config={p}
+              state={st}
+              onChange={(next) => updateState(p.key, next)}
+              onSelect={() => select(p.key)}
+              selected={selectedKey === p.key}
+            />
+          );
+        })}
       </div>
+
+      <button
+        type="button"
+        onClick={reset}
+        className="mt-3 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors"
+      >
+        Réinitialiser
+      </button>
 
       {suggestions.length > 0 && (
         <div className="mt-3 space-y-1 text-center">
