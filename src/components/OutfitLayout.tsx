@@ -282,7 +282,7 @@ export default function OutfitLayout({
     ];
     if (h2) list.push({ key: 'H2', def: SLOTS.H2, item: h2 });
     if (h3) list.push({ key: 'H3', def: SLOTS.H3, item: h3 });
-    if (ceinture) list.push({ key: 'ACEN', def: SLOTS.ACEN, item: ceinture });
+    if (echarpe) list.push({ key: 'A1', def: SLOTS.A1, item: echarpe });
     if (echarpe) list.push({ key: 'A1', def: SLOTS.A1, item: echarpe });
     if (bijoux) list.push({ key: 'A2', def: SLOTS.A2, item: bijoux });
     if (couvre_chef) list.push({ key: 'A3', def: SLOTS.A3, item: couvre_chef });
