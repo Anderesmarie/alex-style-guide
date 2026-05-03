@@ -22,7 +22,7 @@ type SlotId =
   | 'H1' | 'H2' | 'H3'
   | 'B'
   | 'ACH' | 'ASAC'
-  | 'ACEN' | 'A1' | 'A2' | 'A3';
+  | 'A1' | 'A2' | 'A3';
 
 interface SlotDef {
   id: SlotId;
@@ -37,16 +37,15 @@ interface SlotDef {
 }
 
 const SLOTS: Record<SlotId, SlotDef> = {
-  H1:   { id: 'H1',   x: 14, y: 39, w: 9,  h: 9,  icon: '👕', required: true },
-  H2:   { id: 'H2',   x: 3,  y: 39, w: 9,  h: 9,  icon: '👕' },
-  H3:   { id: 'H3',   x: 25, y: 39, w: 9,  h: 9,  icon: '👕' },
-  B:    { id: 'B',    x: 14, y: 17, w: 9,  h: 18, icon: '👖', required: true },
-  ACH:  { id: 'ACH',  x: 14, y: 4,  w: 9,  h: 9,  icon: '👟', suggestion: true, suggestionText: 'Pense à ajouter une paire de chaussures' },
-  ASAC: { id: 'ASAC', x: 25, y: 21, w: 9,  h: 9,  icon: '👜', suggestion: true, suggestionText: 'Pense à ajouter un sac' },
-  ACEN: { id: 'ACEN', x: 26, y: 10, w: 7,  h: 7,  icon: '〰️' },
-  A1:   { id: 'A1',   x: 4,  y: 16, w: 7,  h: 7,  icon: '🧣' },
-  A2:   { id: 'A2',   x: 2,  y: 27, w: 7,  h: 7,  icon: '💍' },
-  A3:   { id: 'A3',   x: 2,  y: 5,  w: 7,  h: 7,  icon: '🎩' },
+  H1:   { id: 'H1',   x: 12, y: 38, w: 12, h: 12, icon: '👕', required: true },
+  H2:   { id: 'H2',   x: 0,  y: 38, w: 12, h: 12, icon: '👕' },
+  H3:   { id: 'H3',   x: 24, y: 38, w: 12, h: 12, icon: '👕' },
+  B:    { id: 'B',    x: 12, y: 12, w: 12, h: 25, icon: '👖', required: true },
+  ACH:  { id: 'ACH',  x: 12, y: 0,  w: 12, h: 11, icon: '👟', suggestion: true, suggestionText: 'Pense à ajouter une paire de chaussures' },
+  ASAC: { id: 'ASAC', x: 24, y: 18, w: 12, h: 11, icon: '👜', suggestion: true, suggestionText: 'Pense à ajouter un sac' },
+  A1:   { id: 'A1',   x: 0,  y: 25, w: 12, h: 11, icon: '🧣' },
+  A2:   { id: 'A2',   x: 0,  y: 13, w: 12, h: 11, icon: '💍' },
+  A3:   { id: 'A3',   x: 0,  y: 1,  w: 12, h: 11, icon: '🎩' },
 };
 
 export interface OutfitLayoutProps {
@@ -68,7 +67,7 @@ const DEBUG_COLORS: Record<SlotId, string> = {
   B: '#34d399',
   ACH: '#fb923c',
   ASAC: '#f472b6',
-  ACEN: '#facc15', A1: '#facc15', A2: '#facc15', A3: '#facc15',
+  A1: '#facc15', A2: '#facc15', A3: '#facc15',
 };
 
 function DebugSlot({ def }: { def: SlotDef }) {
@@ -283,7 +282,7 @@ export default function OutfitLayout({
     ];
     if (h2) list.push({ key: 'H2', def: SLOTS.H2, item: h2 });
     if (h3) list.push({ key: 'H3', def: SLOTS.H3, item: h3 });
-    if (ceinture) list.push({ key: 'ACEN', def: SLOTS.ACEN, item: ceinture });
+    if (echarpe) list.push({ key: 'A1', def: SLOTS.A1, item: echarpe });
     if (echarpe) list.push({ key: 'A1', def: SLOTS.A1, item: echarpe });
     if (bijoux) list.push({ key: 'A2', def: SLOTS.A2, item: bijoux });
     if (couvre_chef) list.push({ key: 'A3', def: SLOTS.A3, item: couvre_chef });
