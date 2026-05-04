@@ -22,6 +22,7 @@ type SlotId =
   | 'H1' | 'H2' | 'H3'
   | 'B'
   | 'ACH' | 'ASAC'
+  | 'ACC'
   | 'A1' | 'A2' | 'A3';
 
 interface SlotDef {
@@ -30,23 +31,84 @@ interface SlotDef {
   y: number;
   w: number;
   h: number;
-  icon: string;
-  required?: boolean;
-  suggestion?: boolean;
-  suggestionText?: string;
 }
 
-const SLOTS: Record<SlotId, SlotDef> = {
-  H1:   { id: 'H1',   x: 12, y: 38, w: 12, h: 12, icon: '👕', required: true },
-  H2:   { id: 'H2',   x: 0,  y: 38, w: 12, h: 12, icon: '👕' },
-  H3:   { id: 'H3',   x: 24, y: 38, w: 12, h: 12, icon: '👕' },
-  B:    { id: 'B',    x: 12, y: 12, w: 12, h: 25, icon: '👖', required: true },
-  ACH:  { id: 'ACH',  x: 12, y: 0,  w: 12, h: 11, icon: '👟', suggestion: true, suggestionText: 'Pense à ajouter une paire de chaussures' },
-  ASAC: { id: 'ASAC', x: 24, y: 18, w: 12, h: 11, icon: '👜', suggestion: true, suggestionText: 'Pense à ajouter un sac' },
-  A1:   { id: 'A1',   x: 0,  y: 25, w: 12, h: 11, icon: '🧣' },
-  A2:   { id: 'A2',   x: 0,  y: 13, w: 12, h: 11, icon: '💍' },
-  A3:   { id: 'A3',   x: 0,  y: 1,  w: 12, h: 11, icon: '🎩' },
+const SLOT_ICONS: Record<SlotId, string> = {
+  H1: '👕', H2: '👕', H3: '👕',
+  B: '👖',
+  ACH: '👟', ASAC: '👜',
+  ACC: '🎩',
+  A1: '🧣', A2: '💍', A3: '💍',
 };
+
+const TEMPLATES: Record<string, Partial<Record<SlotId, SlotDef>>> = {
+  H1BTACC: {
+    H1:   { id:'H1',   x:11, y:35, w:15, h:15 },
+    B:    { id:'B',    x:12, y:10, w:13, h:25 },
+    ACH:  { id:'ACH',  x:13, y:0,  w:11, h:10 },
+    ASAC: { id:'ASAC', x:25, y:17, w:11, h:10 },
+    A1:   { id:'A1',   x:0,  y:32, w:9,  h:9  },
+    ACC:  { id:'ACC',  x:0,  y:17, w:9,  h:8  },
+    A2:   { id:'A2',   x:0,  y:9,  w:9,  h:8  },
+    A3:   { id:'A3',   x:0,  y:1,  w:9,  h:8  },
+  },
+  H1H3BTAC: {
+    H1:   { id:'H1',   x:0,  y:35, w:14, h:15 },
+    H3:   { id:'H3',   x:22, y:35, w:14, h:15 },
+    B:    { id:'B',    x:12, y:10, w:13, h:25 },
+    ACH:  { id:'ACH',  x:13, y:0,  w:11, h:10 },
+    ASAC: { id:'ASAC', x:25, y:17, w:11, h:10 },
+    A1:   { id:'A1',   x:0,  y:25, w:9,  h:9  },
+    ACC:  { id:'ACC',  x:0,  y:17, w:9,  h:8  },
+    A2:   { id:'A2',   x:0,  y:9,  w:9,  h:8  },
+    A3:   { id:'A3',   x:0,  y:1,  w:9,  h:8  },
+  },
+  H1H2H3TACC: {
+    H2:   { id:'H2',   x:0,  y:36, w:14, h:14 },
+    H1:   { id:'H1',   x:11, y:22, w:14, h:14 },
+    H3:   { id:'H3',   x:22, y:36, w:14, h:14 },
+    B:    { id:'B',    x:11, y:0,  w:14, h:22 },
+    ACH:  { id:'ACH',  x:25, y:0,  w:11, h:10 },
+    ASAC: { id:'ASAC', x:25, y:19, w:11, h:10 },
+    A1:   { id:'A1',   x:0,  y:25, w:9,  h:9  },
+    ACC:  { id:'ACC',  x:0,  y:17, w:9,  h:8  },
+    A2:   { id:'A2',   x:0,  y:9,  w:9,  h:8  },
+    A3:   { id:'A3',   x:0,  y:1,  w:9,  h:8  },
+  },
+  H3RTACC: {
+    H3:   { id:'H3',   x:9,  y:34, w:16, h:16 },
+    B:    { id:'B',    x:9,  y:0,  w:16, h:34 },
+    ACH:  { id:'ACH',  x:25, y:0,  w:11, h:10 },
+    ASAC: { id:'ASAC', x:25, y:19, w:11, h:10 },
+    A1:   { id:'A1',   x:0,  y:24, w:9,  h:9  },
+    ACC:  { id:'ACC',  x:0,  y:16, w:9,  h:8  },
+    A2:   { id:'A2',   x:0,  y:8,  w:9,  h:8  },
+    A3:   { id:'A3',   x:0,  y:0,  w:9,  h:8  },
+  },
+  RTACC: {
+    B:    { id:'B',    x:9,  y:3,  w:16, h:38 },
+    ACH:  { id:'ACH',  x:25, y:0,  w:11, h:10 },
+    ASAC: { id:'ASAC', x:25, y:19, w:11, h:10 },
+    A1:   { id:'A1',   x:0,  y:39, w:9,  h:9  },
+    ACC:  { id:'ACC',  x:0,  y:16, w:9,  h:8  },
+    A2:   { id:'A2',   x:0,  y:8,  w:9,  h:8  },
+    A3:   { id:'A3',   x:0,  y:0,  w:9,  h:8  },
+  },
+};
+
+function selectTemplate(props: OutfitLayoutPropsLike): Partial<Record<SlotId, SlotDef>> {
+  const { h1, h2, h3, bas } = props;
+  const topCount = [h1, h2, h3].filter(Boolean).length;
+  if (!h1 && !h2 && !h3 && bas) return TEMPLATES.RTACC;
+  if (!h1 && !h2 && h3 && bas) return TEMPLATES.H3RTACC;
+  if (topCount === 3 && bas) return TEMPLATES.H1H2H3TACC;
+  if (topCount === 2 && bas) return TEMPLATES.H1H3BTAC;
+  return TEMPLATES.H1BTACC;
+}
+
+interface OutfitLayoutPropsLike {
+  h1?: ClothingItem; h2?: ClothingItem; h3?: ClothingItem; bas?: ClothingItem;
+}
 
 export interface OutfitLayoutProps {
   h1?: ClothingItem;
@@ -67,6 +129,7 @@ const DEBUG_COLORS: Record<SlotId, string> = {
   B: '#34d399',
   ACH: '#fb923c',
   ASAC: '#f472b6',
+  ACC: '#a78bfa',
   A1: '#facc15', A2: '#facc15', A3: '#facc15',
 };
 
@@ -218,7 +281,7 @@ function DraggablePiece({ config, state, onChange, onSelect, selected }: Draggab
     />
   ) : (
     <div className="w-full h-full flex items-center justify-center" style={{ opacity: 0.4 }}>
-      <span style={{ fontSize: Math.min(state.width, state.height) * 0.4 }}>{def.icon}</span>
+      <span style={{ fontSize: Math.min(state.width, state.height) * 0.4 }}>{SLOT_ICONS[def.id]}</span>
     </div>
   );
 
@@ -272,22 +335,41 @@ export default function OutfitLayout({
   ceinture, echarpe, bijoux, couvre_chef,
   debugMode = false,
 }: OutfitLayoutProps) {
-  // Build the list of pieces to render (only required + provided)
+  // Select template based on tops + bas
+  const template = useMemo(
+    () => selectTemplate({ h1, h2, h3, bas }),
+    [h1, h2, h3, bas]
+  );
+
+  // Build the list of pieces to render based on template + provided items
   const pieces = useMemo<PieceConfig[]>(() => {
-    const list: PieceConfig[] = [
-      { key: 'H1', def: SLOTS.H1, item: h1 },
-      { key: 'B', def: SLOTS.B, item: bas },
-      { key: 'ACH', def: SLOTS.ACH, item: chaussures },
-      { key: 'ASAC', def: SLOTS.ASAC, item: sac },
-    ];
-    if (h2) list.push({ key: 'H2', def: SLOTS.H2, item: h2 });
-    if (h3) list.push({ key: 'H3', def: SLOTS.H3, item: h3 });
-    if (echarpe) list.push({ key: 'A1', def: SLOTS.A1, item: echarpe });
-    if (echarpe) list.push({ key: 'A1', def: SLOTS.A1, item: echarpe });
-    if (bijoux) list.push({ key: 'A2', def: SLOTS.A2, item: bijoux });
-    if (couvre_chef) list.push({ key: 'A3', def: SLOTS.A3, item: couvre_chef });
+    const list: PieceConfig[] = [];
+    const push = (key: string, slotId: SlotId, item?: ClothingItem) => {
+      const def = template[slotId];
+      if (!def || !item) return;
+      list.push({ key, def, item });
+    };
+
+    push('H1', 'H1', h1);
+    push('H2', 'H2', h2);
+    push('H3', 'H3', h3);
+    push('B', 'B', bas);
+    push('ACH', 'ACH', chaussures);
+    push('ASAC', 'ASAC', sac);
+
+    // Couvre-chef → ACC (priorité)
+    if (couvre_chef) push('ACC', 'ACC', couvre_chef);
+
+    // Autres accessoires → A1, A2, A3 dans l'ordre
+    const others = [echarpe, ceinture, bijoux].filter(Boolean) as ClothingItem[];
+    const aSlots: SlotId[] = ['A1', 'A2', 'A3'];
+    others.forEach((it, i) => {
+      const sid = aSlots[i];
+      if (sid) push(`ACC_${i}`, sid, it);
+    });
+
     return list;
-  }, [h1, h2, h3, bas, chaussures, sac, ceinture, echarpe, bijoux, couvre_chef]);
+  }, [template, h1, h2, h3, bas, chaussures, sac, ceinture, echarpe, bijoux, couvre_chef]);
 
   const [states, setStates] = useState<Record<string, PieceState>>({});
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
@@ -325,8 +407,8 @@ export default function OutfitLayout({
 
   // Suggestions text under the grid
   const suggestions: string[] = [];
-  if (!chaussures) suggestions.push('💡 ' + SLOTS.ACH.suggestionText);
-  if (!sac) suggestions.push('💡 ' + SLOTS.ASAC.suggestionText);
+  if (!chaussures) suggestions.push('💡 Pense à ajouter une paire de chaussures');
+  if (!sac) suggestions.push('💡 Pense à ajouter un sac');
 
   if (debugMode) {
     return (
@@ -335,8 +417,8 @@ export default function OutfitLayout({
           className="relative mx-auto"
           style={{ width: W, height: H, maxWidth: '100%' }}
         >
-          {(Object.keys(SLOTS) as SlotId[]).map(id => (
-            <DebugSlot key={id} def={SLOTS[id]} />
+          {(Object.entries(template) as [SlotId, SlotDef][]).map(([id, def]) => (
+            <DebugSlot key={id} def={def} />
           ))}
         </div>
       </div>
