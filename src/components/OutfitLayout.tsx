@@ -380,13 +380,13 @@ function DraggablePiece({ config, state, onChange, onSelect, selected }: Draggab
 
 export default function OutfitLayout({
   h1, h2, h3,
-  bas,
+  bas, isRobe,
   chaussures, sac,
   ceinture, echarpe, bijoux, couvre_chef,
   debugMode = false,
 }: OutfitLayoutProps) {
   // Calcul direct du template à chaque render (pas de useMemo)
-  const template = selectTemplate({ h1, h2, h3, bas });
+  const template = selectTemplate({ h1, h2, h3, bas, isRobe });
 
   // Build the list of pieces to render based on template + provided items
   const pieces = buildPieces(template, { h1, h2, h3, bas, chaussures, sac, ceinture, echarpe, bijoux, couvre_chef });
@@ -401,7 +401,7 @@ export default function OutfitLayout({
   // Reset complet des positions quand la composition de la tenue change
   useEffect(() => {
     const next: Record<string, PieceState> = {};
-    const tpl = selectTemplate({ h1, h2, h3, bas });
+    const tpl = selectTemplate({ h1, h2, h3, bas, isRobe });
     const newPieces = buildPieces(tpl, { h1, h2, h3, bas, chaussures, sac, ceinture, echarpe, bijoux, couvre_chef });
     for (const p of newPieces) next[p.key] = initialState(p.def);
     setStates(next);
