@@ -175,14 +175,16 @@ interface DraggablePieceProps {
   onChange: (next: PieceState) => void;
   onSelect: () => void;
   selected: boolean;
+  readOnly?: boolean;
 }
 
-function DraggablePiece({ config, state, onChange, onSelect, selected }: DraggablePieceProps) {
+function DraggablePiece({ config, state, onChange, onSelect, selected, readOnly }: DraggablePieceProps) {
   const ref = useRef<HTMLDivElement>(null);
   const { def, item } = config;
 
   useDrag(
     ({ offset: [ox, oy], first }) => {
+      if (readOnly) return;
       if (first) onSelect();
       const x = Math.max(0, Math.min(W - state.width, ox));
       const y = Math.max(0, Math.min(H - state.height, oy));
@@ -193,11 +195,13 @@ function DraggablePiece({ config, state, onChange, onSelect, selected }: Draggab
       from: () => [state.x, state.y],
       eventOptions: { passive: false },
       pointer: { touch: true },
+      enabled: !readOnly,
     }
   );
 
   usePinch(
     ({ offset: [scale], first }) => {
+      if (readOnly) return;
       if (first) onSelect();
       const ratio = Math.max(0.3, Math.min(4, scale));
       const baseW = def.w * U;
@@ -211,13 +215,14 @@ function DraggablePiece({ config, state, onChange, onSelect, selected }: Draggab
       scaleBounds: { min: 0.3, max: 4 },
       from: () => [state.width / (def.w * U), 0],
       eventOptions: { passive: false },
+      enabled: !readOnly,
     }
   );
 
   // Desktop wheel resize when selected
   useEffect(() => {
     const el = ref.current;
-    if (!el || !selected) return;
+    if (!el || !selected || readOnly) return;
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       const delta = -e.deltaY * 0.5;
@@ -228,11 +233,12 @@ function DraggablePiece({ config, state, onChange, onSelect, selected }: Draggab
     };
     el.addEventListener('wheel', onWheel, { passive: false });
     return () => el.removeEventListener('wheel', onWheel);
-  }, [selected, state, onChange]);
+  }, [selected, state, onChange, readOnly]);
 
   // Corner resize handle (desktop)
   const handleResize = useCallback(
     (e: React.PointerEvent) => {
+      if (readOnly) return;
       e.stopPropagation();
       e.preventDefault();
       const startX = e.clientX;
@@ -256,7 +262,7 @@ function DraggablePiece({ config, state, onChange, onSelect, selected }: Draggab
       window.addEventListener('pointermove', onMove);
       window.addEventListener('pointerup', onUp);
     },
-    [state, onChange, onSelect]
+    [state, onChange, onSelect, readOnly]
   );
 
   const content = item ? (
@@ -275,7 +281,7 @@ function DraggablePiece({ config, state, onChange, onSelect, selected }: Draggab
   return (
     <div
       ref={ref}
-      onPointerDown={onSelect}
+      onPointerDown={readOnly ? undefined : onSelect}
       style={{
         position: 'absolute',
         left: state.x,
@@ -283,9 +289,9 @@ function DraggablePiece({ config, state, onChange, onSelect, selected }: Draggab
         width: state.width,
         height: state.height,
         zIndex: state.zIndex,
-        touchAction: 'none',
-        cursor: 'grab',
-        border: selected ? '1.5px solid #C9956C' : '1.5px dashed #9ca3af',
+        touchAction: readOnly ? 'auto' : 'none',
+        cursor: readOnly ? 'default' : 'grab',
+        border: readOnly ? 'none' : (selected ? '1.5px solid #C9956C' : '1.5px dashed #9ca3af'),
         borderRadius: 8,
         overflow: 'hidden',
         background: 'transparent',
@@ -294,7 +300,7 @@ function DraggablePiece({ config, state, onChange, onSelect, selected }: Draggab
       }}
     >
       {content}
-      {selected && (
+      {!readOnly && selected && (
         <div
           onPointerDown={handleResize}
           style={{
