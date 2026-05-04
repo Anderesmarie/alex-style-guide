@@ -407,8 +407,8 @@ export default function OutfitLayout({
 
   // Suggestions text under the grid
   const suggestions: string[] = [];
-  if (!chaussures) suggestions.push('💡 ' + SLOTS.ACH.suggestionText);
-  if (!sac) suggestions.push('💡 ' + SLOTS.ASAC.suggestionText);
+  if (!chaussures) suggestions.push('💡 Pense à ajouter une paire de chaussures');
+  if (!sac) suggestions.push('💡 Pense à ajouter un sac');
 
   if (debugMode) {
     return (
@@ -417,8 +417,8 @@ export default function OutfitLayout({
           className="relative mx-auto"
           style={{ width: W, height: H, maxWidth: '100%' }}
         >
-          {(Object.keys(SLOTS) as SlotId[]).map(id => (
-            <DebugSlot key={id} def={SLOTS[id]} />
+          {(Object.entries(template) as [SlotId, SlotDef][]).map(([id, def]) => (
+            <DebugSlot key={id} def={def} />
           ))}
         </div>
       </div>
