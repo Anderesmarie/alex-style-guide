@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 import { ClothingItem, Outfit, OutfitLayoutData } from '@/lib/types';
 import OutfitLayout, { OutfitLayoutProps } from '@/components/OutfitLayout';
 import { setOutfitLayoutData } from '@/lib/storage';
