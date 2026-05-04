@@ -6,15 +6,23 @@ import { toast } from 'sonner';
 import { updateStreak } from '@/lib/streak';
 import type { Season } from '@/lib/colorimetry';
 import OutfitLayout, { mapItemsToLayout } from '@/components/OutfitLayout';
-import OutfitFreeCanvas, {
-  CHIPS,
-  ChipKey,
-  chipMatchesItem,
-  defaultPositionForCategory,
-  CANVAS_W,
-  CANVAS_H,
-} from '@/components/OutfitFreeCanvas';
 import { getCategoryByType } from '@/lib/categories';
+
+type EditorCatKey = 'haut' | 'bas' | 'chaussures' | 'sac' | 'accessoire';
+
+const EDITOR_CATS: { key: EditorCatKey; label: string; matches: string[] }[] = [
+  { key: 'haut', label: 'Haut', matches: ['Hauts', 'Pulls & sweats', 'Manteaux & vestes', 'Robes & combinaisons'] },
+  { key: 'bas', label: 'Bas', matches: ['Bas', 'Jupes'] },
+  { key: 'chaussures', label: 'Chaussures', matches: ['Chaussures'] },
+  { key: 'sac', label: 'Sac', matches: ['Sacs'] },
+  { key: 'accessoire', label: 'Accessoire', matches: ['Accessoires'] },
+];
+
+function itemMatchesCat(catKey: EditorCatKey, item: ClothingItem): boolean {
+  const cat = getCategoryByType(item.type)?.name || item.category || '';
+  const target = EDITOR_CATS.find(c => c.key === catKey);
+  return !!target && target.matches.includes(cat);
+}
 
 interface OutfitResult {
   outfit: ClothingItem[];
@@ -35,15 +43,6 @@ interface Props {
 
 const ROSE_GOLD = '#C9956C';
 
-interface CanvasPiece {
-  itemId: string;
-  item: ClothingItem;
-  x: number;
-  y: number;
-  size: number;
-  z: number;
-}
-
 export default function OutfitDailyFeed({
   results,
   pseudo,
@@ -54,11 +53,10 @@ export default function OutfitDailyFeed({
   const [wornIdx, setWornIdx] = useState<number | null>(null);
   const [dislikedIdxs, setDislikedIdxs] = useState<Set<number>>(new Set());
 
-  // Editor state
+  // Editor state — selection only, no free placement
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
-  const [freePieces, setFreePieces] = useState<CanvasPiece[]>([]);
-  const [freeSelectedId, setFreeSelectedId] = useState<string | null>(null);
-  const [freeChip, setFreeChip] = useState<ChipKey | null>(null);
+  const [editPieces, setEditPieces] = useState<ClothingItem[]>([]);
+  const [pickerCat, setPickerCat] = useState<EditorCatKey | null>(null);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -154,78 +152,38 @@ export default function OutfitDailyFeed({
 
   const openEditor = (idx: number) => {
     const r = results[idx];
-    // Build pieces from existing layoutData or default positions
-    const pieces: CanvasPiece[] = r.outfit.map((item, i) => {
-      const existing = r.layoutData?.pieces.find(p => p.itemId === item.id);
-      if (existing) {
-        return { itemId: item.id, item, x: existing.x, y: existing.y, size: existing.size, z: existing.z };
-      }
-      const cat = getCategoryByType(item.type)?.name || item.category || '';
-      const def = defaultPositionForCategory(cat);
-      return { itemId: item.id, item, x: def.xPct, y: def.yPct, size: def.size, z: def.z + i };
-    });
-    setFreePieces(pieces);
-    setFreeSelectedId(null);
+    setEditPieces([...r.outfit]);
+    setPickerCat(null);
     setEditingIdx(idx);
   };
 
   const closeEditor = () => {
     setEditingIdx(null);
-    setFreePieces([]);
-    setFreeSelectedId(null);
-    setFreeChip(null);
+    setEditPieces([]);
+    setPickerCat(null);
+  };
+
+  const removePiece = (itemId: string) => {
+    setEditPieces(prev => prev.filter(p => p.id !== itemId));
   };
 
   const addPieceFromItem = (item: ClothingItem) => {
-    if (freePieces.some(p => p.itemId === item.id)) {
-      setFreeChip(null);
+    if (editPieces.some(p => p.id === item.id)) {
+      setPickerCat(null);
       return;
     }
-    const cat = getCategoryByType(item.type)?.name || item.category || '';
-    const def = defaultPositionForCategory(cat);
-    setFreePieces(prev => [
-      ...prev,
-      { itemId: item.id, item, x: def.xPct, y: def.yPct, size: def.size, z: def.z + prev.length },
-    ]);
-    setFreeChip(null);
-  };
-
-  const resizeSelected = (delta: number) => {
-    if (!freeSelectedId) return;
-    setFreePieces(prev =>
-      prev.map(p =>
-        p.itemId === freeSelectedId
-          ? { ...p, size: Math.max(40, Math.min(280, p.size + delta)) }
-          : p
-      )
-    );
-  };
-
-  const removeSelected = () => {
-    if (!freeSelectedId) return;
-    setFreePieces(prev => prev.filter(p => p.itemId !== freeSelectedId));
-    setFreeSelectedId(null);
+    setEditPieces(prev => [...prev, item]);
+    setPickerCat(null);
   };
 
   const saveEditor = async () => {
-    if (editingIdx === null || freePieces.length < 1) return;
-    const layoutData: OutfitLayoutData = {
-      canvasW: CANVAS_W,
-      canvasH: CANVAS_H,
-      pieces: freePieces.map(p => ({
-        itemId: p.itemId,
-        x: p.x,
-        y: p.y,
-        size: p.size,
-        z: p.z,
-      })),
-    };
-    const newOutfit = freePieces.map(p => p.item);
+    if (editingIdx === null || editPieces.length < 1) return;
     const next = [...results];
     next[editingIdx] = {
       ...next[editingIdx],
-      outfit: newOutfit,
-      layoutData,
+      outfit: [...editPieces],
+      // Reset drag positions — template will recompute
+      layoutData: null,
     };
     onResultsChange?.(next);
     toast("Tenue mise à jour ✨", {
@@ -234,7 +192,7 @@ export default function OutfitDailyFeed({
     closeEditor();
   };
 
-  const filteredWardrobe = freeChip ? wardrobe.filter(w => chipMatchesItem(freeChip, w)) : [];
+  const filteredWardrobe = pickerCat ? wardrobe.filter(w => itemMatchesCat(pickerCat, w)) : [];
 
   return (
     <div className="space-y-2 fade-enter">
@@ -305,43 +263,48 @@ export default function OutfitDailyFeed({
               <h1 className="text-xl font-serif font-bold">Modifier la tenue ✨</h1>
             </div>
 
-            <OutfitFreeCanvas
-              pieces={freePieces}
-              onChange={next =>
-                setFreePieces(
-                  next.map(n => ({
-                    ...n,
-                    item: freePieces.find(p => p.itemId === n.itemId)!.item,
-                  }))
-                )
-              }
-              selectedId={freeSelectedId}
-              onSelectId={setFreeSelectedId}
-            />
+            {/* Pièces actuelles */}
+            <div className="bg-card rounded-2xl card-shadow p-3 mb-4">
+              <p className="text-xs font-semibold text-muted-foreground mb-2">
+                Pièces de la tenue ({editPieces.length})
+              </p>
+              {editPieces.length === 0 ? (
+                <p className="text-center text-sm text-muted-foreground py-6">
+                  Ajoute des pièces ci-dessous ✨
+                </p>
+              ) : (
+                <div className="grid grid-cols-3 gap-2">
+                  {editPieces.map(item => (
+                    <div
+                      key={item.id}
+                      className="relative aspect-square rounded-lg overflow-hidden bg-muted"
+                    >
+                      <img
+                        src={item.imageBase64}
+                        alt={item.type}
+                        className="w-full h-full object-contain"
+                      />
+                      <button
+                        onClick={() => removePiece(item.id)}
+                        aria-label="Retirer"
+                        className="absolute top-1 right-1 w-6 h-6 rounded-full bg-foreground/70 text-white text-xs font-bold flex items-center justify-center active:scale-90"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-            {freeSelectedId && (
-              <div className="flex items-center justify-center gap-2 mt-3">
-                <button
-                  onClick={() => resizeSelected(-20)}
-                  className="w-10 h-10 rounded-full bg-card card-shadow text-lg active:scale-90 transition-transform"
-                >−</button>
-                <button
-                  onClick={() => resizeSelected(20)}
-                  className="w-10 h-10 rounded-full bg-card card-shadow text-lg active:scale-90 transition-transform"
-                >+</button>
-                <button
-                  onClick={removeSelected}
-                  className="px-4 h-10 rounded-full bg-destructive/15 text-destructive text-sm font-semibold active:scale-95 transition-transform"
-                >🗑️ Retirer</button>
-              </div>
-            )}
-
-            <div className="flex gap-2 overflow-x-auto no-scrollbar mt-4 pb-1">
-              {CHIPS.map(c => (
+            {/* Boutons d'ajout par catégorie */}
+            <p className="text-xs font-semibold text-muted-foreground mb-2">Ajouter une pièce</p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {EDITOR_CATS.map(c => (
                 <button
                   key={c.key}
-                  onClick={() => setFreeChip(c.key)}
-                  className="flex-shrink-0 px-4 py-2 rounded-full text-xs font-medium"
+                  onClick={() => setPickerCat(c.key)}
+                  className="px-4 py-2 rounded-full text-xs font-medium active:scale-95 transition-transform"
                   style={{ border: `1px solid ${ROSE_GOLD}`, color: ROSE_GOLD, background: 'transparent' }}
                 >
                   + {c.label}
@@ -349,8 +312,8 @@ export default function OutfitDailyFeed({
               ))}
             </div>
 
-            {freeChip && (
-              <div className="fixed inset-0 z-[60] flex items-end" onClick={() => setFreeChip(null)}>
+            {pickerCat && (
+              <div className="fixed inset-0 z-[60] flex items-end" onClick={() => setPickerCat(null)}>
                 <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
                 <div
                   className="relative w-full bg-card rounded-t-3xl p-5 max-h-[70vh] overflow-y-auto animate-slide-in-bottom"
@@ -358,7 +321,7 @@ export default function OutfitDailyFeed({
                 >
                   <div className="w-12 h-1 bg-muted rounded-full mx-auto mb-4" />
                   <h3 className="font-serif font-bold text-lg mb-3">
-                    {CHIPS.find(c => c.key === freeChip)?.label}
+                    {EDITOR_CATS.find(c => c.key === pickerCat)?.label}
                   </h3>
                   {filteredWardrobe.length === 0 ? (
                     <p className="text-center text-sm text-muted-foreground py-8">
@@ -390,7 +353,7 @@ export default function OutfitDailyFeed({
               </button>
               <button
                 onClick={saveEditor}
-                disabled={freePieces.length < 1}
+                disabled={editPieces.length < 1}
                 className="flex-1 py-3 rounded-xl text-white font-semibold text-sm active:scale-[0.98] transition-transform disabled:opacity-50"
                 style={{ backgroundColor: ROSE_GOLD }}
               >
