@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { ClothingItem, Outfit } from '@/lib/types';
-import { getWardrobe, getOutfits, addOutfit, deleteOutfit, setOutfitLiked, genId } from '@/lib/storage';
+import { useState, useEffect, useRef } from 'react';
+import { ClothingItem, Outfit, OutfitLayoutData } from '@/lib/types';
+import { getWardrobe, getOutfits, addOutfit, deleteOutfit, setOutfitLiked, setOutfitLayoutData, genId } from '@/lib/storage';
 import { generateRecommendations } from '@/lib/recommendations';
 import { updateStreak } from '@/lib/streak';
 import { getCategoryByType } from '@/lib/categories';
@@ -9,12 +9,18 @@ import CalendarView from '@/components/CalendarView';
 import OutfitVisualLayout, { SlotKey, SlotMap, SLOT_CONFIG } from '@/components/OutfitVisualLayout';
 import OutfitGalleryCard from '@/components/OutfitGalleryCard';
 import OutfitFreeCanvas, { CHIPS, ChipKey, chipMatchesItem, defaultPositionForCategory, CANVAS_W, CANVAS_H } from '@/components/OutfitFreeCanvas';
+import OutfitLayout, { mapItemsToLayout } from '@/components/OutfitLayout';
 import { getCategoryByType as _getCat } from '@/lib/categories';
 
 type View = 'gallery' | 'createVisual' | 'createQuick' | 'createFree' | 'detail';
 type Tab = 'outfits' | 'calendar';
 
-export default function Outfits() {
+interface OutfitsProps {
+  initialOutfitId?: string | null;
+  onConsumeInitialOutfitId?: () => void;
+}
+
+export default function Outfits({ initialOutfitId, onConsumeInitialOutfitId }: OutfitsProps = {}) {
   const [view, setView] = useState<View>('gallery');
   const [tab, setTab] = useState<Tab>('outfits');
   const [outfits, setOutfits] = useState<Outfit[]>([]);
