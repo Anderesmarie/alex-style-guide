@@ -397,6 +397,7 @@ export default function Today({ onNavigateToOutfit }: TodayProps = {}) {
             pseudo={pseudo}
             wardrobe={wardrobe}
             onResultsChange={handleResultsChange}
+            onNavigateToOutfit={onNavigateToOutfit}
           />
           {/* Custom outfit card — always after auto results */}
           <div className="mt-4">
