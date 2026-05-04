@@ -152,78 +152,38 @@ export default function OutfitDailyFeed({
 
   const openEditor = (idx: number) => {
     const r = results[idx];
-    // Build pieces from existing layoutData or default positions
-    const pieces: CanvasPiece[] = r.outfit.map((item, i) => {
-      const existing = r.layoutData?.pieces.find(p => p.itemId === item.id);
-      if (existing) {
-        return { itemId: item.id, item, x: existing.x, y: existing.y, size: existing.size, z: existing.z };
-      }
-      const cat = getCategoryByType(item.type)?.name || item.category || '';
-      const def = defaultPositionForCategory(cat);
-      return { itemId: item.id, item, x: def.xPct, y: def.yPct, size: def.size, z: def.z + i };
-    });
-    setFreePieces(pieces);
-    setFreeSelectedId(null);
+    setEditPieces([...r.outfit]);
+    setPickerCat(null);
     setEditingIdx(idx);
   };
 
   const closeEditor = () => {
     setEditingIdx(null);
-    setFreePieces([]);
-    setFreeSelectedId(null);
-    setFreeChip(null);
+    setEditPieces([]);
+    setPickerCat(null);
+  };
+
+  const removePiece = (itemId: string) => {
+    setEditPieces(prev => prev.filter(p => p.id !== itemId));
   };
 
   const addPieceFromItem = (item: ClothingItem) => {
-    if (freePieces.some(p => p.itemId === item.id)) {
-      setFreeChip(null);
+    if (editPieces.some(p => p.id === item.id)) {
+      setPickerCat(null);
       return;
     }
-    const cat = getCategoryByType(item.type)?.name || item.category || '';
-    const def = defaultPositionForCategory(cat);
-    setFreePieces(prev => [
-      ...prev,
-      { itemId: item.id, item, x: def.xPct, y: def.yPct, size: def.size, z: def.z + prev.length },
-    ]);
-    setFreeChip(null);
-  };
-
-  const resizeSelected = (delta: number) => {
-    if (!freeSelectedId) return;
-    setFreePieces(prev =>
-      prev.map(p =>
-        p.itemId === freeSelectedId
-          ? { ...p, size: Math.max(40, Math.min(280, p.size + delta)) }
-          : p
-      )
-    );
-  };
-
-  const removeSelected = () => {
-    if (!freeSelectedId) return;
-    setFreePieces(prev => prev.filter(p => p.itemId !== freeSelectedId));
-    setFreeSelectedId(null);
+    setEditPieces(prev => [...prev, item]);
+    setPickerCat(null);
   };
 
   const saveEditor = async () => {
-    if (editingIdx === null || freePieces.length < 1) return;
-    const layoutData: OutfitLayoutData = {
-      canvasW: CANVAS_W,
-      canvasH: CANVAS_H,
-      pieces: freePieces.map(p => ({
-        itemId: p.itemId,
-        x: p.x,
-        y: p.y,
-        size: p.size,
-        z: p.z,
-      })),
-    };
-    const newOutfit = freePieces.map(p => p.item);
+    if (editingIdx === null || editPieces.length < 1) return;
     const next = [...results];
     next[editingIdx] = {
       ...next[editingIdx],
-      outfit: newOutfit,
-      layoutData,
+      outfit: [...editPieces],
+      // Reset drag positions — template will recompute
+      layoutData: null,
     };
     onResultsChange?.(next);
     toast("Tenue mise à jour ✨", {
@@ -232,7 +192,7 @@ export default function OutfitDailyFeed({
     closeEditor();
   };
 
-  const filteredWardrobe = freeChip ? wardrobe.filter(w => chipMatchesItem(freeChip, w)) : [];
+  const filteredWardrobe = pickerCat ? wardrobe.filter(w => itemMatchesCat(pickerCat, w)) : [];
 
   return (
     <div className="space-y-2 fade-enter">
