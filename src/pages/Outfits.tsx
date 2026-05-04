@@ -10,6 +10,7 @@ import OutfitVisualLayout, { SlotKey, SlotMap, SLOT_CONFIG } from '@/components/
 import OutfitGalleryCard from '@/components/OutfitGalleryCard';
 import OutfitFreeCanvas, { CHIPS, ChipKey, chipMatchesItem, defaultPositionForCategory, CANVAS_W, CANVAS_H } from '@/components/OutfitFreeCanvas';
 import OutfitLayout, { mapItemsToLayout } from '@/components/OutfitLayout';
+import OutfitDetailView from '@/components/OutfitDetailView';
 import { getCategoryByType as _getCat } from '@/lib/categories';
 
 type View = 'gallery' | 'createVisual' | 'createQuick' | 'createFree' | 'detail';
