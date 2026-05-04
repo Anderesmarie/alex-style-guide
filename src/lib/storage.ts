@@ -202,6 +202,11 @@ export async function setOutfitLiked(id: string, liked: boolean): Promise<void> 
   await supabase.from('outfits').update({ liked }).eq('id', id).eq('user_id', uid);
 }
 
+export async function setOutfitLayoutData(id: string, layoutData: import('./types').OutfitLayoutData | null): Promise<void> {
+  const uid = await getUserId();
+  await supabase.from('outfits').update({ layout_data: layoutData as any }).eq('id', id).eq('user_id', uid);
+}
+
 export async function deleteOutfit(id: string): Promise<void> {
   const uid = await getUserId();
   await supabase.from('outfits').delete().eq('id', id).eq('user_id', uid);

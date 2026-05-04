@@ -39,6 +39,7 @@ interface Props {
   pseudo?: string | null;
   wardrobe: ClothingItem[];
   onResultsChange?: (next: OutfitResult[]) => void;
+  onNavigateToOutfit?: (outfitId: string) => void;
 }
 
 const ROSE_GOLD = '#C9956C';
@@ -48,6 +49,7 @@ export default function OutfitDailyFeed({
   pseudo,
   wardrobe,
   onResultsChange,
+  onNavigateToOutfit,
 }: Props) {
   const [savedIdxs, setSavedIdxs] = useState<Set<number>>(new Set());
   const [wornIdx, setWornIdx] = useState<number | null>(null);
@@ -120,14 +122,14 @@ export default function OutfitDailyFeed({
         reaction: 'portee',
         created_at: new Date().toISOString(),
       });
-      // Also save to outfits gallery with layoutData if present
-      const r = results[idx];
+      // Save to outfits gallery WITHOUT layoutData (positions defined later in Tenues)
+      const newId = genId();
       await addOutfit({
-        id: genId(),
+        id: newId,
         name: `Tenue du ${new Date().toLocaleDateString('fr-FR')}`,
         itemIds,
         createdAt: new Date().toISOString(),
-        layoutData: r.layoutData ?? null,
+        layoutData: null,
       });
       setWornIdx(idx);
       setSavedIdxs(prev => new Set(prev).add(idx));
@@ -135,18 +137,31 @@ export default function OutfitDailyFeed({
       toast("Belle journée avec cette tenue ! 🌸", {
         style: { backgroundColor: ROSE_GOLD, color: '#FFFFFF', border: 'none' },
       });
+      // Navigate to Tenues page on the new outfit detail
+      onNavigateToOutfit?.(newId);
     } catch (e) {
       console.error(e);
       toast.error("Erreur lors de l'enregistrement");
     }
   };
 
-  const handleDislike = (idx: number) => {
+  const handleDislike = async (items: ClothingItem[], idx: number) => {
     setDislikedIdxs(prev => {
       const next = new Set(prev);
       next.add(idx);
       return next;
     });
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData.user) {
+        await supabase.from('user_preferences').insert({
+          user_id: userData.user.id,
+          item_ids: items.map(i => i.id),
+          reaction: 'pas_fan',
+          created_at: new Date().toISOString(),
+        });
+      }
+    } catch {}
     toast("On note ✨ on te proposera autre chose", { duration: 2000 });
   };
 
@@ -205,8 +220,10 @@ export default function OutfitDailyFeed({
           const isDisliked = dislikedIdxs.has(idx);
           const layoutProps = mapItemsToLayout(r.outfit);
 
+          if (isDisliked) return null;
+
           return (
-            <div key={idx} className={isDisliked ? 'opacity-50' : ''}>
+            <div key={idx}>
               <div className="bg-card rounded-2xl card-shadow p-4">
                 <div className="flex items-center justify-between mb-2">
                   <span
@@ -219,6 +236,7 @@ export default function OutfitDailyFeed({
                 <OutfitLayout
                   key={r.outfit.map(i => i.id).join('-')}
                   {...layoutProps}
+                  readOnly
                 />
               </div>
 
@@ -246,7 +264,7 @@ export default function OutfitDailyFeed({
                 </button>
 
                 <button
-                  onClick={() => handleDislike(idx)}
+                  onClick={() => handleDislike(r.outfit, idx)}
                   className="w-full py-1.5 text-xs text-muted-foreground active:opacity-70"
                 >
                   👎 Pas fan

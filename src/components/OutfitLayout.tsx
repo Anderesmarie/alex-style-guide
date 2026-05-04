@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useDrag, usePinch } from '@use-gesture/react';
-import { ClothingItem } from '@/lib/types';
+import { ClothingItem, OutfitLayoutData } from '@/lib/types';
 import { getCategoryByType } from '@/lib/categories';
 
 /**
@@ -96,11 +96,11 @@ function buildPieces(
 }
 
 export interface OutfitLayoutProps {
-  h1?: ClothingItem;  // top/chemise (couche base)
-  h2?: ClothingItem;  // pull/sweat (couche intermédiaire)
-  h3?: ClothingItem;  // veste/manteau (couche externe)
-  bas?: ClothingItem; // pantalon/jupe OU robe/combinaison
-  isRobe?: boolean;   // true si bas = robe ou combinaison
+  h1?: ClothingItem;
+  h2?: ClothingItem;
+  h3?: ClothingItem;
+  bas?: ClothingItem;
+  isRobe?: boolean;
   chaussures?: ClothingItem;
   sac?: ClothingItem;
   ceinture?: ClothingItem;
@@ -108,6 +108,9 @@ export interface OutfitLayoutProps {
   bijoux?: ClothingItem;
   couvre_chef?: ClothingItem;
   debugMode?: boolean;
+  readOnly?: boolean;
+  initialLayoutData?: OutfitLayoutData | null;
+  onLayoutChange?: (data: OutfitLayoutData) => void;
 }
 
 const DEBUG_COLORS: Record<SlotId, string> = {
@@ -172,14 +175,16 @@ interface DraggablePieceProps {
   onChange: (next: PieceState) => void;
   onSelect: () => void;
   selected: boolean;
+  readOnly?: boolean;
 }
 
-function DraggablePiece({ config, state, onChange, onSelect, selected }: DraggablePieceProps) {
+function DraggablePiece({ config, state, onChange, onSelect, selected, readOnly }: DraggablePieceProps) {
   const ref = useRef<HTMLDivElement>(null);
   const { def, item } = config;
 
   useDrag(
     ({ offset: [ox, oy], first }) => {
+      if (readOnly) return;
       if (first) onSelect();
       const x = Math.max(0, Math.min(W - state.width, ox));
       const y = Math.max(0, Math.min(H - state.height, oy));
@@ -190,11 +195,13 @@ function DraggablePiece({ config, state, onChange, onSelect, selected }: Draggab
       from: () => [state.x, state.y],
       eventOptions: { passive: false },
       pointer: { touch: true },
+      enabled: !readOnly,
     }
   );
 
   usePinch(
     ({ offset: [scale], first }) => {
+      if (readOnly) return;
       if (first) onSelect();
       const ratio = Math.max(0.3, Math.min(4, scale));
       const baseW = def.w * U;
@@ -208,13 +215,14 @@ function DraggablePiece({ config, state, onChange, onSelect, selected }: Draggab
       scaleBounds: { min: 0.3, max: 4 },
       from: () => [state.width / (def.w * U), 0],
       eventOptions: { passive: false },
+      enabled: !readOnly,
     }
   );
 
   // Desktop wheel resize when selected
   useEffect(() => {
     const el = ref.current;
-    if (!el || !selected) return;
+    if (!el || !selected || readOnly) return;
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       const delta = -e.deltaY * 0.5;
@@ -225,11 +233,12 @@ function DraggablePiece({ config, state, onChange, onSelect, selected }: Draggab
     };
     el.addEventListener('wheel', onWheel, { passive: false });
     return () => el.removeEventListener('wheel', onWheel);
-  }, [selected, state, onChange]);
+  }, [selected, state, onChange, readOnly]);
 
   // Corner resize handle (desktop)
   const handleResize = useCallback(
     (e: React.PointerEvent) => {
+      if (readOnly) return;
       e.stopPropagation();
       e.preventDefault();
       const startX = e.clientX;
@@ -253,7 +262,7 @@ function DraggablePiece({ config, state, onChange, onSelect, selected }: Draggab
       window.addEventListener('pointermove', onMove);
       window.addEventListener('pointerup', onUp);
     },
-    [state, onChange, onSelect]
+    [state, onChange, onSelect, readOnly]
   );
 
   const content = item ? (
@@ -272,7 +281,7 @@ function DraggablePiece({ config, state, onChange, onSelect, selected }: Draggab
   return (
     <div
       ref={ref}
-      onPointerDown={onSelect}
+      onPointerDown={readOnly ? undefined : onSelect}
       style={{
         position: 'absolute',
         left: state.x,
@@ -280,9 +289,9 @@ function DraggablePiece({ config, state, onChange, onSelect, selected }: Draggab
         width: state.width,
         height: state.height,
         zIndex: state.zIndex,
-        touchAction: 'none',
-        cursor: 'grab',
-        border: selected ? '1.5px solid #C9956C' : '1.5px dashed #9ca3af',
+        touchAction: readOnly ? 'auto' : 'none',
+        cursor: readOnly ? 'default' : 'grab',
+        border: readOnly ? 'none' : (selected ? '1.5px solid #C9956C' : '1.5px dashed #9ca3af'),
         borderRadius: 8,
         overflow: 'hidden',
         background: 'transparent',
@@ -291,7 +300,7 @@ function DraggablePiece({ config, state, onChange, onSelect, selected }: Draggab
       }}
     >
       {content}
-      {selected && (
+      {!readOnly && selected && (
         <div
           onPointerDown={handleResize}
           style={{
@@ -318,6 +327,9 @@ export default function OutfitLayout({
   chaussures, sac,
   ceinture, echarpe, bijoux, couvre_chef,
   debugMode = false,
+  readOnly = false,
+  initialLayoutData = null,
+  onLayoutChange,
 }: OutfitLayoutProps) {
   // Calcul direct du template à chaque render (pas de useMemo)
   const template = selectTemplate({ h1, h2, h3, bas, isRobe });
@@ -338,11 +350,59 @@ export default function OutfitLayout({
     const tpl = selectTemplate({ h1, h2, h3, bas, isRobe });
     const newPieces = buildPieces(tpl, { h1, h2, h3, bas, chaussures, sac, ceinture, echarpe, bijoux, couvre_chef });
     for (const p of newPieces) next[p.key] = initialState(p.def);
+    // Restore from initialLayoutData if provided (drag positions saved earlier)
+    if (initialLayoutData?.pieces?.length) {
+      const byItemId: Record<string, ClothingItem | undefined> = {
+        [h1?.id ?? '__h1']: h1,
+        [h2?.id ?? '__h2']: h2,
+        [h3?.id ?? '__h3']: h3,
+        [bas?.id ?? '__bas']: bas,
+        [chaussures?.id ?? '__c']: chaussures,
+        [sac?.id ?? '__s']: sac,
+        [ceinture?.id ?? '__ce']: ceinture,
+        [echarpe?.id ?? '__e']: echarpe,
+        [bijoux?.id ?? '__b']: bijoux,
+        [couvre_chef?.id ?? '__cc']: couvre_chef,
+      };
+      // map itemId -> piece key
+      const itemKeyMap: Record<string, string> = {};
+      for (const p of newPieces) if (p.item) itemKeyMap[p.item.id] = p.key;
+      for (const saved of initialLayoutData.pieces) {
+        const k = itemKeyMap[saved.itemId];
+        if (!k || !next[k]) continue;
+        next[k] = {
+          x: saved.x,
+          y: saved.y,
+          width: saved.size,
+          height: next[k].height * (saved.size / next[k].width),
+          zIndex: saved.z || 1,
+        };
+      }
+    }
     setStates(next);
     setSelectedKey(null);
     zCounter.current = 10;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [piecesSignature]);
+
+  // Notify parent on state change (debounced upstream if needed)
+  const onLayoutChangeRef = useRef(onLayoutChange);
+  onLayoutChangeRef.current = onLayoutChange;
+  useEffect(() => {
+    if (readOnly || !onLayoutChangeRef.current) return;
+    if (Object.keys(states).length === 0) return;
+    const piecesData = pieces
+      .filter(p => p.item && states[p.key])
+      .map(p => ({
+        itemId: p.item!.id,
+        x: states[p.key].x,
+        y: states[p.key].y,
+        size: states[p.key].width,
+        z: states[p.key].zIndex,
+      }));
+    onLayoutChangeRef.current({ canvasW: W, canvasH: H, pieces: piecesData });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [states, readOnly]);
 
 
   const updateState = useCallback((key: string, next: PieceState) => {
@@ -389,13 +449,14 @@ export default function OutfitLayout({
       <div
         className="relative mx-auto"
         onPointerDown={(e) => {
+          if (readOnly) return;
           if (e.target === e.currentTarget) setSelectedKey(null);
         }}
         style={{
           width: W,
           height: H,
           maxWidth: '100%',
-          touchAction: 'none',
+          touchAction: readOnly ? 'auto' : 'none',
           overflow: 'hidden',
         }}
       >
@@ -410,18 +471,21 @@ export default function OutfitLayout({
               onChange={(next) => updateState(p.key, next)}
               onSelect={() => select(p.key)}
               selected={selectedKey === p.key}
+              readOnly={readOnly}
             />
           );
         })}
       </div>
 
-      <button
-        type="button"
-        onClick={reset}
-        className="mt-3 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors"
-      >
-        Réinitialiser
-      </button>
+      {!readOnly && (
+        <button
+          type="button"
+          onClick={reset}
+          className="mt-3 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors"
+        >
+          Réinitialiser
+        </button>
+      )}
 
       {suggestions.length > 0 && (
         <div className="mt-3 space-y-1 text-center">
