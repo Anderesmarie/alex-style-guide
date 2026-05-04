@@ -96,11 +96,11 @@ function buildPieces(
 }
 
 export interface OutfitLayoutProps {
-  h1?: ClothingItem;  // top/chemise (couche base)
-  h2?: ClothingItem;  // pull/sweat (couche intermédiaire)
-  h3?: ClothingItem;  // veste/manteau (couche externe)
-  bas?: ClothingItem; // pantalon/jupe OU robe/combinaison
-  isRobe?: boolean;   // true si bas = robe ou combinaison
+  h1?: ClothingItem;
+  h2?: ClothingItem;
+  h3?: ClothingItem;
+  bas?: ClothingItem;
+  isRobe?: boolean;
   chaussures?: ClothingItem;
   sac?: ClothingItem;
   ceinture?: ClothingItem;
@@ -108,6 +108,9 @@ export interface OutfitLayoutProps {
   bijoux?: ClothingItem;
   couvre_chef?: ClothingItem;
   debugMode?: boolean;
+  readOnly?: boolean;
+  initialLayoutData?: OutfitLayoutData | null;
+  onLayoutChange?: (data: OutfitLayoutData) => void;
 }
 
 const DEBUG_COLORS: Record<SlotId, string> = {
