@@ -723,38 +723,17 @@ export default function Outfits({ initialOutfitId, onConsumeInitialOutfitId }: O
 
   if (view === 'detail' && selectedOutfit) {
     const items = getItemsByIds(selectedOutfit.itemIds);
-    const detailSlots = buildSlotsFromItems(items);
+    const layoutProps = mapItemsToLayout(items);
     return (
-      <div className="fade-enter pb-4">
-        {renderDeleteDialog()}
-        <div className="flex items-center gap-3 mb-5">
-          <button onClick={() => setView('gallery')} className="text-2xl">←</button>
-          <h1 className="text-xl font-serif font-bold">{selectedOutfit.name}</h1>
-        </div>
-
-        <OutfitVisualLayout slots={detailSlots} />
-
-        <div className="grid grid-cols-2 gap-2 mt-4 mb-4">
-          {items.map(item => (
-            <div key={item.id} className="rounded-lg overflow-hidden card-shadow">
-              <img src={item.imageBase64} alt={item.type} className="w-full aspect-square object-cover" />
-              <div className="p-2 bg-card">
-                <p className="text-xs font-medium">{item.type}</p>
-                <p className="text-xs text-muted-foreground">{item.color}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-        <p className="text-sm text-muted-foreground mb-4">
-          Créée le {new Date(selectedOutfit.createdAt).toLocaleDateString('fr-FR')}
-        </p>
-        <button
-          onClick={() => setDeleteConfirm(selectedOutfit)}
-          className="w-full py-3 rounded-xl bg-destructive/15 text-destructive font-semibold active:scale-[0.98] transition-transform"
-        >
-          Supprimer cette tenue
-        </button>
-      </div>
+      <OutfitDetailView
+        key={selectedOutfit.id}
+        outfit={selectedOutfit}
+        layoutProps={layoutProps}
+        items={items}
+        onBack={() => setView('gallery')}
+        onDelete={() => setDeleteConfirm(selectedOutfit)}
+        renderDeleteDialog={renderDeleteDialog}
+      />
     );
   }
 
