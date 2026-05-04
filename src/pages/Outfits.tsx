@@ -906,18 +906,28 @@ export default function Outfits({ initialOutfitId, onConsumeInitialOutfitId }: O
           </button>
 
           {outfits.length > 0 ? (
-            <div>
+            <div className="space-y-4">
               {outfits.map(outfit => {
                 const items = getItemsByIds(outfit.itemIds);
+                const layoutProps = mapItemsToLayout(items);
                 return (
-                  <OutfitGalleryCard
+                  <button
                     key={outfit.id}
-                    outfit={outfit}
-                    items={items}
-                    pseudo={pseudo}
                     onClick={() => { setSelectedOutfit(outfit); setView('detail'); }}
-                    onToggleLike={(next) => handleToggleLike(outfit, next)}
-                  />
+                    className="w-full bg-white rounded-2xl p-3 shadow-sm active:scale-[0.99] transition-transform"
+                  >
+                    <OutfitLayout
+                      {...layoutProps}
+                      readOnly={true}
+                      initialLayoutData={outfit.layoutData ?? null}
+                    />
+                    <p
+                      className="text-center mt-2"
+                      style={{ fontFamily: 'Playfair Display, serif', fontSize: 14, color: '#2C2C2C' }}
+                    >
+                      {outfit.name?.trim() || new Date(outfit.createdAt).toLocaleDateString('fr-FR')}
+                    </p>
+                  </button>
                 );
               })}
             </div>
