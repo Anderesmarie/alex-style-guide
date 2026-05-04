@@ -394,16 +394,22 @@ export default function OutfitLayout({
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const zCounter = useRef(10);
 
-  // Sync states when pieces list changes (add/remove items)
+  // Signature des pièces (ids des items + slot) : si elle change, reset complet
+  const piecesSignature = useMemo(
+    () => pieces.map(p => `${p.def.id}:${p.item?.id ?? ''}`).join('|'),
+    [pieces]
+  );
+
+  // Reset complet des positions quand la composition de la tenue change
   useEffect(() => {
-    setStates(prev => {
-      const next: Record<string, PieceState> = {};
-      for (const p of pieces) {
-        next[p.key] = prev[p.key] ?? initialState(p.def);
-      }
-      return next;
-    });
-  }, [pieces]);
+    const next: Record<string, PieceState> = {};
+    for (const p of pieces) next[p.key] = initialState(p.def);
+    setStates(next);
+    setSelectedKey(null);
+    zCounter.current = 10;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [piecesSignature]);
+
 
   const updateState = useCallback((key: string, next: PieceState) => {
     setStates(prev => ({ ...prev, [key]: next }));
