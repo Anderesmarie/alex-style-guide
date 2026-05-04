@@ -129,6 +129,36 @@ interface OutfitLayoutPropsLike {
   h1?: ClothingItem; h2?: ClothingItem; h3?: ClothingItem; bas?: ClothingItem;
 }
 
+function buildPieces(
+  template: Partial<Record<SlotId, SlotDef>>,
+  items: {
+    h1?: ClothingItem; h2?: ClothingItem; h3?: ClothingItem; bas?: ClothingItem;
+    chaussures?: ClothingItem; sac?: ClothingItem;
+    ceinture?: ClothingItem; echarpe?: ClothingItem; bijoux?: ClothingItem; couvre_chef?: ClothingItem;
+  }
+): PieceConfig[] {
+  const list: PieceConfig[] = [];
+  const push = (key: string, slotId: SlotId, item?: ClothingItem) => {
+    const def = template[slotId];
+    if (!def || !item) return;
+    list.push({ key, def, item });
+  };
+  push('H1', 'H1', items.h1);
+  push('H2', 'H2', items.h2);
+  push('H3', 'H3', items.h3);
+  push('B', 'B', items.bas);
+  push('ACH', 'ACH', items.chaussures);
+  push('ASAC', 'ASAC', items.sac);
+  if (items.couvre_chef) push('ACC', 'ACC', items.couvre_chef);
+  const others = [items.echarpe, items.ceinture, items.bijoux].filter(Boolean) as ClothingItem[];
+  const aSlots: SlotId[] = ['A1', 'A2', 'A3'];
+  others.forEach((it, i) => {
+    const sid = aSlots[i];
+    if (sid) push(`ACC_${i}`, sid, it);
+  });
+  return list;
+}
+
 export interface OutfitLayoutProps {
   h1?: ClothingItem;
   h2?: ClothingItem;
@@ -354,56 +384,25 @@ export default function OutfitLayout({
   ceinture, echarpe, bijoux, couvre_chef,
   debugMode = false,
 }: OutfitLayoutProps) {
-  // Select template based on tops + bas
-  const template = useMemo(
-    () => selectTemplate({ h1, h2, h3, bas }),
-    [h1, h2, h3, bas]
-  );
+  // Calcul direct du template à chaque render (pas de useMemo)
+  const template = selectTemplate({ h1, h2, h3, bas });
 
   // Build the list of pieces to render based on template + provided items
-  const pieces = useMemo<PieceConfig[]>(() => {
-    const list: PieceConfig[] = [];
-    const push = (key: string, slotId: SlotId, item?: ClothingItem) => {
-      const def = template[slotId];
-      if (!def || !item) return;
-      list.push({ key, def, item });
-    };
-
-    push('H1', 'H1', h1);
-    push('H2', 'H2', h2);
-    push('H3', 'H3', h3);
-    push('B', 'B', bas);
-    push('ACH', 'ACH', chaussures);
-    push('ASAC', 'ASAC', sac);
-
-    // Couvre-chef → ACC (priorité)
-    if (couvre_chef) push('ACC', 'ACC', couvre_chef);
-
-    // Autres accessoires → A1, A2, A3 dans l'ordre
-    const others = [echarpe, ceinture, bijoux].filter(Boolean) as ClothingItem[];
-    const aSlots: SlotId[] = ['A1', 'A2', 'A3'];
-    others.forEach((it, i) => {
-      const sid = aSlots[i];
-      if (sid) push(`ACC_${i}`, sid, it);
-    });
-
-    return list;
-  }, [template, h1, h2, h3, bas, chaussures, sac, ceinture, echarpe, bijoux, couvre_chef]);
+  const pieces = buildPieces(template, { h1, h2, h3, bas, chaussures, sac, ceinture, echarpe, bijoux, couvre_chef });
 
   const [states, setStates] = useState<Record<string, PieceState>>({});
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const zCounter = useRef(10);
 
-  // Signature des pièces (ids des items + slot) : si elle change, reset complet
-  const piecesSignature = useMemo(
-    () => pieces.map(p => `${p.def.id}:${p.item?.id ?? ''}`).join('|'),
-    [pieces]
-  );
+  // Signature basée sur les IDs des items (pas sur les références objets)
+  const piecesSignature = [h1?.id, h2?.id, h3?.id, bas?.id, chaussures?.id, sac?.id, ceinture?.id, echarpe?.id, bijoux?.id, couvre_chef?.id].join('|');
 
   // Reset complet des positions quand la composition de la tenue change
   useEffect(() => {
     const next: Record<string, PieceState> = {};
-    for (const p of pieces) next[p.key] = initialState(p.def);
+    const tpl = selectTemplate({ h1, h2, h3, bas });
+    const newPieces = buildPieces(tpl, { h1, h2, h3, bas, chaussures, sac, ceinture, echarpe, bijoux, couvre_chef });
+    for (const p of newPieces) next[p.key] = initialState(p.def);
     setStates(next);
     setSelectedKey(null);
     zCounter.current = 10;
