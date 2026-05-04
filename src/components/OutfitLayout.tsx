@@ -22,6 +22,7 @@ type SlotId =
   | 'H1' | 'H2' | 'H3'
   | 'B'
   | 'ACH' | 'ASAC'
+  | 'ACC'
   | 'A1' | 'A2' | 'A3';
 
 interface SlotDef {
@@ -30,23 +31,84 @@ interface SlotDef {
   y: number;
   w: number;
   h: number;
-  icon: string;
-  required?: boolean;
-  suggestion?: boolean;
-  suggestionText?: string;
 }
 
-const SLOTS: Record<SlotId, SlotDef> = {
-  H1:   { id: 'H1',   x: 12, y: 38, w: 12, h: 12, icon: '👕', required: true },
-  H2:   { id: 'H2',   x: 0,  y: 38, w: 12, h: 12, icon: '👕' },
-  H3:   { id: 'H3',   x: 24, y: 38, w: 12, h: 12, icon: '👕' },
-  B:    { id: 'B',    x: 12, y: 12, w: 12, h: 25, icon: '👖', required: true },
-  ACH:  { id: 'ACH',  x: 12, y: 0,  w: 12, h: 11, icon: '👟', suggestion: true, suggestionText: 'Pense à ajouter une paire de chaussures' },
-  ASAC: { id: 'ASAC', x: 24, y: 18, w: 12, h: 11, icon: '👜', suggestion: true, suggestionText: 'Pense à ajouter un sac' },
-  A1:   { id: 'A1',   x: 0,  y: 25, w: 12, h: 11, icon: '🧣' },
-  A2:   { id: 'A2',   x: 0,  y: 13, w: 12, h: 11, icon: '💍' },
-  A3:   { id: 'A3',   x: 0,  y: 1,  w: 12, h: 11, icon: '🎩' },
+const SLOT_ICONS: Record<SlotId, string> = {
+  H1: '👕', H2: '👕', H3: '👕',
+  B: '👖',
+  ACH: '👟', ASAC: '👜',
+  ACC: '🎩',
+  A1: '🧣', A2: '💍', A3: '💍',
 };
+
+const TEMPLATES: Record<string, Partial<Record<SlotId, SlotDef>>> = {
+  H1BTACC: {
+    H1:   { id:'H1',   x:11, y:35, w:15, h:15 },
+    B:    { id:'B',    x:12, y:10, w:13, h:25 },
+    ACH:  { id:'ACH',  x:13, y:0,  w:11, h:10 },
+    ASAC: { id:'ASAC', x:25, y:17, w:11, h:10 },
+    A1:   { id:'A1',   x:0,  y:32, w:9,  h:9  },
+    ACC:  { id:'ACC',  x:0,  y:17, w:9,  h:8  },
+    A2:   { id:'A2',   x:0,  y:9,  w:9,  h:8  },
+    A3:   { id:'A3',   x:0,  y:1,  w:9,  h:8  },
+  },
+  H1H3BTAC: {
+    H1:   { id:'H1',   x:0,  y:35, w:14, h:15 },
+    H3:   { id:'H3',   x:22, y:35, w:14, h:15 },
+    B:    { id:'B',    x:12, y:10, w:13, h:25 },
+    ACH:  { id:'ACH',  x:13, y:0,  w:11, h:10 },
+    ASAC: { id:'ASAC', x:25, y:17, w:11, h:10 },
+    A1:   { id:'A1',   x:0,  y:25, w:9,  h:9  },
+    ACC:  { id:'ACC',  x:0,  y:17, w:9,  h:8  },
+    A2:   { id:'A2',   x:0,  y:9,  w:9,  h:8  },
+    A3:   { id:'A3',   x:0,  y:1,  w:9,  h:8  },
+  },
+  H1H2H3TACC: {
+    H2:   { id:'H2',   x:0,  y:36, w:14, h:14 },
+    H1:   { id:'H1',   x:11, y:22, w:14, h:14 },
+    H3:   { id:'H3',   x:22, y:36, w:14, h:14 },
+    B:    { id:'B',    x:11, y:0,  w:14, h:22 },
+    ACH:  { id:'ACH',  x:25, y:0,  w:11, h:10 },
+    ASAC: { id:'ASAC', x:25, y:19, w:11, h:10 },
+    A1:   { id:'A1',   x:0,  y:25, w:9,  h:9  },
+    ACC:  { id:'ACC',  x:0,  y:17, w:9,  h:8  },
+    A2:   { id:'A2',   x:0,  y:9,  w:9,  h:8  },
+    A3:   { id:'A3',   x:0,  y:1,  w:9,  h:8  },
+  },
+  H3RTACC: {
+    H3:   { id:'H3',   x:9,  y:34, w:16, h:16 },
+    B:    { id:'B',    x:9,  y:0,  w:16, h:34 },
+    ACH:  { id:'ACH',  x:25, y:0,  w:11, h:10 },
+    ASAC: { id:'ASAC', x:25, y:19, w:11, h:10 },
+    A1:   { id:'A1',   x:0,  y:24, w:9,  h:9  },
+    ACC:  { id:'ACC',  x:0,  y:16, w:9,  h:8  },
+    A2:   { id:'A2',   x:0,  y:8,  w:9,  h:8  },
+    A3:   { id:'A3',   x:0,  y:0,  w:9,  h:8  },
+  },
+  RTACC: {
+    B:    { id:'B',    x:9,  y:3,  w:16, h:38 },
+    ACH:  { id:'ACH',  x:25, y:0,  w:11, h:10 },
+    ASAC: { id:'ASAC', x:25, y:19, w:11, h:10 },
+    A1:   { id:'A1',   x:0,  y:39, w:9,  h:9  },
+    ACC:  { id:'ACC',  x:0,  y:16, w:9,  h:8  },
+    A2:   { id:'A2',   x:0,  y:8,  w:9,  h:8  },
+    A3:   { id:'A3',   x:0,  y:0,  w:9,  h:8  },
+  },
+};
+
+function selectTemplate(props: OutfitLayoutPropsLike): Partial<Record<SlotId, SlotDef>> {
+  const { h1, h2, h3, bas } = props;
+  const topCount = [h1, h2, h3].filter(Boolean).length;
+  if (!h1 && !h2 && !h3 && bas) return TEMPLATES.RTACC;
+  if (!h1 && !h2 && h3 && bas) return TEMPLATES.H3RTACC;
+  if (topCount === 3 && bas) return TEMPLATES.H1H2H3TACC;
+  if (topCount === 2 && bas) return TEMPLATES.H1H3BTAC;
+  return TEMPLATES.H1BTACC;
+}
+
+interface OutfitLayoutPropsLike {
+  h1?: ClothingItem; h2?: ClothingItem; h3?: ClothingItem; bas?: ClothingItem;
+}
 
 export interface OutfitLayoutProps {
   h1?: ClothingItem;
