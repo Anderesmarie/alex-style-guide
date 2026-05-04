@@ -108,25 +108,25 @@ const TEMPLATES: Record<string, Partial<Record<SlotId, SlotDef>>> = {
 };
 
 function selectTemplate(props: OutfitLayoutPropsLike): Partial<Record<SlotId, SlotDef>> {
-  const { h1, h2, h3, bas } = props;
-  const hasTop = h1 || h2 || h3;
-  const topCount = [h1, h2, h3].filter(Boolean).length;
-  // Robe seule (pas de haut)
-  if (!hasTop && bas) return TEMPLATES.RTACC;
-  // 2 vestes + Robe : H2 + H3 sans H1
-  if (!h1 && h2 && h3 && bas) return TEMPLATES.H2H3RTACC;
-  // 1 veste + Robe : H3 sans H1 ni H2
-  if (!h1 && !h2 && h3 && bas) return TEMPLATES.H3RTACC;
-  // 3 hauts + bas
-  if (topCount === 3 && bas) return TEMPLATES.H1H2H3TACC;
-  // 2 hauts + bas
-  if (topCount === 2 && bas) return TEMPLATES.H1H3BTAC;
-  // 1 haut + bas (défaut)
-  return TEMPLATES.H1BTACC;
+  const { h1, h2, h3, bas, isRobe } = props;
+  if (isRobe) {
+    // Pièce unique (robe ou combinaison)
+    if (h2 && h3) return TEMPLATES.H2H3RTACC; // pull + veste + robe
+    if (h3)       return TEMPLATES.H3RTACC;    // veste + robe
+    return TEMPLATES.RTACC;                    // robe seule
+  }
+  // Bas classique (pantalon, jupe)
+  if (h1 && h2 && h3) return TEMPLATES.H1H2H3TACC; // 3 couches + bas
+  if (h1 && h3)       return TEMPLATES.H1H3BTAC;   // base + veste + bas
+  return TEMPLATES.H1BTACC;                         // base + bas (défaut)
 }
 
 interface OutfitLayoutPropsLike {
-  h1?: ClothingItem; h2?: ClothingItem; h3?: ClothingItem; bas?: ClothingItem;
+  h1?: ClothingItem;
+  h2?: ClothingItem;
+  h3?: ClothingItem;
+  bas?: ClothingItem;
+  isRobe?: boolean;
 }
 
 function buildPieces(
@@ -160,10 +160,11 @@ function buildPieces(
 }
 
 export interface OutfitLayoutProps {
-  h1?: ClothingItem;
-  h2?: ClothingItem;
-  h3?: ClothingItem;
-  bas?: ClothingItem;
+  h1?: ClothingItem;  // top/chemise (couche base)
+  h2?: ClothingItem;  // pull/sweat (couche intermédiaire)
+  h3?: ClothingItem;  // veste/manteau (couche externe)
+  bas?: ClothingItem; // pantalon/jupe OU robe/combinaison
+  isRobe?: boolean;   // true si bas = robe ou combinaison
   chaussures?: ClothingItem;
   sac?: ClothingItem;
   ceinture?: ClothingItem;
@@ -505,34 +506,53 @@ export default function OutfitLayout({
  */
 export function mapItemsToLayout(items: ClothingItem[]): OutfitLayoutProps {
   const props: OutfitLayoutProps = {};
-  const tops: ClothingItem[] = [];
 
   for (const item of items) {
     const catName = getCategoryByType(item.type)?.name || item.category || '';
+    const typeLower = (item.type || '').toLowerCase();
 
-    if (catName === 'Bas' || catName === 'Jupes' || catName === 'Robes & combinaisons') {
-      if (!props.bas) props.bas = item;
+    // Pièce unique → bas avec flag isRobe
+    if (catName === 'Robes & combinaisons') {
+      if (!props.bas) { props.bas = item; props.isRobe = true; }
       continue;
     }
+    // Bas classique
+    if (catName === 'Bas' || catName === 'Jupes') {
+      if (!props.bas) { props.bas = item; props.isRobe = false; }
+      continue;
+    }
+    // Couche externe (veste, manteau)
+    if (catName === 'Manteaux & vestes') {
+      if (!props.h3) props.h3 = item;
+      continue;
+    }
+    // Couche intermédiaire (pull, sweat)
+    if (catName === 'Pulls & sweats') {
+      if (!props.h2) props.h2 = item;
+      continue;
+    }
+    // Couche de base (top, chemise, haut)
+    if (catName === 'Hauts') {
+      if (!props.h1) props.h1 = item;
+      continue;
+    }
+    // Chaussures
     if (catName === 'Chaussures') {
       if (!props.chaussures) props.chaussures = item;
       continue;
     }
+    // Sacs
     if (catName === 'Sacs') {
       if (!props.sac) props.sac = item;
       continue;
     }
-    if (catName === 'Hauts' || catName === 'Pulls & sweats' || catName === 'Manteaux & vestes') {
-      tops.push(item);
-      continue;
-    }
+    // Accessoires
     if (catName === 'Accessoires') {
-      const t = (item.type || '').toLowerCase();
-      if (t.includes('ceinture')) {
+      if (typeLower.includes('ceinture')) {
         if (!props.ceinture) props.ceinture = item;
-      } else if (t.includes('écharpe') || t.includes('echarpe') || t.includes('foulard') || t.includes('châle') || t.includes('chale')) {
+      } else if (typeLower.includes('écharpe') || typeLower.includes('echarpe') || typeLower.includes('foulard') || typeLower.includes('châle') || typeLower.includes('chale')) {
         if (!props.echarpe) props.echarpe = item;
-      } else if (t.includes('chapeau') || t.includes('casquette') || t.includes('béret') || t.includes('beret') || t.includes('bonnet')) {
+      } else if (typeLower.includes('chapeau') || typeLower.includes('casquette') || typeLower.includes('béret') || typeLower.includes('beret') || typeLower.includes('bonnet')) {
         if (!props.couvre_chef) props.couvre_chef = item;
       } else {
         if (!props.bijoux) props.bijoux = item;
@@ -540,11 +560,6 @@ export function mapItemsToLayout(items: ClothingItem[]): OutfitLayoutProps {
       continue;
     }
   }
-
-  // Distribute tops into H1, H2, H3 (H1 is mandatory)
-  if (tops[0]) props.h1 = tops[0];
-  if (tops[1]) props.h2 = tops[1];
-  if (tops[2]) props.h3 = tops[2];
 
   return props;
 }
