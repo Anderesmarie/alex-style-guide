@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { TabId } from '@/lib/types';
 import Today from '@/pages/Today';
 import Dressing from '@/pages/Dressing';
@@ -21,13 +21,24 @@ interface Props {
 
 export default function AppShell({ onEditProfile, onLogout }: Props) {
   const [activeTab, setActiveTab] = useState<TabId>('today');
+  const [pendingOutfitId, setPendingOutfitId] = useState<string | null>(null);
+
+  const goToOutfit = useCallback((outfitId: string) => {
+    setPendingOutfitId(outfitId);
+    setActiveTab('outfits');
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-1 px-5 pt-6 pb-24 no-scrollbar overflow-y-auto">
-        {activeTab === 'today' && <Today />}
+        {activeTab === 'today' && <Today onNavigateToOutfit={goToOutfit} />}
         {activeTab === 'dressing' && <Dressing />}
-        {activeTab === 'outfits' && <Outfits />}
+        {activeTab === 'outfits' && (
+          <Outfits
+            initialOutfitId={pendingOutfitId}
+            onConsumeInitialOutfitId={() => setPendingOutfitId(null)}
+          />
+        )}
         {activeTab === 'analysis' && <Analysis />}
         {activeTab === 'profile' && <Profile onEditProfile={onEditProfile} onLogout={onLogout} />}
       </main>
