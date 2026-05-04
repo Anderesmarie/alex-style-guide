@@ -129,6 +129,36 @@ interface OutfitLayoutPropsLike {
   h1?: ClothingItem; h2?: ClothingItem; h3?: ClothingItem; bas?: ClothingItem;
 }
 
+function buildPieces(
+  template: Partial<Record<SlotId, SlotDef>>,
+  items: {
+    h1?: ClothingItem; h2?: ClothingItem; h3?: ClothingItem; bas?: ClothingItem;
+    chaussures?: ClothingItem; sac?: ClothingItem;
+    ceinture?: ClothingItem; echarpe?: ClothingItem; bijoux?: ClothingItem; couvre_chef?: ClothingItem;
+  }
+): PieceConfig[] {
+  const list: PieceConfig[] = [];
+  const push = (key: string, slotId: SlotId, item?: ClothingItem) => {
+    const def = template[slotId];
+    if (!def || !item) return;
+    list.push({ key, def, item });
+  };
+  push('H1', 'H1', items.h1);
+  push('H2', 'H2', items.h2);
+  push('H3', 'H3', items.h3);
+  push('B', 'B', items.bas);
+  push('ACH', 'ACH', items.chaussures);
+  push('ASAC', 'ASAC', items.sac);
+  if (items.couvre_chef) push('ACC', 'ACC', items.couvre_chef);
+  const others = [items.echarpe, items.ceinture, items.bijoux].filter(Boolean) as ClothingItem[];
+  const aSlots: SlotId[] = ['A1', 'A2', 'A3'];
+  others.forEach((it, i) => {
+    const sid = aSlots[i];
+    if (sid) push(`ACC_${i}`, sid, it);
+  });
+  return list;
+}
+
 export interface OutfitLayoutProps {
   h1?: ClothingItem;
   h2?: ClothingItem;
