@@ -62,17 +62,19 @@ export default function OutfitDetailView({
         Glisse les pièces pour les arranger ✨
       </p>
 
-      <div className="grid grid-cols-2 gap-2 mt-4 mb-4">
-        {items.map(item => (
-          <div key={item.id} className="rounded-lg overflow-hidden card-shadow">
-            <img src={item.imageBase64} alt={item.type} className="w-full aspect-square object-cover" />
-            <div className="p-2 bg-card">
-              <p className="text-xs font-medium">{item.type}</p>
-              <p className="text-xs text-muted-foreground">{item.color}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+      <button
+        onClick={() => {
+          if (latestRef.current) {
+            setOutfitLayoutData(outfit.id, latestRef.current).catch(() => {});
+          }
+          toast('Placement sauvegardé ✨');
+        }}
+        className="w-full py-3 rounded-xl font-semibold text-white active:scale-[0.98] transition-transform mb-3"
+        style={{ backgroundColor: '#C9956C' }}
+      >
+        ✅ Valider le placement
+      </button>
+
       <p className="text-sm text-muted-foreground mb-4">
         Créée le {new Date(outfit.createdAt).toLocaleDateString('fr-FR')}
       </p>
