@@ -220,8 +220,10 @@ export default function OutfitDailyFeed({
           const isDisliked = dislikedIdxs.has(idx);
           const layoutProps = mapItemsToLayout(r.outfit);
 
+          if (isDisliked) return null;
+
           return (
-            <div key={idx} className={isDisliked ? 'opacity-50' : ''}>
+            <div key={idx}>
               <div className="bg-card rounded-2xl card-shadow p-4">
                 <div className="flex items-center justify-between mb-2">
                   <span
@@ -234,6 +236,7 @@ export default function OutfitDailyFeed({
                 <OutfitLayout
                   key={r.outfit.map(i => i.id).join('-')}
                   {...layoutProps}
+                  readOnly
                 />
               </div>
 
@@ -261,7 +264,7 @@ export default function OutfitDailyFeed({
                 </button>
 
                 <button
-                  onClick={() => handleDislike(idx)}
+                  onClick={() => handleDislike(r.outfit, idx)}
                   className="w-full py-1.5 text-xs text-muted-foreground active:opacity-70"
                 >
                   👎 Pas fan
