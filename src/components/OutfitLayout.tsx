@@ -335,22 +335,41 @@ export default function OutfitLayout({
   ceinture, echarpe, bijoux, couvre_chef,
   debugMode = false,
 }: OutfitLayoutProps) {
-  // Build the list of pieces to render (only required + provided)
+  // Select template based on tops + bas
+  const template = useMemo(
+    () => selectTemplate({ h1, h2, h3, bas }),
+    [h1, h2, h3, bas]
+  );
+
+  // Build the list of pieces to render based on template + provided items
   const pieces = useMemo<PieceConfig[]>(() => {
-    const list: PieceConfig[] = [
-      { key: 'H1', def: SLOTS.H1, item: h1 },
-      { key: 'B', def: SLOTS.B, item: bas },
-      { key: 'ACH', def: SLOTS.ACH, item: chaussures },
-      { key: 'ASAC', def: SLOTS.ASAC, item: sac },
-    ];
-    if (h2) list.push({ key: 'H2', def: SLOTS.H2, item: h2 });
-    if (h3) list.push({ key: 'H3', def: SLOTS.H3, item: h3 });
-    if (echarpe) list.push({ key: 'A1', def: SLOTS.A1, item: echarpe });
-    if (echarpe) list.push({ key: 'A1', def: SLOTS.A1, item: echarpe });
-    if (bijoux) list.push({ key: 'A2', def: SLOTS.A2, item: bijoux });
-    if (couvre_chef) list.push({ key: 'A3', def: SLOTS.A3, item: couvre_chef });
+    const list: PieceConfig[] = [];
+    const push = (key: string, slotId: SlotId, item?: ClothingItem) => {
+      const def = template[slotId];
+      if (!def || !item) return;
+      list.push({ key, def, item });
+    };
+
+    push('H1', 'H1', h1);
+    push('H2', 'H2', h2);
+    push('H3', 'H3', h3);
+    push('B', 'B', bas);
+    push('ACH', 'ACH', chaussures);
+    push('ASAC', 'ASAC', sac);
+
+    // Couvre-chef → ACC (priorité)
+    if (couvre_chef) push('ACC', 'ACC', couvre_chef);
+
+    // Autres accessoires → A1, A2, A3 dans l'ordre
+    const others = [echarpe, ceinture, bijoux].filter(Boolean) as ClothingItem[];
+    const aSlots: SlotId[] = ['A1', 'A2', 'A3'];
+    others.forEach((it, i) => {
+      const sid = aSlots[i];
+      if (sid) push(`ACC_${i}`, sid, it);
+    });
+
     return list;
-  }, [h1, h2, h3, bas, chaussures, sac, ceinture, echarpe, bijoux, couvre_chef]);
+  }, [template, h1, h2, h3, bas, chaussures, sac, ceinture, echarpe, bijoux, couvre_chef]);
 
   const [states, setStates] = useState<Record<string, PieceState>>({});
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
