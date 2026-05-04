@@ -49,6 +49,7 @@ export default function OutfitDailyFeed({
   pseudo,
   wardrobe,
   onResultsChange,
+  onNavigateToOutfit,
 }: Props) {
   const [savedIdxs, setSavedIdxs] = useState<Set<number>>(new Set());
   const [wornIdx, setWornIdx] = useState<number | null>(null);
