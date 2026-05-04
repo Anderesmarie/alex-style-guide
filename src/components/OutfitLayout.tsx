@@ -85,6 +85,17 @@ const TEMPLATES: Record<string, Partial<Record<SlotId, SlotDef>>> = {
     A2:   { id:'A2',   x:0,  y:8,  w:9,  h:8  },
     A3:   { id:'A3',   x:0,  y:0,  w:9,  h:8  },
   },
+  H2H3RTACC: {
+    H2:   { id:'H2',   x:0,  y:33, w:17, h:17 },
+    H3:   { id:'H3',   x:19, y:33, w:17, h:17 },
+    B:    { id:'B',    x:9,  y:0,  w:16, h:33 },
+    ACH:  { id:'ACH',  x:25, y:0,  w:11, h:10 },
+    ASAC: { id:'ASAC', x:25, y:19, w:11, h:10 },
+    A1:   { id:'A1',   x:0,  y:16, w:9,  h:9  },
+    ACC:  { id:'ACC',  x:0,  y:25, w:9,  h:8  },
+    A2:   { id:'A2',   x:0,  y:8,  w:9,  h:8  },
+    A3:   { id:'A3',   x:0,  y:0,  w:9,  h:8  },
+  },
   RTACC: {
     B:    { id:'B',    x:9,  y:3,  w:16, h:38 },
     ACH:  { id:'ACH',  x:25, y:0,  w:11, h:10 },
@@ -98,11 +109,19 @@ const TEMPLATES: Record<string, Partial<Record<SlotId, SlotDef>>> = {
 
 function selectTemplate(props: OutfitLayoutPropsLike): Partial<Record<SlotId, SlotDef>> {
   const { h1, h2, h3, bas } = props;
+  const hasTop = h1 || h2 || h3;
   const topCount = [h1, h2, h3].filter(Boolean).length;
-  if (!h1 && !h2 && !h3 && bas) return TEMPLATES.RTACC;
+  // Robe seule (pas de haut)
+  if (!hasTop && bas) return TEMPLATES.RTACC;
+  // 2 vestes + Robe : H2 + H3 sans H1
+  if (!h1 && h2 && h3 && bas) return TEMPLATES.H2H3RTACC;
+  // 1 veste + Robe : H3 sans H1 ni H2
   if (!h1 && !h2 && h3 && bas) return TEMPLATES.H3RTACC;
+  // 3 hauts + bas
   if (topCount === 3 && bas) return TEMPLATES.H1H2H3TACC;
+  // 2 hauts + bas
   if (topCount === 2 && bas) return TEMPLATES.H1H3BTAC;
+  // 1 haut + bas (défaut)
   return TEMPLATES.H1BTACC;
 }
 
