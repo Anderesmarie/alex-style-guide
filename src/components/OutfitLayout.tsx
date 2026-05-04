@@ -281,7 +281,7 @@ function DraggablePiece({ config, state, onChange, onSelect, selected }: Draggab
     />
   ) : (
     <div className="w-full h-full flex items-center justify-center" style={{ opacity: 0.4 }}>
-      <span style={{ fontSize: Math.min(state.width, state.height) * 0.4 }}>{def.icon}</span>
+      <span style={{ fontSize: Math.min(state.width, state.height) * 0.4 }}>{SLOT_ICONS[def.id]}</span>
     </div>
   );
 
