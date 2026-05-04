@@ -18,12 +18,7 @@ const ROWS = 50;
 const W = COLS * U; // 360
 const H = ROWS * U; // 500
 
-type SlotId =
-  | 'H1' | 'H2' | 'H3'
-  | 'B'
-  | 'ACH' | 'ASAC'
-  | 'ACC'
-  | 'A1' | 'A2' | 'A3';
+type SlotId = 'H1' | 'H2' | 'H3' | 'B' | 'ACH' | 'ASAC' | 'A1';
 
 interface SlotDef {
   id: SlotId;
@@ -37,88 +32,34 @@ const SLOT_ICONS: Record<SlotId, string> = {
   H1: '👕', H2: '👕', H3: '👕',
   B: '👖',
   ACH: '👟', ASAC: '👜',
-  ACC: '🎩',
-  A1: '🧣', A2: '💍', A3: '💍',
+  A1: '💍',
 };
 
 const TEMPLATES: Record<string, Partial<Record<SlotId, SlotDef>>> = {
-  H1BTACC: {
-    H1:   { id:'H1',   x:11, y:35, w:15, h:15 },
-    B:    { id:'B',    x:12, y:10, w:13, h:25 },
-    ACH:  { id:'ACH',  x:13, y:0,  w:11, h:10 },
-    ASAC: { id:'ASAC', x:25, y:17, w:11, h:10 },
-    A1:   { id:'A1',   x:0,  y:32, w:9,  h:9  },
-    ACC:  { id:'ACC',  x:0,  y:17, w:9,  h:8  },
-    A2:   { id:'A2',   x:0,  y:9,  w:9,  h:8  },
-    A3:   { id:'A3',   x:0,  y:1,  w:9,  h:8  },
+  // Template universel Haut + Bas
+  HB: {
+    H1:   { id:'H1',   x:0,  y:34, w:16, h:16 },
+    H2:   { id:'H2',   x:21, y:15, w:15, h:16 },
+    H3:   { id:'H3',   x:21, y:34, w:15, h:16 },
+    B:    { id:'B',    x:0,  y:10, w:16, h:24 },
+    ACH:  { id:'ACH',  x:0,  y:0,  w:11, h:10 },
+    ASAC: { id:'ASAC', x:25, y:0,  w:11, h:10 },
+    A1:   { id:'A1',   x:13, y:0,  w:11, h:10 },
   },
-  H1H3BTAC: {
-    H1:   { id:'H1',   x:0,  y:35, w:14, h:15 },
-    H3:   { id:'H3',   x:22, y:35, w:14, h:15 },
-    B:    { id:'B',    x:12, y:10, w:13, h:25 },
-    ACH:  { id:'ACH',  x:13, y:0,  w:11, h:10 },
-    ASAC: { id:'ASAC', x:25, y:17, w:11, h:10 },
-    A1:   { id:'A1',   x:0,  y:25, w:9,  h:9  },
-    ACC:  { id:'ACC',  x:0,  y:17, w:9,  h:8  },
-    A2:   { id:'A2',   x:0,  y:9,  w:9,  h:8  },
-    A3:   { id:'A3',   x:0,  y:1,  w:9,  h:8  },
-  },
-  H1H2H3TACC: {
-    H2:   { id:'H2',   x:0,  y:36, w:14, h:14 },
-    H1:   { id:'H1',   x:11, y:22, w:14, h:14 },
-    H3:   { id:'H3',   x:22, y:36, w:14, h:14 },
-    B:    { id:'B',    x:11, y:0,  w:14, h:22 },
-    ACH:  { id:'ACH',  x:25, y:0,  w:11, h:10 },
-    ASAC: { id:'ASAC', x:25, y:19, w:11, h:10 },
-    A1:   { id:'A1',   x:0,  y:25, w:9,  h:9  },
-    ACC:  { id:'ACC',  x:0,  y:17, w:9,  h:8  },
-    A2:   { id:'A2',   x:0,  y:9,  w:9,  h:8  },
-    A3:   { id:'A3',   x:0,  y:1,  w:9,  h:8  },
-  },
-  H3RTACC: {
-    H3:   { id:'H3',   x:9,  y:34, w:16, h:16 },
-    B:    { id:'B',    x:9,  y:0,  w:16, h:34 },
-    ACH:  { id:'ACH',  x:25, y:0,  w:11, h:10 },
-    ASAC: { id:'ASAC', x:25, y:19, w:11, h:10 },
-    A1:   { id:'A1',   x:0,  y:24, w:9,  h:9  },
-    ACC:  { id:'ACC',  x:0,  y:16, w:9,  h:8  },
-    A2:   { id:'A2',   x:0,  y:8,  w:9,  h:8  },
-    A3:   { id:'A3',   x:0,  y:0,  w:9,  h:8  },
-  },
-  H2H3RTACC: {
-    H2:   { id:'H2',   x:0,  y:33, w:17, h:17 },
-    H3:   { id:'H3',   x:19, y:33, w:17, h:17 },
-    B:    { id:'B',    x:9,  y:0,  w:16, h:33 },
-    ACH:  { id:'ACH',  x:25, y:0,  w:11, h:10 },
-    ASAC: { id:'ASAC', x:25, y:19, w:11, h:10 },
-    A1:   { id:'A1',   x:0,  y:16, w:9,  h:9  },
-    ACC:  { id:'ACC',  x:0,  y:25, w:9,  h:8  },
-    A2:   { id:'A2',   x:0,  y:8,  w:9,  h:8  },
-    A3:   { id:'A3',   x:0,  y:0,  w:9,  h:8  },
-  },
-  RTACC: {
-    B:    { id:'B',    x:9,  y:3,  w:16, h:38 },
-    ACH:  { id:'ACH',  x:25, y:0,  w:11, h:10 },
-    ASAC: { id:'ASAC', x:25, y:19, w:11, h:10 },
-    A1:   { id:'A1',   x:0,  y:39, w:9,  h:9  },
-    ACC:  { id:'ACC',  x:0,  y:16, w:9,  h:8  },
-    A2:   { id:'A2',   x:0,  y:8,  w:9,  h:8  },
-    A3:   { id:'A3',   x:0,  y:0,  w:9,  h:8  },
+  // Template universel Robe/Combinaison + couches
+  RH: {
+    H2:   { id:'H2',   x:20, y:34, w:16, h:16 },
+    H3:   { id:'H3',   x:0,  y:34, w:17, h:16 },
+    B:    { id:'B',    x:0,  y:2,  w:17, h:31 },
+    ACH:  { id:'ACH',  x:24, y:0,  w:12, h:11 },
+    ASAC: { id:'ASAC', x:24, y:11, w:12, h:11 },
+    A1:   { id:'A1',   x:24, y:22, w:12, h:11 },
   },
 };
 
 function selectTemplate(props: OutfitLayoutPropsLike): Partial<Record<SlotId, SlotDef>> {
-  const { h1, h2, h3, bas, isRobe } = props;
-  if (isRobe) {
-    // Pièce unique (robe ou combinaison)
-    if (h2 && h3) return TEMPLATES.H2H3RTACC; // pull + veste + robe
-    if (h3)       return TEMPLATES.H3RTACC;    // veste + robe
-    return TEMPLATES.RTACC;                    // robe seule
-  }
-  // Bas classique (pantalon, jupe)
-  if (h1 && h2 && h3) return TEMPLATES.H1H2H3TACC; // 3 couches + bas
-  if (h1 && h3)       return TEMPLATES.H1H3BTAC;   // base + veste + bas
-  return TEMPLATES.H1BTACC;                         // base + bas (défaut)
+  if (props.isRobe) return TEMPLATES.RH;
+  return TEMPLATES.HB;
 }
 
 interface OutfitLayoutPropsLike {
@@ -149,13 +90,8 @@ function buildPieces(
   push('B', 'B', items.bas);
   push('ACH', 'ACH', items.chaussures);
   push('ASAC', 'ASAC', items.sac);
-  if (items.couvre_chef) push('ACC', 'ACC', items.couvre_chef);
-  const others = [items.echarpe, items.ceinture, items.bijoux].filter(Boolean) as ClothingItem[];
-  const aSlots: SlotId[] = ['A1', 'A2', 'A3'];
-  others.forEach((it, i) => {
-    const sid = aSlots[i];
-    if (sid) push(`ACC_${i}`, sid, it);
-  });
+  const firstAcc = items.couvre_chef || items.echarpe || items.ceinture || items.bijoux;
+  if (firstAcc) push('A1', 'A1', firstAcc);
   return list;
 }
 
@@ -175,12 +111,10 @@ export interface OutfitLayoutProps {
 }
 
 const DEBUG_COLORS: Record<SlotId, string> = {
-  H1: '#60a5fa', H2: '#60a5fa', H3: '#60a5fa',
+  H1: '#60a5fa', H2: '#93c5fd', H3: '#bfdbfe',
   B: '#34d399',
-  ACH: '#fb923c',
-  ASAC: '#f472b6',
-  ACC: '#a78bfa',
-  A1: '#facc15', A2: '#facc15', A3: '#facc15',
+  ACH: '#fb923c', ASAC: '#f472b6',
+  A1: '#facc15',
 };
 
 function DebugSlot({ def }: { def: SlotDef }) {
