@@ -43,15 +43,6 @@ interface Props {
 
 const ROSE_GOLD = '#C9956C';
 
-interface CanvasPiece {
-  itemId: string;
-  item: ClothingItem;
-  x: number;
-  y: number;
-  size: number;
-  z: number;
-}
-
 export default function OutfitDailyFeed({
   results,
   pseudo,
