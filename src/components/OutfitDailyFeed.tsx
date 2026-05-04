@@ -6,15 +6,23 @@ import { toast } from 'sonner';
 import { updateStreak } from '@/lib/streak';
 import type { Season } from '@/lib/colorimetry';
 import OutfitLayout, { mapItemsToLayout } from '@/components/OutfitLayout';
-import OutfitFreeCanvas, {
-  CHIPS,
-  ChipKey,
-  chipMatchesItem,
-  defaultPositionForCategory,
-  CANVAS_W,
-  CANVAS_H,
-} from '@/components/OutfitFreeCanvas';
 import { getCategoryByType } from '@/lib/categories';
+
+type EditorCatKey = 'haut' | 'bas' | 'chaussures' | 'sac' | 'accessoire';
+
+const EDITOR_CATS: { key: EditorCatKey; label: string; matches: string[] }[] = [
+  { key: 'haut', label: 'Haut', matches: ['Hauts', 'Pulls & sweats', 'Manteaux & vestes', 'Robes & combinaisons'] },
+  { key: 'bas', label: 'Bas', matches: ['Bas', 'Jupes'] },
+  { key: 'chaussures', label: 'Chaussures', matches: ['Chaussures'] },
+  { key: 'sac', label: 'Sac', matches: ['Sacs'] },
+  { key: 'accessoire', label: 'Accessoire', matches: ['Accessoires'] },
+];
+
+function itemMatchesCat(catKey: EditorCatKey, item: ClothingItem): boolean {
+  const cat = getCategoryByType(item.type)?.name || item.category || '';
+  const target = EDITOR_CATS.find(c => c.key === catKey);
+  return !!target && target.matches.includes(cat);
+}
 
 interface OutfitResult {
   outfit: ClothingItem[];
