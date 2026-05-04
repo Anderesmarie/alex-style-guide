@@ -327,6 +327,9 @@ export default function OutfitLayout({
   chaussures, sac,
   ceinture, echarpe, bijoux, couvre_chef,
   debugMode = false,
+  readOnly = false,
+  initialLayoutData = null,
+  onLayoutChange,
 }: OutfitLayoutProps) {
   // Calcul direct du template à chaque render (pas de useMemo)
   const template = selectTemplate({ h1, h2, h3, bas, isRobe });
@@ -347,11 +350,59 @@ export default function OutfitLayout({
     const tpl = selectTemplate({ h1, h2, h3, bas, isRobe });
     const newPieces = buildPieces(tpl, { h1, h2, h3, bas, chaussures, sac, ceinture, echarpe, bijoux, couvre_chef });
     for (const p of newPieces) next[p.key] = initialState(p.def);
+    // Restore from initialLayoutData if provided (drag positions saved earlier)
+    if (initialLayoutData?.pieces?.length) {
+      const byItemId: Record<string, ClothingItem | undefined> = {
+        [h1?.id ?? '__h1']: h1,
+        [h2?.id ?? '__h2']: h2,
+        [h3?.id ?? '__h3']: h3,
+        [bas?.id ?? '__bas']: bas,
+        [chaussures?.id ?? '__c']: chaussures,
+        [sac?.id ?? '__s']: sac,
+        [ceinture?.id ?? '__ce']: ceinture,
+        [echarpe?.id ?? '__e']: echarpe,
+        [bijoux?.id ?? '__b']: bijoux,
+        [couvre_chef?.id ?? '__cc']: couvre_chef,
+      };
+      // map itemId -> piece key
+      const itemKeyMap: Record<string, string> = {};
+      for (const p of newPieces) if (p.item) itemKeyMap[p.item.id] = p.key;
+      for (const saved of initialLayoutData.pieces) {
+        const k = itemKeyMap[saved.itemId];
+        if (!k || !next[k]) continue;
+        next[k] = {
+          x: saved.x,
+          y: saved.y,
+          width: saved.size,
+          height: next[k].height * (saved.size / next[k].width),
+          zIndex: saved.z || 1,
+        };
+      }
+    }
     setStates(next);
     setSelectedKey(null);
     zCounter.current = 10;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [piecesSignature]);
+
+  // Notify parent on state change (debounced upstream if needed)
+  const onLayoutChangeRef = useRef(onLayoutChange);
+  onLayoutChangeRef.current = onLayoutChange;
+  useEffect(() => {
+    if (readOnly || !onLayoutChangeRef.current) return;
+    if (Object.keys(states).length === 0) return;
+    const piecesData = pieces
+      .filter(p => p.item && states[p.key])
+      .map(p => ({
+        itemId: p.item!.id,
+        x: states[p.key].x,
+        y: states[p.key].y,
+        size: states[p.key].width,
+        z: states[p.key].zIndex,
+      }));
+    onLayoutChangeRef.current({ canvasW: W, canvasH: H, pieces: piecesData });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [states, readOnly]);
 
 
   const updateState = useCallback((key: string, next: PieceState) => {
@@ -398,13 +449,14 @@ export default function OutfitLayout({
       <div
         className="relative mx-auto"
         onPointerDown={(e) => {
+          if (readOnly) return;
           if (e.target === e.currentTarget) setSelectedKey(null);
         }}
         style={{
           width: W,
           height: H,
           maxWidth: '100%',
-          touchAction: 'none',
+          touchAction: readOnly ? 'auto' : 'none',
           overflow: 'hidden',
         }}
       >
@@ -419,18 +471,21 @@ export default function OutfitLayout({
               onChange={(next) => updateState(p.key, next)}
               onSelect={() => select(p.key)}
               selected={selectedKey === p.key}
+              readOnly={readOnly}
             />
           );
         })}
       </div>
 
-      <button
-        type="button"
-        onClick={reset}
-        className="mt-3 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors"
-      >
-        Réinitialiser
-      </button>
+      {!readOnly && (
+        <button
+          type="button"
+          onClick={reset}
+          className="mt-3 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors"
+        >
+          Réinitialiser
+        </button>
+      )}
 
       {suggestions.length > 0 && (
         <div className="mt-3 space-y-1 text-center">
