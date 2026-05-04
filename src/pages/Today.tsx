@@ -80,7 +80,11 @@ function getAvatarFromStorage(): AvatarData {
   } catch { return DEFAULT_AVATAR; }
 }
 
-export default function Today() {
+interface TodayProps {
+  onNavigateToOutfit?: (outfitId: string) => void;
+}
+
+export default function Today({ onNavigateToOutfit }: TodayProps = {}) {
   const [ws, setWs] = useState<WeatherState>({ status: 'loading' });
   const [cityInput, setCityInput] = useState('');
   const [recommendations, setRecommendations] = useState<ClothingItem[][]>([]);
