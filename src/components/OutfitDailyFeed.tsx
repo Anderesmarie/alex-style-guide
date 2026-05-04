@@ -263,43 +263,48 @@ export default function OutfitDailyFeed({
               <h1 className="text-xl font-serif font-bold">Modifier la tenue ✨</h1>
             </div>
 
-            <OutfitFreeCanvas
-              pieces={freePieces}
-              onChange={next =>
-                setFreePieces(
-                  next.map(n => ({
-                    ...n,
-                    item: freePieces.find(p => p.itemId === n.itemId)!.item,
-                  }))
-                )
-              }
-              selectedId={freeSelectedId}
-              onSelectId={setFreeSelectedId}
-            />
+            {/* Pièces actuelles */}
+            <div className="bg-card rounded-2xl card-shadow p-3 mb-4">
+              <p className="text-xs font-semibold text-muted-foreground mb-2">
+                Pièces de la tenue ({editPieces.length})
+              </p>
+              {editPieces.length === 0 ? (
+                <p className="text-center text-sm text-muted-foreground py-6">
+                  Ajoute des pièces ci-dessous ✨
+                </p>
+              ) : (
+                <div className="grid grid-cols-3 gap-2">
+                  {editPieces.map(item => (
+                    <div
+                      key={item.id}
+                      className="relative aspect-square rounded-lg overflow-hidden bg-muted"
+                    >
+                      <img
+                        src={item.imageBase64}
+                        alt={item.type}
+                        className="w-full h-full object-contain"
+                      />
+                      <button
+                        onClick={() => removePiece(item.id)}
+                        aria-label="Retirer"
+                        className="absolute top-1 right-1 w-6 h-6 rounded-full bg-foreground/70 text-white text-xs font-bold flex items-center justify-center active:scale-90"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-            {freeSelectedId && (
-              <div className="flex items-center justify-center gap-2 mt-3">
-                <button
-                  onClick={() => resizeSelected(-20)}
-                  className="w-10 h-10 rounded-full bg-card card-shadow text-lg active:scale-90 transition-transform"
-                >−</button>
-                <button
-                  onClick={() => resizeSelected(20)}
-                  className="w-10 h-10 rounded-full bg-card card-shadow text-lg active:scale-90 transition-transform"
-                >+</button>
-                <button
-                  onClick={removeSelected}
-                  className="px-4 h-10 rounded-full bg-destructive/15 text-destructive text-sm font-semibold active:scale-95 transition-transform"
-                >🗑️ Retirer</button>
-              </div>
-            )}
-
-            <div className="flex gap-2 overflow-x-auto no-scrollbar mt-4 pb-1">
-              {CHIPS.map(c => (
+            {/* Boutons d'ajout par catégorie */}
+            <p className="text-xs font-semibold text-muted-foreground mb-2">Ajouter une pièce</p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {EDITOR_CATS.map(c => (
                 <button
                   key={c.key}
-                  onClick={() => setFreeChip(c.key)}
-                  className="flex-shrink-0 px-4 py-2 rounded-full text-xs font-medium"
+                  onClick={() => setPickerCat(c.key)}
+                  className="px-4 py-2 rounded-full text-xs font-medium active:scale-95 transition-transform"
                   style={{ border: `1px solid ${ROSE_GOLD}`, color: ROSE_GOLD, background: 'transparent' }}
                 >
                   + {c.label}
@@ -307,8 +312,8 @@ export default function OutfitDailyFeed({
               ))}
             </div>
 
-            {freeChip && (
-              <div className="fixed inset-0 z-[60] flex items-end" onClick={() => setFreeChip(null)}>
+            {pickerCat && (
+              <div className="fixed inset-0 z-[60] flex items-end" onClick={() => setPickerCat(null)}>
                 <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
                 <div
                   className="relative w-full bg-card rounded-t-3xl p-5 max-h-[70vh] overflow-y-auto animate-slide-in-bottom"
@@ -316,7 +321,7 @@ export default function OutfitDailyFeed({
                 >
                   <div className="w-12 h-1 bg-muted rounded-full mx-auto mb-4" />
                   <h3 className="font-serif font-bold text-lg mb-3">
-                    {CHIPS.find(c => c.key === freeChip)?.label}
+                    {EDITOR_CATS.find(c => c.key === pickerCat)?.label}
                   </h3>
                   {filteredWardrobe.length === 0 ? (
                     <p className="text-center text-sm text-muted-foreground py-8">
@@ -348,7 +353,7 @@ export default function OutfitDailyFeed({
               </button>
               <button
                 onClick={saveEditor}
-                disabled={freePieces.length < 1}
+                disabled={editPieces.length < 1}
                 className="flex-1 py-3 rounded-xl text-white font-semibold text-sm active:scale-[0.98] transition-transform disabled:opacity-50"
                 style={{ backgroundColor: ROSE_GOLD }}
               >
