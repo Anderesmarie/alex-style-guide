@@ -39,6 +39,7 @@ interface Props {
   pseudo?: string | null;
   wardrobe: ClothingItem[];
   onResultsChange?: (next: OutfitResult[]) => void;
+  onNavigateToOutfit?: (outfitId: string) => void;
 }
 
 const ROSE_GOLD = '#C9956C';
