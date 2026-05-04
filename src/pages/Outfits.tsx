@@ -71,6 +71,18 @@ export default function Outfits({ initialOutfitId, onConsumeInitialOutfitId }: O
     })();
   }, []);
 
+  // Auto-open detail view when navigated from Today
+  useEffect(() => {
+    if (!initialOutfitId || outfits.length === 0) return;
+    const found = outfits.find(o => o.id === initialOutfitId);
+    if (found) {
+      setSelectedOutfit(found);
+      setView('detail');
+      setTab('outfits');
+      onConsumeInitialOutfitId?.();
+    }
+  }, [initialOutfitId, outfits, onConsumeInitialOutfitId]);
+
   const handleToggleLike = async (outfit: Outfit, next: boolean) => {
     setOutfits(prev => prev.map(o => o.id === outfit.id ? { ...o, liked: next } : o));
     try { await setOutfitLiked(outfit.id, next); } catch {}
