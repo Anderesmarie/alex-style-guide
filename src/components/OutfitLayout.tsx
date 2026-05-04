@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useDrag, usePinch } from '@use-gesture/react';
-import { ClothingItem } from '@/lib/types';
+import { ClothingItem, OutfitLayoutData } from '@/lib/types';
 import { getCategoryByType } from '@/lib/categories';
 
 /**
