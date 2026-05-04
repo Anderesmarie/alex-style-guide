@@ -122,14 +122,14 @@ export default function OutfitDailyFeed({
         reaction: 'portee',
         created_at: new Date().toISOString(),
       });
-      // Also save to outfits gallery with layoutData if present
-      const r = results[idx];
+      // Save to outfits gallery WITHOUT layoutData (positions defined later in Tenues)
+      const newId = genId();
       await addOutfit({
-        id: genId(),
+        id: newId,
         name: `Tenue du ${new Date().toLocaleDateString('fr-FR')}`,
         itemIds,
         createdAt: new Date().toISOString(),
-        layoutData: r.layoutData ?? null,
+        layoutData: null,
       });
       setWornIdx(idx);
       setSavedIdxs(prev => new Set(prev).add(idx));
@@ -137,18 +137,31 @@ export default function OutfitDailyFeed({
       toast("Belle journée avec cette tenue ! 🌸", {
         style: { backgroundColor: ROSE_GOLD, color: '#FFFFFF', border: 'none' },
       });
+      // Navigate to Tenues page on the new outfit detail
+      onNavigateToOutfit?.(newId);
     } catch (e) {
       console.error(e);
       toast.error("Erreur lors de l'enregistrement");
     }
   };
 
-  const handleDislike = (idx: number) => {
+  const handleDislike = async (items: ClothingItem[], idx: number) => {
     setDislikedIdxs(prev => {
       const next = new Set(prev);
       next.add(idx);
       return next;
     });
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData.user) {
+        await supabase.from('user_preferences').insert({
+          user_id: userData.user.id,
+          item_ids: items.map(i => i.id),
+          reaction: 'pas_fan',
+          created_at: new Date().toISOString(),
+        });
+      }
+    } catch {}
     toast("On note ✨ on te proposera autre chose", { duration: 2000 });
   };
 
