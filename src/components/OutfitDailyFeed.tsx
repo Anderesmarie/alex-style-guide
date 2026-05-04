@@ -53,11 +53,10 @@ export default function OutfitDailyFeed({
   const [wornIdx, setWornIdx] = useState<number | null>(null);
   const [dislikedIdxs, setDislikedIdxs] = useState<Set<number>>(new Set());
 
-  // Editor state
+  // Editor state — selection only, no free placement
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
-  const [freePieces, setFreePieces] = useState<CanvasPiece[]>([]);
-  const [freeSelectedId, setFreeSelectedId] = useState<string | null>(null);
-  const [freeChip, setFreeChip] = useState<ChipKey | null>(null);
+  const [editPieces, setEditPieces] = useState<ClothingItem[]>([]);
+  const [pickerCat, setPickerCat] = useState<EditorCatKey | null>(null);
 
   const today = new Date().toISOString().split('T')[0];
 
