@@ -216,7 +216,10 @@ export default function OutfitDailyFeed({
                     ✨ Générée par MyStyl
                   </span>
                 </div>
-                <OutfitLayout {...layoutProps} />
+                <OutfitLayout
+                  key={r.outfit.map(i => i.id).join('-')}
+                  {...layoutProps}
+                />
               </div>
 
               {/* Action buttons */}
