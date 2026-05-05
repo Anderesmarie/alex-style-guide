@@ -91,7 +91,7 @@ export default function Today({ wardrobe: wardrobeProp, onNavigateToOutfit }: To
   const [recommendations, setRecommendations] = useState<ClothingItem[][]>([]);
   const [swipeResults, setSwipeResults] = useState<{ outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null }[] | null>(null);
   const [swipeComplete, setSwipeComplete] = useState(false);
-  const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
+  const wardrobe = wardrobeProp ?? [];
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [dailyCount, setDailyCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -109,14 +109,13 @@ export default function Today({ wardrobe: wardrobeProp, onNavigateToOutfit }: To
     const loadData = async () => {
       try {
         console.time('data-load');
-        const [w, p, c] = await Promise.all([
-          getWardrobe(),
+        const [p, c] = await Promise.all([
           getProfile(),
           getDailyCounter(),
         ]);
+        const w = wardrobeProp ?? await getWardrobe();
         loadBeautyProfile();
         console.timeEnd('data-load');
-        setWardrobe(w);
         setUserProfile(p);
         setDailyCount(c.date === today ? c.count : 0);
 
