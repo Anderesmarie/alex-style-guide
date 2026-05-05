@@ -315,11 +315,17 @@ const DELETE_REASONS = [
   { emoji: '🗑️', label: 'Autre' },
 ];
 
-export default function Dressing() {
+interface DressingProps {
+  wardrobe?: ClothingItem[];
+  onWardrobeChange?: () => void | Promise<void>;
+  onOutfitsChange?: () => void | Promise<void>;
+}
+
+export default function Dressing({ wardrobe: wardrobeProp, onWardrobeChange, onOutfitsChange }: DressingProps = {}) {
   const [tab, setTab] = useState<Tab>('dressing');
   const [view, setView] = useState<View>('grid');
-  const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const wardrobe = wardrobeProp ?? [];
+  const loading = false;
   const { analyze, loading: analyzing, error: analysisError, cleanImage, analysis } = useClothingAnalysis();
   const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
   const [filterCategory, setFilterCategory] = useState('');
@@ -359,12 +365,9 @@ export default function Dressing() {
   const [bgRemoved, setBgRemoved] = useState(false);
 
   const loadWardrobe = async () => {
-    const w = await getWardrobe();
-    setWardrobe(w);
-    setLoading(false);
+    await onWardrobeChange?.();
   };
 
-  useEffect(() => { loadWardrobe(); }, []);
 
   // Options de longueur selon la sous-catégorie / catégorie sélectionnée
   // Si aucune sous-catégorie n'est sélectionnée, on affiche les options par défaut
