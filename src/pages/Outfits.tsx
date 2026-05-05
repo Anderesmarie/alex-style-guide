@@ -17,16 +17,19 @@ type View = 'gallery' | 'createVisual' | 'createQuick' | 'createFree' | 'detail'
 type Tab = 'outfits' | 'calendar';
 
 interface OutfitsProps {
+  wardrobe?: ClothingItem[];
+  outfits?: Outfit[];
+  onOutfitsChange?: () => void | Promise<void>;
   initialOutfitId?: string | null;
   onConsumeInitialOutfitId?: () => void;
 }
 
-export default function Outfits({ initialOutfitId, onConsumeInitialOutfitId }: OutfitsProps = {}) {
+export default function Outfits({ wardrobe: wardrobeProp, outfits: outfitsProp, onOutfitsChange, initialOutfitId, onConsumeInitialOutfitId }: OutfitsProps = {}) {
   const [view, setView] = useState<View>('gallery');
   const [tab, setTab] = useState<Tab>('outfits');
-  const [outfits, setOutfits] = useState<Outfit[]>([]);
-  const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const wardrobe = wardrobeProp ?? [];
+  const outfits = outfitsProp ?? [];
+  const loading = false;
   const [selectedOutfit, setSelectedOutfit] = useState<Outfit | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [outfitName, setOutfitName] = useState('');
@@ -54,15 +57,7 @@ export default function Outfits({ initialOutfitId, onConsumeInitialOutfitId }: O
   });
   const [zonePicker, setZonePicker] = useState<ZoneKey | null>(null);
 
-  const loadData = async () => {
-    const [w, o] = await Promise.all([getWardrobe(), getOutfits()]);
-    setWardrobe(w);
-    setOutfits(o);
-    setLoading(false);
-  };
-
   useEffect(() => {
-    loadData();
     (async () => {
       const { data: u } = await supabase.auth.getUser();
       if (u.user) {
