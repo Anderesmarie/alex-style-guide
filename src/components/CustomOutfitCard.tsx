@@ -38,6 +38,13 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>(PIECE_TABS[0].label);
+
+  const filteredWardrobe = useMemo(() => {
+    const tab = PIECE_TABS.find(t => t.label === activeTab);
+    if (!tab) return wardrobe;
+    return wardrobe.filter(item => tab.categories.includes(item.category));
+  }, [wardrobe, activeTab]);
 
   const hasFilter = occasion || selectedItem || selectedStyle;
 
