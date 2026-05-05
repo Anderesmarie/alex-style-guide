@@ -12,6 +12,17 @@ const ALL_OCCASIONS = [
   'Travail', 'Sortie', 'Sport', 'Événement', 'Mariage', 'Voyage', 'Plage', 'Quotidien'
 ];
 
+const PIECE_TABS: { label: string; categories: string[] }[] = [
+  { label: 'Hauts', categories: ['Hauts'] },
+  { label: 'Pulls', categories: ['Pulls & sweats'] },
+  { label: 'Vestes', categories: ['Manteaux & vestes'] },
+  { label: 'Robes/Combinaison', categories: ['Robes & combinaisons'] },
+  { label: 'Bas', categories: ['Bas', 'Jupes'] },
+  { label: 'Chaussures', categories: ['Chaussures'] },
+  { label: 'Sacs', categories: ['Sacs'] },
+  { label: 'Accessoires', categories: ['Accessoires'] },
+];
+
 interface Props {
   wardrobe: ClothingItem[];
   temperature: number | null;
@@ -27,6 +38,13 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>(PIECE_TABS[0].label);
+
+  const filteredWardrobe = useMemo(() => {
+    const tab = PIECE_TABS.find(t => t.label === activeTab);
+    if (!tab) return wardrobe;
+    return wardrobe.filter(item => tab.categories.includes(item.category));
+  }, [wardrobe, activeTab]);
 
   const hasFilter = occasion || selectedItem || selectedStyle;
 
@@ -179,12 +197,30 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
       {/* Wardrobe item selector */}
       <div>
         <label className="text-xs font-medium text-muted-foreground mb-1 block">Autour de quelle pièce ?</label>
-        <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
-          {wardrobe.map(item => (
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 mb-2" style={{ scrollbarWidth: 'none' }}>
+          {PIECE_TABS.map(tab => (
+            <button
+              key={tab.label}
+              onClick={() => setActiveTab(tab.label)}
+              className="flex-shrink-0 text-xs py-1 px-2.5 rounded-full transition-all whitespace-nowrap"
+              style={
+                activeTab === tab.label
+                  ? { backgroundColor: ROSE_GOLD, color: 'white' }
+                  : { backgroundColor: '#F5F0EB', color: '#666' }
+              }
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <div className="grid grid-cols-3 gap-2 max-h-56 overflow-y-auto">
+          {filteredWardrobe.length === 0 ? (
+            <p className="col-span-3 text-xs text-muted-foreground italic text-center py-4">Aucune pièce dans cette catégorie.</p>
+          ) : filteredWardrobe.map(item => (
             <button
               key={item.id}
               onClick={() => setSelectedItem(selectedItem?.id === item.id ? null : item)}
-              className="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden transition-all"
+              className="aspect-square rounded-lg overflow-hidden transition-all"
               style={{
                 border: selectedItem?.id === item.id ? `2px solid ${ROSE_GOLD}` : '2px solid transparent',
                 opacity: selectedItem && selectedItem.id !== item.id ? 0.5 : 1,
