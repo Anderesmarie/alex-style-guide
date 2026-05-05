@@ -31,16 +31,24 @@ export default function AppShell({ onEditProfile, onLogout }: Props) {
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-1 px-5 pt-6 pb-24 no-scrollbar overflow-y-auto">
-        {activeTab === 'today' && <Today onNavigateToOutfit={goToOutfit} />}
-        {activeTab === 'dressing' && <Dressing />}
-        {activeTab === 'outfits' && (
+        <div style={{ display: activeTab === 'today' ? 'block' : 'none' }}>
+          <Today onNavigateToOutfit={goToOutfit} />
+        </div>
+        <div style={{ display: activeTab === 'dressing' ? 'block' : 'none' }}>
+          <Dressing />
+        </div>
+        <div style={{ display: activeTab === 'outfits' ? 'block' : 'none' }}>
           <Outfits
             initialOutfitId={pendingOutfitId}
             onConsumeInitialOutfitId={() => setPendingOutfitId(null)}
           />
-        )}
-        {activeTab === 'analysis' && <Analysis />}
-        {activeTab === 'profile' && <Profile onEditProfile={onEditProfile} onLogout={onLogout} />}
+        </div>
+        <div style={{ display: activeTab === 'analysis' ? 'block' : 'none' }}>
+          <Analysis />
+        </div>
+        <div style={{ display: activeTab === 'profile' ? 'block' : 'none' }}>
+          <Profile onEditProfile={onEditProfile} onLogout={onLogout} />
+        </div>
       </main>
 
       <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-card/95 backdrop-blur-md border-t border-border px-2 py-2 z-50">
