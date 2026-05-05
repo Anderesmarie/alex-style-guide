@@ -196,6 +196,7 @@ export async function getOutfits(): Promise<Outfit[]> {
 }
 
 export async function addOutfit(outfit: Outfit): Promise<void> {
+  cachedOutfits = null;
   const uid = await getUserId();
   await supabase.from('outfits').insert({
     id: outfit.id,
@@ -207,21 +208,25 @@ export async function addOutfit(outfit: Outfit): Promise<void> {
 }
 
 export async function setOutfitLiked(id: string, liked: boolean): Promise<void> {
+  cachedOutfits = null;
   const uid = await getUserId();
   await supabase.from('outfits').update({ liked }).eq('id', id).eq('user_id', uid);
 }
 
 export async function setOutfitLayoutData(id: string, layoutData: import('./types').OutfitLayoutData | null): Promise<void> {
+  cachedOutfits = null;
   const uid = await getUserId();
   await supabase.from('outfits').update({ layout_data: layoutData as any }).eq('id', id).eq('user_id', uid);
 }
 
 export async function deleteOutfit(id: string): Promise<void> {
+  cachedOutfits = null;
   const uid = await getUserId();
   await supabase.from('outfits').delete().eq('id', id).eq('user_id', uid);
 }
 
 export async function saveOutfits(outfits: Outfit[]): Promise<void> {
+  cachedOutfits = null;
   const uid = await getUserId();
   // Delete all then re-insert
   await supabase.from('outfits').delete().eq('user_id', uid);
