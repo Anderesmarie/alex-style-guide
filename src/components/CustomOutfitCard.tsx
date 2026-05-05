@@ -4,9 +4,26 @@ import { buildValidCustomOutfit } from '@/lib/recommendations';
 import { addOutfit, genId, saveLastOutfit } from '@/lib/storage';
 import { getStylingTips } from '@/lib/stylingTips';
 import { updateStreak } from '@/lib/streak';
+import { getCategoryByType } from '@/lib/categories';
 import { toast } from 'sonner';
 
 const ROSE_GOLD = '#C9956C';
+
+type EditorCatKey = 'haut' | 'bas' | 'chaussures' | 'sac' | 'accessoire';
+
+const EDITOR_CATS: { key: EditorCatKey; label: string; matches: string[] }[] = [
+  { key: 'haut', label: 'Haut', matches: ['Hauts', 'Pulls & sweats', 'Manteaux & vestes', 'Robes & combinaisons'] },
+  { key: 'bas', label: 'Bas', matches: ['Bas', 'Jupes'] },
+  { key: 'chaussures', label: 'Chaussures', matches: ['Chaussures'] },
+  { key: 'sac', label: 'Sac', matches: ['Sacs'] },
+  { key: 'accessoire', label: 'Accessoire', matches: ['Accessoires'] },
+];
+
+function itemMatchesCat(catKey: EditorCatKey, item: ClothingItem): boolean {
+  const cat = getCategoryByType(item.type)?.name || item.category || '';
+  const target = EDITOR_CATS.find(c => c.key === catKey);
+  return !!target && target.matches.includes(cat);
+}
 
 const ALL_OCCASIONS = [
   'Travail', 'Sortie', 'Sport', 'Événement', 'Mariage', 'Voyage', 'Plage', 'Quotidien'
@@ -39,6 +56,33 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [activeTab, setActiveTab] = useState<string>(PIECE_TABS[0].label);
+
+  // Editor state
+  const [editing, setEditing] = useState(false);
+  const [editPieces, setEditPieces] = useState<ClothingItem[]>([]);
+  const [pickerCat, setPickerCat] = useState<EditorCatKey | null>(null);
+
+  const openEditor = () => {
+    if (!generatedOutfit) return;
+    setEditPieces([...generatedOutfit]);
+    setPickerCat(null);
+    setEditing(true);
+  };
+  const closeEditor = () => { setEditing(false); setEditPieces([]); setPickerCat(null); };
+  const removePiece = (id: string) => setEditPieces(prev => prev.filter(p => p.id !== id));
+  const addPieceFromItem = (item: ClothingItem) => {
+    if (editPieces.some(p => p.id === item.id)) { setPickerCat(null); return; }
+    setEditPieces(prev => [...prev, item]);
+    setPickerCat(null);
+  };
+  const saveEditor = () => {
+    if (editPieces.length < 1) return;
+    setGeneratedOutfit([...editPieces]);
+    setSaved(false);
+    toast("Tenue mise à jour ✨", { style: { backgroundColor: ROSE_GOLD, color: '#FFFFFF', border: 'none' } });
+    closeEditor();
+  };
+  const editorFilteredWardrobe = pickerCat ? wardrobe.filter(w => itemMatchesCat(pickerCat, w)) : [];
 
   const filteredWardrobe = useMemo(() => {
     const tab = PIECE_TABS.find(t => t.label === activeTab);
@@ -151,6 +195,13 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
             >
               Réessayer 🔄
             </button>
+            <button
+              onClick={openEditor}
+              className="flex-1 py-2.5 rounded-lg font-medium text-sm active:scale-[0.98] transition-transform"
+              style={{ border: `1.5px solid ${ROSE_GOLD}`, color: ROSE_GOLD, backgroundColor: 'transparent' }}
+            >
+              ✏️ Modifier
+            </button>
             {saved ? (
               <div className="flex-1 py-2.5 rounded-lg font-medium text-sm text-center text-white" style={{ backgroundColor: '#2E7D32' }}>
                 ✅ Sauvegardée !
@@ -167,6 +218,102 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
             )}
           </div>
         </div>
+
+        {editing && (
+          <div className="fixed inset-0 z-50 bg-background overflow-y-auto">
+            <div className="p-4 pb-24 max-w-md mx-auto">
+              <div className="flex items-center gap-3 mb-4">
+                <button onClick={closeEditor} className="text-2xl" aria-label="Fermer">←</button>
+                <h1 className="text-xl font-serif font-bold">Modifier la tenue ✨</h1>
+              </div>
+
+              <div className="bg-card rounded-2xl card-shadow p-3 mb-4">
+                <p className="text-xs font-semibold text-muted-foreground mb-2">
+                  Pièces de la tenue ({editPieces.length})
+                </p>
+                {editPieces.length === 0 ? (
+                  <p className="text-center text-sm text-muted-foreground py-6">Ajoute des pièces ci-dessous ✨</p>
+                ) : (
+                  <div className="grid grid-cols-3 gap-2">
+                    {editPieces.map(item => (
+                      <div key={item.id} className="relative aspect-square rounded-lg overflow-hidden bg-muted">
+                        <img src={item.imageBase64} alt={item.type} className="w-full h-full object-contain" />
+                        <button
+                          onClick={() => removePiece(item.id)}
+                          aria-label="Retirer"
+                          className="absolute top-1 right-1 w-6 h-6 rounded-full bg-foreground/70 text-white text-xs font-bold flex items-center justify-center active:scale-90"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <p className="text-xs font-semibold text-muted-foreground mb-2">Ajouter une pièce</p>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {EDITOR_CATS.map(c => (
+                  <button
+                    key={c.key}
+                    onClick={() => setPickerCat(c.key)}
+                    className="px-4 py-2 rounded-full text-xs font-medium active:scale-95 transition-transform"
+                    style={{ border: `1px solid ${ROSE_GOLD}`, color: ROSE_GOLD, background: 'transparent' }}
+                  >
+                    + {c.label}
+                  </button>
+                ))}
+              </div>
+
+              {pickerCat && (
+                <div className="fixed inset-0 z-[60] flex items-end" onClick={() => setPickerCat(null)}>
+                  <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
+                  <div
+                    className="relative w-full bg-card rounded-t-3xl p-5 max-h-[70vh] overflow-y-auto animate-slide-in-bottom"
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <div className="w-12 h-1 bg-muted rounded-full mx-auto mb-4" />
+                    <h3 className="font-serif font-bold text-lg mb-3">
+                      {EDITOR_CATS.find(c => c.key === pickerCat)?.label}
+                    </h3>
+                    {editorFilteredWardrobe.length === 0 ? (
+                      <p className="text-center text-sm text-muted-foreground py-8">Aucune pièce dans cette catégorie</p>
+                    ) : (
+                      <div className="grid grid-cols-3 gap-2">
+                        {editorFilteredWardrobe.map(item => (
+                          <button
+                            key={item.id}
+                            onClick={() => addPieceFromItem(item)}
+                            className="aspect-square rounded-lg overflow-hidden bg-white active:scale-[0.96] transition-transform"
+                          >
+                            <img src={item.imageBase64} alt={item.type} className="w-full h-full object-contain" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-2 mt-6">
+                <button
+                  onClick={closeEditor}
+                  className="flex-1 py-3 rounded-xl bg-secondary text-secondary-foreground font-semibold text-sm active:scale-[0.98] transition-transform"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={saveEditor}
+                  disabled={editPieces.length < 1}
+                  className="flex-1 py-3 rounded-xl text-white font-semibold text-sm active:scale-[0.98] transition-transform disabled:opacity-50"
+                  style={{ backgroundColor: ROSE_GOLD }}
+                >
+                  Enregistrer
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
