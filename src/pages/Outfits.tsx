@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
-import { ClothingItem, Outfit, OutfitLayoutData } from '@/lib/types';
-import { getWardrobe, getOutfits, addOutfit, deleteOutfit, setOutfitLiked, setOutfitLayoutData, genId } from '@/lib/storage';
+import { useState, useEffect } from 'react';
+import { ClothingItem, Outfit } from '@/lib/types';
+import { getWardrobe, getOutfits, addOutfit, deleteOutfit, setOutfitLiked, genId } from '@/lib/storage';
 import { generateRecommendations } from '@/lib/recommendations';
 import { updateStreak } from '@/lib/streak';
 import { getCategoryByType } from '@/lib/categories';
@@ -9,27 +9,17 @@ import CalendarView from '@/components/CalendarView';
 import OutfitVisualLayout, { SlotKey, SlotMap, SLOT_CONFIG } from '@/components/OutfitVisualLayout';
 import OutfitGalleryCard from '@/components/OutfitGalleryCard';
 import OutfitFreeCanvas, { CHIPS, ChipKey, chipMatchesItem, defaultPositionForCategory, CANVAS_W, CANVAS_H } from '@/components/OutfitFreeCanvas';
-import OutfitLayout, { mapItemsToLayout } from '@/components/OutfitLayout';
-import OutfitDetailView from '@/components/OutfitDetailView';
 import { getCategoryByType as _getCat } from '@/lib/categories';
 
 type View = 'gallery' | 'createVisual' | 'createQuick' | 'createFree' | 'detail';
 type Tab = 'outfits' | 'calendar';
 
-interface OutfitsProps {
-  wardrobe?: ClothingItem[];
-  outfits?: Outfit[];
-  onOutfitsChange?: () => void | Promise<void>;
-  initialOutfitId?: string | null;
-  onConsumeInitialOutfitId?: () => void;
-}
-
-export default function Outfits({ wardrobe: wardrobeProp, outfits: outfitsProp, onOutfitsChange, initialOutfitId, onConsumeInitialOutfitId }: OutfitsProps = {}) {
+export default function Outfits() {
   const [view, setView] = useState<View>('gallery');
   const [tab, setTab] = useState<Tab>('outfits');
-  const wardrobe = wardrobeProp ?? [];
-  const outfits = outfitsProp ?? [];
-  const loading = false;
+  const [outfits, setOutfits] = useState<Outfit[]>([]);
+  const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedOutfit, setSelectedOutfit] = useState<Outfit | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [outfitName, setOutfitName] = useState('');
@@ -57,7 +47,15 @@ export default function Outfits({ wardrobe: wardrobeProp, outfits: outfitsProp, 
   });
   const [zonePicker, setZonePicker] = useState<ZoneKey | null>(null);
 
+  const loadData = async () => {
+    const [w, o] = await Promise.all([getWardrobe(), getOutfits()]);
+    setWardrobe(w);
+    setOutfits(o);
+    setLoading(false);
+  };
+
   useEffect(() => {
+    loadData();
     (async () => {
       const { data: u } = await supabase.auth.getUser();
       if (u.user) {
@@ -67,21 +65,9 @@ export default function Outfits({ wardrobe: wardrobeProp, outfits: outfitsProp, 
     })();
   }, []);
 
-  // Auto-open detail view when navigated from Today
-  useEffect(() => {
-    if (!initialOutfitId || outfits.length === 0) return;
-    const found = outfits.find(o => o.id === initialOutfitId);
-    if (found) {
-      setSelectedOutfit(found);
-      setView('detail');
-      setTab('outfits');
-      onConsumeInitialOutfitId?.();
-    }
-  }, [initialOutfitId, outfits, onConsumeInitialOutfitId]);
-
   const handleToggleLike = async (outfit: Outfit, next: boolean) => {
+    setOutfits(prev => prev.map(o => o.id === outfit.id ? { ...o, liked: next } : o));
     try { await setOutfitLiked(outfit.id, next); } catch {}
-    await onOutfitsChange?.();
   };
 
   const toggleItem = (id: string) => {
@@ -100,7 +86,8 @@ export default function Outfits({ wardrobe: wardrobeProp, outfits: outfitsProp, 
       createdAt: new Date().toISOString(),
     });
     updateStreak();
-    await onOutfitsChange?.();
+    const o = await getOutfits();
+    setOutfits(o);
     setSelectedIds(new Set());
     setOutfitName('');
     setView('gallery');
@@ -117,7 +104,8 @@ export default function Outfits({ wardrobe: wardrobeProp, outfits: outfitsProp, 
       createdAt: new Date().toISOString(),
     });
     updateStreak();
-    await onOutfitsChange?.();
+    const o = await getOutfits();
+    setOutfits(o);
     setSlots({});
     setOutfitName('');
     setView('gallery');
@@ -126,7 +114,8 @@ export default function Outfits({ wardrobe: wardrobeProp, outfits: outfitsProp, 
   const confirmDeleteOutfit = async () => {
     if (!deleteConfirm) return;
     await deleteOutfit(deleteConfirm.id);
-    await onOutfitsChange?.();
+    const o = await getOutfits();
+    setOutfits(o);
     setDeleteConfirm(null);
     setView('gallery');
   };
@@ -314,7 +303,8 @@ export default function Outfits({ wardrobe: wardrobeProp, outfits: outfitsProp, 
         },
       });
       updateStreak();
-      await onOutfitsChange?.();
+      const o = await getOutfits();
+      setOutfits(o);
       setFreePieces([]);
       setFreeSelectedId(null);
       setOutfitName('');
@@ -537,7 +527,8 @@ export default function Outfits({ wardrobe: wardrobeProp, outfits: outfitsProp, 
       createdAt: new Date().toISOString(),
     });
     updateStreak();
-    await onOutfitsChange?.();
+    const o = await getOutfits();
+    setOutfits(o);
     resetQuickZones();
     setView('gallery');
   };
@@ -714,17 +705,38 @@ export default function Outfits({ wardrobe: wardrobeProp, outfits: outfitsProp, 
 
   if (view === 'detail' && selectedOutfit) {
     const items = getItemsByIds(selectedOutfit.itemIds);
-    const layoutProps = mapItemsToLayout(items);
+    const detailSlots = buildSlotsFromItems(items);
     return (
-      <OutfitDetailView
-        key={selectedOutfit.id}
-        outfit={selectedOutfit}
-        layoutProps={layoutProps}
-        items={items}
-        onBack={() => setView('gallery')}
-        onDelete={() => setDeleteConfirm(selectedOutfit)}
-        renderDeleteDialog={renderDeleteDialog}
-      />
+      <div className="fade-enter pb-4">
+        {renderDeleteDialog()}
+        <div className="flex items-center gap-3 mb-5">
+          <button onClick={() => setView('gallery')} className="text-2xl">←</button>
+          <h1 className="text-xl font-serif font-bold">{selectedOutfit.name}</h1>
+        </div>
+
+        <OutfitVisualLayout slots={detailSlots} />
+
+        <div className="grid grid-cols-2 gap-2 mt-4 mb-4">
+          {items.map(item => (
+            <div key={item.id} className="rounded-lg overflow-hidden card-shadow">
+              <img src={item.imageBase64} alt={item.type} className="w-full aspect-square object-cover" />
+              <div className="p-2 bg-card">
+                <p className="text-xs font-medium">{item.type}</p>
+                <p className="text-xs text-muted-foreground">{item.color}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="text-sm text-muted-foreground mb-4">
+          Créée le {new Date(selectedOutfit.createdAt).toLocaleDateString('fr-FR')}
+        </p>
+        <button
+          onClick={() => setDeleteConfirm(selectedOutfit)}
+          className="w-full py-3 rounded-xl bg-destructive/15 text-destructive font-semibold active:scale-[0.98] transition-transform"
+        >
+          Supprimer cette tenue
+        </button>
+      </div>
     );
   }
 
@@ -896,28 +908,18 @@ export default function Outfits({ wardrobe: wardrobeProp, outfits: outfitsProp, 
           </button>
 
           {outfits.length > 0 ? (
-            <div className="space-y-4">
+            <div>
               {outfits.map(outfit => {
                 const items = getItemsByIds(outfit.itemIds);
-                const layoutProps = mapItemsToLayout(items);
                 return (
-                  <button
+                  <OutfitGalleryCard
                     key={outfit.id}
+                    outfit={outfit}
+                    items={items}
+                    pseudo={pseudo}
                     onClick={() => { setSelectedOutfit(outfit); setView('detail'); }}
-                    className="w-full bg-white rounded-2xl p-3 shadow-sm active:scale-[0.99] transition-transform"
-                  >
-                    <OutfitLayout
-                      {...layoutProps}
-                      readOnly={true}
-                      initialLayoutData={outfit.layoutData ?? null}
-                    />
-                    <p
-                      className="text-center mt-2"
-                      style={{ fontFamily: 'Playfair Display, serif', fontSize: 14, color: '#2C2C2C' }}
-                    >
-                      {outfit.name?.trim() || new Date(outfit.createdAt).toLocaleDateString('fr-FR')}
-                    </p>
-                  </button>
+                    onToggleLike={(next) => handleToggleLike(outfit, next)}
+                  />
                 );
               })}
             </div>

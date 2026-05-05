@@ -80,18 +80,13 @@ function getAvatarFromStorage(): AvatarData {
   } catch { return DEFAULT_AVATAR; }
 }
 
-interface TodayProps {
-  wardrobe?: ClothingItem[];
-  onNavigateToOutfit?: (outfitId: string) => void;
-}
-
-export default function Today({ wardrobe: wardrobeProp, onNavigateToOutfit }: TodayProps = {}) {
+export default function Today() {
   const [ws, setWs] = useState<WeatherState>({ status: 'loading' });
   const [cityInput, setCityInput] = useState('');
   const [recommendations, setRecommendations] = useState<ClothingItem[][]>([]);
   const [swipeResults, setSwipeResults] = useState<{ outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null }[] | null>(null);
   const [swipeComplete, setSwipeComplete] = useState(false);
-  const wardrobe = wardrobeProp ?? [];
+  const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [dailyCount, setDailyCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -109,13 +104,14 @@ export default function Today({ wardrobe: wardrobeProp, onNavigateToOutfit }: To
     const loadData = async () => {
       try {
         console.time('data-load');
-        const [p, c] = await Promise.all([
+        const [w, p, c] = await Promise.all([
+          getWardrobe(),
           getProfile(),
           getDailyCounter(),
         ]);
-        const w = wardrobeProp ?? await getWardrobe();
         loadBeautyProfile();
         console.timeEnd('data-load');
+        setWardrobe(w);
         setUserProfile(p);
         setDailyCount(c.date === today ? c.count : 0);
 
@@ -397,7 +393,6 @@ export default function Today({ wardrobe: wardrobeProp, onNavigateToOutfit }: To
             pseudo={pseudo}
             wardrobe={wardrobe}
             onResultsChange={handleResultsChange}
-            onNavigateToOutfit={onNavigateToOutfit}
           />
           {/* Custom outfit card — always after auto results */}
           <div className="mt-4">

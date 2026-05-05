@@ -4,8 +4,6 @@ import { supabase } from './supabase';
 
 // ---------- helpers ----------
 let cachedUserId: string | null | undefined = undefined;
-let cachedWardrobe: ClothingItem[] | null = null;
-let cachedOutfits: Outfit[] | null = null;
 
 async function getUserId(): Promise<string> {
   if (cachedUserId !== undefined) {
@@ -19,8 +17,8 @@ async function getUserId(): Promise<string> {
 }
 
 supabase.auth.onAuthStateChange((event) => {
-  if (event === 'SIGNED_OUT') { cachedUserId = null; cachedWardrobe = null; cachedOutfits = null; }
-  if (event === 'SIGNED_IN') { cachedUserId = undefined; cachedWardrobe = null; cachedOutfits = null; }
+  if (event === 'SIGNED_OUT') cachedUserId = null;
+  if (event === 'SIGNED_IN') cachedUserId = undefined;
 });
 
 export const genId = () => crypto.randomUUID();
@@ -107,11 +105,10 @@ export const savePalette = (palette: ColorPalette) => {
 
 // ---------- Wardrobe ----------
 export async function getWardrobe(): Promise<ClothingItem[]> {
-  if (cachedWardrobe) return cachedWardrobe;
   const uid = await getUserId();
   const { data } = await supabase.from('wardrobe').select('*').eq('user_id', uid).order('created_at', { ascending: false });
   if (!data) return [];
-  cachedWardrobe = data.map(row => ({
+  return data.map(row => ({
     id: row.id,
     imageBase64: row.image_base64,
     category: row.category || '',
@@ -125,11 +122,9 @@ export async function getWardrobe(): Promise<ClothingItem[]> {
     brand: row.brand || undefined,
     price: row.price || undefined,
   }));
-  return cachedWardrobe;
 }
 
 export async function addClothing(item: ClothingItem): Promise<void> {
-  cachedWardrobe = null;
   const uid = await getUserId();
   const { error } = await supabase.from('wardrobe').insert({
     id: item.id,
@@ -152,7 +147,6 @@ export async function addClothing(item: ClothingItem): Promise<void> {
 }
 
 export async function updateClothing(item: ClothingItem): Promise<void> {
-  cachedWardrobe = null;
   const uid = await getUserId();
   const { error } = await supabase.from('wardrobe').update({
     image_base64: item.imageBase64,
@@ -173,18 +167,16 @@ export async function updateClothing(item: ClothingItem): Promise<void> {
 }
 
 export async function deleteClothing(id: string): Promise<void> {
-  cachedWardrobe = null;
   const uid = await getUserId();
   await supabase.from('wardrobe').delete().eq('id', id).eq('user_id', uid);
 }
 
 // ---------- Outfits ----------
 export async function getOutfits(): Promise<Outfit[]> {
-  if (cachedOutfits) return cachedOutfits;
   const uid = await getUserId();
   const { data } = await supabase.from('outfits').select('*').eq('user_id', uid).order('created_at', { ascending: false });
   if (!data) return [];
-  cachedOutfits = data.map(row => ({
+  return data.map(row => ({
     id: row.id,
     name: row.name,
     itemIds: row.item_ids as string[],
@@ -192,11 +184,9 @@ export async function getOutfits(): Promise<Outfit[]> {
     liked: (row as any).liked ?? false,
     layoutData: ((row as any).layout_data ?? null) as Outfit['layoutData'],
   }));
-  return cachedOutfits;
 }
 
 export async function addOutfit(outfit: Outfit): Promise<void> {
-  cachedOutfits = null;
   const uid = await getUserId();
   await supabase.from('outfits').insert({
     id: outfit.id,
@@ -208,25 +198,16 @@ export async function addOutfit(outfit: Outfit): Promise<void> {
 }
 
 export async function setOutfitLiked(id: string, liked: boolean): Promise<void> {
-  cachedOutfits = null;
   const uid = await getUserId();
   await supabase.from('outfits').update({ liked }).eq('id', id).eq('user_id', uid);
 }
 
-export async function setOutfitLayoutData(id: string, layoutData: import('./types').OutfitLayoutData | null): Promise<void> {
-  cachedOutfits = null;
-  const uid = await getUserId();
-  await supabase.from('outfits').update({ layout_data: layoutData as any }).eq('id', id).eq('user_id', uid);
-}
-
 export async function deleteOutfit(id: string): Promise<void> {
-  cachedOutfits = null;
   const uid = await getUserId();
   await supabase.from('outfits').delete().eq('id', id).eq('user_id', uid);
 }
 
 export async function saveOutfits(outfits: Outfit[]): Promise<void> {
-  cachedOutfits = null;
   const uid = await getUserId();
   // Delete all then re-insert
   await supabase.from('outfits').delete().eq('user_id', uid);

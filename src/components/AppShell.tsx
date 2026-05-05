@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { TabId, ClothingItem, Outfit } from '@/lib/types';
-import { getWardrobe, getOutfits } from '@/lib/storage';
+import { useState } from 'react';
+import { TabId } from '@/lib/types';
 import Today from '@/pages/Today';
 import Dressing from '@/pages/Dressing';
 import Outfits from '@/pages/Outfits';
@@ -22,58 +21,15 @@ interface Props {
 
 export default function AppShell({ onEditProfile, onLogout }: Props) {
   const [activeTab, setActiveTab] = useState<TabId>('today');
-  const [pendingOutfitId, setPendingOutfitId] = useState<string | null>(null);
-  const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
-  const [outfits, setOutfits] = useState<Outfit[]>([]);
-
-  const refreshWardrobe = useCallback(async () => {
-    const w = await getWardrobe();
-    setWardrobe(w);
-  }, []);
-
-  const refreshOutfits = useCallback(async () => {
-    const o = await getOutfits();
-    setOutfits(o);
-  }, []);
-
-  useEffect(() => {
-    refreshWardrobe();
-    refreshOutfits();
-  }, [refreshWardrobe, refreshOutfits]);
-
-  const goToOutfit = useCallback((outfitId: string) => {
-    setPendingOutfitId(outfitId);
-    setActiveTab('outfits');
-  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-1 px-5 pt-6 pb-24 no-scrollbar overflow-y-auto">
-        <div style={{ display: activeTab === 'today' ? 'block' : 'none' }}>
-          <Today wardrobe={wardrobe} onNavigateToOutfit={goToOutfit} />
-        </div>
-        <div style={{ display: activeTab === 'dressing' ? 'block' : 'none' }}>
-          <Dressing
-            wardrobe={wardrobe}
-            onWardrobeChange={refreshWardrobe}
-            onOutfitsChange={refreshOutfits}
-          />
-        </div>
-        <div style={{ display: activeTab === 'outfits' ? 'block' : 'none' }}>
-          <Outfits
-            wardrobe={wardrobe}
-            outfits={outfits}
-            onOutfitsChange={refreshOutfits}
-            initialOutfitId={pendingOutfitId}
-            onConsumeInitialOutfitId={() => setPendingOutfitId(null)}
-          />
-        </div>
-        <div style={{ display: activeTab === 'analysis' ? 'block' : 'none' }}>
-          <Analysis />
-        </div>
-        <div style={{ display: activeTab === 'profile' ? 'block' : 'none' }}>
-          <Profile onEditProfile={onEditProfile} onLogout={onLogout} />
-        </div>
+        {activeTab === 'today' && <Today />}
+        {activeTab === 'dressing' && <Dressing />}
+        {activeTab === 'outfits' && <Outfits />}
+        {activeTab === 'analysis' && <Analysis />}
+        {activeTab === 'profile' && <Profile onEditProfile={onEditProfile} onLogout={onLogout} />}
       </main>
 
       <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-card/95 backdrop-blur-md border-t border-border px-2 py-2 z-50">
