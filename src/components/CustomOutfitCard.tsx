@@ -12,6 +12,17 @@ const ALL_OCCASIONS = [
   'Travail', 'Sortie', 'Sport', 'Événement', 'Mariage', 'Voyage', 'Plage', 'Quotidien'
 ];
 
+const PIECE_TABS: { label: string; categories: string[] }[] = [
+  { label: 'Hauts', categories: ['Hauts'] },
+  { label: 'Pulls', categories: ['Pulls & sweats'] },
+  { label: 'Vestes', categories: ['Manteaux & vestes'] },
+  { label: 'Robes/Combinaison', categories: ['Robes & combinaisons'] },
+  { label: 'Bas', categories: ['Bas', 'Jupes'] },
+  { label: 'Chaussures', categories: ['Chaussures'] },
+  { label: 'Sacs', categories: ['Sacs'] },
+  { label: 'Accessoires', categories: ['Accessoires'] },
+];
+
 interface Props {
   wardrobe: ClothingItem[];
   temperature: number | null;
