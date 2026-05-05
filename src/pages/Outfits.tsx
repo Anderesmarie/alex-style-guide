@@ -17,16 +17,19 @@ type View = 'gallery' | 'createVisual' | 'createQuick' | 'createFree' | 'detail'
 type Tab = 'outfits' | 'calendar';
 
 interface OutfitsProps {
+  wardrobe?: ClothingItem[];
+  outfits?: Outfit[];
+  onOutfitsChange?: () => void | Promise<void>;
   initialOutfitId?: string | null;
   onConsumeInitialOutfitId?: () => void;
 }
 
-export default function Outfits({ initialOutfitId, onConsumeInitialOutfitId }: OutfitsProps = {}) {
+export default function Outfits({ wardrobe: wardrobeProp, outfits: outfitsProp, onOutfitsChange, initialOutfitId, onConsumeInitialOutfitId }: OutfitsProps = {}) {
   const [view, setView] = useState<View>('gallery');
   const [tab, setTab] = useState<Tab>('outfits');
-  const [outfits, setOutfits] = useState<Outfit[]>([]);
-  const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const wardrobe = wardrobeProp ?? [];
+  const outfits = outfitsProp ?? [];
+  const loading = false;
   const [selectedOutfit, setSelectedOutfit] = useState<Outfit | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [outfitName, setOutfitName] = useState('');
@@ -54,15 +57,7 @@ export default function Outfits({ initialOutfitId, onConsumeInitialOutfitId }: O
   });
   const [zonePicker, setZonePicker] = useState<ZoneKey | null>(null);
 
-  const loadData = async () => {
-    const [w, o] = await Promise.all([getWardrobe(), getOutfits()]);
-    setWardrobe(w);
-    setOutfits(o);
-    setLoading(false);
-  };
-
   useEffect(() => {
-    loadData();
     (async () => {
       const { data: u } = await supabase.auth.getUser();
       if (u.user) {
@@ -85,8 +80,8 @@ export default function Outfits({ initialOutfitId, onConsumeInitialOutfitId }: O
   }, [initialOutfitId, outfits, onConsumeInitialOutfitId]);
 
   const handleToggleLike = async (outfit: Outfit, next: boolean) => {
-    setOutfits(prev => prev.map(o => o.id === outfit.id ? { ...o, liked: next } : o));
     try { await setOutfitLiked(outfit.id, next); } catch {}
+    await onOutfitsChange?.();
   };
 
   const toggleItem = (id: string) => {
@@ -105,8 +100,7 @@ export default function Outfits({ initialOutfitId, onConsumeInitialOutfitId }: O
       createdAt: new Date().toISOString(),
     });
     updateStreak();
-    const o = await getOutfits();
-    setOutfits(o);
+    await onOutfitsChange?.();
     setSelectedIds(new Set());
     setOutfitName('');
     setView('gallery');
@@ -123,8 +117,7 @@ export default function Outfits({ initialOutfitId, onConsumeInitialOutfitId }: O
       createdAt: new Date().toISOString(),
     });
     updateStreak();
-    const o = await getOutfits();
-    setOutfits(o);
+    await onOutfitsChange?.();
     setSlots({});
     setOutfitName('');
     setView('gallery');
@@ -133,8 +126,7 @@ export default function Outfits({ initialOutfitId, onConsumeInitialOutfitId }: O
   const confirmDeleteOutfit = async () => {
     if (!deleteConfirm) return;
     await deleteOutfit(deleteConfirm.id);
-    const o = await getOutfits();
-    setOutfits(o);
+    await onOutfitsChange?.();
     setDeleteConfirm(null);
     setView('gallery');
   };
@@ -322,8 +314,7 @@ export default function Outfits({ initialOutfitId, onConsumeInitialOutfitId }: O
         },
       });
       updateStreak();
-      const o = await getOutfits();
-      setOutfits(o);
+      await onOutfitsChange?.();
       setFreePieces([]);
       setFreeSelectedId(null);
       setOutfitName('');
@@ -546,8 +537,7 @@ export default function Outfits({ initialOutfitId, onConsumeInitialOutfitId }: O
       createdAt: new Date().toISOString(),
     });
     updateStreak();
-    const o = await getOutfits();
-    setOutfits(o);
+    await onOutfitsChange?.();
     resetQuickZones();
     setView('gallery');
   };

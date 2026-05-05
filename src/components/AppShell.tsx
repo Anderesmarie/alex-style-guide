@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
-import { TabId } from '@/lib/types';
+import { useState, useEffect, useCallback } from 'react';
+import { TabId, ClothingItem, Outfit } from '@/lib/types';
+import { getWardrobe, getOutfits } from '@/lib/storage';
 import Today from '@/pages/Today';
 import Dressing from '@/pages/Dressing';
 import Outfits from '@/pages/Outfits';
@@ -22,6 +23,23 @@ interface Props {
 export default function AppShell({ onEditProfile, onLogout }: Props) {
   const [activeTab, setActiveTab] = useState<TabId>('today');
   const [pendingOutfitId, setPendingOutfitId] = useState<string | null>(null);
+  const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
+  const [outfits, setOutfits] = useState<Outfit[]>([]);
+
+  const refreshWardrobe = useCallback(async () => {
+    const w = await getWardrobe();
+    setWardrobe(w);
+  }, []);
+
+  const refreshOutfits = useCallback(async () => {
+    const o = await getOutfits();
+    setOutfits(o);
+  }, []);
+
+  useEffect(() => {
+    refreshWardrobe();
+    refreshOutfits();
+  }, [refreshWardrobe, refreshOutfits]);
 
   const goToOutfit = useCallback((outfitId: string) => {
     setPendingOutfitId(outfitId);
@@ -32,13 +50,20 @@ export default function AppShell({ onEditProfile, onLogout }: Props) {
     <div className="flex flex-col min-h-screen">
       <main className="flex-1 px-5 pt-6 pb-24 no-scrollbar overflow-y-auto">
         <div style={{ display: activeTab === 'today' ? 'block' : 'none' }}>
-          <Today onNavigateToOutfit={goToOutfit} />
+          <Today wardrobe={wardrobe} onNavigateToOutfit={goToOutfit} />
         </div>
         <div style={{ display: activeTab === 'dressing' ? 'block' : 'none' }}>
-          <Dressing />
+          <Dressing
+            wardrobe={wardrobe}
+            onWardrobeChange={refreshWardrobe}
+            onOutfitsChange={refreshOutfits}
+          />
         </div>
         <div style={{ display: activeTab === 'outfits' ? 'block' : 'none' }}>
           <Outfits
+            wardrobe={wardrobe}
+            outfits={outfits}
+            onOutfitsChange={refreshOutfits}
             initialOutfitId={pendingOutfitId}
             onConsumeInitialOutfitId={() => setPendingOutfitId(null)}
           />
