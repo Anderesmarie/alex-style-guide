@@ -80,8 +80,8 @@ export default function Outfits({ wardrobe: wardrobeProp, outfits: outfitsProp, 
   }, [initialOutfitId, outfits, onConsumeInitialOutfitId]);
 
   const handleToggleLike = async (outfit: Outfit, next: boolean) => {
-    setOutfits(prev => prev.map(o => o.id === outfit.id ? { ...o, liked: next } : o));
     try { await setOutfitLiked(outfit.id, next); } catch {}
+    await onOutfitsChange?.();
   };
 
   const toggleItem = (id: string) => {
@@ -100,8 +100,7 @@ export default function Outfits({ wardrobe: wardrobeProp, outfits: outfitsProp, 
       createdAt: new Date().toISOString(),
     });
     updateStreak();
-    const o = await getOutfits();
-    setOutfits(o);
+    await onOutfitsChange?.();
     setSelectedIds(new Set());
     setOutfitName('');
     setView('gallery');
@@ -118,8 +117,7 @@ export default function Outfits({ wardrobe: wardrobeProp, outfits: outfitsProp, 
       createdAt: new Date().toISOString(),
     });
     updateStreak();
-    const o = await getOutfits();
-    setOutfits(o);
+    await onOutfitsChange?.();
     setSlots({});
     setOutfitName('');
     setView('gallery');
@@ -128,8 +126,7 @@ export default function Outfits({ wardrobe: wardrobeProp, outfits: outfitsProp, 
   const confirmDeleteOutfit = async () => {
     if (!deleteConfirm) return;
     await deleteOutfit(deleteConfirm.id);
-    const o = await getOutfits();
-    setOutfits(o);
+    await onOutfitsChange?.();
     setDeleteConfirm(null);
     setView('gallery');
   };
@@ -317,8 +314,7 @@ export default function Outfits({ wardrobe: wardrobeProp, outfits: outfitsProp, 
         },
       });
       updateStreak();
-      const o = await getOutfits();
-      setOutfits(o);
+      await onOutfitsChange?.();
       setFreePieces([]);
       setFreeSelectedId(null);
       setOutfitName('');
@@ -541,8 +537,7 @@ export default function Outfits({ wardrobe: wardrobeProp, outfits: outfitsProp, 
       createdAt: new Date().toISOString(),
     });
     updateStreak();
-    const o = await getOutfits();
-    setOutfits(o);
+    await onOutfitsChange?.();
     resetQuickZones();
     setView('gallery');
   };
