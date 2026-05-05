@@ -48,12 +48,12 @@ const TEMPLATES: Record<string, Partial<Record<SlotId, SlotDef>>> = {
   },
   // Template universel Robe/Combinaison + couches
   RH: {
-    H2:   { id:'H2',   x:20, y:34, w:16, h:16 },
-    H3:   { id:'H3',   x:0,  y:34, w:17, h:16 },
-    B:    { id:'B',    x:0,  y:2,  w:17, h:31 },
-    ACH:  { id:'ACH',  x:24, y:0,  w:12, h:11 },
-    ASAC: { id:'ASAC', x:24, y:11, w:12, h:11 },
-    A1:   { id:'A1',   x:24, y:22, w:12, h:11 },
+    H2:   { id:'H2',   x:19, y:16, w:17, h:16 },
+    H3:   { id:'H3',   x:19, y:34, w:17, h:16 },
+    B:    { id:'B',    x:0,  y:13, w:18, h:34 },
+    ACH:  { id:'ACH',  x:0,  y:0,  w:12, h:11 },
+    ASAC: { id:'ASAC', x:24, y:0,  w:12, h:11 },
+    A1:   { id:'A1',   x:12, y:0,  w:12, h:11 },
   },
 };
 
