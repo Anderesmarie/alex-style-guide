@@ -18,7 +18,7 @@ const ROWS = 50;
 const W = COLS * U; // 360
 const H = ROWS * U; // 500
 
-type SlotId = 'H1' | 'H2' | 'H3' | 'B' | 'ACH' | 'ASAC' | 'A1';
+type SlotId = 'H1' | 'H2' | 'H3' | 'B' | 'ACH' | 'ASAC' | 'A1' | 'A2' | 'A3';
 
 interface SlotDef {
   id: SlotId;
@@ -32,7 +32,7 @@ const SLOT_ICONS: Record<SlotId, string> = {
   H1: '👕', H2: '👕', H3: '👕',
   B: '👖',
   ACH: '👟', ASAC: '👜',
-  A1: '💍',
+  A1: '💍', A2: '💍', A3: '💍',
 };
 
 const TEMPLATES: Record<string, Partial<Record<SlotId, SlotDef>>> = {
@@ -45,6 +45,8 @@ const TEMPLATES: Record<string, Partial<Record<SlotId, SlotDef>>> = {
     ACH:  { id:'ACH',  x:0,  y:0,  w:11, h:10 },
     ASAC: { id:'ASAC', x:25, y:0,  w:11, h:10 },
     A1:   { id:'A1',   x:13, y:0,  w:11, h:10 },
+    A2:   { id:'A2',   x:8,  y:0,  w:11, h:10 },
+    A3:   { id:'A3',   x:18, y:0,  w:11, h:10 },
   },
   // Template universel Robe/Combinaison + couches
   RH: {
@@ -54,6 +56,8 @@ const TEMPLATES: Record<string, Partial<Record<SlotId, SlotDef>>> = {
     ACH:  { id:'ACH',  x:0,  y:0,  w:12, h:11 },
     ASAC: { id:'ASAC', x:24, y:0,  w:12, h:11 },
     A1:   { id:'A1',   x:12, y:0,  w:12, h:11 },
+    A2:   { id:'A2',   x:7,  y:0,  w:12, h:11 },
+    A3:   { id:'A3',   x:17, y:0,  w:12, h:11 },
   },
 };
 
@@ -90,8 +94,13 @@ function buildPieces(
   push('B', 'B', items.bas);
   push('ACH', 'ACH', items.chaussures);
   push('ASAC', 'ASAC', items.sac);
-  const firstAcc = items.couvre_chef || items.echarpe || items.ceinture || items.bijoux;
-  if (firstAcc) push('A1', 'A1', firstAcc);
+  // Accessoires → A1, A2, A3 dans l'ordre
+  const accessories = [items.couvre_chef, items.echarpe, items.ceinture, items.bijoux].filter(Boolean) as ClothingItem[];
+  const aSlots: SlotId[] = ['A1', 'A2', 'A3'];
+  accessories.forEach((item, i) => {
+    const sid = aSlots[i];
+    if (sid) push(`ACC_${i}`, sid, item);
+  });
   return list;
 }
 
@@ -117,7 +126,7 @@ const DEBUG_COLORS: Record<SlotId, string> = {
   H1: '#60a5fa', H2: '#93c5fd', H3: '#bfdbfe',
   B: '#34d399',
   ACH: '#fb923c', ASAC: '#f472b6',
-  A1: '#facc15',
+  A1: '#facc15', A2: '#fde68a', A3: '#fef9c3',
 };
 
 function DebugSlot({ def }: { def: SlotDef }) {
