@@ -636,6 +636,7 @@ export default function Dressing({ wardrobe: wardrobeProp, onWardrobeChange, onO
     });
 
     await saveOutfits(keptOutfits);
+    await onOutfitsChange?.();
 
     // Show toasts for removed outfits
     removedOutfitNames.forEach(name => {
