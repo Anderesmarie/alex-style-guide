@@ -32,20 +32,11 @@ export default function Outfits() {
 
   // Mode choice bottom sheet
   const [modeSheetOpen, setModeSheetOpen] = useState(false);
-  const [modeSheetState, setModeSheetState] = useState<'collapsed' | 'half' | 'full'>('collapsed');
 
   // Free-canvas state
   const [freePieces, setFreePieces] = useState<Array<{ itemId: string; item: ClothingItem; x: number; y: number; size: number; z: number }>>([]);
   const [freeSelectedId, setFreeSelectedId] = useState<string | null>(null);
   const [freeChip, setFreeChip] = useState<ChipKey | null>(null);
-
-  // Quick-zones state (createQuick view)
-  type ZoneKey = 'jacket' | 'belt' | 'top' | 'bottom' | 'shoes' | 'pull' | 'bag' | 'jewelry' | 'accessory';
-  const [zones, setZones] = useState<Record<ZoneKey, string | null>>({
-    jacket: null, belt: null, top: null, bottom: null, shoes: null,
-    pull: null, bag: null, jewelry: null, accessory: null,
-  });
-  const [zonePicker, setZonePicker] = useState<ZoneKey | null>(null);
 
   const loadData = async () => {
     const [w, o] = await Promise.all([getWardrobe(), getOutfits()]);
@@ -73,7 +64,7 @@ export default function Outfits() {
   const toggleItem = (id: string) => {
     const next = new Set(selectedIds);
     if (next.has(id)) next.delete(id);
-    else if (next.size < 8) next.add(id);
+    else if (next.size < 5) next.add(id);
     setSelectedIds(next);
   };
 
@@ -472,236 +463,77 @@ export default function Outfits() {
     );
   }
 
-  // ----- Quick-zones helpers -----
-  const ZONE_META: Record<ZoneKey, { label: string; emoji: string; cats: string[]; types?: string[] }> = {
-    jacket: { label: 'Veste / Manteau', emoji: '🧥', cats: ['Manteaux & vestes'] },
-    belt: { label: 'Ceinture', emoji: '👔', cats: ['Accessoires'], types: ['Ceinture'] },
-    top: { label: 'Haut', emoji: '👕', cats: ['Hauts', 'Robes & combinaisons'] },
-    bottom: { label: 'Bas', emoji: '👖', cats: ['Bas', 'Jupes'] },
-    shoes: { label: 'Chaussures', emoji: '👟', cats: ['Chaussures'] },
-    pull: { label: 'Pull', emoji: '🧶', cats: ['Pulls & sweats'] },
-    bag: { label: 'Sac', emoji: '👜', cats: ['Sacs'] },
-    jewelry: { label: 'Bijoux', emoji: '💍', cats: ['Accessoires'], types: ['Bijoux'] },
-    accessory: { label: 'Accessoire', emoji: '🧢', cats: ['Accessoires'] },
-  };
-
-  const zoneFilteredItems = (zk: ZoneKey): ClothingItem[] => {
-    const meta = ZONE_META[zk];
-    return wardrobe.filter(it => {
-      const cat = getCategoryByType(it.type)?.name || it.category || '';
-      if (!meta.cats.includes(cat)) return false;
-      if (meta.types && !meta.types.includes(it.type)) return false;
-      if (zk === 'accessory' && (it.type === 'Ceinture' || it.type === 'Bijoux')) return false;
-      return true;
-    });
-  };
-
-  const filledZoneCount = Object.values(zones).filter(Boolean).length;
-
-  const assignToZone = (item: ClothingItem) => {
-    if (!zonePicker) return;
-    if (filledZoneCount >= 8 && !zones[zonePicker]) return;
-    setZones(prev => ({ ...prev, [zonePicker]: item.id }));
-    setZonePicker(null);
-  };
-
-  const clearZone = (zk: ZoneKey) => {
-    setZones(prev => ({ ...prev, [zk]: null }));
-  };
-
-  const resetQuickZones = () => {
-    setZones({
-      jacket: null, belt: null, top: null, bottom: null, shoes: null,
-      pull: null, bag: null, jewelry: null, accessory: null,
-    });
-    setOutfitName('');
-  };
-
-  const handleSaveZones = async () => {
-    const ids = (Object.values(zones).filter(Boolean) as string[]);
-    if (ids.length < 2 || !outfitName.trim()) return;
-    await addOutfit({
-      id: genId(),
-      name: outfitName.trim(),
-      itemIds: ids,
-      createdAt: new Date().toISOString(),
-    });
-    updateStreak();
-    const o = await getOutfits();
-    setOutfits(o);
-    resetQuickZones();
-    setView('gallery');
-  };
-
-  const Zone = ({ zk, h }: { zk: ZoneKey; h: number }) => {
-    const id = zones[zk];
-    const item = id ? wardrobe.find(i => i.id === id) : null;
-    const meta = ZONE_META[zk];
-    return (
-      <div
-        style={{ width: '100%', height: h, position: 'relative' }}
-        onClick={() => { if (!item) setZonePicker(zk); }}
-        className={!item ? 'cursor-pointer active:scale-[0.98] transition-transform' : ''}
-      >
-        {item ? (
-          <>
-            <img
-              src={item.imageBase64}
-              alt={item.type}
-              style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-            />
-            <button
-              onClick={(e) => { e.stopPropagation(); clearZone(zk); }}
-              aria-label="Retirer"
-              style={{
-                position: 'absolute', top: 2, right: 2,
-                width: 24, height: 24, borderRadius: 999,
-                background: 'rgba(255,255,255,0.9)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 12, lineHeight: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
-              }}
-            >
-              🗑️
-            </button>
-          </>
-        ) : (
-          <div
-            style={{
-              width: '100%', height: '100%',
-              background: '#F5F5F5', borderRadius: 8,
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center', gap: 4,
-            }}
-          >
-            <span style={{ fontSize: Math.min(28, h * 0.35), opacity: 0.45 }}>{meta.emoji}</span>
-            <div
-              style={{
-                width: 26, height: 26, borderRadius: 999,
-                background: '#C9956C', color: '#fff',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 18, fontWeight: 600, lineHeight: 1,
-              }}
-            >
-              +
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderQuickZones = () => {
-    const canSave = filledZoneCount >= 2 && !!outfitName.trim();
-    const pickerItems = zonePicker ? zoneFilteredItems(zonePicker) : [];
+  if (view === 'createQuick') {
+    const selected = getItemsByIds(Array.from(selectedIds));
     return (
       <div className="fade-enter pb-4 no-scrollbar overflow-y-auto">
-        <div className="flex items-center gap-3 mb-4">
-          <button
-            onClick={() => { resetQuickZones(); setView('gallery'); setModeSheetOpen(true); }}
-            className="text-2xl"
-          >
-            ←
-          </button>
-          <h1 className="text-xl font-serif font-bold">Compose ta tenue</h1>
+        <div className="flex items-center gap-3 mb-5">
+          <button onClick={() => { setSelectedIds(new Set()); setView('gallery'); setModeSheetOpen(true); }} className="text-2xl">←</button>
+          <h1 className="text-xl font-serif font-bold">Sélection rapide</h1>
         </div>
 
-        <div
-          style={{
-            width: '100%', height: 480,
-            background: '#FFFFFF', borderRadius: 16,
-            boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-            padding: 12, marginBottom: 16,
-          }}
-        >
-          <div className="flex items-start" style={{ gap: 6, width: '100%', height: '100%' }}>
-            <div style={{ flex: '0 0 30%', display: 'flex', flexDirection: 'column', gap: 6, height: '100%' }}>
-              <Zone zk="jacket" h={300} />
-              <Zone zk="belt" h={70} />
-            </div>
-            <div style={{ flex: '0 0 40%', display: 'flex', flexDirection: 'column', gap: 6, height: '100%' }}>
-              <Zone zk="top" h={170} />
-              <Zone zk="bottom" h={180} />
-              <Zone zk="shoes" h={110} />
-            </div>
-            <div style={{ flex: '0 0 30%', display: 'flex', flexDirection: 'column', gap: 6, height: '100%' }}>
-              <Zone zk="pull" h={150} />
-              <Zone zk="bag" h={120} />
-              <Zone zk="jewelry" h={70} />
-              <Zone zk="accessory" h={70} />
-            </div>
+        {selected.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto no-scrollbar mb-4 pb-1">
+            {selected.map(item => (
+              <img key={item.id} src={item.imageBase64} alt={item.type}
+                className="w-16 h-16 rounded-lg object-cover flex-shrink-0 ring-2 ring-primary" />
+            ))}
           </div>
-        </div>
+        )}
 
-        <p className="text-sm text-muted-foreground mb-3 text-center">
-          {filledZoneCount} pièce{filledZoneCount > 1 ? 's' : ''} ajoutée{filledZoneCount > 1 ? 's' : ''} · min 2, max 8
+        <p className="text-sm text-muted-foreground mb-3">
+          Sélectionne 2 à 5 pièces ({selectedIds.size}/5)
         </p>
 
-        <input
-          type="text"
-          value={outfitName}
-          onChange={e => setOutfitName(e.target.value)}
-          placeholder="Nom de la tenue (ex: Bureau lundi)"
-          className="w-full px-4 py-3 rounded-lg bg-card card-shadow outline-none focus:ring-2 focus:ring-primary/30 mb-4"
-        />
-
-        <button
-          onClick={handleSaveZones}
-          disabled={!canSave}
-          className={`w-full py-3.5 rounded-xl font-semibold transition-all duration-200 ${
-            canSave
-              ? 'bg-primary text-primary-foreground shadow-lg active:scale-[0.98]'
-              : 'bg-muted text-muted-foreground'
-          }`}
-        >
-          Sauvegarder
+        <button onClick={handleGenerate}
+          className="w-full py-2.5 rounded-lg bg-secondary text-secondary-foreground font-medium text-sm mb-4 active:scale-[0.98] transition-transform">
+          ✨ Générer pour aujourd'hui
         </button>
 
-        {zonePicker && (
-          <div className="fixed inset-0 z-50 flex items-end" onClick={() => setZonePicker(null)}>
-            <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
-            <div
-              onClick={e => e.stopPropagation()}
-              className="relative w-full bg-card rounded-t-2xl p-4 max-h-[80vh] overflow-y-auto"
+        <div className="grid grid-cols-3 gap-2 mb-5">
+          {wardrobe.map(item => (
+            <button
+              key={item.id}
+              onClick={() => toggleItem(item.id)}
+              className={`aspect-square rounded-lg overflow-hidden relative active:scale-[0.96] transition-transform ${
+                selectedIds.has(item.id) ? 'ring-3 ring-primary' : ''
+              }`}
             >
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-serif font-bold text-lg">
-                  {ZONE_META[zonePicker].emoji} {ZONE_META[zonePicker].label}
-                </h3>
-                <button onClick={() => setZonePicker(null)} className="text-2xl leading-none">×</button>
-              </div>
-              {pickerItems.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-6 text-center">
-                  Aucune pièce dans cette catégorie.
-                </p>
-              ) : (
-                <div className="grid grid-cols-3 gap-2 pb-4">
-                  {pickerItems.map(item => (
-                    <button
-                      key={item.id}
-                      onClick={() => assignToZone(item)}
-                      className="aspect-square rounded-lg overflow-hidden bg-white card-shadow active:scale-[0.96] transition-transform"
-                    >
-                      <img
-                        src={item.imageBase64}
-                        alt={item.type}
-                        className="w-full h-full"
-                        style={{ objectFit: 'contain' }}
-                      />
-                    </button>
-                  ))}
+              <img src={item.imageBase64} alt={item.type} className="w-full h-full object-cover" />
+              {selectedIds.has(item.id) && (
+                <div className="absolute top-1 right-1 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
+                  ✓
                 </div>
               )}
-            </div>
-          </div>
+            </button>
+          ))}
+        </div>
+
+        {selectedIds.size >= 2 && (
+          <>
+            <input
+              type="text"
+              value={outfitName}
+              onChange={e => setOutfitName(e.target.value)}
+              placeholder="Nom de la tenue (ex: Bureau lundi)"
+              className="w-full px-4 py-3 rounded-lg bg-card card-shadow outline-none focus:ring-2 focus:ring-primary/30 mb-4"
+            />
+            <button
+              onClick={handleSaveQuick}
+              disabled={!outfitName.trim()}
+              className={`w-full py-3.5 rounded-xl font-semibold transition-all duration-200 ${
+                outfitName.trim()
+                  ? 'bg-primary text-primary-foreground shadow-lg active:scale-[0.98]'
+                  : 'bg-muted text-muted-foreground'
+              }`}
+            >
+              Sauvegarder la tenue
+            </button>
+          </>
         )}
       </div>
     );
-  };
-
-  if (view === 'createQuick') {
-    return renderQuickZones();
   }
-
 
   if (view === 'detail' && selectedOutfit) {
     const items = getItemsByIds(selectedOutfit.itemIds);
@@ -740,123 +572,58 @@ export default function Outfits() {
     );
   }
 
-  // Mode choice bottom sheet (shared) — draggable: collapsed / half / full
+  // Mode choice bottom sheet (shared)
   const renderModeSheet = () => {
     if (!modeSheetOpen) return null;
-
-    const heightVh = modeSheetState === 'full' ? 95 : modeSheetState === 'half' ? 60 : 30;
-
-    const cycleUp = () => {
-      setModeSheetState(s => s === 'collapsed' ? 'half' : s === 'half' ? 'full' : 'full');
-    };
-    const cycleDown = () => {
-      setModeSheetState(s => s === 'full' ? 'half' : s === 'half' ? 'collapsed' : 'collapsed');
-    };
-
-    // Touch / pointer drag on the handle
-    let startY: number | null = null;
-    const onPointerDown = (e: React.PointerEvent) => {
-      startY = e.clientY;
-      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    };
-    const onPointerUp = (e: React.PointerEvent) => {
-      if (startY === null) return;
-      const dy = e.clientY - startY;
-      startY = null;
-      if (dy < -30) cycleUp();
-      else if (dy > 30) cycleDown();
-    };
-
-    const closeSheet = () => {
-      setModeSheetOpen(false);
-      setModeSheetState('collapsed');
-    };
-
-    const openCreate = (mode: 'quick' | 'free') => {
-      closeSheet();
-      if (mode === 'quick') {
-        setSlots({}); setSelectedIds(new Set()); setOutfitName('');
-        setView('createQuick');
-      } else {
-        setFreePieces([]); setFreeSelectedId(null); setOutfitName('');
-        setView('createFree');
-      }
-    };
-
     return (
-      <div className="fixed inset-0 z-50 flex items-end" onClick={closeSheet}>
+      <div className="fixed inset-0 z-50 flex items-end" onClick={() => setModeSheetOpen(false)}>
         <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
         <div
-          className="relative w-full bg-card rounded-t-3xl flex flex-col animate-slide-in-bottom transition-[height] duration-300 ease-out"
-          style={{ height: `${heightVh}vh` }}
+          className="relative w-full bg-card rounded-t-3xl p-5 animate-slide-in-bottom"
           onClick={e => e.stopPropagation()}
         >
-          {/* Draggable handle */}
-          <div
-            className="pt-3 pb-2 cursor-grab active:cursor-grabbing select-none touch-none"
-            onPointerDown={onPointerDown}
-            onPointerUp={onPointerUp}
-            onClick={cycleUp}
-          >
-            <div className="w-12 h-1.5 bg-muted rounded-full mx-auto" />
-          </div>
+          <div className="w-12 h-1 bg-muted rounded-full mx-auto mb-4" />
+          <h3 className="font-serif font-bold text-lg mb-1">Créer une tenue</h3>
+          <p className="text-xs text-muted-foreground mb-4">Choisis ton mode de création</p>
 
-          {/* Header */}
-          <div className="px-5 pb-3">
-            <h3 className="font-serif font-bold text-lg mb-1">Créer une tenue</h3>
-            <p className="text-xs text-muted-foreground">Choisis ton mode de création</p>
-          </div>
-
-          {/* Scrollable content */}
-          <div className="flex-1 overflow-y-auto px-5 pb-6">
-            <div className="space-y-3">
-              <button
-                onClick={() => openCreate('quick')}
-                className="w-full bg-secondary/40 rounded-2xl p-4 text-left active:scale-[0.98] transition-transform"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-card flex items-center justify-center text-2xl flex-shrink-0">
-                    ▦
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-serif font-bold text-base">Layout guidé</p>
-                    <p className="text-xs text-muted-foreground">Sélection rapide de pièces</p>
-                  </div>
+          <div className="space-y-3">
+            <button
+              onClick={() => {
+                setModeSheetOpen(false);
+                setSlots({}); setSelectedIds(new Set()); setOutfitName('');
+                setView('createQuick');
+              }}
+              className="w-full bg-secondary/40 rounded-2xl p-4 text-left active:scale-[0.98] transition-transform"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-card flex items-center justify-center text-2xl flex-shrink-0">
+                  ▦
                 </div>
-              </button>
-
-              <button
-                onClick={() => openCreate('free')}
-                className="w-full bg-secondary/40 rounded-2xl p-4 text-left active:scale-[0.98] transition-transform"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-card flex items-center justify-center text-2xl flex-shrink-0">
-                    ✨
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-serif font-bold text-base">Disposition libre</p>
-                    <p className="text-xs text-muted-foreground">Compose en drag & drop sur un canvas blanc</p>
-                  </div>
+                <div className="flex-1">
+                  <p className="font-serif font-bold text-base">Layout guidé</p>
+                  <p className="text-xs text-muted-foreground">Sélection rapide de pièces</p>
                 </div>
-              </button>
+              </div>
+            </button>
 
-              {/* Quick wardrobe preview — visible when sheet is expanded */}
-              {(modeSheetState === 'half' || modeSheetState === 'full') && wardrobe.length > 0 && (
-                <div className="pt-4">
-                  <p className="text-xs text-muted-foreground mb-2 font-medium">Aperçu de ton dressing</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {wardrobe.map(item => (
-                      <div
-                        key={item.id}
-                        className="aspect-square rounded-lg overflow-hidden bg-secondary/30"
-                      >
-                        <img src={item.imageBase64} alt={item.type} className="w-full h-full object-contain" />
-                      </div>
-                    ))}
-                  </div>
+            <button
+              onClick={() => {
+                setModeSheetOpen(false);
+                setFreePieces([]); setFreeSelectedId(null); setOutfitName('');
+                setView('createFree');
+              }}
+              className="w-full bg-secondary/40 rounded-2xl p-4 text-left active:scale-[0.98] transition-transform"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-card flex items-center justify-center text-2xl flex-shrink-0">
+                  ✨
                 </div>
-              )}
-            </div>
+                <div className="flex-1">
+                  <p className="font-serif font-bold text-base">Disposition libre</p>
+                  <p className="text-xs text-muted-foreground">Compose en drag & drop sur un canvas blanc</p>
+                </div>
+              </div>
+            </button>
           </div>
         </div>
       </div>

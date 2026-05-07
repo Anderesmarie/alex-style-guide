@@ -191,154 +191,89 @@ export default function OutfitGalleryCard({ outfit, items, pseudo, onClick, onTo
             </div>
           ) : (
             (() => {
-              // "Invisible mannequin" composition — centered, Pinterest flat-lay style.
-              // Each piece is positioned by its CENTER (left = center X) using translateX(-50%).
+              // Absolute percentage-based positions inside a 380px-tall stage
               type Slot = {
                 key: string;
                 item: ClothingItem;
-                left: string;
                 top: string;
+                left: string;
                 width: string;
                 maxHeight: number;
                 z: number;
-                rotate: number;
               };
-
-              const mannequinShadow = 'drop-shadow(0 8px 12px rgba(0,0,0,0.14))';
               const slots: Slot[] = [];
-              const isDress = !!dressPiece;
-              const hasTorso = !!(topPiece || pullPiece || isDress);
-              const hasBottom = !!bottomPiece;
 
-              // ---- VERTICAL CHAIN: torso -> bottom -> shoes (no gaps) ----
-              // Torso starts at TOP_START, each next piece starts where previous ends - OVERLAP
-              const TORSO_TOP = 6;          // %
-              const TORSO_HEIGHT = 26;      // % (top/pull)
-              const DRESS_HEIGHT = 50;      // %
-              const BOTTOM_HEIGHT = 30;     // %
-              const SHOES_HEIGHT = 16;      // %
-              const OVERLAP = 5;            // % overlap between pieces
-
-              let cursor = TORSO_TOP;
-
-              // OUTERWEAR (manteau) — derrière le haut, centré, légère rotation
               if (jacketPiece) {
+                const long = isLongOuterwear(jacketPiece);
                 slots.push({
-                  key: 'jacket', item: jacketPiece,
-                  left: '50%',
-                  top: `${TORSO_TOP - 1}%`,
-                  width: '46%',
-                  maxHeight: 240, z: 2, rotate: -3,
+                  key: 'jacket',
+                  item: jacketPiece,
+                  top: '4%',
+                  left: '2%',
+                  width: long ? '38%' : '35%',
+                  maxHeight: long ? 280 : 160,
+                  z: 2,
                 });
               }
-
-              // TOP / PULL / DRESS — devant, centré
-              if (isDress) {
-                slots.push({
-                  key: 'dress', item: dressPiece!,
-                  left: '50%', top: `${cursor}%`, width: '42%',
-                  maxHeight: 320, z: 4, rotate: 0,
-                });
-                cursor = cursor + DRESS_HEIGHT - OVERLAP;
-              } else {
-                if (pullPiece) {
-                  slots.push({
-                    key: 'pull', item: pullPiece,
-                    left: '50%', top: `${cursor}%`, width: '38%',
-                    maxHeight: 170, z: 3, rotate: 0,
-                  });
-                }
-                if (topPiece) {
-                  slots.push({
-                    key: 'top', item: topPiece,
-                    left: '50%', top: `${cursor}%`, width: '38%',
-                    maxHeight: 170, z: 4, rotate: 0,
-                  });
-                }
-                if (topPiece || pullPiece) {
-                  cursor = cursor + TORSO_HEIGHT - OVERLAP;
-                }
+              if (pullPiece) {
+                slots.push({ key: 'pull', item: pullPiece, top: '4%', left: '62%', width: '36%', maxHeight: 160, z: 2 });
               }
-
-              // BOTTOM — collé au haut
-              if (bottomPiece && !isDress) {
+              if (topPiece) {
                 slots.push({
-                  key: 'bottom', item: bottomPiece,
-                  left: '50%', top: `${cursor}%`, width: '36%',
-                  maxHeight: 230, z: 3, rotate: 0,
+                  key: 'top',
+                  item: topPiece,
+                  top: '6%',
+                  left: dressPiece ? '28%' : '30%',
+                  width: dressPiece ? '44%' : '40%',
+                  maxHeight: dressPiece ? 320 : 180,
+                  z: 3,
                 });
-                cursor = cursor + BOTTOM_HEIGHT - OVERLAP;
               }
-
-              // SHOES — collées au bas (ou remontées si pas de bas)
+              if (bottomPiece) {
+                slots.push({ key: 'bottom', item: bottomPiece, top: '44%', left: '22%', width: '44%', maxHeight: 200, z: 3 });
+              }
               if (shoesPiece) {
-                // si rien au-dessus, on remonte
-                let shoesTop = hasTorso || hasBottom ? cursor + 2 : 35;
-                // jamais en dehors du cadre
-                if (shoesTop + SHOES_HEIGHT > 92) shoesTop = 92 - SHOES_HEIGHT;
-                slots.push({
-                  key: 'shoes', item: shoesPiece,
-                  left: '50%', top: `${shoesTop}%`,
-                  width: '32%', maxHeight: 120, z: 5, rotate: 0,
-                });
-              }
-
-              // ---- ACCESSOIRES (côtés uniquement) ----
-              if (bagPiece) {
-                slots.push({
-                  key: 'bag', item: bagPiece,
-                  left: '82%', top: '46%', width: '20%',
-                  maxHeight: 120, z: 6, rotate: 4,
-                });
+                slots.push({ key: 'shoes', item: shoesPiece, top: '78%', left: '20%', width: '42%', maxHeight: 110, z: 4 });
               }
               if (beltPiece) {
-                slots.push({
-                  key: 'belt', item: beltPiece,
-                  left: '50%', top: '40%', width: '24%',
-                  maxHeight: 40, z: 6, rotate: 0,
-                });
+                slots.push({ key: 'belt', item: beltPiece, top: '40%', left: '4%', width: '28%', maxHeight: 70, z: 4 });
               }
-              const accs: ClothingItem[] = [];
-              if (jewelryPiece) accs.push(jewelryPiece);
-              if (accessoryPlusPiece) accs.push(accessoryPlusPiece);
-              accs.forEach((acc, i) => {
-                slots.push({
-                  key: `acc-${i}`, item: acc,
-                  left: '15%',
-                  top: `${18 + i * 14}%`,
-                  width: '14%', maxHeight: 80, z: 6, rotate: -6,
-                });
-              });
+              if (bagPiece) {
+                slots.push({ key: 'bag', item: bagPiece, top: '50%', left: '70%', width: '28%', maxHeight: 130, z: 4 });
+              }
+              if (jewelryPiece) {
+                slots.push({ key: 'jewelry', item: jewelryPiece, top: '78%', left: '72%', width: '24%', maxHeight: 70, z: 5 });
+              }
+              if (accessoryPlusPiece) {
+                slots.push({ key: 'acc', item: accessoryPlusPiece, top: '88%', left: '72%', width: '24%', maxHeight: 70, z: 5 });
+              }
 
               return (
-                <div
-                  style={{
-                    position: 'relative',
-                    width: '100%',
-                    height: 380,
-                    overflow: 'hidden',
-                  }}
-                >
+                <div style={{ position: 'relative', width: '100%', height: 380 }}>
                   {slots.map(s => (
-                    <img
+                    <div
                       key={s.key}
-                      src={s.item.imageBase64}
-                      alt={s.item.type}
                       style={{
                         position: 'absolute',
-                        left: s.left,
                         top: s.top,
+                        left: s.left,
                         width: s.width,
-                        maxWidth: '100%',
                         maxHeight: s.maxHeight,
-                        objectFit: 'contain',
                         zIndex: s.z,
-                        transform: `translateX(-50%) rotate(${s.rotate}deg)`,
-                        filter: mannequinShadow,
-                        display: 'block',
-                        pointerEvents: 'none',
                       }}
-                    />
+                    >
+                      <img
+                        src={s.item.imageBase64}
+                        alt={s.item.type}
+                        style={{
+                          width: '100%',
+                          maxHeight: s.maxHeight,
+                          objectFit: 'contain',
+                          filter: dropShadow,
+                          display: 'block',
+                        }}
+                      />
+                    </div>
                   ))}
                 </div>
               );
