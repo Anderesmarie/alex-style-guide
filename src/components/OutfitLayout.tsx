@@ -16,46 +16,47 @@ const GRID_W = 36;
 const GRID_H = 50;
 
 export type SlotName = 'H1' | 'H2' | 'H3' | 'B' | 'ACH' | 'ASAC' | 'A1';
-type Cell = { x: number; y: number; w: number; h: number };
+type Cell = { id: string; x: number; y: number; w: number; h: number };
 
-// Template HB (haut + bas)
-const TEMPLATE_HB: Partial<Record<SlotName, Cell>> = {
-  H1:   { x: 0,  y: 34, w: 16, h: 16 }, // Haut base
-  H2:   { x: 21, y: 15, w: 15, h: 16 }, // Couche intermédiaire
-  H3:   { x: 21, y: 34, w: 15, h: 16 }, // Couche externe
-  B:    { x: 0,  y: 10, w: 16, h: 24 }, // Bas
-  ACH:  { x: 0,  y: 0,  w: 11, h: 10 }, // Chaussures
-  ASAC: { x: 25, y: 0,  w: 11, h: 10 }, // Sac
-  A1:   { x: 13, y: 0,  w: 11, h: 10 }, // Accessoire
-};
+const TEMPLATES = {
+  // Template H/B — Haut + Bas (pantalon, jupe)
+  HB: {
+    H1:   { id:'H1',   x:2,  y:33, w:16, h:15 },
+    H2:   { id:'H2',   x:19, y:16, w:15, h:15 },
+    H3:   { id:'H3',   x:19, y:32, w:15, h:16 },
+    B:    { id:'B',    x:2,  y:12, w:16, h:22 },
+    ACH:  { id:'ACH',  x:2,  y:1,  w:12, h:11 },
+    ASAC: { id:'ASAC', x:23, y:1,  w:12, h:11 },
+    A1:   { id:'A1',   x:14, y:2,  w:9,  h:8  },
+  },
+  // Template R/C — Robe ou Combinaison (pièce unique)
+  RC: {
+    B:    { id:'B',    x:2,  y:13, w:16, h:35 },
+    H3:   { id:'H3',   x:18, y:32, w:16, h:15 },
+    H2:   { id:'H2',   x:18, y:17, w:16, h:15 },
+    ACH:  { id:'ACH',  x:2,  y:2,  w:12, h:11 },
+    A1:   { id:'A1',   x:14, y:2,  w:9,  h:8  },
+    ASAC: { id:'ASAC', x:23, y:2,  w:12, h:11 },
+  },
+} as const;
 
-// Template RH (robe / combinaison)
-const TEMPLATE_RH: Partial<Record<SlotName, Cell>> = {
-  B:    { x: 0,  y: 13, w: 18, h: 34 }, // Robe / combinaison
-  H3:   { x: 19, y: 34, w: 17, h: 16 }, // Couche externe
-  H2:   { x: 19, y: 16, w: 17, h: 16 }, // Couche intermédiaire
-  ACH:  { x: 0,  y: 0,  w: 12, h: 11 }, // Chaussures
-  A1:   { x: 12, y: 0,  w: 12, h: 11 }, // Accessoire
-  ASAC: { x: 24, y: 0,  w: 12, h: 11 }, // Sac
-};
-
-type TemplateKey = 'HB' | 'RH';
+type TemplateKey = keyof typeof TEMPLATES;
 
 function categoryOf(item: ClothingItem): string {
   return getCategoryByType(item.type)?.name || item.category || '';
 }
 
-function pickTemplate(items: ClothingItem[]): TemplateKey {
-  const hasDress = items.some(it => categoryOf(it) === 'Robes & combinaisons');
-  return hasDress ? 'RH' : 'HB';
+function selectTemplate(items: ClothingItem[]): TemplateKey {
+  const isRobe = items.some(it => categoryOf(it) === 'Robes & combinaisons');
+  return isRobe ? 'RC' : 'HB';
 }
 
-function mapToSlots(items: ClothingItem[], tpl: TemplateKey): Partial<Record<SlotName, ClothingItem>> {
+function mapItemsToLayout(items: ClothingItem[], tpl: TemplateKey): Partial<Record<SlotName, ClothingItem>> {
   const slots: Partial<Record<SlotName, ClothingItem>> = {};
   let accessoryUsed = false;
   for (const item of items) {
     const cat = categoryOf(item);
-    if (tpl === 'RH' && cat === 'Robes & combinaisons') {
+    if (tpl === 'RC' && cat === 'Robes & combinaisons') {
       if (!slots.B) slots.B = item;
     } else if (tpl === 'HB' && (cat === 'Bas' || cat === 'Jupes')) {
       if (!slots.B) slots.B = item;
@@ -86,15 +87,15 @@ interface Props {
 }
 
 export default function OutfitLayout({ items, readOnly = true, className = '' }: Props) {
-  const tpl = pickTemplate(items);
-  const template = tpl === 'RH' ? TEMPLATE_RH : TEMPLATE_HB;
-  const slots = mapToSlots(items, tpl);
+  const tpl = selectTemplate(items);
+  const template = TEMPLATES[tpl];
+  const slots = mapItemsToLayout(items, tpl);
 
   // Note: readOnly=false (drag & drop) sera géré séparément par la page Tenues
   // via OutfitFreeCanvas. Ici on rend toujours en placement fixe.
   void readOnly;
 
-  const order: SlotName[] = tpl === 'RH'
+  const order: SlotName[] = tpl === 'RC'
     ? ['B', 'H2', 'H3', 'ACH', 'A1', 'ASAC']
     : ['B', 'H1', 'H2', 'H3', 'ACH', 'A1', 'ASAC'];
 
