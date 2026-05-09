@@ -409,6 +409,7 @@ export default function Today() {
         setRecommendations(recs);
         setSwipeComplete(false);
         setSwipeResults(null);
+        setPendingSwipe(recs);
       }} />
 
       {!enough && (
@@ -423,7 +424,16 @@ export default function Today() {
         </div>
       )}
 
-      {/* Vertical scroll feed of suggested outfits */}
+      {/* Phase 1 — swipe Tinder */}
+      {pendingSwipe && !swipeComplete && (
+        <OutfitTinderSwipe
+          outfits={pendingSwipe}
+          pseudo={pseudo}
+          onComplete={handleSwipeComplete}
+        />
+      )}
+
+      {/* Phase 2 — liste verticale des 3 tenues */}
       {swipeComplete && swipeResults && (
         <>
           <OutfitDailyFeed
