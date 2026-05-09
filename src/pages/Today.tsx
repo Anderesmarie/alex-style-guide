@@ -5,6 +5,7 @@ import { generateRecommendations, buildDefaultLayoutData } from '@/lib/recommend
 import { ClothingItem, OutfitLayoutData, UserProfile } from '@/lib/types';
 import { loadBeautyProfile } from '@/lib/stylingTips';
 import OutfitDailyFeed from '@/components/OutfitDailyFeed';
+import OutfitTinderSwipe from '@/components/OutfitTinderSwipe';
 import CustomOutfitCard from '@/components/CustomOutfitCard';
 import ProgressMilestones from '@/components/ProgressMilestones';
 import StreakCounter from '@/components/StreakCounter';
@@ -86,6 +87,7 @@ export default function Today() {
   const [recommendations, setRecommendations] = useState<ClothingItem[][]>([]);
   const [swipeResults, setSwipeResults] = useState<{ outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null }[] | null>(null);
   const [swipeComplete, setSwipeComplete] = useState(false);
+  const [pendingSwipe, setPendingSwipe] = useState<ClothingItem[][] | null>(null);
   const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [dailyCount, setDailyCount] = useState(0);
@@ -200,25 +202,31 @@ export default function Today() {
   };
 
   const generate = useCallback(async () => {
-    if (!enough || swipeComplete) return;
+    if (!enough || swipeComplete || pendingSwipe) return;
     if (!canSuggest) return;
     const recs = await generateRecommendations(wardrobe, weatherTemp, 3, userProfile);
     setRecommendations(recs);
-    // Auto-treat as completed (vertical scroll feed, no swiping)
     if (recs.length > 0) {
-      const results = recs.map(outfit => ({
-        outfit,
-        liked: null as boolean | null,
-        layoutData: buildDefaultLayoutData(outfit),
-      }));
-      setSwipeResults(results);
-      setSwipeComplete(true);
-      await saveTodayData(today, results);
-      const newCount = dailyCount + 1;
-      setDailyCount(newCount);
-      await saveDailyCounter({ date: today, count: newCount });
+      // Phase 1 : swipe Tinder avant d'enregistrer
+      setPendingSwipe(recs);
     }
-  }, [weatherTemp, canSuggest, enough, wardrobe, today, swipeComplete, userProfile, dailyCount]);
+  }, [weatherTemp, canSuggest, enough, wardrobe, swipeComplete, userProfile, pendingSwipe]);
+
+  const handleSwipeComplete = useCallback(async (likes: boolean[]) => {
+    if (!pendingSwipe) return;
+    const results = pendingSwipe.map((outfit, i) => ({
+      outfit,
+      liked: likes[i] ?? null,
+      layoutData: buildDefaultLayoutData(outfit),
+    }));
+    setSwipeResults(results);
+    setSwipeComplete(true);
+    setPendingSwipe(null);
+    await saveTodayData(today, results);
+    const newCount = dailyCount + 1;
+    setDailyCount(newCount);
+    await saveDailyCounter({ date: today, count: newCount });
+  }, [pendingSwipe, today, dailyCount]);
 
   // Auto-generate only if no saved results for today and has quota
   useEffect(() => {
