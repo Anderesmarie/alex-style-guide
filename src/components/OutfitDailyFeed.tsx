@@ -142,14 +142,7 @@ export default function OutfitDailyFeed({
     }
   };
 
-  const handleDislike = (idx: number) => {
-    setDislikedIdxs(prev => {
-      const next = new Set(prev);
-      next.add(idx);
-      return next;
-    });
-    toast("On note ✨ on te proposera autre chose", { duration: 2000 });
-  };
+
 
   const openEditor = (idx: number) => {
     const r = results[idx];
