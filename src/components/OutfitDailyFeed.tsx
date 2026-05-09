@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { updateStreak } from '@/lib/streak';
 import type { Season } from '@/lib/colorimetry';
-import OutfitGalleryCard from '@/components/OutfitGalleryCard';
+import OutfitLayout from '@/components/OutfitLayout';
 import OutfitFreeCanvas, {
   CHIPS,
   ChipKey,
@@ -52,7 +52,6 @@ export default function OutfitDailyFeed({
 }: Props) {
   const [savedIdxs, setSavedIdxs] = useState<Set<number>>(new Set());
   const [wornIdx, setWornIdx] = useState<number | null>(null);
-  const [dislikedIdxs, setDislikedIdxs] = useState<Set<number>>(new Set());
 
   // Editor state
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
@@ -143,14 +142,7 @@ export default function OutfitDailyFeed({
     }
   };
 
-  const handleDislike = (idx: number) => {
-    setDislikedIdxs(prev => {
-      const next = new Set(prev);
-      next.add(idx);
-      return next;
-    });
-    toast("On note ✨ on te proposera autre chose", { duration: 2000 });
-  };
+
 
   const openEditor = (idx: number) => {
     const r = results[idx];
@@ -244,57 +236,59 @@ export default function OutfitDailyFeed({
       <div className="space-y-4">
         {results.map((r, idx) => {
           const isWorn = wornIdx === idx;
-          const isDisliked = dislikedIdxs.has(idx);
-          const fakeOutfit = {
-            id: `daily-${idx}`,
-            name: '',
-            itemIds: r.outfit.map(i => i.id),
-            createdAt: new Date().toISOString(),
-            liked: false,
-            layoutData: r.layoutData ?? null,
-          };
+          const isDisliked = r.liked === false;
 
           return (
-            <div key={idx} className={isDisliked ? 'opacity-50' : ''}>
-              <OutfitGalleryCard
-                outfit={fakeOutfit}
-                items={r.outfit}
-                pseudo={pseudo}
-                badgeLabel="✨ Générée par MyStyl"
-                hideLike
-                hideName
-              />
-
-              {/* Action buttons */}
-              <div className="mt-3 space-y-2">
-                <button
-                  onClick={() => handleWear(r.outfit, idx)}
-                  disabled={isWorn}
-                  className="w-full py-3 rounded-xl text-white font-semibold text-sm active:scale-[0.98] transition-transform disabled:opacity-80"
-                  style={{ backgroundColor: isWorn ? '#4CAF50' : ROSE_GOLD }}
-                >
-                  {isWorn ? 'Portée aujourd\'hui 🌸' : '✨ Je la mets !'}
-                </button>
-
-                <button
-                  onClick={() => openEditor(idx)}
-                  className="w-full py-2.5 rounded-xl text-sm font-semibold active:scale-[0.98] transition-transform"
+            <div key={idx} className={isDisliked ? 'opacity-40 pointer-events-none' : ''}>
+              <div className="relative">
+                <OutfitLayout items={r.outfit} readOnly />
+                {/* Badge bas */}
+                <div
+                  className="absolute left-0 right-0 bottom-0 flex items-center justify-between px-4"
                   style={{
-                    border: `1.5px solid ${ROSE_GOLD}`,
-                    color: ROSE_GOLD,
-                    backgroundColor: 'transparent',
+                    background: 'rgba(255,255,255,0.85)',
+                    height: 36,
+                    backdropFilter: 'blur(4px)',
+                    borderBottomLeftRadius: 16,
+                    borderBottomRightRadius: 16,
+                    maxWidth: 360,
+                    margin: '0 auto',
                   }}
                 >
-                  ✏️ Modifier
-                </button>
-
-                <button
-                  onClick={() => handleDislike(idx)}
-                  className="w-full py-1.5 text-xs text-muted-foreground active:opacity-70"
-                >
-                  👎 Pas fan
-                </button>
+                  <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#9CA3AF' }}>
+                    ✨ Générée par MyStyl
+                  </span>
+                  <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#9CA3AF' }}>
+                    @{pseudo || 'moi'}
+                  </span>
+                </div>
               </div>
+
+              {/* Boutons — uniquement pour les tenues approuvées */}
+              {!isDisliked && (
+                <div className="mt-3 space-y-2 max-w-[360px] mx-auto">
+                  <button
+                    onClick={() => handleWear(r.outfit, idx)}
+                    disabled={isWorn}
+                    className="w-full py-3 rounded-xl text-white font-semibold text-sm active:scale-[0.98] transition-transform disabled:opacity-80"
+                    style={{ backgroundColor: isWorn ? '#4CAF50' : ROSE_GOLD }}
+                  >
+                    {isWorn ? 'Portée aujourd\'hui 🌸' : '✨ Je la mets !'}
+                  </button>
+
+                  <button
+                    onClick={() => openEditor(idx)}
+                    className="w-full py-2.5 rounded-xl text-sm font-semibold active:scale-[0.98] transition-transform"
+                    style={{
+                      border: `1.5px solid ${ROSE_GOLD}`,
+                      color: ROSE_GOLD,
+                      backgroundColor: 'transparent',
+                    }}
+                  >
+                    ✏️ Modifier
+                  </button>
+                </div>
+              )}
             </div>
           );
         })}
