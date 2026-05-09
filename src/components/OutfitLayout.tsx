@@ -95,7 +95,7 @@ export default function OutfitLayout({ items, readOnly = true, className = '' }:
   // via OutfitFreeCanvas. Ici on rend toujours en placement fixe.
   void readOnly;
 
-  const order: SlotName[] = tpl === 'RH'
+  const order: SlotName[] = tpl === 'RC'
     ? ['B', 'H2', 'H3', 'ACH', 'A1', 'ASAC']
     : ['B', 'H1', 'H2', 'H3', 'ACH', 'A1', 'ASAC'];
 
