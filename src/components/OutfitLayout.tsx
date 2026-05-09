@@ -87,9 +87,9 @@ interface Props {
 }
 
 export default function OutfitLayout({ items, readOnly = true, className = '' }: Props) {
-  const tpl = pickTemplate(items);
-  const template = tpl === 'RH' ? TEMPLATE_RH : TEMPLATE_HB;
-  const slots = mapToSlots(items, tpl);
+  const tpl = selectTemplate(items);
+  const template = TEMPLATES[tpl];
+  const slots = mapItemsToLayout(items, tpl);
 
   // Note: readOnly=false (drag & drop) sera géré séparément par la page Tenues
   // via OutfitFreeCanvas. Ici on rend toujours en placement fixe.
