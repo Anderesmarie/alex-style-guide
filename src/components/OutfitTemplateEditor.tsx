@@ -374,36 +374,48 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
           <div className="fixed inset-0 z-[60] flex items-end" onClick={() => setSheet(null)}>
             <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
             <div
-              className="relative w-full bg-card rounded-t-3xl p-5 animate-slide-in-bottom"
+              className="relative w-full bg-card rounded-t-3xl animate-slide-in-bottom flex flex-col"
               style={{
                 maxHeight: '70vh',
-                overflowY: 'auto',
-                WebkitOverflowScrolling: 'touch',
-                touchAction: 'pan-y',
+                touchAction: 'none',
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="w-12 h-1 bg-muted rounded-full mx-auto mb-4" />
-              <h3 className="font-serif font-bold text-lg mb-3">
-                {ADD_BUTTONS.find(b => b.key === sheet)?.label.replace('+ ', '')}
-              </h3>
-              {sheetItems.length === 0 ? (
-                <p className="text-center text-sm text-muted-foreground py-8">
-                  Aucune pièce dans cette catégorie
-                </p>
-              ) : (
-                <div className="grid grid-cols-3 gap-2">
-                  {sheetItems.map(it => (
-                    <button
-                      key={it.id}
-                      onClick={() => addPiece(it)}
-                      className="aspect-square rounded-lg overflow-hidden bg-white active:scale-[0.96] transition-transform"
-                    >
-                      <img src={it.imageBase64} alt={it.type} className="w-full h-full object-contain" />
-                    </button>
-                  ))}
-                </div>
-              )}
+              {/* Fixed header */}
+              <div className="p-5 pb-0 shrink-0">
+                <div className="w-12 h-1 bg-muted rounded-full mx-auto mb-4" />
+                <h3 className="font-serif font-bold text-lg mb-3">
+                  {ADD_BUTTONS.find(b => b.key === sheet)?.label.replace('+ ', '')}
+                </h3>
+              </div>
+              {/* Scrollable content */}
+              <div
+                className="px-5 pb-5"
+                style={{
+                  overflowY: 'auto',
+                  WebkitOverflowScrolling: 'touch',
+                  touchAction: 'pan-y',
+                  overscrollBehavior: 'contain',
+                }}
+              >
+                {sheetItems.length === 0 ? (
+                  <p className="text-center text-sm text-muted-foreground py-8">
+                    Aucune pièce dans cette catégorie
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-3 gap-2">
+                    {sheetItems.map(it => (
+                      <button
+                        key={it.id}
+                        onClick={() => addPiece(it)}
+                        className="aspect-square rounded-lg overflow-hidden bg-white active:scale-[0.96] transition-transform"
+                      >
+                        <img src={it.imageBase64} alt={it.type} className="w-full h-full object-contain" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
