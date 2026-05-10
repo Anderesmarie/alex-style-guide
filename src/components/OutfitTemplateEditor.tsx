@@ -6,7 +6,6 @@ import {
   selectTemplateForItems,
   categoryOfItem,
 } from './OutfitLayout';
-
 const ROSE_GOLD = '#C9956C';
 const CANVAS_W = 360;
 const CANVAS_H = 500;
