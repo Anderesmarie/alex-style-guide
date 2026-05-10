@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { WeatherData, fetchWeatherByGeolocation, fetchWeatherByCity, getSavedCity, saveCity } from '@/lib/weather';
 import { getWardrobe, getDailyCounter, saveDailyCounter, getProfile } from '@/lib/storage';
-import { generateRecommendations, buildDefaultLayoutData } from '@/lib/recommendations';
+import { generateRecommendations } from '@/lib/recommendations';
 import { ClothingItem, OutfitLayoutData, UserProfile } from '@/lib/types';
 import { loadBeautyProfile } from '@/lib/stylingTips';
 import OutfitDailyFeed from '@/components/OutfitDailyFeed';
@@ -219,7 +219,7 @@ export default function Today() {
     const results = pendingSwipe.map((outfit, i) => ({
       outfit,
       liked: likes[i] ?? null,
-      layoutData: buildDefaultLayoutData(outfit),
+      layoutData: null,
     }));
     setSwipeResults(results);
     setSwipeComplete(true);
