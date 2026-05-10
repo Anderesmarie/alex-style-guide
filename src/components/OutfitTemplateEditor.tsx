@@ -382,6 +382,10 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
         {/* Bottom sheet — pick item */}
         {sheet && (
           <div className="fixed inset-0 z-[60] flex items-end" onClick={() => setSheet(null)}>
+            <style>{`
+              .sheet-scroll::-webkit-scrollbar { width: 6px; }
+              .sheet-scroll::-webkit-scrollbar-thumb { background: #C9956C; border-radius: 3px; }
+            `}</style>
             <div
               className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
               onTouchMove={(e) => e.preventDefault()}
@@ -401,15 +405,20 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
                 <h3 className="font-serif font-bold text-lg mb-3">
                   {ADD_BUTTONS.find(b => b.key === sheet)?.label.replace('+ ', '')}
                 </h3>
+                {sheetItems.length > 6 && (
+                  <p className="text-center text-xs text-muted-foreground mb-2">
+                    ↑ Défiler pour voir plus
+                  </p>
+                )}
               </div>
               {/* Scrollable content */}
               <div
-                className="px-5 pb-5"
+                className="px-5 pb-5 sheet-scroll"
                 style={{
-                  overflowY: 'auto',
-                  WebkitOverflowScrolling: 'touch',
+                  overflowY: 'scroll',
                   touchAction: 'pan-y',
-                  maxHeight: '60vh',
+                  height: '50vh',
+                  scrollbarWidth: 'thin',
                   overscrollBehavior: 'contain',
                 }}
               >
