@@ -22,7 +22,9 @@ export interface OutfitLayoutPiece {
   itemId: string;
   x: number; // percentage 0-100 of canvas width (top-left of piece)
   y: number; // percentage 0-100 of canvas height
-  size: number; // width in px (height auto)
+  size: number; // legacy: width in px (height auto). Editor: kept for back-compat (set to width in px ref canvas).
+  w?: number; // percentage 0-100 width (editor)
+  h?: number; // percentage 0-100 height (editor)
   z: number;
 }
 
