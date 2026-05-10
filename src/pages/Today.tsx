@@ -219,7 +219,7 @@ export default function Today() {
     const results = pendingSwipe.map((outfit, i) => ({
       outfit,
       liked: likes[i] ?? null,
-      layoutData: buildDefaultLayoutData(outfit),
+      layoutData: null,
     }));
     setSwipeResults(results);
     setSwipeComplete(true);
