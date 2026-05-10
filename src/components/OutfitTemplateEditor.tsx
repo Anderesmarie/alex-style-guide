@@ -420,6 +420,8 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
               </div>
               {/* Scrollable content */}
               <div
+                ref={scrollRef}
+                onScroll={handleScroll}
                 className="px-5 pb-5 sheet-scroll"
                 style={{
                   overflowY: 'scroll',
@@ -445,6 +447,11 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
                       </button>
                     ))}
                   </div>
+                )}
+                {showScrollHint && sheetItems.length > 6 && (
+                  <p className="text-center text-xs text-muted-foreground mt-2 pb-1">
+                    ↓ Voir plus
+                  </p>
                 )}
               </div>
             </div>
