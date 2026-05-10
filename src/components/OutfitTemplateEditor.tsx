@@ -417,11 +417,6 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
                 <h3 className="font-serif font-bold text-lg mb-3">
                   {ADD_BUTTONS.find(b => b.key === sheet)?.label.replace('+ ', '')}
                 </h3>
-                {sheetItems.length > 6 && (
-                  <p className="text-center text-xs text-muted-foreground mb-2">
-                    ↑ Défiler pour voir plus
-                  </p>
-                )}
               </div>
               {/* Scrollable content */}
               <div
