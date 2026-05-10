@@ -26,6 +26,7 @@ interface SavedOutfitResult {
   outfitIds: string[];
   liked: boolean | null;
   layoutData?: OutfitLayoutData | null;
+  savedOutfitId?: string | null;
 }
 
 interface SavedTodayData {
@@ -33,7 +34,7 @@ interface SavedTodayData {
   results: SavedOutfitResult[];
 }
 
-async function loadTodayData(today: string, wardrobe: ClothingItem[]): Promise<{ outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null }[] | null> {
+async function loadTodayData(today: string, wardrobe: ClothingItem[]): Promise<{ outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[] | null> {
   try {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return null;
@@ -47,7 +48,7 @@ async function loadTodayData(today: string, wardrobe: ClothingItem[]): Promise<{
     const results = data.results as SavedOutfitResult[];
     const resolved = results.map(r => {
       const items = r.outfitIds.map(id => wardrobe.find(i => i.id === id)).filter(Boolean) as ClothingItem[];
-      return { outfit: items, liked: r.liked, layoutData: r.layoutData ?? null };
+      return { outfit: items, liked: r.liked, layoutData: r.layoutData ?? null, savedOutfitId: r.savedOutfitId ?? null };
     }).filter(r => r.outfit.length > 0);
     return resolved.length > 0 ? resolved : null;
   } catch {
@@ -55,7 +56,7 @@ async function loadTodayData(today: string, wardrobe: ClothingItem[]): Promise<{
   }
 }
 
-async function saveTodayData(today: string, results: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null }[]) {
+async function saveTodayData(today: string, results: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[]) {
   try {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
@@ -63,6 +64,7 @@ async function saveTodayData(today: string, results: { outfit: ClothingItem[]; l
       outfitIds: r.outfit.map(i => i.id),
       liked: r.liked,
       layoutData: r.layoutData ?? null,
+      savedOutfitId: r.savedOutfitId ?? null,
     }));
     await supabase.from('daily_outfits').upsert({
       user_id: userData.user.id,
