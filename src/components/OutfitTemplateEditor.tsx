@@ -175,12 +175,22 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
     };
   }, [dragId, endDrag]);
 
+  const bringToFront = (itemId: string) => {
+    setPieces(prev => {
+      const maxZ = prev.length > 0 ? Math.max(...prev.map(pp => pp.z)) : 0;
+      const target = prev.find(pp => pp.itemId === itemId);
+      if (!target || target.z === maxZ) return prev;
+      return prev.map(pp => pp.itemId === itemId ? { ...pp, z: maxZ + 1 } : pp);
+    });
+  };
+
   const startDrag = (p: EditorPiece, cx: number, cy: number) => {
     dragRef.current = { id: p.itemId, startX: cx, startY: cy, baseX: p.x, baseY: p.y };
     offsetRef.current = { dx: 0, dy: 0 };
     setDragOffset({ dx: 0, dy: 0 });
     setDragId(p.itemId);
     setSelectedId(p.itemId);
+    bringToFront(p.itemId);
     document.body.style.overflow = 'hidden';
     document.body.style.touchAction = 'none';
   };
@@ -301,14 +311,14 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
                   if (!e.touches[0]) return;
                   startDrag(p, e.touches[0].clientX, e.touches[0].clientY);
                 }}
-                onClick={(e) => { e.stopPropagation(); setSelectedId(p.itemId); }}
+                onClick={(e) => { e.stopPropagation(); setSelectedId(p.itemId); bringToFront(p.itemId); }}
                 style={{
                   position: 'absolute',
                   left: `${p.x + offX}%`,
                   top: `${p.y + offY}%`,
                   width: `${p.w}%`,
                   height: `${p.h}%`,
-                  zIndex: p.z + (selected || isDrag ? 100 : 0),
+                  zIndex: p.z,
                   cursor: isDrag ? 'grabbing' : 'grab',
                   outline: selected ? `2px solid ${ROSE_GOLD}` : 'none',
                   outlineOffset: 2,
