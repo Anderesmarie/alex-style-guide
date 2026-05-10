@@ -1,4 +1,4 @@
-import { ClothingItem } from '@/lib/types';
+import { ClothingItem, OutfitLayoutData } from '@/lib/types';
 import { getCategoryByType } from '@/lib/categories';
 
 /**
