@@ -80,20 +80,73 @@ function mapItemsToLayout(items: ClothingItem[], tpl: TemplateKey): Partial<Reco
 
 interface Props {
   items: ClothingItem[];
+  /** Si fourni, prime sur le template (positions libres x%/y%/w%/h%/z). */
+  layoutData?: OutfitLayoutData | null;
   /** readOnly = pas de drag, pas de resize, placement fixe via template. */
   readOnly?: boolean;
-  /** Hauteur indicative — en réalité on suit l'aspect-ratio 36/50. */
   className?: string;
 }
 
-export default function OutfitLayout({ items, readOnly = true, className = '' }: Props) {
+export default function OutfitLayout({ items, layoutData, readOnly = true, className = '' }: Props) {
+  void readOnly;
+
+  // ---------- Render depuis layoutData ----------
+  if (layoutData && layoutData.pieces && layoutData.pieces.length > 0) {
+    const byId = new Map(items.map(it => [it.id, it]));
+    const sorted = [...layoutData.pieces].sort((a, b) => a.z - b.z);
+    const cw = layoutData.canvasW || 360;
+    const ch = layoutData.canvasH || 500;
+    return (
+      <div
+        className={`relative mx-auto bg-white rounded-2xl overflow-hidden ${className}`}
+        style={{
+          width: '100%',
+          maxWidth: 360,
+          aspectRatio: `${cw} / ${ch}`,
+          boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+        }}
+      >
+        {sorted.map((p, i) => {
+          const item = byId.get(p.itemId);
+          if (!item) return null;
+          const wPct = p.w ?? (p.size ? (p.size / cw) * 100 : 30);
+          const hPct = p.h ?? wPct * (cw / ch);
+          return (
+            <div
+              key={p.itemId + i}
+              style={{
+                position: 'absolute',
+                left: `${p.x}%`,
+                top: `${p.y}%`,
+                width: `${wPct}%`,
+                height: `${hPct}%`,
+                zIndex: p.z + 1,
+              }}
+            >
+              <img
+                src={item.imageBase64}
+                alt={item.type}
+                draggable={false}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.10))',
+                  pointerEvents: 'none',
+                  userSelect: 'none',
+                }}
+              />
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // ---------- Render depuis template ----------
   const tpl = selectTemplate(items);
   const template = TEMPLATES[tpl];
   const slots = mapItemsToLayout(items, tpl);
-
-  // Note: readOnly=false (drag & drop) sera géré séparément par la page Tenues
-  // via OutfitFreeCanvas. Ici on rend toujours en placement fixe.
-  void readOnly;
 
   const order: SlotName[] = tpl === 'RC'
     ? ['B', 'H2', 'H3', 'ACH', 'A1', 'ASAC']
@@ -147,4 +200,14 @@ export default function OutfitLayout({ items, readOnly = true, className = '' }:
       })}
     </div>
   );
+}
+
+// ---------- Helpers exportés pour l'éditeur ----------
+export const LAYOUT_GRID = { W: GRID_W, H: GRID_H };
+export const LAYOUT_TEMPLATES = TEMPLATES;
+export function selectTemplateForItems(items: ClothingItem[]): TemplateKey {
+  return selectTemplate(items);
+}
+export function categoryOfItem(item: ClothingItem): string {
+  return categoryOf(item);
 }
