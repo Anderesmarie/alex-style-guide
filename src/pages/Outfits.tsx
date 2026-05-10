@@ -7,6 +7,7 @@ import { getCategoryByType } from '@/lib/categories';
 import { supabase } from '@/integrations/supabase/client';
 import CalendarView from '@/components/CalendarView';
 import OutfitVisualLayout, { SlotKey, SlotMap, SLOT_CONFIG } from '@/components/OutfitVisualLayout';
+import OutfitLayout from '@/components/OutfitLayout';
 import OutfitGalleryCard from '@/components/OutfitGalleryCard';
 import OutfitFreeCanvas, { CHIPS, ChipKey, chipMatchesItem, defaultPositionForCategory, CANVAS_W, CANVAS_H } from '@/components/OutfitFreeCanvas';
 import { getCategoryByType as _getCat } from '@/lib/categories';
@@ -537,7 +538,6 @@ export default function Outfits() {
 
   if (view === 'detail' && selectedOutfit) {
     const items = getItemsByIds(selectedOutfit.itemIds);
-    const detailSlots = buildSlotsFromItems(items);
     return (
       <div className="fade-enter pb-4">
         {renderDeleteDialog()}
@@ -546,7 +546,11 @@ export default function Outfits() {
           <h1 className="text-xl font-serif font-bold">{selectedOutfit.name}</h1>
         </div>
 
-        <OutfitVisualLayout slots={detailSlots} />
+        <OutfitLayout
+          items={items}
+          layoutData={selectedOutfit.layoutData ?? null}
+          readOnly={false}
+        />
 
         <div className="grid grid-cols-2 gap-2 mt-4 mb-4">
           {items.map(item => (
