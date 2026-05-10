@@ -237,6 +237,17 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
     setSheet(null);
   };
 
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const isBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 4;
+    if (isBottom) setShowScrollHint(false);
+  };
+
+  useEffect(() => {
+    setShowScrollHint(true);
+  }, [sheet]);
+
   // ---------- Save ----------
   const handleSave = () => {
     const layoutPieces: OutfitLayoutPiece[] = pieces.map(p => ({
