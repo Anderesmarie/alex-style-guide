@@ -87,7 +87,7 @@ export default function Today() {
   const [ws, setWs] = useState<WeatherState>({ status: 'loading' });
   const [cityInput, setCityInput] = useState('');
   const [recommendations, setRecommendations] = useState<ClothingItem[][]>([]);
-  const [swipeResults, setSwipeResults] = useState<{ outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null }[] | null>(null);
+  const [swipeResults, setSwipeResults] = useState<{ outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[] | null>(null);
   const [swipeComplete, setSwipeComplete] = useState(false);
   const [pendingSwipe, setPendingSwipe] = useState<ClothingItem[][] | null>(null);
   const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
