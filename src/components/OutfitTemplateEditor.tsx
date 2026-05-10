@@ -311,14 +311,14 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
                   if (!e.touches[0]) return;
                   startDrag(p, e.touches[0].clientX, e.touches[0].clientY);
                 }}
-                onClick={(e) => { e.stopPropagation(); setSelectedId(p.itemId); }}
+                onClick={(e) => { e.stopPropagation(); setSelectedId(p.itemId); bringToFront(p.itemId); }}
                 style={{
                   position: 'absolute',
                   left: `${p.x + offX}%`,
                   top: `${p.y + offY}%`,
                   width: `${p.w}%`,
                   height: `${p.h}%`,
-                  zIndex: p.z + (selected || isDrag ? 100 : 0),
+                  zIndex: p.z,
                   cursor: isDrag ? 'grabbing' : 'grab',
                   outline: selected ? `2px solid ${ROSE_GOLD}` : 'none',
                   outlineOffset: 2,
