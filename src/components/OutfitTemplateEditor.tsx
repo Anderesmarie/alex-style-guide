@@ -107,6 +107,16 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sheet, setSheet] = useState<AddCategory | null>(null);
 
+  useEffect(() => {
+    if (!sheet) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [sheet]);
+
   const usedSlots = useMemo(() => new Set(pieces.map(p => p.slot)), [pieces]);
 
   // ---------- Drag ----------
@@ -372,7 +382,10 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
         {/* Bottom sheet — pick item */}
         {sheet && (
           <div className="fixed inset-0 z-[60] flex items-end" onClick={() => setSheet(null)}>
-            <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
+            <div
+              className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
+              onTouchMove={(e) => e.preventDefault()}
+            />
             <div
               className="relative w-full bg-card rounded-t-3xl animate-slide-in-bottom flex flex-col"
               style={{
@@ -380,6 +393,7 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
                 touchAction: 'none',
               }}
               onClick={(e) => e.stopPropagation()}
+              onTouchMove={(e) => e.stopPropagation()}
             >
               {/* Fixed header */}
               <div className="p-5 pb-0 shrink-0">
@@ -395,6 +409,7 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
                   overflowY: 'auto',
                   WebkitOverflowScrolling: 'touch',
                   touchAction: 'pan-y',
+                  maxHeight: '60vh',
                   overscrollBehavior: 'contain',
                 }}
               >
