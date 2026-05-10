@@ -537,7 +537,6 @@ export default function Outfits() {
 
   if (view === 'detail' && selectedOutfit) {
     const items = getItemsByIds(selectedOutfit.itemIds);
-    const detailSlots = buildSlotsFromItems(items);
     return (
       <div className="fade-enter pb-4">
         {renderDeleteDialog()}
@@ -546,7 +545,11 @@ export default function Outfits() {
           <h1 className="text-xl font-serif font-bold">{selectedOutfit.name}</h1>
         </div>
 
-        <OutfitVisualLayout slots={detailSlots} />
+        <OutfitLayout
+          items={items}
+          layoutData={selectedOutfit.layoutData ?? null}
+          readOnly={false}
+        />
 
         <div className="grid grid-cols-2 gap-2 mt-4 mb-4">
           {items.map(item => (
