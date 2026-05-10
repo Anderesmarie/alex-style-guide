@@ -374,7 +374,13 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
           <div className="fixed inset-0 z-[60] flex items-end" onClick={() => setSheet(null)}>
             <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
             <div
-              className="relative w-full bg-card rounded-t-3xl p-5 max-h-[70vh] overflow-y-auto animate-slide-in-bottom"
+              className="relative w-full bg-card rounded-t-3xl p-5 animate-slide-in-bottom"
+              style={{
+                maxHeight: '70vh',
+                overflowY: 'auto',
+                WebkitOverflowScrolling: 'touch',
+                touchAction: 'pan-y',
+              }}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="w-12 h-1 bg-muted rounded-full mx-auto mb-4" />
