@@ -549,16 +549,16 @@ export default function Outfits() {
         <OutfitLayout
           items={items}
           layoutData={selectedOutfit.layoutData ?? null}
-          readOnly={false}
+          readOnly={true}
         />
 
-        <div className="grid grid-cols-2 gap-2 mt-4 mb-4">
+        <div className="grid grid-cols-3 gap-2 mt-4 mb-4">
           {items.map(item => (
             <div key={item.id} className="rounded-lg overflow-hidden card-shadow">
-              <img src={item.imageBase64} alt={item.type} className="w-full aspect-square object-cover" />
+              <img src={item.imageBase64} alt={item.type} className="w-full aspect-square object-cover bg-white" />
               <div className="p-2 bg-card">
-                <p className="text-xs font-medium">{item.type}</p>
-                <p className="text-xs text-muted-foreground">{item.color}</p>
+                <p className="text-xs font-medium truncate">{item.type}</p>
+                <p className="text-xs text-muted-foreground truncate">{item.color}</p>
               </div>
             </div>
           ))}
