@@ -237,7 +237,7 @@ export default function Today() {
     }
   }, [loading, ws.status, enough, swipeComplete]); // eslint-disable-line
 
-  const handleResultsChange = (next: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null }[]) => {
+  const handleResultsChange = (next: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[]) => {
     setSwipeResults(next);
     saveTodayData(today, next);
   };
