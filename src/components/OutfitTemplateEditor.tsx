@@ -175,12 +175,22 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
     };
   }, [dragId, endDrag]);
 
+  const bringToFront = (itemId: string) => {
+    setPieces(prev => {
+      const maxZ = prev.length > 0 ? Math.max(...prev.map(pp => pp.z)) : 0;
+      const target = prev.find(pp => pp.itemId === itemId);
+      if (!target || target.z === maxZ) return prev;
+      return prev.map(pp => pp.itemId === itemId ? { ...pp, z: maxZ + 1 } : pp);
+    });
+  };
+
   const startDrag = (p: EditorPiece, cx: number, cy: number) => {
     dragRef.current = { id: p.itemId, startX: cx, startY: cy, baseX: p.x, baseY: p.y };
     offsetRef.current = { dx: 0, dy: 0 };
     setDragOffset({ dx: 0, dy: 0 });
     setDragId(p.itemId);
     setSelectedId(p.itemId);
+    bringToFront(p.itemId);
     document.body.style.overflow = 'hidden';
     document.body.style.touchAction = 'none';
   };
