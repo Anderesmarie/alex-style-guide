@@ -6,7 +6,6 @@ import {
   selectTemplateForItems,
   categoryOfItem,
 } from './OutfitLayout';
-
 const ROSE_GOLD = '#C9956C';
 const CANVAS_W = 360;
 const CANVAS_H = 500;
@@ -106,6 +105,8 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
   const [pieces, setPieces] = useState<EditorPiece[]>(buildInitial);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sheet, setSheet] = useState<AddCategory | null>(null);
+  const [showScrollHint, setShowScrollHint] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!sheet) return;
@@ -234,6 +235,17 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
     setSelectedId(item.id);
     setSheet(null);
   };
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const isBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 4;
+    if (isBottom) setShowScrollHint(false);
+  };
+
+  useEffect(() => {
+    setShowScrollHint(true);
+  }, [sheet]);
 
   // ---------- Save ----------
   const handleSave = () => {
@@ -405,14 +417,11 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
                 <h3 className="font-serif font-bold text-lg mb-3">
                   {ADD_BUTTONS.find(b => b.key === sheet)?.label.replace('+ ', '')}
                 </h3>
-                {sheetItems.length > 6 && (
-                  <p className="text-center text-xs text-muted-foreground mb-2">
-                    ↑ Défiler pour voir plus
-                  </p>
-                )}
               </div>
               {/* Scrollable content */}
               <div
+                ref={scrollRef}
+                onScroll={handleScroll}
                 className="px-5 pb-5 sheet-scroll"
                 style={{
                   overflowY: 'scroll',
@@ -438,6 +447,11 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
                       </button>
                     ))}
                   </div>
+                )}
+                {showScrollHint && sheetItems.length > 6 && (
+                  <p className="text-center text-xs text-muted-foreground mt-2 pb-1">
+                    ↓ Voir plus
+                  </p>
                 )}
               </div>
             </div>
