@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ClothingItem, OutfitLayoutData, UserProfile } from '@/lib/types';
 import { addOutfit, genId, saveLastOutfit } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
@@ -6,20 +7,13 @@ import { toast } from 'sonner';
 import { updateStreak } from '@/lib/streak';
 import type { Season } from '@/lib/colorimetry';
 import OutfitLayout from '@/components/OutfitLayout';
-import OutfitFreeCanvas, {
-  CHIPS,
-  ChipKey,
-  chipMatchesItem,
-  defaultPositionForCategory,
-  CANVAS_W,
-  CANVAS_H,
-} from '@/components/OutfitFreeCanvas';
-import { getCategoryByType } from '@/lib/categories';
+import OutfitTemplateEditor from '@/components/OutfitTemplateEditor';
 
-interface OutfitResult {
+export interface OutfitResult {
   outfit: ClothingItem[];
   liked: boolean | null;
   layoutData?: OutfitLayoutData | null;
+  savedOutfitId?: string | null;
 }
 
 interface Props {
@@ -35,29 +29,16 @@ interface Props {
 
 const ROSE_GOLD = '#C9956C';
 
-interface CanvasPiece {
-  itemId: string;
-  item: ClothingItem;
-  x: number;
-  y: number;
-  size: number;
-  z: number;
-}
-
 export default function OutfitDailyFeed({
   results,
   pseudo,
   wardrobe,
   onResultsChange,
 }: Props) {
+  const navigate = useNavigate();
   const [savedIdxs, setSavedIdxs] = useState<Set<number>>(new Set());
   const [wornIdx, setWornIdx] = useState<number | null>(null);
-
-  // Editor state
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
-  const [freePieces, setFreePieces] = useState<CanvasPiece[]>([]);
-  const [freeSelectedId, setFreeSelectedId] = useState<string | null>(null);
-  const [freeChip, setFreeChip] = useState<ChipKey | null>(null);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -121,7 +102,6 @@ export default function OutfitDailyFeed({
         reaction: 'portee',
         created_at: new Date().toISOString(),
       });
-      // Also save to outfits gallery with layoutData if present
       const r = results[idx];
       await addOutfit({
         id: genId(),
@@ -142,107 +122,50 @@ export default function OutfitDailyFeed({
     }
   };
 
-
-
-  const openEditor = (idx: number) => {
-    const r = results[idx];
-    // Build pieces from existing layoutData or default positions
-    const pieces: CanvasPiece[] = r.outfit.map((item, i) => {
-      const existing = r.layoutData?.pieces.find(p => p.itemId === item.id);
-      if (existing) {
-        return { itemId: item.id, item, x: existing.x, y: existing.y, size: existing.size, z: existing.z };
-      }
-      const cat = getCategoryByType(item.type)?.name || item.category || '';
-      const def = defaultPositionForCategory(cat);
-      return { itemId: item.id, item, x: def.xPct, y: def.yPct, size: def.size, z: def.z + i };
-    });
-    setFreePieces(pieces);
-    setFreeSelectedId(null);
-    setEditingIdx(idx);
-  };
-
-  const closeEditor = () => {
-    setEditingIdx(null);
-    setFreePieces([]);
-    setFreeSelectedId(null);
-    setFreeChip(null);
-  };
-
-  const addPieceFromItem = (item: ClothingItem) => {
-    if (freePieces.some(p => p.itemId === item.id)) {
-      setFreeChip(null);
-      return;
+  const handleEditorSave = async (newItems: ClothingItem[], layoutData: OutfitLayoutData) => {
+    if (editingIdx === null) return;
+    try {
+      const outfitId = genId();
+      await addOutfit({
+        id: outfitId,
+        name: `Tenue du ${new Date().toLocaleDateString('fr-FR')}`,
+        itemIds: newItems.map(i => i.id),
+        createdAt: new Date().toISOString(),
+        layoutData,
+      });
+      const next = [...results];
+      next[editingIdx] = {
+        ...next[editingIdx],
+        outfit: newItems,
+        layoutData,
+        savedOutfitId: outfitId,
+      };
+      onResultsChange?.(next);
+      toast("Tenue enregistrée ✨", {
+        style: { backgroundColor: ROSE_GOLD, color: '#FFFFFF', border: 'none' },
+      });
+      setEditingIdx(null);
+      navigate('/outfits');
+    } catch (e) {
+      console.error(e);
+      toast.error("Erreur lors de l'enregistrement");
     }
-    const cat = getCategoryByType(item.type)?.name || item.category || '';
-    const def = defaultPositionForCategory(cat);
-    setFreePieces(prev => [
-      ...prev,
-      { itemId: item.id, item, x: def.xPct, y: def.yPct, size: def.size, z: def.z + prev.length },
-    ]);
-    setFreeChip(null);
   };
-
-  const resizeSelected = (delta: number) => {
-    if (!freeSelectedId) return;
-    setFreePieces(prev =>
-      prev.map(p =>
-        p.itemId === freeSelectedId
-          ? { ...p, size: Math.max(40, Math.min(280, p.size + delta)) }
-          : p
-      )
-    );
-  };
-
-  const removeSelected = () => {
-    if (!freeSelectedId) return;
-    setFreePieces(prev => prev.filter(p => p.itemId !== freeSelectedId));
-    setFreeSelectedId(null);
-  };
-
-  const saveEditor = async () => {
-    if (editingIdx === null || freePieces.length < 1) return;
-    const layoutData: OutfitLayoutData = {
-      canvasW: CANVAS_W,
-      canvasH: CANVAS_H,
-      pieces: freePieces.map(p => ({
-        itemId: p.itemId,
-        x: p.x,
-        y: p.y,
-        size: p.size,
-        z: p.z,
-      })),
-    };
-    const newOutfit = freePieces.map(p => p.item);
-    const next = [...results];
-    next[editingIdx] = {
-      ...next[editingIdx],
-      outfit: newOutfit,
-      layoutData,
-    };
-    onResultsChange?.(next);
-    toast("Tenue mise à jour ✨", {
-      style: { backgroundColor: ROSE_GOLD, color: '#FFFFFF', border: 'none' },
-    });
-    closeEditor();
-  };
-
-  const filteredWardrobe = freeChip ? wardrobe.filter(w => chipMatchesItem(freeChip, w)) : [];
 
   return (
     <div className="space-y-2 fade-enter">
       <h2 className="text-lg font-serif font-semibold text-center mb-2">Tes tenues du jour</h2>
 
-      {/* Vertical list of cards */}
       <div className="space-y-4">
         {results.map((r, idx) => {
           const isWorn = wornIdx === idx;
           const isDisliked = r.liked === false;
+          const isLocked = !!r.savedOutfitId;
 
           return (
             <div key={idx} className={isDisliked ? 'opacity-40 pointer-events-none' : ''}>
               <div className="relative">
-                <OutfitLayout items={r.outfit} readOnly />
-                {/* Badge bas */}
+                <OutfitLayout items={r.outfit} layoutData={r.layoutData ?? null} readOnly />
                 <div
                   className="absolute left-0 right-0 bottom-0 flex items-center justify-between px-4"
                   style={{
@@ -264,7 +187,6 @@ export default function OutfitDailyFeed({
                 </div>
               </div>
 
-              {/* Boutons — uniquement pour les tenues approuvées */}
               {!isDisliked && (
                 <div className="mt-3 space-y-2 max-w-[360px] mx-auto">
                   <button
@@ -276,17 +198,19 @@ export default function OutfitDailyFeed({
                     {isWorn ? 'Portée aujourd\'hui 🌸' : '✨ Je la mets !'}
                   </button>
 
-                  <button
-                    onClick={() => openEditor(idx)}
-                    className="w-full py-2.5 rounded-xl text-sm font-semibold active:scale-[0.98] transition-transform"
-                    style={{
-                      border: `1.5px solid ${ROSE_GOLD}`,
-                      color: ROSE_GOLD,
-                      backgroundColor: 'transparent',
-                    }}
-                  >
-                    ✏️ Modifier
-                  </button>
+                  {!isLocked && (
+                    <button
+                      onClick={() => setEditingIdx(idx)}
+                      className="w-full py-2.5 rounded-xl text-sm font-semibold active:scale-[0.98] transition-transform"
+                      style={{
+                        border: `1.5px solid ${ROSE_GOLD}`,
+                        color: ROSE_GOLD,
+                        backgroundColor: 'transparent',
+                      }}
+                    >
+                      ✏️ Modifier
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -294,109 +218,14 @@ export default function OutfitDailyFeed({
         })}
       </div>
 
-      {/* Editor modal */}
       {editingIdx !== null && (
-        <div className="fixed inset-0 z-50 bg-background overflow-y-auto">
-          <div className="p-4 pb-24 max-w-md mx-auto">
-            <div className="flex items-center gap-3 mb-4">
-              <button onClick={closeEditor} className="text-2xl" aria-label="Fermer">←</button>
-              <h1 className="text-xl font-serif font-bold">Modifier la tenue ✨</h1>
-            </div>
-
-            <OutfitFreeCanvas
-              pieces={freePieces}
-              onChange={next =>
-                setFreePieces(
-                  next.map(n => ({
-                    ...n,
-                    item: freePieces.find(p => p.itemId === n.itemId)!.item,
-                  }))
-                )
-              }
-              selectedId={freeSelectedId}
-              onSelectId={setFreeSelectedId}
-            />
-
-            {freeSelectedId && (
-              <div className="flex items-center justify-center gap-2 mt-3">
-                <button
-                  onClick={() => resizeSelected(-20)}
-                  className="w-10 h-10 rounded-full bg-card card-shadow text-lg active:scale-90 transition-transform"
-                >−</button>
-                <button
-                  onClick={() => resizeSelected(20)}
-                  className="w-10 h-10 rounded-full bg-card card-shadow text-lg active:scale-90 transition-transform"
-                >+</button>
-                <button
-                  onClick={removeSelected}
-                  className="px-4 h-10 rounded-full bg-destructive/15 text-destructive text-sm font-semibold active:scale-95 transition-transform"
-                >🗑️ Retirer</button>
-              </div>
-            )}
-
-            <div className="flex gap-2 overflow-x-auto no-scrollbar mt-4 pb-1">
-              {CHIPS.map(c => (
-                <button
-                  key={c.key}
-                  onClick={() => setFreeChip(c.key)}
-                  className="flex-shrink-0 px-4 py-2 rounded-full text-xs font-medium"
-                  style={{ border: `1px solid ${ROSE_GOLD}`, color: ROSE_GOLD, background: 'transparent' }}
-                >
-                  + {c.label}
-                </button>
-              ))}
-            </div>
-
-            {freeChip && (
-              <div className="fixed inset-0 z-[60] flex items-end" onClick={() => setFreeChip(null)}>
-                <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
-                <div
-                  className="relative w-full bg-card rounded-t-3xl p-5 max-h-[70vh] overflow-y-auto animate-slide-in-bottom"
-                  onClick={e => e.stopPropagation()}
-                >
-                  <div className="w-12 h-1 bg-muted rounded-full mx-auto mb-4" />
-                  <h3 className="font-serif font-bold text-lg mb-3">
-                    {CHIPS.find(c => c.key === freeChip)?.label}
-                  </h3>
-                  {filteredWardrobe.length === 0 ? (
-                    <p className="text-center text-sm text-muted-foreground py-8">
-                      Aucune pièce dans cette catégorie
-                    </p>
-                  ) : (
-                    <div className="grid grid-cols-3 gap-2">
-                      {filteredWardrobe.map(item => (
-                        <button
-                          key={item.id}
-                          onClick={() => addPieceFromItem(item)}
-                          className="aspect-square rounded-lg overflow-hidden bg-white active:scale-[0.96] transition-transform"
-                        >
-                          <img src={item.imageBase64} alt={item.type} className="w-full h-full object-contain" />
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            <div className="flex gap-2 mt-6">
-              <button
-                onClick={closeEditor}
-                className="flex-1 py-3 rounded-xl bg-secondary text-secondary-foreground font-semibold text-sm active:scale-[0.98] transition-transform"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={saveEditor}
-                disabled={freePieces.length < 1}
-                className="flex-1 py-3 rounded-xl text-white font-semibold text-sm active:scale-[0.98] transition-transform disabled:opacity-50"
-                style={{ backgroundColor: ROSE_GOLD }}
-              >
-                Enregistrer
-              </button>
-            </div>
-          </div>
-        </div>
+        <OutfitTemplateEditor
+          items={results[editingIdx].outfit}
+          initialLayout={results[editingIdx].layoutData ?? null}
+          wardrobe={wardrobe}
+          onCancel={() => setEditingIdx(null)}
+          onSave={handleEditorSave}
+        />
       )}
     </div>
   );
