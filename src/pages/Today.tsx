@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { WeatherData, fetchWeatherByGeolocation, fetchWeatherByCity, getSavedCity, saveCity } from '@/lib/weather';
 import { getWardrobe, getDailyCounter, saveDailyCounter, getProfile } from '@/lib/storage';
 import { generateRecommendations } from '@/lib/recommendations';
+import { generateOutfits } from '@/lib/outfitEngine';
 import { ClothingItem, OutfitLayoutData, UserProfile } from '@/lib/types';
 import { loadBeautyProfile } from '@/lib/stylingTips';
 import OutfitDailyFeed from '@/components/OutfitDailyFeed';
