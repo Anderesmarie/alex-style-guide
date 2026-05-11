@@ -208,16 +208,38 @@ export default function Today() {
     }
   };
 
+  const buildEngineInput = useCallback(() => {
+    const tempMin = ws.status === 'done' ? ws.data.tempMin : (weatherTemp ?? 18);
+    const tempMax = ws.status === 'done' ? ws.data.tempMax : (weatherTemp ?? 18);
+    const amplitude = ws.status === 'done' ? (ws.data.amplitude ?? Math.max(0, tempMax - tempMin)) : 0;
+    const day = new Date().getDay(); // 0=Sun, 6=Sat
+    const isWeekday = day >= 1 && day <= 5;
+    const worksLifestyle = lifestyle === 'Premier job' || lifestyle === 'Je travaille';
+    const occasion = isWeekday && worksLifestyle ? 'Travail' : 'Quotidien';
+    return {
+      wardrobe,
+      tempMin,
+      tempMax,
+      amplitude,
+      occasion,
+      morphologie: userProfile?.morphologie ?? null,
+      taille: userProfile?.taille ?? null,
+      corpulence: userProfile?.corpulence ?? null,
+      colorimetry: userSeason ?? undefined,
+      favStyles: userProfile?.styles ?? [],
+    };
+  }, [ws, weatherTemp, wardrobe, userProfile, userSeason, lifestyle]);
+
   const generate = useCallback(async () => {
     if (!enough || swipeComplete || pendingSwipe) return;
     if (!canSuggest) return;
-    const recs = await generateRecommendations(wardrobe, weatherTemp, 3, userProfile);
+    const candidates = generateOutfits(buildEngineInput());
+    const recs = candidates.map(c => c.items);
     setRecommendations(recs);
     if (recs.length > 0) {
-      // Phase 1 : swipe Tinder avant d'enregistrer
       setPendingSwipe(recs);
     }
-  }, [weatherTemp, canSuggest, enough, wardrobe, swipeComplete, userProfile, pendingSwipe]);
+  }, [enough, swipeComplete, pendingSwipe, canSuggest, buildEngineInput]);
 
   const handleSwipeComplete = useCallback(async (likes: boolean[]) => {
     if (!pendingSwipe) return;
