@@ -97,6 +97,7 @@ export default function Today() {
   const [loading, setLoading] = useState(true);
   const [userSeason, setUserSeason] = useState<Season | null>(null);
   const [pseudo, setPseudo] = useState<string | null>(null);
+  const [lifestyle, setLifestyle] = useState<string | null>(null);
   
 
   const today = new Date().toISOString().split('T')[0];
