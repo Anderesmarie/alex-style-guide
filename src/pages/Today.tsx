@@ -434,7 +434,8 @@ export default function Today() {
 
       <EventBanner onViewOutfits={async () => {
         if (!enough) return;
-        const recs = await generateRecommendations(wardrobe, weatherTemp, 3, userProfile);
+        const candidates = generateOutfits(buildEngineInput());
+        const recs = candidates.map(c => c.items);
         setRecommendations(recs);
         setSwipeComplete(false);
         setSwipeResults(null);
