@@ -315,5 +315,59 @@ export function applyScoring(
     }
   }
 
+  // ---- Chaussures ----
+  const shoes = items.find(i => i.category === 'Chaussures');
+  if (shoes) {
+    const ss = shoes.style || [];
+    const has = (...names: string[]) => names.some(n => ss.includes(n));
+    const occ = shoes.occasion || [];
+    const hasOcc = (...names: string[]) => names.some(n => occ.includes(n));
+
+    switch (shoes.type) {
+      case 'Baskets':
+        if (has('Casual chic', 'Streetwear', 'Y2K')) ({ score, reasons } = add(score, reasons, 1, 'Baskets dans le style'));
+        if (tempMax > 15) ({ score, reasons } = add(score, reasons, 1, 'Baskets adaptées'));
+        if (has('Old Money')) ({ score, reasons } = add(score, reasons, -1, 'Baskets vs Old Money'));
+        break;
+      case 'Escarpins':
+        if (has('Old Money', 'Casual chic', 'Romantique')) ({ score, reasons } = add(score, reasons, 2, 'Escarpins parfaits'));
+        if (tempMin < 5) ({ score, reasons } = add(score, reasons, -1, 'Escarpins par grand froid'));
+        if (has('Streetwear', 'Sportswear')) ({ score, reasons } = add(score, reasons, -3, 'Escarpins hors style'));
+        break;
+      case 'Sandales plates':
+        if (tempMax > 22) ({ score, reasons } = add(score, reasons, 1, 'Sandales plates pour la chaleur'));
+        if (has('Bohème', 'Casual chic')) ({ score, reasons } = add(score, reasons, 1, 'Sandales plates dans le style'));
+        if (tempMin < 18) ({ score, reasons } = add(score, reasons, -2, 'Sandales plates trop fraîches'));
+        break;
+      case 'Sandales à talons':
+        if (has('Casual chic', 'Romantique', 'Old Money')) ({ score, reasons } = add(score, reasons, 1, 'Sandales à talons chic'));
+        if (tempMin < 15) ({ score, reasons } = add(score, reasons, -1, 'Sandales à talons trop fraîches'));
+        if (has('Streetwear', 'Sportswear')) ({ score, reasons } = add(score, reasons, -2, 'Sandales à talons hors style'));
+        break;
+      case 'Boots / Bottines':
+        if (tempMin < 15) ({ score, reasons } = add(score, reasons, 1, 'Bottines au frais'));
+        if (has('Grunge', 'Dark', 'Casual chic')) ({ score, reasons } = add(score, reasons, 1, 'Bottines dans le style'));
+        if (tempMax > 25) ({ score, reasons } = add(score, reasons, -2, 'Bottines trop chaudes'));
+        break;
+      case 'Bottes hautes':
+        if (tempMin < 10) ({ score, reasons } = add(score, reasons, 1, 'Bottes hautes au froid'));
+        if (has('Dark', 'Grunge', 'Old Money')) ({ score, reasons } = add(score, reasons, 1, 'Bottes hautes dans le style'));
+        if (tempMax > 20) ({ score, reasons } = add(score, reasons, -2, 'Bottes hautes trop chaudes'));
+        break;
+      case 'Mocassins / Loafers':
+        if (has('Old Money', 'Preppy', 'Casual chic')) ({ score, reasons } = add(score, reasons, 2, 'Mocassins parfaits'));
+        if (has('Streetwear', 'Sportswear')) ({ score, reasons } = add(score, reasons, -1, 'Mocassins hors style'));
+        break;
+      case 'Ballerines':
+        if (has('Romantique', 'Casual chic', 'Preppy')) ({ score, reasons } = add(score, reasons, 1, 'Ballerines dans le style'));
+        break;
+      case 'Claquettes / Mules':
+        if (tempMax > 22) ({ score, reasons } = add(score, reasons, 1, 'Mules pour la chaleur'));
+        if (has('Streetwear', 'Y2K')) ({ score, reasons } = add(score, reasons, 1, 'Mules dans le style'));
+        if (hasOcc('Cérémonie', 'Bureau')) ({ score, reasons } = add(score, reasons, -2, 'Mules inadaptées'));
+        break;
+    }
+  }
+
   return { ...candidate, score, reasons };
 }
