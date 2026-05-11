@@ -148,6 +148,9 @@ export default function Today() {
             if (prof?.pseudo) {
               setPseudo(prof.pseudo);
             }
+            if (prof?.lifestyle) {
+              setLifestyle(prof.lifestyle);
+            }
             if (prof) {
               setUserProfile(prev => ({
                 ...prev,
