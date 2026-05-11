@@ -245,5 +245,75 @@ export function applyScoring(
     }
   }
 
+  // ---- Pièces par style favori ----
+  const styleMap: Record<string, { plus: string[]; minus: string[]; minusDelta?: number }> = {
+    'Old Money': {
+      plus: ['Blazer', 'Manteau long', 'Manteau court', 'Trench', 'Pantalon droit', 'Pantalon large', 'Cardigan', 'Pull col roulé', 'Pull col V', 'Chemise', 'Robe midi', 'Robe longue', 'Mocassins / Loafers'],
+      minus: ['Jogging', 'Hoodie', 'Baskets'],
+    },
+    'Streetwear': {
+      plus: ['Hoodie', 'Sweat', 'Bomber', 'Jogging', 'Pantalon cargo', 'Short cargo', 'Baskets'],
+      minus: ['Escarpins', 'Robe habillée'],
+    },
+    'Y2K': {
+      plus: ['Crop top', 'Top corset / Bralette', 'Mini-jupe', 'Robe mini', 'Combishort', 'Top dos nu'],
+      minus: ['Manteau long', 'Pantalon droit'],
+    },
+    'Casual chic': {
+      plus: ['Blazer', 'Jean droit', 'Jean taille haute', 'Chemise', 'Blouse', 'Robe casual', 'Robe midi', 'Mocassins / Loafers', 'Baskets'],
+      minus: ['Jogging', 'Hoodie'],
+      minusDelta: -1,
+    },
+    'Romantique': {
+      plus: ['Robe midi', 'Robe longue', 'Robe sans bretelles', 'Jupe plissée', 'Jupe évasée', 'Blouse', 'Top dos nu'],
+      minus: ['Jogging', 'Veste militaire'],
+    },
+    'Bohème': {
+      plus: ['Jupe longue', 'Robe longue', 'Blouse', 'Cardigan', 'Veste en jean', 'Sandales plates'],
+      minus: ['Escarpins', 'Blazer'],
+    },
+    'Minimaliste': {
+      plus: ['T-shirt', 'Pantalon droit', 'Robe casual', 'Manteau court', 'Jean droit'],
+      minus: ['Top corset / Bralette', 'Jupe plissée'],
+    },
+    'Grunge': {
+      plus: ['Veste en jean', 'Perfecto', 'Chemise', 'Boots / Bottines', 'Mini-jupe', 'Jean boyfriend'],
+      minus: ['Robe habillée', 'Escarpins'],
+    },
+    'Dark': {
+      plus: ['Perfecto', 'Manteau long', 'Robe habillée', 'Boots / Bottines', 'Bottes hautes', 'Jean skinny'],
+      minus: ['Robe sans bretelles'],
+    },
+    'Vintage': {
+      plus: ['Jean évasé', 'Jean boyfriend', 'Chemise', 'Veste en jean', 'Robe midi', 'Cardigan', 'Mocassins / Loafers'],
+      minus: ['Jogging', 'Baskets'],
+    },
+    'Preppy': {
+      plus: ['Blazer', 'Chemise', 'Jupe plissée', 'Pantalon droit', 'Pull col V', 'Pull col rond', 'Mocassins / Loafers', 'Robe midi'],
+      minus: ['Jogging', 'Crop top'],
+    },
+    'Sportswear': {
+      plus: ['Legging', 'Sweat', 'Hoodie', 'Short taille haute', 'Baskets', 'Jogging'],
+      minus: ['Escarpins', 'Robe habillée', 'Blazer'],
+    },
+  };
+
+  const favStyles = input.favStyles || [];
+  for (const style of favStyles) {
+    const rules = styleMap[style];
+    if (!rules) continue;
+    for (const it of items) {
+      const itemStyles = it.style || [];
+      if (!itemStyles.includes(style)) continue;
+      if (rules.plus.includes(it.type)) {
+        ({ score, reasons } = add(score, reasons, 2, `${it.type} parfait ${style}`));
+      }
+      if (rules.minus.includes(it.type)) {
+        const delta = rules.minusDelta ?? -2;
+        ({ score, reasons } = add(score, reasons, delta, `${it.type} hors style ${style}`));
+      }
+    }
+  }
+
   return { ...candidate, score, reasons };
 }
