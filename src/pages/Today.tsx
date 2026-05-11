@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { WeatherData, fetchWeatherByGeolocation, fetchWeatherByCity, getSavedCity, saveCity } from '@/lib/weather';
 import { getWardrobe, getDailyCounter, saveDailyCounter, getProfile } from '@/lib/storage';
 import { generateRecommendations } from '@/lib/recommendations';
+import { generateOutfits } from '@/lib/outfitEngine';
 import { ClothingItem, OutfitLayoutData, UserProfile } from '@/lib/types';
 import { loadBeautyProfile } from '@/lib/stylingTips';
 import OutfitDailyFeed from '@/components/OutfitDailyFeed';
@@ -96,6 +97,7 @@ export default function Today() {
   const [loading, setLoading] = useState(true);
   const [userSeason, setUserSeason] = useState<Season | null>(null);
   const [pseudo, setPseudo] = useState<string | null>(null);
+  const [lifestyle, setLifestyle] = useState<string | null>(null);
   
 
   const today = new Date().toISOString().split('T')[0];
@@ -145,6 +147,9 @@ export default function Today() {
             }
             if (prof?.pseudo) {
               setPseudo(prof.pseudo);
+            }
+            if (prof?.lifestyle) {
+              setLifestyle(prof.lifestyle);
             }
             if (prof) {
               setUserProfile(prev => ({
@@ -203,16 +208,38 @@ export default function Today() {
     }
   };
 
+  const buildEngineInput = useCallback(() => {
+    const tempMin = ws.status === 'done' ? ws.data.tempMin : (weatherTemp ?? 18);
+    const tempMax = ws.status === 'done' ? ws.data.tempMax : (weatherTemp ?? 18);
+    const amplitude = ws.status === 'done' ? (ws.data.amplitude ?? Math.max(0, tempMax - tempMin)) : 0;
+    const day = new Date().getDay(); // 0=Sun, 6=Sat
+    const isWeekday = day >= 1 && day <= 5;
+    const worksLifestyle = lifestyle === 'Premier job' || lifestyle === 'Je travaille';
+    const occasion = isWeekday && worksLifestyle ? 'Travail' : 'Quotidien';
+    return {
+      wardrobe,
+      tempMin,
+      tempMax,
+      amplitude,
+      occasion,
+      morphologie: userProfile?.morphologie ?? null,
+      taille: userProfile?.taille ?? null,
+      corpulence: userProfile?.corpulence ?? null,
+      colorimetry: userSeason ?? undefined,
+      favStyles: userProfile?.styles ?? [],
+    };
+  }, [ws, weatherTemp, wardrobe, userProfile, userSeason, lifestyle]);
+
   const generate = useCallback(async () => {
     if (!enough || swipeComplete || pendingSwipe) return;
     if (!canSuggest) return;
-    const recs = await generateRecommendations(wardrobe, weatherTemp, 3, userProfile);
+    const candidates = generateOutfits(buildEngineInput());
+    const recs = candidates.map(c => c.items);
     setRecommendations(recs);
     if (recs.length > 0) {
-      // Phase 1 : swipe Tinder avant d'enregistrer
       setPendingSwipe(recs);
     }
-  }, [weatherTemp, canSuggest, enough, wardrobe, swipeComplete, userProfile, pendingSwipe]);
+  }, [enough, swipeComplete, pendingSwipe, canSuggest, buildEngineInput]);
 
   const handleSwipeComplete = useCallback(async (likes: boolean[]) => {
     if (!pendingSwipe) return;
@@ -407,7 +434,8 @@ export default function Today() {
 
       <EventBanner onViewOutfits={async () => {
         if (!enough) return;
-        const recs = await generateRecommendations(wardrobe, weatherTemp, 3, userProfile);
+        const candidates = generateOutfits(buildEngineInput());
+        const recs = candidates.map(c => c.items);
         setRecommendations(recs);
         setSwipeComplete(false);
         setSwipeResults(null);
