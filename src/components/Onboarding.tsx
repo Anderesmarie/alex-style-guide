@@ -116,7 +116,7 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
           favorite_colors: favoriteColors,
           morphologie: morphoCode,
         }).eq('id', userData.user.id);
-        console.log('Morphologie sauvegardée:', morphoCode);
+        if (import.meta.env.DEV) console.log('Morphologie sauvegardée:', morphoCode);
       }
     } catch {}
     setShowMessage(true);
