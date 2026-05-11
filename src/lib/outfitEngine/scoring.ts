@@ -369,5 +369,44 @@ export function applyScoring(
     }
   }
 
+  // ---- Anti-répétition ----
+  const currentIds = items.map(i => i.id).sort().join(',');
+  if (input.recentOutfitIds && input.recentOutfitIds.length > 0) {
+    for (let i = 0; i < input.recentOutfitIds.length; i++) {
+      const pastIds = [...input.recentOutfitIds[i]].sort().join(',');
+      if (pastIds !== currentIds) continue;
+      if (i === 0) {
+        ({ score, reasons } = add(score, reasons, -5, 'Tenue identique à hier'));
+      } else if (i <= 2) {
+        ({ score, reasons } = add(score, reasons, -3, 'Tenue portée récemment'));
+      } else if (i <= 13) {
+        ({ score, reasons } = add(score, reasons, -1, 'Tenue déjà portée'));
+      }
+      break;
+    }
+  }
+
+  // ---- Pièces non aimées ----
+  if (input.dislikedItemIds && input.dislikedItemIds.length > 0) {
+    for (const it of items) {
+      if (input.dislikedItemIds.includes(it.id)) {
+        ({ score, reasons } = add(score, reasons, -10, 'Pièce non aimée'));
+      }
+    }
+  }
+
+  // ---- Bonus fraîcheur ----
+  const now = Date.now();
+  const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+  for (const it of items) {
+    const createdAt = (it as any).createdAt;
+    if (!createdAt) continue;
+    const ts = typeof createdAt === 'string' ? Date.parse(createdAt) : Number(createdAt);
+    if (!isFinite(ts)) continue;
+    if (now - ts < THIRTY_DAYS) {
+      ({ score, reasons } = add(score, reasons, 1, `${it.type} récemment ajouté`));
+    }
+  }
+
   return { ...candidate, score, reasons };
 }
