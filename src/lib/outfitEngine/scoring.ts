@@ -108,5 +108,142 @@ export function applyScoring(
     ({ score, reasons } = add(score, reasons, -2, 'Trop de couleurs vives'));
   }
 
+  // ---- Morphologie ----
+  const fit = (it: ClothingItem) => norm(it.fit);
+  const tex = (it: ClothingItem) => norm(it.matiere) + ' ' + norm(it.texture);
+  const isHighHeel = (it: ClothingItem) =>
+    ['Escarpins', 'Sandales à talons'].includes(it.type);
+
+  if (input.morphologie === 'A') {
+    for (const it of items) {
+      if (it.type === 'Jean évasé') ({ score, reasons } = add(score, reasons, 2, 'Jean évasé flatteur (A)'));
+      if (it.type === 'Jupe évasée') ({ score, reasons } = add(score, reasons, 2, 'Jupe évasée flatteuse (A)'));
+      if (it.type === 'Blazer') ({ score, reasons } = add(score, reasons, 2, 'Blazer structurant (A)'));
+      if (it.type === 'Jean skinny') ({ score, reasons } = add(score, reasons, -2, 'Jean skinny peu flatteur (A)'));
+      if (it.type === 'Jupe crayon') ({ score, reasons } = add(score, reasons, -2, 'Jupe crayon peu flatteuse (A)'));
+      if (it.type === 'Jupe moulante') ({ score, reasons } = add(score, reasons, -2, 'Jupe moulante peu flatteuse (A)'));
+    }
+  }
+  if (input.morphologie === 'H') {
+    for (const it of items) {
+      if (it.type === 'Cardigan') ({ score, reasons } = add(score, reasons, 2, 'Cardigan structure (H)'));
+      if (it.type === 'Pantalon droit') ({ score, reasons } = add(score, reasons, 2, 'Pantalon droit (H)'));
+      if (it.type === 'Ceinture') ({ score, reasons } = add(score, reasons, 1, 'Ceinture marque la taille (H)'));
+      if (fit(it).includes('oversize')) ({ score, reasons } = add(score, reasons, -1, 'Oversize peu flatteur (H)'));
+    }
+  }
+  if (input.morphologie === 'X') {
+    for (const it of items) {
+      if (fit(it).includes('ajust')) ({ score, reasons } = add(score, reasons, 2, 'Coupe ajustée (X)'));
+      if (['Robe midi', 'Robe longue', 'Robe habillée'].includes(it.type)) {
+        ({ score, reasons } = add(score, reasons, 2, `${it.type} flatteuse (X)`));
+      }
+      if (fit(it).includes('oversize')) ({ score, reasons } = add(score, reasons, -1, 'Oversize cache la silhouette (X)'));
+    }
+  }
+  if (input.morphologie === 'V') {
+    for (const it of items) {
+      if (['Jupe évasée', 'Jupe plissée'].includes(it.type)) {
+        ({ score, reasons } = add(score, reasons, 2, `${it.type} équilibre (V)`));
+      }
+      if (it.type === 'Pantalon large') ({ score, reasons } = add(score, reasons, 2, 'Pantalon large (V)'));
+      if (fit(it).includes('oversize')) ({ score, reasons } = add(score, reasons, -1, 'Oversize accentue les épaules (V)'));
+    }
+  }
+  if (input.morphologie === 'O') {
+    for (const it of items) {
+      const t = tex(it);
+      if (t.includes('satin') || t.includes('lin')) ({ score, reasons } = add(score, reasons, 2, 'Texture fluide (O)'));
+      const cs = colorTokens(it);
+      if (cs.some(c => c.includes('noir') || c.includes('marine') || c.includes('bordeaux'))) {
+        ({ score, reasons } = add(score, reasons, 1, 'Couleur affinante (O)'));
+      }
+      if (['Jupe moulante', 'Jupe crayon'].includes(it.type)) {
+        ({ score, reasons } = add(score, reasons, -2, `${it.type} peu flatteuse (O)`));
+      }
+    }
+  }
+  if (input.morphologie === '8') {
+    for (const it of items) {
+      if (fit(it).includes('ajust')) ({ score, reasons } = add(score, reasons, 2, 'Coupe ajustée (8)'));
+      if (it.type === 'Jean taille haute') ({ score, reasons } = add(score, reasons, 2, 'Jean taille haute (8)'));
+      if (fit(it).includes('oversize')) ({ score, reasons } = add(score, reasons, -1, 'Oversize cache la silhouette (8)'));
+    }
+  }
+
+  // ---- Taille ----
+  if (input.taille === 'petite') {
+    for (const it of items) {
+      if (['Robe midi', 'Jupe mi-longue'].includes(it.type)) {
+        ({ score, reasons } = add(score, reasons, 2, `${it.type} allongeante`));
+      }
+      if (isHighHeel(it)) ({ score, reasons } = add(score, reasons, 1, 'Talons allongent'));
+      if (['Pantalon large', 'Pantalon cargo'].includes(it.type)) {
+        ({ score, reasons } = add(score, reasons, -2, `${it.type} tasse la silhouette`));
+      }
+      if (it.type === 'Manteau long') ({ score, reasons } = add(score, reasons, -1, 'Manteau long écrasant'));
+    }
+  }
+  if (input.taille === 'grande') {
+    for (const it of items) {
+      if (['Robe longue', 'Pantalon large'].includes(it.type)) {
+        ({ score, reasons } = add(score, reasons, 2, `${it.type} met en valeur`));
+      }
+    }
+  }
+
+  // ---- Corpulence ----
+  if (input.corpulence === 'ronde') {
+    for (const it of items) {
+      const t = tex(it);
+      if (t.includes('satin') || t.includes('lin')) ({ score, reasons } = add(score, reasons, 2, 'Texture fluide flatteuse'));
+      const cs = colorTokens(it);
+      if (cs.some(c => c.includes('noir') || c.includes('marine') || c.includes('bordeaux') || c.includes('sombre'))) {
+        ({ score, reasons } = add(score, reasons, 1, 'Couleur sombre affinante'));
+      }
+    }
+  }
+  if (input.corpulence === 'fine') {
+    for (const it of items) {
+      const t = tex(it);
+      if (t.includes('denim') || t.includes('coton') || t.includes('maille')) {
+        ({ score, reasons } = add(score, reasons, 1, 'Texture qui ajoute du volume'));
+      }
+      if (fit(it).includes('oversize')) ({ score, reasons } = add(score, reasons, 1, 'Oversize stylé'));
+    }
+  }
+
+  // ---- Colorimétrie ----
+  const colorimetryMap: Record<string, { good: string[]; bad: string[] }> = {
+    'Printemps': {
+      good: ['corail', 'rose', 'turquoise', 'bleu-ciel', 'bleu ciel', 'camel'],
+      bad: ['noir', 'bordeaux', 'violet'],
+    },
+    'Été': {
+      good: ['rose', 'lavande', 'bleu', 'gris', 'creme', 'crème'],
+      bad: ['orange', 'rouge', 'marron'],
+    },
+    'Automne': {
+      good: ['camel', 'terracotta', 'kaki', 'bordeaux', 'marron'],
+      bad: ['rose', 'blanc'],
+    },
+    'Hiver': {
+      good: ['noir', 'blanc', 'rouge', 'bleu', 'fuchsia', 'violet'],
+      bad: ['beige', 'camel', 'orange'],
+    },
+  };
+  const palette = input.colorimetry ? colorimetryMap[input.colorimetry] : null;
+  if (palette) {
+    for (const it of items) {
+      const cs = colorTokens(it);
+      if (cs.some(c => palette.good.some(g => c.includes(g)))) {
+        ({ score, reasons } = add(score, reasons, 2, `Couleur ${input.colorimetry}`));
+      }
+      if (cs.some(c => palette.bad.some(b => c.includes(b)))) {
+        ({ score, reasons } = add(score, reasons, -1, `Couleur peu adaptée ${input.colorimetry}`));
+      }
+    }
+  }
+
   return { ...candidate, score, reasons };
 }
