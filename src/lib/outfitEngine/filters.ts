@@ -120,5 +120,33 @@ export function applyFilters(
     }
   }
 
+  // ---- Style ----
+  const norm = (s?: string) => (s || '').toLowerCase().trim();
+
+  const hasSporty = items.some(it => ['Jogging', 'Legging'].includes(it.type));
+  const hasHighHeels = items.some(it =>
+    ['Escarpins', 'Sandales à talons'].includes(it.type)
+  );
+  if (hasSporty && hasHighHeels) {
+    return block(candidate, '🚫 Jogging/Legging + talons');
+  }
+
+  const STRONG_PATTERNS = ['leopard', 'léopard', 'fleuri', 'tie-dye', 'tie dye', 'zebre', 'zébré', 'graphique'];
+  const strongCount = items.filter(it => {
+    const p = norm(it.pattern);
+    return STRONG_PATTERNS.some(sp => p.includes(sp));
+  }).length;
+  if (strongCount >= 2) {
+    return block(candidate, '🚫 Deux imprimés forts');
+  }
+
+  // ---- Couleurs ----
+  const colors = items.map(it => norm(it.color));
+  const hasRouge = colors.some(c => c.includes('rouge'));
+  const hasCorail = colors.some(c => c.includes('corail'));
+  if (hasRouge && hasCorail) {
+    return block(candidate, '🚫 Rouge + corail');
+  }
+
   return candidate;
 }
