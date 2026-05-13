@@ -427,6 +427,26 @@ export function applyScoring(
     }
   }
 
+  // ---- Bonus tenue sauvegardée ----
+  if (input.savedOutfitItemIds && input.savedOutfitItemIds.length > 0) {
+    const isSaved = input.savedOutfitItemIds.some(
+      ids => [...ids].sort().join(',') === currentIds
+    );
+    if (isSaved) {
+      ({ score, reasons } = add(score, reasons, 3, 'Tenue sauvegardée'));
+    }
+  }
+
+  // ---- Bonus pièce non vue 14 jours ----
+  if (input.recentItemIds) {
+    const recentSet = new Set(input.recentItemIds);
+    for (const it of items) {
+      if (!recentSet.has(it.id)) {
+        ({ score, reasons } = add(score, reasons, 1, `${it.type} pas vu récemment`));
+      }
+    }
+  }
+
   // ---- Bonus fraîcheur ----
   const now = Date.now();
   const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
