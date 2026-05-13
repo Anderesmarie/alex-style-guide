@@ -141,7 +141,7 @@ export default function Today() {
               .select('*')
               .eq('id', userData.user.id)
               .maybeSingle();
-            if (import.meta.env.DEV) console.log('Profil complet chargé:', prof);
+            console.log('Profil complet chargé:', prof);
             if (prof?.colorimetry_season) {
               setUserSeason(prof.colorimetry_season as Season);
             }
