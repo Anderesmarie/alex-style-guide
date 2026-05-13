@@ -78,16 +78,24 @@ function pickDiverse(sorted: OutfitCandidate[], input: EngineInput): OutfitCandi
 
   if (picked.length < 2) return picked;
 
-  // Tenue 3: main piece différente des 2 précédentes, bas différent, chaussures pas identiques aux 2
+  // Tenue 3: jamais de pièce identique aux DEUX autres tenues simultanément
   const shoes1 = getShoesId(picked[0]);
   const shoes2 = getShoesId(picked[1]);
+  const coat1 = getCoatId(picked[0]);
+  const coat2 = getCoatId(picked[1]);
+  const bag1 = getBagId(picked[0]);
+  const bag2 = getBagId(picked[1]);
   tryPick(c => {
     const m = getMainPieceId(c);
     const b = getBottomId(c);
     const s = getShoesId(c);
+    const co = getCoatId(c);
+    const bg = getBagId(c);
     if (m === getMainPieceId(picked[0]) || m === getMainPieceId(picked[1])) return false;
     if (b && (b === getBottomId(picked[0]) || b === getBottomId(picked[1]))) return false;
     if (s && shoes1 === s && shoes2 === s) return false;
+    if (co && coat1 === co && coat2 === co) return false;
+    if (bg && bag1 === bg && bag2 === bg) return false;
     return true;
   }) || tryPick(c => {
     const m = getMainPieceId(c);
