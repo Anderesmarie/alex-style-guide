@@ -14,15 +14,19 @@ export function generateCombinations(wardrobe: ClothingItem[]): ClothingItem[][]
   const baseCombos: ClothingItem[][] = [];
   const maxBase = chaussures.length > 0 ? Math.ceil(MAX_COMBOS / chaussures.length) : MAX_COMBOS;
 
+  const hautOptions: (ClothingItem | null)[] = [null, ...hauts];
   const pullOptions: (ClothingItem | null)[] = [null, ...pulls];
   const manteauOptions: (ClothingItem | null)[] = [null, ...manteaux];
 
-  outerA: for (const h of hauts) {
-    for (const b of bas) {
+  // Chemin A : (haut et/ou pull) + bas + manteau optionnel
+  // Génère : haut+bas, pull+bas, haut+pull+bas, +manteau pour chaque
+  outerA: for (const b of bas) {
+    for (const h of hautOptions) {
       for (const p of pullOptions) {
-        if (p && p.id === h.id) continue;
+        if (!h && !p) continue; // il faut au moins un top
         for (const m of manteauOptions) {
-          const combo: ClothingItem[] = [h, b];
+          const combo: ClothingItem[] = [b];
+          if (h) combo.push(h);
           if (p) combo.push(p);
           if (m) combo.push(m);
           baseCombos.push(combo);
