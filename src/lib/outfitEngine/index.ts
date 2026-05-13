@@ -25,6 +25,16 @@ function getShoesId(c: OutfitCandidate): string | null {
   return sh?.id ?? null;
 }
 
+function getCoatId(c: OutfitCandidate): string | null {
+  const co = c.items.find(i => i.category === 'Manteaux' || i.category === 'Manteaux & vestes');
+  return co?.id ?? null;
+}
+
+function getBagId(c: OutfitCandidate): string | null {
+  const bag = c.items.find(i => i.category === 'Sacs' || i.category === 'Accessoires' && (i.subcategory || '').toLowerCase().includes('sac'));
+  return bag?.id ?? null;
+}
+
 function hasRemovableLayer(c: OutfitCandidate): boolean {
   return c.items.some(i => REMOVABLE_LAYERS.includes(i.type));
 }
