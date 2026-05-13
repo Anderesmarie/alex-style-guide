@@ -399,6 +399,8 @@ export function applyScoring(
         if (hasOcc('Cérémonie', 'Bureau')) ({ score, reasons } = add(score, reasons, -2, 'Mules inadaptées'));
         break;
     }
+  }
+
   // ---- Styles mixables ----
   const allStyles = items.flatMap(i => i.style || []);
   const hasStyle = (...styles: string[]) => styles.every(s => allStyles.includes(s));
