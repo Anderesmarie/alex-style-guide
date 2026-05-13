@@ -8,7 +8,7 @@ const REMOVABLE_LAYERS = [
   'Bomber',
   'Cardigan',
   'Veste militaire',
-  'Veste coupe-vent',
+  'Veste coupe-vent', 'Veste en cuir', 'Perfecto',
 ];
 
 const NEUTRALS = ['blanc', 'noir', 'gris', 'beige', 'camel', 'marine', 'creme', 'crème', 'nude'];

@@ -8,7 +8,7 @@ const REMOVABLE_LAYERS = [
   'Bomber',
   'Cardigan',
   'Veste militaire',
-  'Veste coupe-vent',
+  'Veste coupe-vent', 'Veste en cuir', 'Perfecto',
 ];
 
 const COATS_AND_JACKETS_SUBS = ['Manteaux', 'Vestes'];
