@@ -4,7 +4,7 @@ import { generateCombinations } from './combinations';
 import { applyFilters } from './filters';
 import { applyScoring } from './scoring';
 
-const REMOVABLE_LAYERS = ['Blazer', 'Veste en jean', 'Trench', 'Bomber', 'Cardigan', 'Veste militaire', 'Veste coupe-vent'];
+const REMOVABLE_LAYERS = ['Blazer', 'Veste en jean', 'Trench', 'Bomber', 'Cardigan', 'Veste militaire', 'Veste coupe-vent', 'Veste en cuir', 'Perfecto'];
 const DRESSY_STYLES = ['Old Money', 'Chic', 'Romantique', 'Preppy', 'Casual chic'];
 const CASUAL_STYLES = ['Streetwear', 'Sportswear', 'Grunge', 'Y2K', 'Casual'];
 const ACCESSORY_CATEGORIES = ['Sacs', 'Accessoires', 'Bijoux'];

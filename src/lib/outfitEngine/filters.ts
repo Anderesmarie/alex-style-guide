@@ -8,7 +8,7 @@ const REMOVABLE_LAYERS = [
   'Bomber',
   'Cardigan',
   'Veste militaire',
-  'Veste coupe-vent',
+  'Veste coupe-vent', 'Veste en cuir', 'Perfecto',
 ];
 
 const COATS_AND_JACKETS_SUBS = ['Manteaux', 'Vestes'];
@@ -28,7 +28,7 @@ function isBas(it: ClothingItem) {
   return it.category === 'Bas';
 }
 function isManteau(it: ClothingItem) {
-  return it.category === 'Manteaux';
+  return it.category === 'Manteaux' || it.category === 'Manteaux & vestes';
 }
 function isChaussure(it: ClothingItem) {
   return it.category === 'Chaussures';

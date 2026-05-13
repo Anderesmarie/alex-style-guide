@@ -7,7 +7,7 @@ export function generateCombinations(wardrobe: ClothingItem[]): ClothingItem[][]
   const bas = wardrobe.filter(i => i.category === 'Bas');
   const robes = wardrobe.filter(i => i.category === 'Robes');
   const pulls = wardrobe.filter(i => i.subcategory === 'Pulls & Mailles');
-  const manteaux = wardrobe.filter(i => i.category === 'Manteaux');
+  const manteaux = wardrobe.filter(i => i.category === 'Manteaux' || i.category === 'Manteaux & vestes');
   const chaussures = wardrobe.filter(i => i.category === 'Chaussures');
 
   // Phase 1 : combos de base (haut+bas ou robe)
