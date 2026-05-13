@@ -142,6 +142,10 @@ export function applyFilters(
 
   // ---- Cardigan rules ----
   const hasCardigan = items.some(i => i.type === 'Cardigan');
+  // Cardigan sans haut (layer 1) = BLOQUANT
+  if (hasCardigan && hauts.length === 0) {
+    return block(candidate, '🚫 Cardigan doit être porté avec un haut');
+  }
   const VESTES_COURTES = [
     'Blazer', 'Bomber', 'Veste en jean',
     'Perfecto', 'Veste militaire',
