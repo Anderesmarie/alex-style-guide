@@ -91,6 +91,38 @@ export function applyScoring(
     ({ score, reasons } = add(score, reasons, -2, 'Pas de couche amovible'));
   }
 
+  // ---- Empilement / layering (températures fraîches) ----
+  const hasCoat = items.some(it => it.category === 'Manteaux');
+  const hasPullCat = items.some(it => it.subcategory === 'Pulls & Mailles');
+  const hasNoLayer = !hasCoat && !hasPullCat;
+  const TSHIRT_LIKE = ['T-shirt', 'Crop top', 'Débardeur', 'Body', 'Top dos nu', 'Top épaules dénudées'];
+  const tshirtItem = items.find(it => TSHIRT_LIKE.includes(it.type));
+  const pullItem = items.find(it => it.subcategory === 'Pulls & Mailles');
+  const removableItem = items.find(it => REMOVABLE_LAYERS.includes(it.type));
+  const hasTshirt = !!tshirtItem;
+  const hasPull = !!pullItem;
+  const hasRemovableLayer = !!removableItem;
+  const hasMidCoat = items.some(it => ['Trench', 'Manteau court'].includes(it.type));
+
+  if (hasPull && !hasTshirt && hasNoLayer && tempMin < 15) {
+    ({ score, reasons } = add(score, reasons, -3, `Pull seul insuffisant à ${tempMin}°C`));
+  }
+  if (hasTshirt && !hasPull && hasNoLayer && tempMin < 12) {
+    ({ score, reasons } = add(score, reasons, -3, `T-shirt seul insuffisant à ${tempMin}°C`));
+  }
+  if (hasTshirt && hasPull && tempMin < 15) {
+    ({ score, reasons } = add(score, reasons, 3, 'T-shirt + pull bien adapté'));
+  }
+  if (hasTshirt && hasRemovableLayer && tempMin < 15 && tempMax > 18) {
+    ({ score, reasons } = add(score, reasons, 3, 'T-shirt + couche amovible idéal'));
+  }
+  if (hasPull && hasMidCoat && tempMin < 12) {
+    ({ score, reasons } = add(score, reasons, 3, 'Pull + manteau au frais'));
+  }
+  if (hasTshirt && hasPull && hasRemovableLayer && amplitude >= 8) {
+    ({ score, reasons } = add(score, reasons, 4, 'Triple couche pour forte amplitude'));
+  }
+
   // ---- Couleurs ----
   const allColors = items.flatMap(colorTokens);
   let neutralCount = 0;
