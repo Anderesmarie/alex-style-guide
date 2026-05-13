@@ -83,36 +83,41 @@ function pickDiverse(sorted: OutfitCandidate[], input: EngineInput): OutfitCandi
 
   if (picked.length < 2) return picked;
 
-  // Tenue 3: aucune pièce ne doit apparaître dans les 3 tenues simultanément
-  const ids1 = new Set(picked[0].items.map(i => i.id));
-  const ids2 = new Set(picked[1].items.map(i => i.id));
-  const sharedByBoth = new Set([...ids1].filter(id => ids2.has(id)));
-  const shoes1 = getShoesId(picked[0]);
-  const shoes2 = getShoesId(picked[1]);
-  const coat1 = getCoatId(picked[0]);
-  const coat2 = getCoatId(picked[1]);
-  const bag1 = getBagId(picked[0]);
-  const bag2 = getBagId(picked[1]);
+  // Tenue 2: aucune pièce non-accessoire en commun avec tenue 1
+  const nonAccIds1 = new Set(picked[0].items.filter(i => !isAccessory(i)).map(i => i.id));
+  tryPick(c => !c.items.some(it => !isAccessory(it) && nonAccIds1.has(it.id)))
+    || tryPick(c => getMainPieceId(c) !== getMainPieceId(picked[0]));
+
+  if (picked.length < 2) return picked;
+
+  // Tenue 3:
+  // - aucune pièce non-accessoire en commun avec tenue 1 OU tenue 2
+  // - aucun accessoire présent dans LES DEUX tenues précédentes (max 2 sur 3)
+  const nonAccIds2 = new Set(picked[1].items.filter(i => !isAccessory(i)).map(i => i.id));
+  const accSharedByBoth = new Set(
+    picked[0].items
+      .filter(i => isAccessory(i) && picked[1].items.some(j => j.id === i.id))
+      .map(i => i.id)
+  );
   tryPick(c => {
-    const m = getMainPieceId(c);
-    const b = getBottomId(c);
-    const s = getShoesId(c);
-    const co = getCoatId(c);
-    const bg = getBagId(c);
-    if (m === getMainPieceId(picked[0]) || m === getMainPieceId(picked[1])) return false;
-    if (b && (b === getBottomId(picked[0]) || b === getBottomId(picked[1]))) return false;
-    if (s && shoes1 === s && shoes2 === s) return false;
-    if (co && coat1 === co && coat2 === co) return false;
-    if (bg && bag1 === bg && bag2 === bg) return false;
-    // Aucune pièce de la tenue ne doit déjà être dans les DEUX autres
-    if (c.items.some(it => sharedByBoth.has(it.id))) return false;
+    for (const it of c.items) {
+      if (isAccessory(it)) {
+        if (accSharedByBoth.has(it.id)) return false;
+      } else {
+        if (nonAccIds1.has(it.id) || nonAccIds2.has(it.id)) return false;
+      }
+    }
     return true;
   }) || tryPick(c => {
-    // Fallback : au minimum aucune pièce partagée par les 3
-    return !c.items.some(it => sharedByBoth.has(it.id));
-  }) || tryPick(c => {
-    const m = getMainPieceId(c);
-    return m !== getMainPieceId(picked[0]) && m !== getMainPieceId(picked[1]);
+    // Fallback : au minimum aucune pièce dans les 3 tenues
+    for (const it of c.items) {
+      if (isAccessory(it)) {
+        if (accSharedByBoth.has(it.id)) return false;
+      } else if (nonAccIds1.has(it.id) && nonAccIds2.has(it.id)) {
+        return false;
+      }
+    }
+    return true;
   }) || tryPick(() => true);
 
   // Garantir au moins une tenue avec couche amovible si amplitude >= 8
