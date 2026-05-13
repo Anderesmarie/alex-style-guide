@@ -78,7 +78,10 @@ function pickDiverse(sorted: OutfitCandidate[], input: EngineInput): OutfitCandi
 
   if (picked.length < 2) return picked;
 
-  // Tenue 3: jamais de pièce identique aux DEUX autres tenues simultanément
+  // Tenue 3: aucune pièce ne doit apparaître dans les 3 tenues simultanément
+  const ids1 = new Set(picked[0].items.map(i => i.id));
+  const ids2 = new Set(picked[1].items.map(i => i.id));
+  const sharedByBoth = new Set([...ids1].filter(id => ids2.has(id)));
   const shoes1 = getShoesId(picked[0]);
   const shoes2 = getShoesId(picked[1]);
   const coat1 = getCoatId(picked[0]);
@@ -96,7 +99,12 @@ function pickDiverse(sorted: OutfitCandidate[], input: EngineInput): OutfitCandi
     if (s && shoes1 === s && shoes2 === s) return false;
     if (co && coat1 === co && coat2 === co) return false;
     if (bg && bag1 === bg && bag2 === bg) return false;
+    // Aucune pièce de la tenue ne doit déjà être dans les DEUX autres
+    if (c.items.some(it => sharedByBoth.has(it.id))) return false;
     return true;
+  }) || tryPick(c => {
+    // Fallback : au minimum aucune pièce partagée par les 3
+    return !c.items.some(it => sharedByBoth.has(it.id));
   }) || tryPick(c => {
     const m = getMainPieceId(c);
     return m !== getMainPieceId(picked[0]) && m !== getMainPieceId(picked[1]);
