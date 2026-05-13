@@ -74,14 +74,7 @@ function pickDiverse(sorted: OutfitCandidate[], input: EngineInput): OutfitCandi
     return false;
   };
 
-  // Tenue 2: main piece + bottom différent de tenue 1
-  tryPick(c => {
-    const m1 = getMainPieceId(picked[0]);
-    const b1 = getBottomId(picked[0]);
-    return getMainPieceId(c) !== m1 && (b1 == null || getBottomId(c) !== b1);
-  }) || tryPick(c => getMainPieceId(c) !== getMainPieceId(picked[0]));
-
-  if (picked.length < 2) return picked;
+  // (tenue 2 sélectionnée plus bas avec règles unifiées)
 
   // Tenue 2: aucune pièce non-accessoire en commun avec tenue 1
   const nonAccIds1 = new Set(picked[0].items.filter(i => !isAccessory(i)).map(i => i.id));
