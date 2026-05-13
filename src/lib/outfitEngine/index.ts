@@ -7,6 +7,11 @@ import { applyScoring } from './scoring';
 const REMOVABLE_LAYERS = ['Blazer', 'Veste en jean', 'Trench', 'Bomber', 'Cardigan', 'Veste militaire', 'Veste coupe-vent'];
 const DRESSY_STYLES = ['Old Money', 'Chic', 'Romantique', 'Preppy', 'Casual chic'];
 const CASUAL_STYLES = ['Streetwear', 'Sportswear', 'Grunge', 'Y2K', 'Casual'];
+const ACCESSORY_CATEGORIES = ['Sacs', 'Accessoires', 'Bijoux'];
+
+function isAccessory(it: ClothingItem): boolean {
+  return ACCESSORY_CATEGORIES.includes(it.category);
+}
 
 function getMainPieceId(c: OutfitCandidate): string | null {
   const robe = c.items.find(i => i.category === 'Robes');
