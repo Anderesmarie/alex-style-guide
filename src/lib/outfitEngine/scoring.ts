@@ -113,7 +113,7 @@ export function applyScoring(
   if (hasTshirt && hasPull && tempMin < 15) {
     ({ score, reasons } = add(score, reasons, 3, 'T-shirt + pull bien adapté'));
   }
-  if (hasTshirt && hasRemovableLayer && tempMin < 15 && tempMax > 18) {
+  if (hasTshirt && hasRemovableLayer && tempMin < 15 && tempMax >= 17) {
     ({ score, reasons } = add(score, reasons, 3, 'T-shirt + couche amovible idéal'));
   }
   if (hasPull && hasMidCoat && tempMin < 12) {
@@ -121,6 +121,14 @@ export function applyScoring(
   }
   if (hasTshirt && hasPull && hasRemovableLayer && amplitude >= 8) {
     ({ score, reasons } = add(score, reasons, 4, 'Triple couche pour forte amplitude'));
+  }
+  // Bonus couche amovible quand il fait frais le matin (mi-saison type 11-18°C)
+  if (hasRemovableLayer && tempMin < 14 && tempMax <= 22) {
+    ({ score, reasons } = add(score, reasons, 2, 'Couche amovible adaptée à la mi-saison'));
+  }
+  // Pénalité : ni couche ni pull en mi-saison fraîche
+  if (hasNoLayer && tempMin < 13) {
+    ({ score, reasons } = add(score, reasons, -2, `Pas de couche pour ${tempMin}°C`));
   }
 
   // ---- Couleurs ----
