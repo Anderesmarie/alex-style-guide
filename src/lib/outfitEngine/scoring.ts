@@ -401,6 +401,48 @@ export function applyScoring(
     }
   }
 
+  // ---- Styles mixables ----
+  const allStyles = items.flatMap(i => i.style || []);
+  const hasStyle = (...styles: string[]) => styles.every(s => allStyles.includes(s));
+
+  if (hasStyle('Casual chic', 'Streetwear')) {
+    ({ score, reasons } = add(score, reasons, 1, 'Mix Casual chic + Streetwear'));
+  }
+  if (hasStyle('Casual chic', 'Old Money')) {
+    ({ score, reasons } = add(score, reasons, 1, 'Mix Casual chic + Old Money'));
+  }
+  if (hasStyle('Casual chic', 'Bohème')) {
+    ({ score, reasons } = add(score, reasons, 1, 'Mix Casual chic + Bohème'));
+  }
+  if (hasStyle('Old Money', 'Preppy')) {
+    ({ score, reasons } = add(score, reasons, 1, 'Mix Old Money + Preppy'));
+  }
+  if (hasStyle('Y2K', 'Streetwear')) {
+    ({ score, reasons } = add(score, reasons, 1, 'Mix Y2K + Streetwear'));
+  }
+  if (hasStyle('Bohème', 'Vintage')) {
+    ({ score, reasons } = add(score, reasons, 1, 'Mix Bohème + Vintage'));
+  }
+  if (hasStyle('Romantique', 'Y2K')) {
+    ({ score, reasons } = add(score, reasons, 1, 'Mix Romantique + Y2K'));
+  }
+
+  if (hasStyle('Sportswear', 'Old Money')) {
+    ({ score, reasons } = add(score, reasons, -2, 'Clash Sportswear + Old Money'));
+  }
+  if (hasStyle('Sportswear', 'Romantique')) {
+    ({ score, reasons } = add(score, reasons, -2, 'Clash Sportswear + Romantique'));
+  }
+  if (hasStyle('Dark', 'Romantique')) {
+    ({ score, reasons } = add(score, reasons, -1, 'Clash Dark + Romantique'));
+  }
+  if (hasStyle('Grunge', 'Old Money')) {
+    ({ score, reasons } = add(score, reasons, -2, 'Clash Grunge + Old Money'));
+  }
+  if (hasStyle('Minimaliste', 'Y2K')) {
+    ({ score, reasons } = add(score, reasons, -1, 'Clash Minimaliste + Y2K'));
+  }
+
   // ---- Anti-répétition ----
   const currentIds = items.map(i => i.id).sort().join(',');
   if (input.recentOutfitIds && input.recentOutfitIds.length > 0) {
