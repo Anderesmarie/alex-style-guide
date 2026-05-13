@@ -140,6 +140,18 @@ export function applyFilters(
     return block(candidate, '🚫 Deux imprimés forts');
   }
 
+  // ---- Cardigan rules ----
+  const hasCardigan = items.some(i => i.type === 'Cardigan');
+  const VESTES_COURTES = [
+    'Blazer', 'Bomber', 'Veste en jean',
+    'Perfecto', 'Veste militaire',
+    'Veste coupe-vent',
+  ];
+  const hasVesteCourte = items.some(i => VESTES_COURTES.includes(i.type));
+  if (hasCardigan && hasVesteCourte) {
+    return block(candidate, '🚫 Cardigan + veste courte incompatibles');
+  }
+
   // ---- Couleurs ----
   const colors = items.map(it => norm(it.color));
   const hasRouge = colors.some(c => c.includes('rouge'));
