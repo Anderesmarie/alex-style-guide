@@ -152,6 +152,20 @@ export function applyFilters(
     return block(candidate, '🚫 Cardigan + veste courte incompatibles');
   }
 
+  // ---- Trench rules ----
+  const hasTrench = items.some(i => i.type === 'Trench');
+  const COUCHES_EXTERIEURES = [
+    'Manteau long', 'Manteau court', 'Parka',
+    'Doudoune', 'Imperméable / Ciré',
+    'Cape / Poncho', 'Blazer', 'Bomber',
+    'Veste en jean', 'Perfecto',
+    'Veste militaire', 'Veste coupe-vent',
+  ];
+  const hasCoucheExterieure = items.some(i => COUCHES_EXTERIEURES.includes(i.type));
+  if (hasTrench && hasCoucheExterieure) {
+    return block(candidate, '🚫 Trench = couche extérieure unique — incompatible avec autre veste/manteau');
+  }
+
   // ---- Couleurs ----
   const colors = items.map(it => norm(it.color));
   const hasRouge = colors.some(c => c.includes('rouge'));
