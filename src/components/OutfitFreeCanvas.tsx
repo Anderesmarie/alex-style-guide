@@ -8,23 +8,23 @@ export const CANVAS_H = 500;
 export type ChipKey = 'top' | 'bottom' | 'jacket' | 'shoes' | 'bag' | 'jewelry' | 'other';
 
 export const CHIPS: { key: ChipKey; label: string; matches: string[] }[] = [
-  { key: 'top', label: 'Haut', matches: ['Hauts', 'Pulls & sweats', 'Robes & combinaisons'] },
-  { key: 'bottom', label: 'Bas', matches: ['Bas', 'Jupes'] },
-  { key: 'jacket', label: 'Veste', matches: ['Manteaux & vestes'] },
+  { key: 'top', label: 'Haut', matches: ['Hauts', 'Robes'] },
+  { key: 'bottom', label: 'Bas', matches: ['Bas'] },
+  { key: 'jacket', label: 'Veste', matches: ['Manteaux'] },
   { key: 'shoes', label: 'Chaussures', matches: ['Chaussures'] },
   { key: 'bag', label: 'Sac', matches: ['Sacs'] },
-  { key: 'jewelry', label: 'Bijoux', matches: ['Accessoires'] },
+  { key: 'jewelry', label: 'Bijoux', matches: ['Bijoux', 'Accessoires'] },
   { key: 'other', label: 'Autre', matches: [] },
 ];
 
 export function defaultPositionForCategory(catName: string): { xPct: number; yPct: number; size: number; z: number } {
-  if (catName === 'Manteaux & vestes') return { xPct: 5, yPct: 18, size: 170, z: 2 };
-  if (catName === 'Hauts' || catName === 'Pulls & sweats') return { xPct: 35, yPct: 12, size: 140, z: 3 };
-  if (catName === 'Robes & combinaisons') return { xPct: 28, yPct: 14, size: 180, z: 3 };
-  if (catName === 'Bas' || catName === 'Jupes') return { xPct: 33, yPct: 42, size: 150, z: 2 };
+  if (catName === 'Manteaux') return { xPct: 5, yPct: 18, size: 170, z: 2 };
+  if (catName === 'Hauts') return { xPct: 35, yPct: 12, size: 140, z: 3 };
+  if (catName === 'Robes') return { xPct: 28, yPct: 14, size: 180, z: 3 };
+  if (catName === 'Bas') return { xPct: 33, yPct: 42, size: 150, z: 2 };
   if (catName === 'Chaussures') return { xPct: 38, yPct: 76, size: 110, z: 2 };
   if (catName === 'Sacs') return { xPct: 70, yPct: 70, size: 80, z: 4 };
-  if (catName === 'Accessoires') return { xPct: 75, yPct: 6, size: 50, z: 5 };
+  if (catName === 'Accessoires' || catName === 'Bijoux') return { xPct: 75, yPct: 6, size: 50, z: 5 };
   return { xPct: 40, yPct: 40, size: 100, z: 1 };
 }
 
