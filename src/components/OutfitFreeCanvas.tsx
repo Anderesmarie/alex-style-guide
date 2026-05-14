@@ -229,7 +229,13 @@ export default function OutfitFreeCanvas({ pieces, onChange, selectedId, onSelec
 }
 
 export function chipMatchesItem(chip: ChipKey, item: ClothingItem): boolean {
-  const cat = getCategoryByType(item.type)?.name || item.category || '';
+  const rawCat = getCategoryForType(item.type)?.key || item.category || '';
+  // Compat: anciens noms BDD
+  const cat = rawCat === 'Robes & combinaisons' ? 'Robes'
+            : rawCat === 'Manteaux & vestes' ? 'Manteaux'
+            : rawCat === 'Pulls & sweats' ? 'Hauts'
+            : rawCat === 'Jupes' ? 'Bas'
+            : rawCat;
   const all = CHIPS.flatMap(c => c.matches);
   if (chip === 'other') return !all.includes(cat);
   const target = CHIPS.find(c => c.key === chip);
