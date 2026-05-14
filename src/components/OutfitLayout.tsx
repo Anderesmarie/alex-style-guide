@@ -63,12 +63,12 @@ const TEMPLATES = {
 
 type TemplateKey = keyof typeof TEMPLATES;
 
-function categoryOf(item: ClothingItem): string {
-  return getCategoryByType(item.type)?.name || item.category || '';
+function categoryOf(item: ClothingItem): SlotCat {
+  return slotCategoryOf(item);
 }
 
 function selectTemplate(items: ClothingItem[]): TemplateKey {
-  const isRobe = items.some(it => categoryOf(it) === 'Robes & combinaisons');
+  const isRobe = items.some(it => categoryOf(it) === 'Robes');
   return isRobe ? 'RC' : 'HB';
 }
 
@@ -77,21 +77,21 @@ function mapItemsToLayout(items: ClothingItem[], tpl: TemplateKey): Partial<Reco
   let accessoryUsed = false;
   for (const item of items) {
     const cat = categoryOf(item);
-    if (tpl === 'RC' && cat === 'Robes & combinaisons') {
+    if (tpl === 'RC' && cat === 'Robes') {
       if (!slots.B) slots.B = item;
-    } else if (tpl === 'HB' && (cat === 'Bas' || cat === 'Jupes')) {
+    } else if (tpl === 'HB' && cat === 'Bas') {
       if (!slots.B) slots.B = item;
     } else if (cat === 'Hauts') {
       if (!slots.H1) slots.H1 = item;
-    } else if (cat === 'Pulls & sweats') {
+    } else if (cat === 'Pulls') {
       if (!slots.H2) slots.H2 = item;
-    } else if (cat === 'Manteaux & vestes') {
+    } else if (cat === 'Manteaux') {
       if (!slots.H3) slots.H3 = item;
     } else if (cat === 'Chaussures') {
       if (!slots.ACH) slots.ACH = item;
     } else if (cat === 'Sacs') {
       if (!slots.ASAC) slots.ASAC = item;
-    } else if (cat === 'Accessoires' && !accessoryUsed) {
+    } else if ((cat === 'Accessoires' || cat === 'Bijoux') && !accessoryUsed) {
       slots.A1 = item;
       accessoryUsed = true;
     }
