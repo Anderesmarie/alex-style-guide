@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { ClothingItem, OutfitLayoutPiece } from '@/lib/types';
-import { getCategoryByType } from '@/lib/categories';
+import { getCategoryForType } from '@/lib/dressingTaxonomy';
 
 export const CANVAS_W = 360;
 export const CANVAS_H = 500;
