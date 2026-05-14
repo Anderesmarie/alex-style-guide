@@ -36,15 +36,15 @@ interface EditorPiece {
 
 function slotForCategory(cat: string, isRobe: boolean, used: Set<SlotKey>): SlotKey | null {
   if (cat === 'Hauts') return used.has('H1') ? null : 'H1';
-  if (cat === 'Pulls & sweats') return used.has('H2') ? null : 'H2';
-  if (cat === 'Manteaux & vestes') return used.has('H3') ? null : 'H3';
+  if (cat === 'Pulls') return used.has('H2') ? null : 'H2';
+  if (cat === 'Manteaux') return used.has('H3') ? null : 'H3';
   if (cat === 'Chaussures') return used.has('ACH') ? null : 'ACH';
   if (cat === 'Sacs') return used.has('ASAC') ? null : 'ASAC';
-  if (cat === 'Accessoires') {
+  if (cat === 'Accessoires' || cat === 'Bijoux') {
     for (const s of ['A1', 'A2', 'A3'] as SlotKey[]) if (!used.has(s)) return s;
     return null;
   }
-  if (cat === 'Bas' || cat === 'Jupes' || cat === 'Robes & combinaisons') {
+  if (cat === 'Bas' || cat === 'Robes') {
     return used.has('B') ? null : 'B';
   }
   return null;
