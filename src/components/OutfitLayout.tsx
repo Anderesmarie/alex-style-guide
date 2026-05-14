@@ -1,5 +1,26 @@
 import { ClothingItem, OutfitLayoutData } from '@/lib/types';
-import { getCategoryByType } from '@/lib/categories';
+import { getCategoryForType, getSubcategoryForType } from '@/lib/dressingTaxonomy';
+
+type SlotCat = 'Hauts' | 'Pulls' | 'Bas' | 'Robes' | 'Manteaux' | 'Chaussures' | 'Sacs' | 'Bijoux' | 'Accessoires' | 'Autre';
+
+function slotCategoryOf(item: ClothingItem): SlotCat {
+  const cat = getCategoryForType(item.type)?.key || item.category || '';
+  // Legacy compat (anciens noms BDD)
+  if (cat === 'Robes' || cat === 'Robes & combinaisons') return 'Robes';
+  if (cat === 'Manteaux' || cat === 'Manteaux & vestes') return 'Manteaux';
+  if (cat === 'Bas' || cat === 'Jupes') return 'Bas';
+  if (cat === 'Chaussures') return 'Chaussures';
+  if (cat === 'Sacs') return 'Sacs';
+  if (cat === 'Bijoux') return 'Bijoux';
+  if (cat === 'Accessoires') return 'Accessoires';
+  if (cat === 'Hauts' || cat === 'Pulls & sweats') {
+    // Distinguer pulls/mailles des autres hauts via la sous-catégorie
+    const sub = getSubcategoryForType(item.type)?.subcategory.key || item.subcategory || '';
+    if (sub === 'Pulls & Mailles' || cat === 'Pulls & sweats') return 'Pulls';
+    return 'Hauts';
+  }
+  return 'Autre';
+}
 
 /**
  * Grille 36×50, U=10px, Y inversé (Y=0 en bas).
