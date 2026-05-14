@@ -15,12 +15,12 @@ export type SlotKey = 'H1' | 'H2' | 'H3' | 'B' | 'ACH' | 'ASAC' | 'A1' | 'A2' | 
 export type AddCategory = 'haut' | 'bas' | 'veste' | 'chaussures' | 'sac' | 'accessoire';
 
 const ADD_BUTTONS: { key: AddCategory; label: string; cats: string[]; slots: SlotKey[] }[] = [
-  { key: 'haut', label: '+ Haut', cats: ['Hauts', 'Pulls & sweats'], slots: ['H1', 'H2'] },
-  { key: 'bas', label: '+ Bas', cats: ['Bas', 'Jupes', 'Robes & combinaisons'], slots: ['B'] },
-  { key: 'veste', label: '+ Veste', cats: ['Manteaux & vestes'], slots: ['H3'] },
+  { key: 'haut', label: '+ Haut', cats: ['Hauts', 'Pulls'], slots: ['H1', 'H2'] },
+  { key: 'bas', label: '+ Bas', cats: ['Bas', 'Robes'], slots: ['B'] },
+  { key: 'veste', label: '+ Veste', cats: ['Manteaux'], slots: ['H3'] },
   { key: 'chaussures', label: '+ Chaussures', cats: ['Chaussures'], slots: ['ACH'] },
   { key: 'sac', label: '+ Sac', cats: ['Sacs'], slots: ['ASAC'] },
-  { key: 'accessoire', label: '+ Accessoire', cats: ['Accessoires'], slots: ['A1', 'A2', 'A3'] },
+  { key: 'accessoire', label: '+ Accessoire', cats: ['Accessoires', 'Bijoux'], slots: ['A1', 'A2', 'A3'] },
 ];
 
 interface EditorPiece {
@@ -36,15 +36,15 @@ interface EditorPiece {
 
 function slotForCategory(cat: string, isRobe: boolean, used: Set<SlotKey>): SlotKey | null {
   if (cat === 'Hauts') return used.has('H1') ? null : 'H1';
-  if (cat === 'Pulls & sweats') return used.has('H2') ? null : 'H2';
-  if (cat === 'Manteaux & vestes') return used.has('H3') ? null : 'H3';
+  if (cat === 'Pulls') return used.has('H2') ? null : 'H2';
+  if (cat === 'Manteaux') return used.has('H3') ? null : 'H3';
   if (cat === 'Chaussures') return used.has('ACH') ? null : 'ACH';
   if (cat === 'Sacs') return used.has('ASAC') ? null : 'ASAC';
-  if (cat === 'Accessoires') {
+  if (cat === 'Accessoires' || cat === 'Bijoux') {
     for (const s of ['A1', 'A2', 'A3'] as SlotKey[]) if (!used.has(s)) return s;
     return null;
   }
-  if (cat === 'Bas' || cat === 'Jupes' || cat === 'Robes & combinaisons') {
+  if (cat === 'Bas' || cat === 'Robes') {
     return used.has('B') ? null : 'B';
   }
   return null;

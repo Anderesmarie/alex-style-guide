@@ -1,5 +1,26 @@
 import { ClothingItem, OutfitLayoutData } from '@/lib/types';
-import { getCategoryByType } from '@/lib/categories';
+import { getCategoryForType, getSubcategoryForType } from '@/lib/dressingTaxonomy';
+
+type SlotCat = 'Hauts' | 'Pulls' | 'Bas' | 'Robes' | 'Manteaux' | 'Chaussures' | 'Sacs' | 'Bijoux' | 'Accessoires' | 'Autre';
+
+function slotCategoryOf(item: ClothingItem): SlotCat {
+  const cat = getCategoryForType(item.type)?.key || item.category || '';
+  // Legacy compat (anciens noms BDD)
+  if (cat === 'Robes' || cat === 'Robes & combinaisons') return 'Robes';
+  if (cat === 'Manteaux' || cat === 'Manteaux & vestes') return 'Manteaux';
+  if (cat === 'Bas' || cat === 'Jupes') return 'Bas';
+  if (cat === 'Chaussures') return 'Chaussures';
+  if (cat === 'Sacs') return 'Sacs';
+  if (cat === 'Bijoux') return 'Bijoux';
+  if (cat === 'Accessoires') return 'Accessoires';
+  if (cat === 'Hauts' || cat === 'Pulls & sweats') {
+    // Distinguer pulls/mailles des autres hauts via la sous-catégorie
+    const sub = getSubcategoryForType(item.type)?.subcategory.key || item.subcategory || '';
+    if (sub === 'Pulls & Mailles' || cat === 'Pulls & sweats') return 'Pulls';
+    return 'Hauts';
+  }
+  return 'Autre';
+}
 
 /**
  * Grille 36×50, U=10px, Y inversé (Y=0 en bas).
@@ -42,12 +63,12 @@ const TEMPLATES = {
 
 type TemplateKey = keyof typeof TEMPLATES;
 
-function categoryOf(item: ClothingItem): string {
-  return getCategoryByType(item.type)?.name || item.category || '';
+function categoryOf(item: ClothingItem): SlotCat {
+  return slotCategoryOf(item);
 }
 
 function selectTemplate(items: ClothingItem[]): TemplateKey {
-  const isRobe = items.some(it => categoryOf(it) === 'Robes & combinaisons');
+  const isRobe = items.some(it => categoryOf(it) === 'Robes');
   return isRobe ? 'RC' : 'HB';
 }
 
@@ -56,21 +77,21 @@ function mapItemsToLayout(items: ClothingItem[], tpl: TemplateKey): Partial<Reco
   let accessoryUsed = false;
   for (const item of items) {
     const cat = categoryOf(item);
-    if (tpl === 'RC' && cat === 'Robes & combinaisons') {
+    if (tpl === 'RC' && cat === 'Robes') {
       if (!slots.B) slots.B = item;
-    } else if (tpl === 'HB' && (cat === 'Bas' || cat === 'Jupes')) {
+    } else if (tpl === 'HB' && cat === 'Bas') {
       if (!slots.B) slots.B = item;
     } else if (cat === 'Hauts') {
       if (!slots.H1) slots.H1 = item;
-    } else if (cat === 'Pulls & sweats') {
+    } else if (cat === 'Pulls') {
       if (!slots.H2) slots.H2 = item;
-    } else if (cat === 'Manteaux & vestes') {
+    } else if (cat === 'Manteaux') {
       if (!slots.H3) slots.H3 = item;
     } else if (cat === 'Chaussures') {
       if (!slots.ACH) slots.ACH = item;
     } else if (cat === 'Sacs') {
       if (!slots.ASAC) slots.ASAC = item;
-    } else if (cat === 'Accessoires' && !accessoryUsed) {
+    } else if ((cat === 'Accessoires' || cat === 'Bijoux') && !accessoryUsed) {
       slots.A1 = item;
       accessoryUsed = true;
     }
