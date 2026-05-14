@@ -18,8 +18,14 @@ export function generateCombinations(wardrobe: ClothingItem[]): ClothingItem[][]
   const pullOptions: (ClothingItem | null)[] = [null, ...pulls];
   const manteauOptions: (ClothingItem | null)[] = [null, ...manteaux];
 
+  // Réserver un quota dédié aux robes pour qu'elles ne soient pas évincées
+  // par l'explosion combinatoire haut × pull × bas × manteau.
+  const robesQuota = robes.length > 0
+    ? Math.min(robes.length * manteauOptions.length, Math.ceil(maxBase / 2))
+    : 0;
+  const maxBaseHautBas = maxBase - robesQuota;
+
   // Chemin A : (haut et/ou pull) + bas + manteau optionnel
-  // Génère : haut+bas, pull+bas, haut+pull+bas, +manteau pour chaque
   outerA: for (const b of bas) {
     for (const h of hautOptions) {
       for (const p of pullOptions) {
@@ -30,20 +36,19 @@ export function generateCombinations(wardrobe: ClothingItem[]): ClothingItem[][]
           if (p) combo.push(p);
           if (m) combo.push(m);
           baseCombos.push(combo);
-          if (baseCombos.length >= maxBase) break outerA;
+          if (baseCombos.length >= maxBaseHautBas) break outerA;
         }
       }
     }
   }
 
-  if (baseCombos.length < maxBase) {
-    outerB: for (const r of robes) {
-      for (const m of manteauOptions) {
-        const combo: ClothingItem[] = [r];
-        if (m) combo.push(m);
-        baseCombos.push(combo);
-        if (baseCombos.length >= maxBase) break outerB;
-      }
+  // Chemin B : robes + manteau optionnel (toujours exécuté, quota dédié)
+  outerB: for (const r of robes) {
+    for (const m of manteauOptions) {
+      const combo: ClothingItem[] = [r];
+      if (m) combo.push(m);
+      baseCombos.push(combo);
+      if (baseCombos.length >= maxBase) break outerB;
     }
   }
 
