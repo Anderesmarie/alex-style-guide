@@ -1,7 +1,7 @@
 import { ClothingItem, OutfitLayoutData, OutfitLayoutPiece, UserProfile } from './types';
 import { getLastOutfit, getRejected } from './storage';
 import { supabase } from './supabase';
-import { getCategoryByType } from './categories';
+import { getCategoryForType } from './dressingTaxonomy';
 
 // Reference canvas (must match OutfitFreeCanvas CANVAS_W / CANVAS_H)
 const DEFAULT_CANVAS_W = 360;
