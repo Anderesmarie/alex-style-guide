@@ -20,14 +20,20 @@ const SLOT_DEFAULTS: Record<Slot, { x: number; y: number; width: number; z: numb
 };
 
 function slotForItem(item: ClothingItem): Slot {
-  const cat = getCategoryByType(item.type)?.name || item.category || '';
-  if (cat === 'Manteaux & vestes') return 'jacket';
-  if (cat === 'Robes & combinaisons') return 'dress';
-  if (cat === 'Hauts' || cat === 'Pulls & sweats') return 'top';
-  if (cat === 'Bas' || cat === 'Jupes') return 'bottom';
+  const rawCat = getCategoryForType(item.type)?.key || item.category || '';
+  // Compat anciens noms BDD
+  const cat = rawCat === 'Robes & combinaisons' ? 'Robes'
+            : rawCat === 'Manteaux & vestes' ? 'Manteaux'
+            : rawCat === 'Pulls & sweats' ? 'Hauts'
+            : rawCat === 'Jupes' ? 'Bas'
+            : rawCat;
+  if (cat === 'Manteaux') return 'jacket';
+  if (cat === 'Robes') return 'dress';
+  if (cat === 'Hauts') return 'top';
+  if (cat === 'Bas') return 'bottom';
   if (cat === 'Chaussures') return 'shoes';
   if (cat === 'Sacs') return 'bag';
-  if (cat === 'Accessoires') return 'accessory';
+  if (cat === 'Accessoires' || cat === 'Bijoux') return 'accessory';
   return 'accessory';
 }
 
