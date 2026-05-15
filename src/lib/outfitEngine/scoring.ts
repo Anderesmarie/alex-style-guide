@@ -385,6 +385,15 @@ export function applyScoring(
     'Débardeur': { 'Streetwear': 1, 'Casual chic': 1, 'Y2K': 1, 'Old Money': -1, 'Bureau': -2 },
     'Top corset / Bralette': { 'Y2K': 2, 'Romantique': 1, 'Dark': 1, 'Old Money': -2, 'Bureau': -3, 'Minimaliste': -1 },
     'Haut épaules dénudées': { 'Romantique': 1, 'Y2K': 1, 'Casual chic': 1, 'Bureau': -2, 'Old Money': -1 },
+    'Jean court': { 'Y2K': 1, 'Casual chic': 1, 'Streetwear': 1, 'Old Money': -1, 'Bureau': -2 },
+    'Pantalon en cuir': { 'Dark': 2, 'Grunge': 1, 'Streetwear': 1, 'Y2K': 1, 'Old Money': -1, 'Romantique': -2, 'Bureau': -1 },
+    'Jupe en jean': { 'Casual chic': 2, 'Vintage': 1, 'Y2K': 1, 'Old Money': -1 },
+    'Jupe mi-longue': { 'Old Money': 1, 'Romantique': 1, 'Casual chic': 1, 'Bohème': 1 },
+    'Jupe crayon': { 'Old Money': 2, 'Bureau': 2, 'Casual chic': 1, 'Streetwear': -2, 'Grunge': -2 },
+    'Autres shorts': { 'Casual chic': 1, 'Sportswear': 1 },
+    'Robe en jean': { 'Casual chic': 2, 'Vintage': 1, 'Old Money': -1 },
+    'Combinaison': { 'Minimaliste': 2, 'Casual chic': 1, 'Old Money': 1, 'Bohème': 1 },
+    'Salopette': { 'Vintage': 2, 'Casual chic': 1, 'Bohème': 1, 'Y2K': 1, 'Streetwear': 1, 'Old Money': -2, 'Bureau': -2 },
   };
   for (const it of items) {
     const deltas = perItemStyleDeltas[it.type];
@@ -394,6 +403,21 @@ export function applyScoring(
       if (delta === undefined) continue;
       const label = delta > 0 ? `${it.type} parfait ${style}` : `${it.type} hors style ${style}`;
       ({ score, reasons } = add(score, reasons, delta, label));
+    }
+  }
+
+  // ---- Bas/Robes : règles météo & morpho spécifiques ----
+  for (const it of items) {
+    if (it.type === 'Jean court' || it.type === 'Autres shorts') {
+      if (tempMax > 22) ({ score, reasons } = add(score, reasons, 1, `${it.type} adapté à la chaleur`));
+      if (tempMin < 15) ({ score, reasons } = add(score, reasons, -2, `${it.type} trop frais`));
+    }
+    if (it.type === 'Jupe mi-longue' && input.taille === 'petite') {
+      ({ score, reasons } = add(score, reasons, 2, 'Jupe mi-longue allonge la silhouette (petite)'));
+    }
+    if (it.type === 'Jupe crayon') {
+      if (input.morphologie === 'A') ({ score, reasons } = add(score, reasons, -2, 'Jupe crayon vs morpho A'));
+      if (input.morphologie === 'O') ({ score, reasons } = add(score, reasons, -2, 'Jupe crayon vs morpho O'));
     }
   }
 
