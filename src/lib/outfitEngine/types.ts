@@ -23,4 +23,6 @@ export interface EngineInput {
   dislikedItemIds?: string[];
   savedOutfitItemIds?: string[][];
   recentItemIds?: string[];
+  favoriteColors?: string[];
+  wornItemIds?: string[];
 }
