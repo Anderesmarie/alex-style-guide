@@ -429,6 +429,12 @@ export function applyScoring(
     'Veste coupe-vent': { 'Sportswear': 2, 'Casual chic': 1, 'Streetwear': 1, 'Old Money': -2, 'Romantique': -2 },
     'Parka': { 'Streetwear': 1, 'Casual chic': 1, 'Old Money': -1, 'Romantique': -2 },
     'Doudoune': { 'Streetwear': 1, 'Casual chic': 1, 'Old Money': -2, 'Romantique': -2 },
+    'Col roulé': { 'Old Money': 1, 'Minimaliste': 1, 'Dark': 1, 'Preppy': 1, 'Y2K': -1, 'Bohème': -1 },
+    'Jupe moulante': { 'Dark': 2, 'Y2K': 1, 'Old Money': -1 },
+    'Short en jean': { 'Casual chic': 1, 'Y2K': 1, 'Vintage': 1, 'Old Money': -1, 'Bureau': -2 },
+    'Sandales à talons': { 'Romantique': 1, 'Old Money': 1, 'Casual chic': 1, 'Sportswear': -2, 'Grunge': -2 },
+    'Ballerines': { 'Romantique': 2, 'Casual chic': 1, 'Preppy': 1, 'Old Money': 1, 'Streetwear': -1, 'Grunge': -2 },
+    'Claquettes / Mules': { 'Streetwear': 1, 'Y2K': 1, 'Casual chic': 1 },
     // Sacs
     'Sac à main': { 'Old Money': 2, 'Casual chic': 2, 'Romantique': 1, 'Chic': 1, 'Streetwear': -1, 'Sportswear': -2 },
     'Tote bag': { 'Casual chic': 1, 'Bohème': 1, 'Minimaliste': 1, 'Preppy': 1 },
@@ -474,6 +480,17 @@ export function applyScoring(
     if (it.type === 'Mini sac') {
       if (occMatch('sport')) ({ score, reasons } = add(score, reasons, -2, 'Mini sac inadapté au sport'));
       if (occMatch('travail')) ({ score, reasons } = add(score, reasons, -1, 'Mini sac peu pratique au travail'));
+    }
+    if (it.type === 'Sandales à talons' && occMatch('soirée', 'soiree')) {
+      ({ score, reasons } = add(score, reasons, 1, 'Sandales à talons parfaites en soirée'));
+    }
+    if (it.type === 'Jupe moulante' && occMatch('soirée', 'soiree')) {
+      ({ score, reasons } = add(score, reasons, 1, 'Jupe moulante parfaite en soirée'));
+    }
+    if (it.type === 'Claquettes / Mules') {
+      if (occMatch('bureau', 'travail')) ({ score, reasons } = add(score, reasons, -2, 'Claquettes inadaptées au bureau'));
+      if (occMatch('cérémonie', 'ceremonie')) ({ score, reasons } = add(score, reasons, -3, 'Claquettes inadaptées en cérémonie'));
+      if (input.tempMax > 20) ({ score, reasons } = add(score, reasons, 1, 'Claquettes parfaites par chaleur'));
     }
   }
 
