@@ -101,7 +101,7 @@ export function applyScoring(
   const hasCoat = items.some(it => it.category === 'Manteaux' || it.category === 'Manteaux & vestes');
   const hasPullCat = items.some(it => it.subcategory === 'Pulls & Mailles');
   const hasNoLayer = !hasCoat && !hasPullCat;
-  const TSHIRT_LIKE = ['T-shirt', 'Crop top', 'Débardeur', 'Body', 'Top dos nu', 'Top épaules dénudées'];
+  const TSHIRT_LIKE = ['T-shirt', 'Crop top', 'Débardeur', 'Body', 'Top dos nu', 'Top épaules dénudées', 'Pull sans manche', 'Col roulé'];
   const tshirtItem = items.find(it => TSHIRT_LIKE.includes(it.type));
   const pullItem = items.find(it => it.subcategory === 'Pulls & Mailles');
   const removableItem = items.find(it => REMOVABLE_LAYERS.includes(it.type));
