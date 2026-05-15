@@ -141,6 +141,59 @@ function pickDiverse(sorted: OutfitCandidate[], input: EngineInput): OutfitCandi
   return picked;
 }
 
+function enrichWithAccessories(
+  outfit: OutfitCandidate,
+  input: EngineInput
+): OutfitCandidate {
+  const wardrobe = input.wardrobe;
+  const usedIds = new Set(outfit.items.map(i => i.id));
+
+  const tryAdd = (candidateItem: ClothingItem): OutfitCandidate | null => {
+    const newItems = [...outfit.items, candidateItem];
+    const base: OutfitCandidate = { items: newItems, score: 0, reasons: [], blocked: false };
+    const filtered = applyFilters(base, input);
+    if (filtered.blocked) return null;
+    return applyScoring(filtered, input);
+  };
+
+  // 1) Best bag
+  const sacs = wardrobe.filter(i => i.category === 'Sacs' && !usedIds.has(i.id));
+  let best: OutfitCandidate = outfit;
+  for (const s of sacs) {
+    const next = tryAdd(s);
+    if (next && next.score > best.score) best = next;
+  }
+  if (best !== outfit) {
+    outfit = best;
+    best.items.forEach(i => usedIds.add(i.id));
+  }
+
+  // 2) Best accessories / jewelry (up to 2, only if they improve score)
+  const accs = wardrobe.filter(
+    i => (i.category === 'Accessoires' || i.category === 'Bijoux') && !usedIds.has(i.id)
+  );
+  for (let n = 0; n < 2; n++) {
+    let bestAcc: OutfitCandidate = outfit;
+    let bestItemId: string | null = null;
+    for (const a of accs) {
+      if (usedIds.has(a.id)) continue;
+      const next = tryAdd(a);
+      if (next && next.score > bestAcc.score) {
+        bestAcc = next;
+        bestItemId = a.id;
+      }
+    }
+    if (bestItemId) {
+      outfit = bestAcc;
+      usedIds.add(bestItemId);
+    } else {
+      break;
+    }
+  }
+
+  return outfit;
+}
+
 export function generateOutfits(input: EngineInput): OutfitCandidate[] {
   const combos = generateCombinations(input.wardrobe);
 
@@ -159,7 +212,8 @@ export function generateOutfits(input: EngineInput): OutfitCandidate[] {
   }
 
   valid.sort((a, b) => b.score - a.score);
-  return pickDiverse(valid, input);
+  const picked = pickDiverse(valid, input);
+  return picked.map(p => enrichWithAccessories(p, input));
 }
 
 export * from './types';
