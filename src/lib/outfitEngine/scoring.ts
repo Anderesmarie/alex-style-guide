@@ -416,6 +416,12 @@ export function applyScoring(
     'Robe en jean': { 'Casual chic': 2, 'Vintage': 1, 'Old Money': -1 },
     'Combinaison': { 'Minimaliste': 2, 'Casual chic': 1, 'Old Money': 1, 'Bohème': 1 },
     'Salopette': { 'Vintage': 2, 'Casual chic': 1, 'Bohème': 1, 'Y2K': 1, 'Streetwear': 1, 'Old Money': -2, 'Bureau': -2 },
+    'Bomber': { 'Streetwear': 2, 'Casual chic': 1, 'Y2K': 1, 'Old Money': -2, 'Romantique': -2 },
+    'Imperméable / Ciré': { 'Casual chic': 1, 'Minimaliste': 1, 'Old Money': -1 },
+    'Cape / Poncho': { 'Bohème': 2, 'Vintage': 1, 'Casual chic': 1, 'Streetwear': -2, 'Sportswear': -2 },
+    'Veste coupe-vent': { 'Sportswear': 2, 'Casual chic': 1, 'Streetwear': 1, 'Old Money': -2, 'Romantique': -2 },
+    'Parka': { 'Streetwear': 1, 'Casual chic': 1, 'Old Money': -1, 'Romantique': -2 },
+    'Doudoune': { 'Streetwear': 1, 'Casual chic': 1, 'Old Money': -2, 'Romantique': -2 },
   };
   for (const it of items) {
     const deltas = perItemStyleDeltas[it.type];
