@@ -66,6 +66,14 @@ export function applyFilters(
   if (chaussures.length >= 2) return block(candidate, '🚫 Deux paires de chaussures');
   if (sacs.length >= 2) return block(candidate, '🚫 Deux sacs');
 
+  // ---- Limite globale ----
+  const nbVetements = items.filter(i =>
+    ['Hauts', 'Bas', 'Jupes', 'Robes', 'Manteaux'].includes(i.category)
+  ).length;
+  if (nbVetements > 4) {
+    return block(candidate, '🚫 Maximum 4 vêtements par tenue');
+  }
+
   // ---- Bijoux ----
   const colliers = items.filter(i => i.type === 'Collier');
   if (colliers.length > 1) {
