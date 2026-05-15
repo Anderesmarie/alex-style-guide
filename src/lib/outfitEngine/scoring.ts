@@ -43,7 +43,7 @@ export function applyScoring(
   for (const it of items) {
     const t = it.type;
 
-    if (['T-shirt', 'Crop top', 'Débardeur', 'Body', 'Pull sans manche', 'Col roulé', 'Top corset / Bralette', 'Haut épaules dénudées'].includes(t) && tempMin < 10) {
+    if (['T-shirt', 'Crop top', 'Débardeur', 'Body', 'Pull sans manche', 'Col roulé', 'Top corset / Bralette', 'Top épaules dénudées'].includes(t) && tempMin < 10) {
       ({ score, reasons } = add(score, reasons, -2, `${t} trop léger pour ${tempMin}°C`));
     }
 
@@ -123,7 +123,7 @@ export function applyScoring(
   const hasCoat = items.some(it => it.category === 'Manteaux');
   const hasPullCat = items.some(it => it.subcategory === 'Pulls & Mailles');
   const hasNoLayer = !hasCoat && !hasPullCat;
-  const TSHIRT_LIKE = ['T-shirt', 'Crop top', 'Débardeur', 'Body', 'Top dos nu', 'Top épaules dénudées', 'Haut épaules dénudées', 'Top corset / Bralette', 'Pull sans manche', 'Col roulé'];
+  const TSHIRT_LIKE = ['T-shirt', 'Crop top', 'Débardeur', 'Body', 'Top dos nu', 'Top épaules dénudées', 'Top corset / Bralette', 'Pull sans manche', 'Col roulé'];
   const tshirtItem = items.find(it => TSHIRT_LIKE.includes(it.type));
   const pullItem = items.find(it => it.subcategory === 'Pulls & Mailles');
   const removableItem = items.find(it => REMOVABLE_LAYERS.includes(it.type));
@@ -406,7 +406,7 @@ export function applyScoring(
     'Body': { 'Casual chic': 1, 'Y2K': 1, 'Dark': 1, 'Minimaliste': 1 },
     'Débardeur': { 'Streetwear': 1, 'Casual chic': 1, 'Y2K': 1, 'Old Money': -1, 'Bureau': -2 },
     'Top corset / Bralette': { 'Y2K': 2, 'Romantique': 1, 'Dark': 1, 'Old Money': -2, 'Bureau': -3, 'Minimaliste': -1 },
-    'Haut épaules dénudées': { 'Romantique': 1, 'Y2K': 1, 'Casual chic': 1, 'Bureau': -2, 'Old Money': -1 },
+    'Top épaules dénudées': { 'Romantique': 1, 'Y2K': 1, 'Casual chic': 1, 'Bureau': -2, 'Old Money': -1 },
     'Jean court': { 'Y2K': 1, 'Casual chic': 1, 'Streetwear': 1, 'Old Money': -1, 'Bureau': -2 },
     'Pantalon en cuir': { 'Dark': 2, 'Grunge': 1, 'Streetwear': 1, 'Y2K': 1, 'Old Money': -1, 'Romantique': -2, 'Bureau': -1 },
     'Jupe en jean': { 'Casual chic': 2, 'Vintage': 1, 'Y2K': 1, 'Old Money': -1 },

@@ -66,6 +66,27 @@ export function applyFilters(
   if (chaussures.length >= 2) return block(candidate, '🚫 Deux paires de chaussures');
   if (sacs.length >= 2) return block(candidate, '🚫 Deux sacs');
 
+  // ---- Bijoux ----
+  const colliers = items.filter(i => i.type === 'Collier');
+  if (colliers.length > 1) {
+    return block(candidate, '🚫 Max 1 collier par tenue');
+  }
+
+  // ---- Maillots ----
+  const maillots = items.filter(i => i.category === 'Maillots');
+  if (maillots.length > 0) {
+    if (bas.length > 0) {
+      return block(candidate, '🚫 Maillot + bas incompatibles');
+    }
+    if (robes.length > 0) {
+      return block(candidate, '🚫 Maillot + robe incompatibles');
+    }
+    const occ = (input.occasion || '').toLowerCase();
+    if (occ !== 'sport' && occ !== 'plage') {
+      return block(candidate, '🚫 Maillot uniquement pour Sport ou Plage');
+    }
+  }
+
   // ---- Météo ----
   const { tempMin, tempMax, amplitude } = input;
 
