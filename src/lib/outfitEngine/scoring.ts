@@ -59,8 +59,14 @@ export function applyScoring(
       if (tAvg > 20) ({ score, reasons } = add(score, reasons, -3, `${t} trop chaud`));
     }
 
-    if (['Blazer', 'Veste en jean', 'Trench', 'Bomber'].includes(t) && tAvg >= 12 && tAvg <= 22) {
+    if (['Blazer', 'Veste en jean', 'Trench', 'Bomber', 'Veste militaire'].includes(t) && tAvg >= 12 && tAvg <= 22) {
       ({ score, reasons } = add(score, reasons, 1, `${t} idéal mi-saison`));
+    }
+
+    if (t === 'Perfecto') {
+      if (tempMin >= 10 && tempMin <= 20) ({ score, reasons } = add(score, reasons, 1, 'Perfecto idéal mi-saison'));
+      if (tempMin < 5) ({ score, reasons } = add(score, reasons, -1, 'Perfecto trop léger'));
+      if (tempMax > 25) ({ score, reasons } = add(score, reasons, -2, 'Perfecto trop chaud'));
     }
 
     const wcode = (input as any).weathercode as number | undefined;
@@ -91,7 +97,7 @@ export function applyScoring(
       if (tempMax > 25) ({ score, reasons } = add(score, reasons, -2, 'Veste en cuir trop chaude'));
     }
 
-    const isMiniBottom = t === 'Mini-jupe' || it.subcategory === 'Shorts';
+    const isMiniBottom = t === 'Mini-jupe' || t === 'Combishort' || it.subcategory === 'Shorts';
     if (isMiniBottom) {
       if (tAvg > 22) ({ score, reasons } = add(score, reasons, 1, `${t} parfait pour la chaleur`));
       if (tAvg < 15) ({ score, reasons } = add(score, reasons, -2, `${t} trop léger`));
@@ -417,6 +423,7 @@ export function applyScoring(
     'Combinaison': { 'Minimaliste': 2, 'Casual chic': 1, 'Old Money': 1, 'Bohème': 1 },
     'Salopette': { 'Vintage': 2, 'Casual chic': 1, 'Bohème': 1, 'Y2K': 1, 'Streetwear': 1, 'Old Money': -2, 'Bureau': -2 },
     'Bomber': { 'Streetwear': 2, 'Casual chic': 1, 'Y2K': 1, 'Old Money': -2, 'Romantique': -2 },
+    'Veste militaire': { 'Grunge': 2, 'Streetwear': 1, 'Dark': 1, 'Casual chic': 1, 'Old Money': -2, 'Romantique': -2 },
     'Imperméable / Ciré': { 'Casual chic': 1, 'Minimaliste': 1, 'Old Money': -1 },
     'Cape / Poncho': { 'Bohème': 2, 'Vintage': 1, 'Casual chic': 1, 'Streetwear': -2, 'Sportswear': -2 },
     'Veste coupe-vent': { 'Sportswear': 2, 'Casual chic': 1, 'Streetwear': 1, 'Old Money': -2, 'Romantique': -2 },
