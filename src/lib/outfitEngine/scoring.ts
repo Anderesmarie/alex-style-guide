@@ -493,6 +493,8 @@ export function applyScoring(
       if (input.tempMax > 20) ({ score, reasons } = add(score, reasons, 1, 'Claquettes parfaites par chaleur'));
     }
   }
+
+  // ---- Bijoux : colorimétrie or/argent ----
   const goldSeasons = ['Printemps', 'Automne'];
   const silverSeasons = ['Été', 'Hiver'];
   const JEWELRY_TYPES = ['Collier', "Boucles d'oreilles", 'Bracelet', 'Bague', 'Montre'];
