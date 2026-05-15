@@ -422,7 +422,70 @@ export function applyScoring(
     'Veste coupe-vent': { 'Sportswear': 2, 'Casual chic': 1, 'Streetwear': 1, 'Old Money': -2, 'Romantique': -2 },
     'Parka': { 'Streetwear': 1, 'Casual chic': 1, 'Old Money': -1, 'Romantique': -2 },
     'Doudoune': { 'Streetwear': 1, 'Casual chic': 1, 'Old Money': -2, 'Romantique': -2 },
+    // Sacs
+    'Sac à main': { 'Old Money': 2, 'Casual chic': 2, 'Romantique': 1, 'Chic': 1, 'Streetwear': -1, 'Sportswear': -2 },
+    'Tote bag': { 'Casual chic': 1, 'Bohème': 1, 'Minimaliste': 1, 'Preppy': 1 },
+    'Sac à dos': { 'Streetwear': 2, 'Casual chic': 1, 'Preppy': 1, 'Old Money': -2 },
+    'Pochette': { 'Y2K': 1, 'Romantique': 1, 'Dark': 1 },
+    'Sac banane': { 'Streetwear': 2, 'Y2K': 1, 'Casual chic': 1, 'Old Money': -2, 'Romantique': -1 },
+    'Sac baguette': { 'Casual chic': 2, 'Old Money': 1, 'Y2K': 1, 'Romantique': 1 },
+    'Mini sac': { 'Y2K': 2, 'Romantique': 1, 'Dark': 1 },
+    // Bijoux
+    'Collier': { 'Romantique': 1, 'Old Money': 1, 'Bohème': 1, 'Y2K': 1 },
+    "Boucles d'oreilles": { 'Romantique': 1, 'Old Money': 1, 'Y2K': 1, 'Casual chic': 1 },
+    'Bracelet': { 'Bohème': 1, 'Y2K': 1, 'Streetwear': 1 },
+    'Bague': { 'Grunge': 1, 'Dark': 1, 'Bohème': 1, 'Y2K': 1 },
+    'Montre': { 'Old Money': 2, 'Preppy': 1, 'Casual chic': 1 },
   };
+
+  // ---- Sacs : scoring par occasion ----
+  const occasion = input.occasion || '';
+  const occMatch = (...keys: string[]) => keys.some(k => occasion.toLowerCase().includes(k.toLowerCase()));
+  for (const it of items) {
+    if (it.type === 'Sac à main') {
+      if (occMatch('travail', 'bureau')) ({ score, reasons } = add(score, reasons, 2, 'Sac à main pour le bureau'));
+      if (occMatch('soirée', 'soiree')) ({ score, reasons } = add(score, reasons, 1, 'Sac à main en soirée'));
+    }
+    if (it.type === 'Tote bag') {
+      if (occMatch('cours', 'campus')) ({ score, reasons } = add(score, reasons, 2, 'Tote bag pour les cours'));
+      if (occMatch('soirée chic', 'soiree chic')) ({ score, reasons } = add(score, reasons, -1, 'Tote bag peu chic'));
+    }
+    if (it.type === 'Sac à dos') {
+      if (occMatch('cours', 'campus')) ({ score, reasons } = add(score, reasons, 2, 'Sac à dos pour les cours'));
+      if (occMatch('soirée', 'soiree')) ({ score, reasons } = add(score, reasons, -2, 'Sac à dos pas en soirée'));
+    }
+    if (it.type === 'Pochette') {
+      if (occMatch('événement', 'evenement')) ({ score, reasons } = add(score, reasons, 3, 'Pochette parfaite en événement'));
+      if (occMatch('travail')) ({ score, reasons } = add(score, reasons, -1, 'Pochette peu pratique au travail'));
+    }
+    if (it.type === 'Sac banane' && occMatch('événement', 'evenement')) {
+      ({ score, reasons } = add(score, reasons, -2, 'Sac banane peu adapté événement'));
+    }
+    if (it.type === 'Sac baguette' && occMatch('travail')) {
+      ({ score, reasons } = add(score, reasons, 1, 'Sac baguette au travail'));
+    }
+    if (it.type === 'Mini sac') {
+      if (occMatch('sport')) ({ score, reasons } = add(score, reasons, -2, 'Mini sac inadapté au sport'));
+      if (occMatch('travail')) ({ score, reasons } = add(score, reasons, -1, 'Mini sac peu pratique au travail'));
+    }
+  }
+
+  // ---- Bijoux : colorimétrie or/argent ----
+  const goldSeasons = ['Printemps', 'Automne'];
+  const silverSeasons = ['Été', 'Hiver'];
+  const JEWELRY_TYPES = ['Collier', "Boucles d'oreilles", 'Bracelet', 'Bague', 'Montre'];
+  for (const it of items) {
+    if (!JEWELRY_TYPES.includes(it.type)) continue;
+    const cs = colorTokens(it);
+    const isGold = cs.some(c => c.includes('or') && !c.includes('argent')) || cs.some(c => c.includes('doré') || c.includes('dore'));
+    const isSilver = cs.some(c => c.includes('argent'));
+    if (isGold && input.colorimetry && goldSeasons.includes(input.colorimetry)) {
+      ({ score, reasons } = add(score, reasons, 1, `Bijou doré accordé ${input.colorimetry}`));
+    }
+    if (isSilver && input.colorimetry && silverSeasons.includes(input.colorimetry)) {
+      ({ score, reasons } = add(score, reasons, 1, `Bijou argenté accordé ${input.colorimetry}`));
+    }
+  }
   for (const it of items) {
     const deltas = perItemStyleDeltas[it.type];
     if (!deltas) continue;
