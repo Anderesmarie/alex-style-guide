@@ -382,7 +382,9 @@ export function applyScoring(
     'Polo': { 'Preppy': 2, 'Old Money': 1, 'Casual chic': 1, 'Streetwear': -1, 'Dark': -1 },
     'Tunique': { 'Bohème': 2, 'Casual chic': 1, 'Old Money': -1, 'Minimaliste': -1 },
     'Body': { 'Casual chic': 1, 'Y2K': 1, 'Dark': 1, 'Minimaliste': 1 },
-    'Débardeur': { 'Streetwear': 1, 'Casual chic': 1 },
+    'Débardeur': { 'Streetwear': 1, 'Casual chic': 1, 'Y2K': 1, 'Old Money': -1, 'Bureau': -2 },
+    'Top corset / Bralette': { 'Y2K': 2, 'Romantique': 1, 'Dark': 1, 'Old Money': -2, 'Bureau': -3, 'Minimaliste': -1 },
+    'Haut épaules dénudées': { 'Romantique': 1, 'Y2K': 1, 'Casual chic': 1, 'Bureau': -2, 'Old Money': -1 },
   };
   for (const it of items) {
     const deltas = perItemStyleDeltas[it.type];
