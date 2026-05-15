@@ -361,6 +361,22 @@ export function applyScoring(
     }
   }
 
+  // ---- Veste en cuir : style favori ----
+  const vesteCuir = items.find(it => it.type === 'Veste en cuir');
+  if (vesteCuir) {
+    const cuirStyleDeltas: Record<string, number> = {
+      'Dark': 2, 'Grunge': 2, 'Streetwear': 2,
+      'Casual chic': 1, 'Y2K': 1,
+      'Old Money': -1, 'Bohème': -1, 'Romantique': -2,
+    };
+    for (const style of favStyles) {
+      const delta = cuirStyleDeltas[style];
+      if (delta === undefined) continue;
+      const label = delta > 0 ? `Veste en cuir parfaite ${style}` : `Veste en cuir hors style ${style}`;
+      ({ score, reasons } = add(score, reasons, delta, label));
+    }
+  }
+
   // ---- Chaussures ----
   const shoes = items.find(i => i.category === 'Chaussures');
   if (shoes) {
