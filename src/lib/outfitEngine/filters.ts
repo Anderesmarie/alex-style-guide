@@ -148,7 +148,7 @@ export function applyFilters(
   }
   const VESTES_COURTES = [
     'Blazer', 'Bomber', 'Veste en jean',
-    'Perfecto', 'Veste militaire',
+    'Perfecto', 'Veste en cuir', 'Veste militaire',
     'Veste coupe-vent',
   ];
   const hasVesteCourte = items.some(i => VESTES_COURTES.includes(i.type));
@@ -162,7 +162,7 @@ export function applyFilters(
     'Manteau long', 'Manteau court', 'Parka',
     'Doudoune', 'Imperméable / Ciré',
     'Cape / Poncho', 'Blazer', 'Bomber',
-    'Veste en jean', 'Perfecto',
+    'Veste en jean', 'Perfecto', 'Veste en cuir',
     'Veste militaire', 'Veste coupe-vent',
   ];
   const hasCoucheExterieure = items.some(i => COUCHES_EXTERIEURES.includes(i.type));

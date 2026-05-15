@@ -63,6 +63,12 @@ export function applyScoring(
       ({ score, reasons } = add(score, reasons, 1, `${t} idéal mi-saison`));
     }
 
+    if (t === 'Veste en cuir') {
+      if (tempMin >= 12 && tempMin <= 22) ({ score, reasons } = add(score, reasons, 1, 'Veste en cuir idéale mi-saison'));
+      if (tempMin < 5) ({ score, reasons } = add(score, reasons, -1, 'Veste en cuir trop légère'));
+      if (tempMax > 25) ({ score, reasons } = add(score, reasons, -2, 'Veste en cuir trop chaude'));
+    }
+
     const isMiniBottom = t === 'Mini-jupe' || it.subcategory === 'Shorts';
     if (isMiniBottom) {
       if (tAvg > 22) ({ score, reasons } = add(score, reasons, 1, `${t} parfait pour la chaleur`));
@@ -352,6 +358,22 @@ export function applyScoring(
         const delta = rules.minusDelta ?? -2;
         ({ score, reasons } = add(score, reasons, delta, `${it.type} hors style ${style}`));
       }
+    }
+  }
+
+  // ---- Veste en cuir : style favori ----
+  const vesteCuir = items.find(it => it.type === 'Veste en cuir');
+  if (vesteCuir) {
+    const cuirStyleDeltas: Record<string, number> = {
+      'Dark': 2, 'Grunge': 2, 'Streetwear': 2,
+      'Casual chic': 1, 'Y2K': 1,
+      'Old Money': -1, 'Bohème': -1, 'Romantique': -2,
+    };
+    for (const style of favStyles) {
+      const delta = cuirStyleDeltas[style];
+      if (delta === undefined) continue;
+      const label = delta > 0 ? `Veste en cuir parfaite ${style}` : `Veste en cuir hors style ${style}`;
+      ({ score, reasons } = add(score, reasons, delta, label));
     }
   }
 

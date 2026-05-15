@@ -122,7 +122,7 @@ export const DRESSING_CATEGORIES: CategoryGroup[] = [
         key: 'Vestes',
         label: 'Vestes',
         allLabel: 'Toutes les vestes',
-        types: ['Bomber', 'Veste en jean', 'Perfecto', 'Veste militaire', 'Veste coupe-vent', 'Blazer'],
+        types: ['Bomber', 'Veste en jean', 'Perfecto', 'Veste en cuir', 'Veste militaire', 'Veste coupe-vent', 'Blazer'],
       },
     ],
   },
