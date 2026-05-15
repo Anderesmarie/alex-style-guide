@@ -3,14 +3,30 @@ import { ClothingItem, Outfit } from '@/lib/types';
 import { getWardrobe, getOutfits, addOutfit, deleteOutfit, setOutfitLiked, genId } from '@/lib/storage';
 import { generateRecommendations } from '@/lib/recommendations';
 import { updateStreak } from '@/lib/streak';
-import { getCategoryByType } from '@/lib/categories';
+import { getCategoryForType, getSubcategoryForType } from '@/lib/dressingTaxonomy';
 import { supabase } from '@/integrations/supabase/client';
 import CalendarView from '@/components/CalendarView';
 import OutfitVisualLayout, { SlotKey, SlotMap, SLOT_CONFIG } from '@/components/OutfitVisualLayout';
 import OutfitLayout from '@/components/OutfitLayout';
 import OutfitGalleryCard from '@/components/OutfitGalleryCard';
 import OutfitFreeCanvas, { CHIPS, ChipKey, chipMatchesItem, defaultPositionForCategory, CANVAS_W, CANVAS_H } from '@/components/OutfitFreeCanvas';
-import { getCategoryByType as _getCat } from '@/lib/categories';
+
+// Renvoie le nom de catégorie attendu par SLOT_CONFIG (compat anciens libellés)
+function legacyCategoryName(it: ClothingItem): string {
+  const cat = getCategoryForType(it.type);
+  if (!cat) return it.category;
+  if (cat.key === 'Hauts') {
+    const sub = getSubcategoryForType(it.type);
+    return sub?.subcategory.key === 'Pulls & Mailles' ? 'Pulls & sweats' : 'Hauts';
+  }
+  if (cat.key === 'Robes') return 'Robes & combinaisons';
+  if (cat.key === 'Manteaux') return 'Manteaux & vestes';
+  if (cat.key === 'Bas') {
+    const sub = getSubcategoryForType(it.type);
+    return sub?.subcategory.key === 'Jupes' ? 'Jupes' : 'Bas';
+  }
+  return cat.key;
+}
 
 type View = 'gallery' | 'createVisual' | 'createQuick' | 'createFree' | 'detail';
 type Tab = 'outfits' | 'calendar';
@@ -131,7 +147,7 @@ export default function Outfits() {
       const cfg = SLOT_CONFIG[slotKey];
       const candidate = items.find(it => {
         if (used.has(it.id)) return false;
-        const cat = getCategoryByType(it.type)?.name || it.category;
+        const cat = legacyCategoryName(it);
         return cfg.categories.includes(cat);
       });
       if (candidate) {
@@ -154,7 +170,7 @@ export default function Outfits() {
     if (!pickerSlot) return [];
     const cfg = SLOT_CONFIG[pickerSlot];
     return wardrobe.filter(it => {
-      const cat = getCategoryByType(it.type)?.name || it.category;
+      const cat = legacyCategoryName(it);
       return cfg.categories.includes(cat);
     });
   };
@@ -253,7 +269,7 @@ export default function Outfits() {
         setFreeChip(null);
         return;
       }
-      const cat = _getCat(item.type)?.name || item.category || '';
+      const cat = legacyCategoryName(item);
       const def = defaultPositionForCategory(cat);
       setFreePieces(prev => [...prev, {
         itemId: item.id,
