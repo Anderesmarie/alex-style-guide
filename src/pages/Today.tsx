@@ -227,6 +227,8 @@ export default function Today() {
       corpulence: userProfile?.corpulence ?? null,
       colorimetry: userSeason ?? undefined,
       favStyles: userProfile?.styles ?? [],
+      favoriteColors: userProfile?.favorite_colors,
+      wornItemIds: [],
     };
   }, [ws, weatherTemp, wardrobe, userProfile, userSeason, lifestyle]);
 

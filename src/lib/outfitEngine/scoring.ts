@@ -848,5 +848,23 @@ export function applyScoring(
     }
   }
 
+  // Couleur favorite dans la tenue
+  if (input.favoriteColors && input.favoriteColors.length > 0) {
+    const favs = input.favoriteColors.map(c => norm(c));
+    const allColors = items.flatMap(i => colorTokens(i));
+    const hasFavColor = allColors.some(c => favs.includes(c));
+    if (hasFavColor) {
+      ({ score, reasons } = add(score, reasons, 2, 'Couleur favorite présente'));
+    }
+  }
+
+  // Pièce portée = J'aime + J'ai mis
+  if (input.wornItemIds && input.wornItemIds.length > 0) {
+    const wornCount = items.filter(i => input.wornItemIds!.includes(i.id)).length;
+    if (wornCount > 0) {
+      ({ score, reasons } = add(score, reasons, 2, 'Pièce déjà aimée et portée'));
+    }
+  }
+
   return { ...candidate, score, reasons };
 }
