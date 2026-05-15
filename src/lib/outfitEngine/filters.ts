@@ -28,7 +28,7 @@ function isBas(it: ClothingItem) {
   return it.category === 'Bas';
 }
 function isManteau(it: ClothingItem) {
-  return it.category === 'Manteaux' || it.category === 'Manteaux & vestes';
+  return it.category === 'Manteaux';
 }
 function isChaussure(it: ClothingItem) {
   return it.category === 'Chaussures';
