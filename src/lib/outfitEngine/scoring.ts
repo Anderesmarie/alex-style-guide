@@ -98,7 +98,7 @@ export function applyScoring(
   }
 
   // ---- Empilement / layering (températures fraîches) ----
-  const hasCoat = items.some(it => it.category === 'Manteaux' || it.category === 'Manteaux & vestes');
+  const hasCoat = items.some(it => it.category === 'Manteaux');
   const hasPullCat = items.some(it => it.subcategory === 'Pulls & Mailles');
   const hasNoLayer = !hasCoat && !hasPullCat;
   const TSHIRT_LIKE = ['T-shirt', 'Crop top', 'Débardeur', 'Body', 'Top dos nu', 'Top épaules dénudées', 'Pull sans manche', 'Col roulé'];
