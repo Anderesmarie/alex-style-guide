@@ -1,0 +1,1 @@
+UPDATE public.wardrobe SET type = 'Robe midi' WHERE id = '8e111d47-424e-48a3-b408-8cb2b7be4b6e' AND (type IS NULL OR type = '');
