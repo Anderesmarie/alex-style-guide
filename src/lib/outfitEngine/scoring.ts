@@ -525,6 +525,43 @@ export function applyScoring(
     }
   }
 
+  // ---- Scoring par occasion (lycée, campus, cérémonie, plage, soirée étudiante) ----
+  switch (occasion) {
+    case 'Cours lycée': {
+      const matchLycee = items.filter(i =>
+        i.style?.some(s => (input.favStyles || []).includes(s))
+      ).length;
+      if (matchLycee > 0) ({ score, reasons } = add(score, reasons, 2, 'Style lycée match'));
+      break;
+    }
+    case 'Campus': {
+      const matchCampus = items.filter(i =>
+        i.style?.some(s => (input.favStyles || []).includes(s))
+      ).length;
+      if (matchCampus > 0) ({ score, reasons } = add(score, reasons, 2, 'Style campus match'));
+      break;
+    }
+    case 'Cérémonie': {
+      const matchCeremonie = items.filter(i =>
+        i.occasion?.includes('Cérémonie') || i.occasion?.includes('Événement')
+      ).length;
+      if (matchCeremonie > 0) ({ score, reasons } = add(score, reasons, 3, 'Pièces cérémonie'));
+      break;
+    }
+    case 'Plage': {
+      const matchPlage = items.filter(i => i.occasion?.includes('Plage')).length;
+      if (matchPlage > 0) ({ score, reasons } = add(score, reasons, 2, 'Pièces plage'));
+      break;
+    }
+    case 'Soirée étudiante': {
+      const matchSoiree = items.filter(i =>
+        i.style?.some(s => ['Y2K', 'Streetwear', 'Casual chic'].includes(s))
+      ).length;
+      if (matchSoiree > 0) ({ score, reasons } = add(score, reasons, 2, 'Style soirée étudiante'));
+      break;
+    }
+  }
+
   // ---- Bijoux : colorimétrie or/argent ----
   const goldSeasons = ['Printemps', 'Automne'];
   const silverSeasons = ['Été', 'Hiver'];
