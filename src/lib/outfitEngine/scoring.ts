@@ -59,8 +59,30 @@ export function applyScoring(
       if (tAvg > 20) ({ score, reasons } = add(score, reasons, -3, `${t} trop chaud`));
     }
 
-    if (['Blazer', 'Veste en jean', 'Trench'].includes(t) && tAvg >= 12 && tAvg <= 22) {
+    if (['Blazer', 'Veste en jean', 'Trench', 'Bomber'].includes(t) && tAvg >= 12 && tAvg <= 22) {
       ({ score, reasons } = add(score, reasons, 1, `${t} idéal mi-saison`));
+    }
+
+    const wcode = (input as any).weathercode as number | undefined;
+    const isRainy = typeof wcode === 'number' && wcode > 50;
+    const isWindy = (input as any).wind === true || (typeof wcode === 'number' && [45, 48].includes(wcode));
+
+    if (t === 'Imperméable / Ciré') {
+      if (tempMin < 15 && isRainy) ({ score, reasons } = add(score, reasons, 3, 'Imperméable parfait sous la pluie'));
+      if (tempMax > 25) ({ score, reasons } = add(score, reasons, -2, 'Imperméable trop chaud'));
+    }
+    if (t === 'Cape / Poncho' && tempMin < 15) {
+      ({ score, reasons } = add(score, reasons, 1, 'Cape adaptée au frais'));
+    }
+    if (t === 'Veste coupe-vent' && tempMin < 15 && isWindy) {
+      ({ score, reasons } = add(score, reasons, 2, 'Coupe-vent adapté au vent'));
+    }
+    if (t === 'Parka' && tempMin < 5) {
+      ({ score, reasons } = add(score, reasons, 2, 'Parka idéale au grand froid'));
+    }
+    if (t === 'Doudoune') {
+      if (tempMin < 5) ({ score, reasons } = add(score, reasons, 3, 'Doudoune idéale au grand froid'));
+      if (tempMax > 15) ({ score, reasons } = add(score, reasons, -2, 'Doudoune trop chaude'));
     }
 
     if (t === 'Veste en cuir') {
