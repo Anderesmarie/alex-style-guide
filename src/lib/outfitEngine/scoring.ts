@@ -43,7 +43,7 @@ export function applyScoring(
   for (const it of items) {
     const t = it.type;
 
-    if (['T-shirt', 'Crop top', 'Débardeur', 'Body', 'Pull sans manche', 'Col roulé'].includes(t) && tempMin < 10) {
+    if (['T-shirt', 'Crop top', 'Débardeur', 'Body', 'Pull sans manche', 'Col roulé', 'Top corset / Bralette', 'Haut épaules dénudées'].includes(t) && tempMin < 10) {
       ({ score, reasons } = add(score, reasons, -2, `${t} trop léger pour ${tempMin}°C`));
     }
 
@@ -101,7 +101,7 @@ export function applyScoring(
   const hasCoat = items.some(it => it.category === 'Manteaux');
   const hasPullCat = items.some(it => it.subcategory === 'Pulls & Mailles');
   const hasNoLayer = !hasCoat && !hasPullCat;
-  const TSHIRT_LIKE = ['T-shirt', 'Crop top', 'Débardeur', 'Body', 'Top dos nu', 'Top épaules dénudées', 'Pull sans manche', 'Col roulé'];
+  const TSHIRT_LIKE = ['T-shirt', 'Crop top', 'Débardeur', 'Body', 'Top dos nu', 'Top épaules dénudées', 'Haut épaules dénudées', 'Top corset / Bralette', 'Pull sans manche', 'Col roulé'];
   const tshirtItem = items.find(it => TSHIRT_LIKE.includes(it.type));
   const pullItem = items.find(it => it.subcategory === 'Pulls & Mailles');
   const removableItem = items.find(it => REMOVABLE_LAYERS.includes(it.type));
@@ -373,6 +373,24 @@ export function applyScoring(
       const delta = cuirStyleDeltas[style];
       if (delta === undefined) continue;
       const label = delta > 0 ? `Veste en cuir parfaite ${style}` : `Veste en cuir hors style ${style}`;
+      ({ score, reasons } = add(score, reasons, delta, label));
+    }
+  }
+
+  // ---- Hauts spécifiques : style favori ----
+  const perItemStyleDeltas: Record<string, Record<string, number>> = {
+    'Polo': { 'Preppy': 2, 'Old Money': 1, 'Casual chic': 1, 'Streetwear': -1, 'Dark': -1 },
+    'Tunique': { 'Bohème': 2, 'Casual chic': 1, 'Old Money': -1, 'Minimaliste': -1 },
+    'Body': { 'Casual chic': 1, 'Y2K': 1, 'Dark': 1, 'Minimaliste': 1 },
+    'Débardeur': { 'Streetwear': 1, 'Casual chic': 1 },
+  };
+  for (const it of items) {
+    const deltas = perItemStyleDeltas[it.type];
+    if (!deltas) continue;
+    for (const style of favStyles) {
+      const delta = deltas[style];
+      if (delta === undefined) continue;
+      const label = delta > 0 ? `${it.type} parfait ${style}` : `${it.type} hors style ${style}`;
       ({ score, reasons } = add(score, reasons, delta, label));
     }
   }
