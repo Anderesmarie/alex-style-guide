@@ -486,6 +486,95 @@ export function applyScoring(
       ({ score, reasons } = add(score, reasons, 1, `Bijou argenté accordé ${input.colorimetry}`));
     }
   }
+
+  // ---- Accessoires : météo, style, occasion ----
+  const wcode2 = (input as any).weathercode as number | undefined;
+  const isRainy2 = typeof wcode2 === 'number' && wcode2 > 50;
+  const isClearSky = typeof wcode2 === 'number' && wcode2 <= 2;
+  const hasJupeOuRobe = items.some(it => it.category === 'Robes' || it.subcategory === 'Jupes' || /jupe/i.test(it.type));
+  const shoesItem = items.find(i => i.category === 'Chaussures');
+  const shoesColors = shoesItem ? colorTokens(shoesItem) : [];
+
+  for (const it of items) {
+    const t = it.type;
+    const styles = it.style || [];
+    const occ = it.occasion || [];
+    const hasS = (...s: string[]) => s.some(x => styles.includes(x));
+    const hasO = (...o: string[]) => o.some(x => occ.includes(x));
+
+    if (t === 'Bonnet') {
+      if (tempMin < 5) ({ score, reasons } = add(score, reasons, 3, 'Bonnet idéal au grand froid'));
+      else if (tempMin < 8) ({ score, reasons } = add(score, reasons, 2, 'Bonnet adapté au froid'));
+      if (tempMax > 18) ({ score, reasons } = add(score, reasons, -2, 'Bonnet trop chaud'));
+      for (const style of favStyles) {
+        if (['Streetwear', 'Casual chic', 'Grunge'].includes(style) && styles.includes(style)) {
+          ({ score, reasons } = add(score, reasons, 1, `Bonnet ${style}`));
+        }
+        if (style === 'Old Money' && styles.includes(style)) {
+          ({ score, reasons } = add(score, reasons, -1, 'Bonnet vs Old Money'));
+        }
+      }
+      if (hasO('Cérémonie', 'Ceremonie')) ({ score, reasons } = add(score, reasons, -2, 'Bonnet hors cérémonie'));
+    }
+
+    if (t === 'Écharpe / Foulard' || t === 'Echarpe / Foulard' || t === 'Écharpe' || t === 'Foulard') {
+      if (tempMin < 10) ({ score, reasons } = add(score, reasons, 2, 'Écharpe adaptée au froid'));
+      if (tempMax > 22) ({ score, reasons } = add(score, reasons, -1, 'Écharpe trop chaude'));
+      for (const style of favStyles) {
+        if (['Old Money', 'Bohème', 'Preppy', 'Vintage'].includes(style) && styles.includes(style)) {
+          ({ score, reasons } = add(score, reasons, 1, `Foulard ${style}`));
+        }
+      }
+    }
+
+    if (t === 'Casquette' || t === 'Bob' || t === 'Casquette / Bob') {
+      for (const style of favStyles) {
+        if (style === 'Streetwear' && styles.includes(style)) ({ score, reasons } = add(score, reasons, 2, 'Casquette streetwear'));
+        if (['Y2K', 'Casual chic'].includes(style) && styles.includes(style)) ({ score, reasons } = add(score, reasons, 1, `Casquette ${style}`));
+        if (style === 'Old Money' && styles.includes(style)) ({ score, reasons } = add(score, reasons, -2, 'Casquette vs Old Money'));
+      }
+      if (hasO('Cérémonie', 'Ceremonie')) ({ score, reasons } = add(score, reasons, -3, 'Casquette hors cérémonie'));
+      if (hasO('Bureau', 'Travail')) ({ score, reasons } = add(score, reasons, -2, 'Casquette hors bureau'));
+    }
+
+    if (t === 'Lunettes de soleil') {
+      if (isClearSky && tempMax > 18) ({ score, reasons } = add(score, reasons, 1, 'Lunettes par beau temps'));
+      if (isRainy2) ({ score, reasons } = add(score, reasons, -2, 'Lunettes sous la pluie'));
+      for (const style of favStyles) {
+        if (['Y2K', 'Casual chic'].includes(style) && styles.includes(style)) {
+          ({ score, reasons } = add(score, reasons, 1, `Lunettes ${style}`));
+        }
+      }
+    }
+
+    if (t === 'Collants' || t === 'Chaussettes' || t === 'Collants / Chaussettes') {
+      const isSport = hasS('Sportswear') || /sport/i.test(it.subcategory || '');
+      const isThick = /épais|epais|laine|opaque/i.test((it as any).matiere || '') || /épais|epais/i.test(t);
+      if (hasJupeOuRobe) {
+        if (tempMin < 8) ({ score, reasons } = add(score, reasons, 3, 'Collants au grand froid'));
+        else if (tempMin < 12) ({ score, reasons } = add(score, reasons, 2, 'Collants au frais'));
+      }
+      for (const style of favStyles) {
+        if (style === 'Preppy' && styles.includes('Preppy')) ({ score, reasons } = add(score, reasons, 1, 'Chaussettes Preppy'));
+        if (style === 'Sportswear' && isSport) ({ score, reasons } = add(score, reasons, 1, 'Chaussettes sport'));
+      }
+      const tenueChic = items.some(i => (i.style || []).some(s => ['Old Money', 'Casual chic', 'Romantique'].includes(s)));
+      if (isSport && tenueChic) ({ score, reasons } = add(score, reasons, -2, 'Chaussettes sport vs tenue chic'));
+      if (tempMax > 22 && isThick) ({ score, reasons } = add(score, reasons, -2, 'Collants épais trop chauds'));
+    }
+
+    if (t === 'Ceinture') {
+      for (const style of favStyles) {
+        if (['Old Money', 'Casual chic'].includes(style) && styles.includes(style)) {
+          ({ score, reasons } = add(score, reasons, 1, `Ceinture ${style}`));
+        }
+      }
+      const ceintureColors = colorTokens(it);
+      if (shoesColors.length > 0 && ceintureColors.some(c => shoesColors.some(sc => sc === c))) {
+        ({ score, reasons } = add(score, reasons, 1, 'Ceinture assortie aux chaussures'));
+      }
+    }
+  }
   for (const it of items) {
     const deltas = perItemStyleDeltas[it.type];
     if (!deltas) continue;
