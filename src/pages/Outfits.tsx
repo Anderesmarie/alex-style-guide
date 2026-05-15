@@ -147,7 +147,7 @@ export default function Outfits() {
       const cfg = SLOT_CONFIG[slotKey];
       const candidate = items.find(it => {
         if (used.has(it.id)) return false;
-        const cat = getCategoryByType(it.type)?.name || it.category;
+        const cat = legacyCategoryName(it);
         return cfg.categories.includes(cat);
       });
       if (candidate) {
@@ -170,7 +170,7 @@ export default function Outfits() {
     if (!pickerSlot) return [];
     const cfg = SLOT_CONFIG[pickerSlot];
     return wardrobe.filter(it => {
-      const cat = getCategoryByType(it.type)?.name || it.category;
+      const cat = legacyCategoryName(it);
       return cfg.categories.includes(cat);
     });
   };
@@ -269,7 +269,7 @@ export default function Outfits() {
         setFreeChip(null);
         return;
       }
-      const cat = _getCat(item.type)?.name || item.category || '';
+      const cat = legacyCategoryName(item);
       const def = defaultPositionForCategory(cat);
       setFreePieces(prev => [...prev, {
         itemId: item.id,
