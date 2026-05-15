@@ -63,6 +63,12 @@ export function applyScoring(
       ({ score, reasons } = add(score, reasons, 1, `${t} idéal mi-saison`));
     }
 
+    if (t === 'Veste en cuir') {
+      if (tempMin >= 12 && tempMin <= 22) ({ score, reasons } = add(score, reasons, 1, 'Veste en cuir idéale mi-saison'));
+      if (tempMin < 5) ({ score, reasons } = add(score, reasons, -1, 'Veste en cuir trop légère'));
+      if (tempMax > 25) ({ score, reasons } = add(score, reasons, -2, 'Veste en cuir trop chaude'));
+    }
+
     const isMiniBottom = t === 'Mini-jupe' || it.subcategory === 'Shorts';
     if (isMiniBottom) {
       if (tAvg > 22) ({ score, reasons } = add(score, reasons, 1, `${t} parfait pour la chaleur`));
