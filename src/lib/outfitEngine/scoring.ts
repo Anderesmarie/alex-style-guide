@@ -43,11 +43,11 @@ export function applyScoring(
   for (const it of items) {
     const t = it.type;
 
-    if (['T-shirt', 'Crop top', 'Débardeur', 'Body'].includes(t) && tempMin < 10) {
+    if (['T-shirt', 'Crop top', 'Débardeur', 'Body', 'Pull sans manche', 'Col roulé'].includes(t) && tempMin < 10) {
       ({ score, reasons } = add(score, reasons, -2, `${t} trop léger pour ${tempMin}°C`));
     }
 
-    const isPull = ['Sweat', 'Hoodie', 'Cardigan'].includes(t) || t.startsWith('Pull');
+    const isPull = ['Sweat', 'Hoodie', 'Cardigan'].includes(t) || (t.startsWith('Pull') && t !== 'Pull sans manche');
     if (isPull) {
       if (tAvg > 25) ({ score, reasons } = add(score, reasons, -2, `${t} trop chaud`));
       if (tAvg < 12) ({ score, reasons } = add(score, reasons, 2, `${t} adapté au froid`));
