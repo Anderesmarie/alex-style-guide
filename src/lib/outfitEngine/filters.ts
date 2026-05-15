@@ -148,7 +148,7 @@ export function applyFilters(
   }
   const VESTES_COURTES = [
     'Blazer', 'Bomber', 'Veste en jean',
-    'Perfecto', 'Veste militaire',
+    'Perfecto', 'Veste en cuir', 'Veste militaire',
     'Veste coupe-vent',
   ];
   const hasVesteCourte = items.some(i => VESTES_COURTES.includes(i.type));
