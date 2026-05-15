@@ -182,6 +182,37 @@ export function applyScoring(
     ({ score, reasons } = add(score, reasons, -2, 'Trop de couleurs vives'));
   }
 
+  // ---- Couleurs : clashs & harmonies ----
+  const colorList = items
+    .flatMap(i => Array.isArray((i as any).color) ? (i as any).color : [i.color])
+    .map(c => (c || '').toString().toLowerCase());
+
+  if (colorList.includes('rose') && colorList.includes('rouge')) {
+    ({ score, reasons } = add(score, reasons, -3, 'Rose vif + Rouge vif clash'));
+  }
+  if (colorList.includes('vert') && colorList.includes('jaune')) {
+    ({ score, reasons } = add(score, reasons, -3, 'Vert fluo + Jaune fluo clash'));
+  }
+  if (colorList.includes('marron') && colorList.includes('noir')) {
+    ({ score, reasons } = add(score, reasons, -1, 'Marron + Noir clash'));
+  }
+
+  const uniqueColors = [...new Set(colorList.filter(Boolean))];
+  if (uniqueColors.length === 1) {
+    ({ score, reasons } = add(score, reasons, 2, 'Look monochrome sophistiqué'));
+  }
+
+  const ANALOGUES: [string, string][] = [
+    ['bleu', 'vert'], ['rose', 'mauve'],
+    ['rouge', 'orange'], ['jaune', 'vert'],
+    ['bleu', 'violet'], ['rose', 'rouge'],
+  ];
+  for (const [a, b] of ANALOGUES) {
+    if (colorList.includes(a) && colorList.includes(b)) {
+      ({ score, reasons } = add(score, reasons, 1, 'Couleurs analogues harmonieuses'));
+    }
+  }
+
   // ---- Morphologie ----
   const fit = (it: ClothingItem) => norm(it.fit);
   const tex = (it: ClothingItem) => norm(it.matiere) + ' ' + norm(it.texture);
