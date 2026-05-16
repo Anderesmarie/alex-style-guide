@@ -539,7 +539,7 @@ export default function Dressing() {
       setFormError('Choisis une catégorie');
       return;
     }
-    const finalColor = colors.length ? colors.join(', ') : (customColor || 'Autre');
+    const finalColor: string[] = colors.length ? colors : (customColor ? [customColor] : []);
     const item: ClothingItem = {
       id: genId(), imageBase64: finalImage, category, subcategory, layer, type: type || category, color: finalColor,
       season: season.length ? season : ['Toutes saisons'],
