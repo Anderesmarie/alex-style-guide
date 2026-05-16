@@ -304,7 +304,7 @@ export function getSilhouetteScore(
   // Règles Taille
   if (taille === 'petite') {
     if (item.style?.some(s => s === 'Bureau') || item.type === 'Robe') score += 2;
-    if (item.color?.toLowerCase() === 'noir' || item.color?.toLowerCase() === 'blanc') score += 1;
+    if ((item.color || []).some(c => c.toLowerCase() === 'noir' || c.toLowerCase() === 'blanc')) score += 1;
     if (item.type === 'Pantalon' && item.style?.some(s => s.toLowerCase().includes('large'))) score -= 2;
     if (item.type === 'Manteau' && item.occasion?.includes('Quotidien')) score -= 1;
   }
