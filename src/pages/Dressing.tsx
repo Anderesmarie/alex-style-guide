@@ -1121,7 +1121,18 @@ export default function Dressing() {
           <label className="block text-sm font-medium mb-3">Saison</label>
           <div className="flex flex-wrap gap-2">
             {SEASONS.map(s => (
-              <button key={s} type="button" onClick={() => toggle(season, s, setSeason)}
+              <button key={s} type="button" onClick={() => {
+                const ALL = 'Toutes saisons';
+                const FOUR = ['Été', 'Automne', 'Hiver', 'Printemps'];
+                if (s === ALL) {
+                  setSeason(season.includes(ALL) ? [] : [ALL]);
+                  return;
+                }
+                let next = season.includes(ALL) ? [] : [...season];
+                next = next.includes(s) ? next.filter(x => x !== s) : [...next, s];
+                if (FOUR.every(f => next.includes(f))) next = [ALL];
+                setSeason(next);
+              }}
                 className={`px-3 py-1.5 rounded-full border text-xs transition-all ${season.includes(s) ? 'border-[#C9956C] bg-[#C9956C]/10 text-[#C9956C]' : 'border-gray-200 bg-white text-gray-600'}`}>
                 {s}
               </button>
