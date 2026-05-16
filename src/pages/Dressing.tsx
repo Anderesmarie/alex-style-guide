@@ -685,7 +685,7 @@ export default function Dressing() {
   const filtered = wardrobe.filter(i => {
     if (allowedTypes && !allowedTypes.includes(i.type)) return false;
     if (filterType && i.type !== filterType) return false;
-    if (filterColor && i.color !== filterColor) return false;
+    if (filterColor && !(i.color || []).includes(filterColor)) return false;
     if (filterSeason && !i.season.includes(filterSeason)) return false;
     return true;
   });
