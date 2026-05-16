@@ -574,7 +574,7 @@ export default function Outfits() {
               <img src={item.imageBase64} alt={item.type} className="w-full aspect-square object-cover bg-white" />
               <div className="p-2 bg-card">
                 <p className="text-xs font-medium truncate">{item.type}</p>
-                <p className="text-xs text-muted-foreground truncate">{item.color}</p>
+                <p className="text-xs text-muted-foreground truncate">{(item.color || []).join(', ')}</p>
               </div>
             </div>
           ))}
