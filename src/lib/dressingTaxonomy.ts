@@ -8,6 +8,7 @@ export type Subcategory = {
   label: string;
   allLabel: string;
   types: string[];
+  layer?: number; // override la layer de la catégorie parent
 };
 
 export type CategoryGroup = {
