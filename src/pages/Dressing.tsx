@@ -539,9 +539,17 @@ export default function Dressing() {
       setFormError('Choisis une catégorie');
       return;
     }
+    if (!subcategory) {
+      setFormError('Choisis une sous-catégorie');
+      return;
+    }
+    if (!type) {
+      setFormError('Choisis un type');
+      return;
+    }
     const finalColor: string[] = colors.length ? colors : (customColor ? [customColor] : []);
     const item: ClothingItem = {
-      id: genId(), imageBase64: finalImage, category, subcategory, layer, type: type || category, color: finalColor,
+      id: genId(), imageBase64: finalImage, category, subcategory, layer, type, color: finalColor,
       season: season.length ? season : ['Toutes saisons'],
       style: style.length ? style : ['Casual chic'],
       occasion: occasion.length ? occasion : ['Quotidien'],
@@ -569,11 +577,22 @@ export default function Dressing() {
 
   const handleUpdate = async () => {
     if (!selectedItem) return;
+    setFormError(null);
+    const effSubcategory = subcategory || selectedItem.subcategory;
+    const effType = type || selectedItem.type;
+    if (!effSubcategory) {
+      setFormError('Choisis une sous-catégorie');
+      return;
+    }
+    if (!effType) {
+      setFormError('Choisis un type');
+      return;
+    }
     const finalColor: string[] = colors.length ? colors : (customColor ? [customColor] : (selectedItem.color || []));
     const updated: ClothingItem = {
       ...selectedItem, category: category || selectedItem.category,
-      subcategory: subcategory || selectedItem.subcategory,
-      type, color: finalColor,
+      subcategory: effSubcategory,
+      type: effType, color: finalColor,
       season: season.length ? season : selectedItem.season,
       style: style.length ? style : selectedItem.style,
       occasion: occasion.length ? occasion : selectedItem.occasion,
