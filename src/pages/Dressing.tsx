@@ -539,12 +539,13 @@ export default function Dressing() {
       setFormError('Choisis une catégorie');
       return;
     }
-    if (!subcategory) {
-      setFormError('Choisis une sous-catégorie');
+    const catDef = DRESSING_CATEGORIES.find(c => c.key === category);
+    if (catDef?.subcategories && catDef.subcategories.length > 0 && !subcategory) {
+      setFormError('La sous-catégorie est obligatoire');
       return;
     }
     if (!type) {
-      setFormError('Choisis un type');
+      setFormError('Le type est obligatoire 👗');
       return;
     }
     const finalColor: string[] = colors.length ? colors : (customColor ? [customColor] : []);
