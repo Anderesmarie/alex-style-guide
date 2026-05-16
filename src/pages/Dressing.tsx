@@ -654,9 +654,7 @@ export default function Dressing() {
     setSubcategory(item.subcategory || '');
     setType(item.type);
     // Reconstruit la sélection multiple depuis le champ stocké (joint par virgule)
-    const parsed = (item.color || '')
-      .split(',')
-      .map(s => s.trim())
+    const parsed = (item.color || [])
       .filter(v => v && COLOR_PALETTE.some(c => c.value === v))
       .slice(0, 3);
     setColors(parsed);
