@@ -569,7 +569,7 @@ export default function Dressing() {
 
   const handleUpdate = async () => {
     if (!selectedItem) return;
-    const finalColor = colors.length ? colors.join(', ') : (customColor || selectedItem.color);
+    const finalColor: string[] = colors.length ? colors : (customColor ? [customColor] : (selectedItem.color || []));
     const updated: ClothingItem = {
       ...selectedItem, category: category || selectedItem.category,
       subcategory: subcategory || selectedItem.subcategory,
