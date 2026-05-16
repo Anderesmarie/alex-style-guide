@@ -187,6 +187,7 @@ export type Database = {
           beauty_makeup_level: string | null
           brands: Json | null
           budget: number | null
+          colorimetry: Json | null
           colorimetry_season: string | null
           corpulence: string | null
           favorite_colors: Json | null
@@ -208,6 +209,7 @@ export type Database = {
           beauty_makeup_level?: string | null
           brands?: Json | null
           budget?: number | null
+          colorimetry?: Json | null
           colorimetry_season?: string | null
           corpulence?: string | null
           favorite_colors?: Json | null
@@ -229,6 +231,7 @@ export type Database = {
           beauty_makeup_level?: string | null
           brands?: Json | null
           budget?: number | null
+          colorimetry?: Json | null
           colorimetry_season?: string | null
           corpulence?: string | null
           favorite_colors?: Json | null
