@@ -118,6 +118,7 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
           lifestyle: lifestyle || null,
           makeup: makeup || null,
           colorimetry: palette as unknown as object,
+          colorimetry_season: getSeasonFromSkin(avatar.skin),
         }).eq('id', userData.user.id);
         console.log('Morphologie sauvegardée:', morphoCode);
       }
