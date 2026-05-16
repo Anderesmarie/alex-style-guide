@@ -318,7 +318,7 @@ export function getSilhouetteScore(
   if (corpulence === 'ronde') {
     const itemDesc = `${item.type} ${item.category} ${item.subcategory}`.toLowerCase();
     if (['viscose', 'soie', 'jersey', 'modal'].some(m => itemDesc.includes(m))) score += 2;
-    if (item.color?.toLowerCase() === 'noir' || item.color?.toLowerCase() === 'marron') score += 1;
+    if ((item.color || []).some(c => c.toLowerCase() === 'noir' || c.toLowerCase() === 'marron')) score += 1;
     if (['tweed', 'rigide', 'structure'].some(m => itemDesc.includes(m))) score -= 2;
   }
 
