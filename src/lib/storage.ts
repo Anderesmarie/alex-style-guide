@@ -115,7 +115,7 @@ export async function getWardrobe(): Promise<ClothingItem[]> {
     subcategory: row.subcategory || '',
     layer: row.layer ?? 1,
     type: row.type,
-    color: row.color,
+    color: Array.isArray(row.color) ? (row.color as string[]) : (typeof row.color === 'string' ? (row.color as string).split(',').map(s => s.trim()).filter(Boolean) : []),
     season: row.season as string[],
     style: row.style as string[],
     occasion: row.occasion as string[],
