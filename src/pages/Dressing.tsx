@@ -1157,6 +1157,11 @@ export default function Dressing() {
               </button>
             ))}
           </div>
+          {style.length === 0 && (
+            <p className="text-xs text-muted-foreground mt-2 italic">
+              Choisis au moins 1 style pour de meilleures suggestions ✨
+            </p>
+          )}
         </div>
 
         <div>
