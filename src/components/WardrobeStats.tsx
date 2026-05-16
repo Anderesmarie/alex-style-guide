@@ -23,8 +23,10 @@ export default function WardrobeStats({ wardrobe, outfits, loading }: Props) {
   // --- Card 2: Dominant colors ---
   const colorCounts: Record<string, number> = {};
   wardrobe.forEach(i => {
-    const c = i.color.toLowerCase();
-    colorCounts[c] = (colorCounts[c] || 0) + 1;
+    (i.color || []).forEach(col => {
+      const c = col.toLowerCase();
+      colorCounts[c] = (colorCounts[c] || 0) + 1;
+    });
   });
   const topColors = Object.entries(colorCounts)
     .sort((a, b) => b[1] - a[1])
