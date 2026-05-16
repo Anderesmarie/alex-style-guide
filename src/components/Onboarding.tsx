@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { saveProfile, saveAvatar, savePalette } from '@/lib/storage';
 import { AvatarData } from './AvatarSVG';
 import AvatarCreator from './AvatarCreator';
-import { getPaletteForSkin } from '@/lib/colorimetry';
+import { getPaletteForSkin, getSeasonFromSkin } from '@/lib/colorimetry';
 import ProfileEditor from './ProfileEditor';
 import SilhouetteCarousel from './SilhouetteCarousel';
 
@@ -118,6 +118,7 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
           lifestyle: lifestyle || null,
           makeup: makeup || null,
           colorimetry: palette as unknown as object,
+          colorimetry_season: getSeasonFromSkin(avatar.skin),
         }).eq('id', userData.user.id);
         console.log('Morphologie sauvegardée:', morphoCode);
       }
