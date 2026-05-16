@@ -423,7 +423,7 @@ function scoreByProfile(
     if (item.style.some(s => s === 'Boho')) score += 3;
   }
   if (styles.includes('minimaliste')) {
-    if (['blanc', 'noir', 'gris', 'beige'].includes(item.color?.toLowerCase())) score += 2;
+    if ((item.color || []).some(c => ['blanc', 'noir', 'gris', 'beige'].includes(c.toLowerCase()))) score += 2;
   }
 
   // 2. Occasion du jour (+2)
