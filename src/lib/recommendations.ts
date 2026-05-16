@@ -366,7 +366,7 @@ export function getMorphologyScore(
   }
 
   if (morphologie === 'O') {
-    if (['viscose', 'soie', 'jersey'].some(m => item.matiere?.includes(m))) score += 2;
+    if (['viscose', 'soie', 'jersey'].some(m => item.texture?.includes(m))) score += 2;
     if (item.style?.includes('col V')) score += 1;
     if (item.style?.includes('moulant')) score -= 2;
     if (item.style?.includes('taille basse')) score -= 1;
