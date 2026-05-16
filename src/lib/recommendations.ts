@@ -361,7 +361,7 @@ export function getMorphologyScore(
   if (morphologie === 'V') {
     if (item.type === 'Jupe' && item.style?.includes('trapèze')) score += 2;
     if (item.type === 'Pantalon' && item.style?.includes('large')) score += 2;
-    if (item.color === 'noir' && item.type?.includes('Haut')) score += 1;
+    if ((item.color || []).map(c => c.toLowerCase()).includes('noir') && item.type?.includes('Haut')) score += 1;
     if (item.style?.includes('épaules')) score -= 2;
   }
 
