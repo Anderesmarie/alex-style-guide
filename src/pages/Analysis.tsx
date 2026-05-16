@@ -100,7 +100,7 @@ export default function Analysis() {
       const typeMatch = item.type.toLowerCase().includes(basic.type.toLowerCase())
         || item.category?.toLowerCase().includes(basic.type.toLowerCase());
       if (!typeMatch) return false;
-      if (basic.color) return item.color.toLowerCase().includes(basic.color);
+      if (basic.color) return (item.color || []).some(c => c.toLowerCase().includes(basic.color));
       return true;
     });
   };
