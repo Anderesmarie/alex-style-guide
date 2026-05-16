@@ -551,7 +551,7 @@ export default function Dressing() {
     const item: ClothingItem = {
       id: genId(), imageBase64: finalImage, category, subcategory, layer, type, color: finalColor,
       season: season.length ? season : ['Toutes saisons'],
-      style: style.length ? style : ['Casual chic'],
+      style: style,
       occasion: occasion.length ? occasion : ['Quotidien'],
       brand: brand || undefined,
       price: price ? Number(price) : undefined,
@@ -1157,6 +1157,11 @@ export default function Dressing() {
               </button>
             ))}
           </div>
+          {style.length === 0 && (
+            <p className="text-xs text-muted-foreground mt-2 italic">
+              Choisis au moins 1 style pour de meilleures suggestions ✨
+            </p>
+          )}
         </div>
 
         <div>
