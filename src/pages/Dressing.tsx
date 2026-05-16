@@ -539,9 +539,17 @@ export default function Dressing() {
       setFormError('Choisis une catégorie');
       return;
     }
+    if (!subcategory) {
+      setFormError('Choisis une sous-catégorie');
+      return;
+    }
+    if (!type) {
+      setFormError('Choisis un type');
+      return;
+    }
     const finalColor: string[] = colors.length ? colors : (customColor ? [customColor] : []);
     const item: ClothingItem = {
-      id: genId(), imageBase64: finalImage, category, subcategory, layer, type: type || category, color: finalColor,
+      id: genId(), imageBase64: finalImage, category, subcategory, layer, type, color: finalColor,
       season: season.length ? season : ['Toutes saisons'],
       style: style.length ? style : ['Casual chic'],
       occasion: occasion.length ? occasion : ['Quotidien'],
