@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { saveProfile, saveAvatar, savePalette } from '@/lib/storage';
 import { AvatarData } from './AvatarSVG';
 import AvatarCreator from './AvatarCreator';
-import { getPaletteForSkin } from '@/lib/colorimetry';
+import { getPaletteForSkin, getSeasonFromSkin } from '@/lib/colorimetry';
 import ProfileEditor from './ProfileEditor';
 import SilhouetteCarousel from './SilhouetteCarousel';
 
