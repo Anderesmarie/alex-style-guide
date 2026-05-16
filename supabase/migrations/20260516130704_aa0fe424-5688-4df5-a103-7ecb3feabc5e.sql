@@ -1,0 +1,1 @@
+UPDATE public.wardrobe SET category = 'Manteaux' WHERE category = 'Manteaux & vestes';
