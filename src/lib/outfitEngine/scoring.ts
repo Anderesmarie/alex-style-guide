@@ -215,7 +215,7 @@ export function applyScoring(
 
   // ---- Morphologie ----
   const fit = (it: ClothingItem) => norm(it.fit);
-  const tex = (it: ClothingItem) => norm(it.matiere) + ' ' + norm(it.texture);
+  const tex = (it: ClothingItem) => norm(it.texture);
   const isHighHeel = (it: ClothingItem) =>
     ['Escarpins', 'Sandales à talons'].includes(it.type);
 
