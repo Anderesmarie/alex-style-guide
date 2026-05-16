@@ -701,7 +701,7 @@ export default function Dressing() {
           onClick={e => e.stopPropagation()}
         >
           <h3 className="font-serif font-bold text-lg mb-1">Pourquoi tu supprimes cette pièce ?</h3>
-          <p className="text-sm text-muted-foreground mb-4">{deleteDialogItem.type} · {deleteDialogItem.color}</p>
+          <p className="text-sm text-muted-foreground mb-4">{deleteDialogItem.type} · {(deleteDialogItem.color || []).join(', ')}</p>
 
           <div className="space-y-2 mb-6">
             {DELETE_REASONS.map(r => (
