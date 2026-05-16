@@ -895,7 +895,14 @@ export default function Dressing() {
           <div>
             <label className="block text-sm font-medium mb-2">Sous-catégorie <span className="text-[#C9956C]">*</span></label>
             <select value={subcategory}
-              onChange={e => { setSubcategory(e.target.value); setType(''); }}
+              onChange={e => {
+                const newSub = e.target.value;
+                setSubcategory(newSub);
+                setType('');
+                const cat = DRESSING_CATEGORIES.find(c => c.key === category);
+                const sub = cat?.subcategories?.find(s => s.key === newSub);
+                setLayer(sub?.layer ?? cat?.layer ?? 1);
+              }}
               className="w-full p-3 border border-gray-200 rounded-2xl bg-white text-sm text-gray-700">
               <option value="">Sélectionne une sous-catégorie</option>
               {DRESSING_CATEGORIES.find(c => c.key === category)?.subcategories?.map(s => (
