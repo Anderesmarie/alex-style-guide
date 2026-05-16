@@ -11,7 +11,7 @@ export interface ClothingItem {
   occasion: string[];
   brand?: string;
   price?: number;
-  matiere?: string;
+  
   pattern?: string;
   texture?: string;
   length?: string;
