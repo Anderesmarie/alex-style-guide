@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { ClothingItem } from '@/lib/types';
+import { ClothingItem, OCCASIONS } from '@/lib/types';
 
-const OCCASIONS = ['Cours', 'Soirée', 'Sport', 'Rendez-vous', 'Bureau', 'Occasion spéciale', 'Week-end'];
 const STYLES = ['Casual', 'Chic', 'Boho', 'Sportswear', 'Élégant', 'Minimaliste'];
 
 interface Props {

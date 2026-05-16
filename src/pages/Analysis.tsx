@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getWardrobe, getOutfits } from '@/lib/storage';
-import { ClothingItem, Outfit } from '@/lib/types';
+import { ClothingItem, Outfit, OCCASIONS } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import { updateStreak } from '@/lib/streak';
 import WardrobeStats from '@/components/WardrobeStats';
@@ -18,7 +18,6 @@ const BASICS = [
   { type: 'Sac', color: null, label: 'Sac neutre', impact: 'Va avec toutes tes tenues' },
 ] as const;
 
-const OCCASIONS = ['Travail', 'Sortie', 'Sport', 'Événement', 'Cérémonie', 'Voyage', 'Plage'] as const;
 const SEASONS_LIST = ['Été', 'Automne', 'Hiver', 'Printemps'] as const;
 
 const OCCASION_SEARCH: Record<string, string> = {
@@ -26,9 +25,11 @@ const OCCASION_SEARCH: Record<string, string> = {
   'Sortie': 'tenue sortie soirée',
   'Sport': 'tenue sport femme',
   'Événement': 'tenue événement femme',
-  'Cérémonie': 'tenue cérémonie femme',
-  'Voyage': 'tenue voyage confortable',
+  'Quotidien': 'tenue quotidien femme',
   'Plage': 'tenue plage été',
+  'Cérémonie': 'tenue cérémonie femme',
+  'Soirée': 'tenue soirée chic femme',
+  'Cours/Campus': 'tenue cours campus étudiante',
 };
 
 const SEASON_SEARCH: Record<string, string> = {
