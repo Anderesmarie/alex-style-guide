@@ -577,6 +577,17 @@ export default function Dressing() {
 
   const handleUpdate = async () => {
     if (!selectedItem) return;
+    setFormError(null);
+    const effSubcategory = subcategory || selectedItem.subcategory;
+    const effType = type || selectedItem.type;
+    if (!effSubcategory) {
+      setFormError('Choisis une sous-catégorie');
+      return;
+    }
+    if (!effType) {
+      setFormError('Choisis un type');
+      return;
+    }
     const finalColor: string[] = colors.length ? colors : (customColor ? [customColor] : (selectedItem.color || []));
     const updated: ClothingItem = {
       ...selectedItem, category: category || selectedItem.category,
