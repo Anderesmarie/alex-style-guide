@@ -1208,7 +1208,7 @@ export default function Dressing() {
       </div>
       <img src={selectedItem.imageBase64} alt="" className="w-full aspect-square object-contain bg-white rounded-xl card-shadow mb-4" />
       <div className="space-y-3">
-        <div><span className="text-sm text-muted-foreground">Couleur :</span> <span className="font-medium">{selectedItem.color}</span></div>
+        <div><span className="text-sm text-muted-foreground">Couleur :</span> <span className="font-medium">{(selectedItem.color || []).join(', ')}</span></div>
         <div><span className="text-sm text-muted-foreground">Saison :</span> <span className="font-medium">{selectedItem.season.join(', ')}</span></div>
         <div><span className="text-sm text-muted-foreground">Style :</span> <span className="font-medium">{selectedItem.style.join(', ')}</span></div>
         <div><span className="text-sm text-muted-foreground">Occasion :</span> <span className="font-medium">{selectedItem.occasion.join(', ')}</span></div>
