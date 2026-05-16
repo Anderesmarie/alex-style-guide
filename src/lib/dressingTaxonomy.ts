@@ -40,6 +40,7 @@ export const DRESSING_CATEGORIES: CategoryGroup[] = [
         label: 'Pulls & Mailles',
         allLabel: 'Tous les pulls',
         types: ['Pull col rond', 'Pull col V', 'Pull col roulé', 'Sweat', 'Hoodie', 'Cardigan'],
+        layer: 2,
       },
       {
         key: 'Chemises & Blouses',
