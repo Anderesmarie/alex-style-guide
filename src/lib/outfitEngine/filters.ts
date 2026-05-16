@@ -200,7 +200,7 @@ export function applyFilters(
   }
 
   // ---- Couleurs ----
-  const colors = items.map(it => norm(it.color));
+  const colors = items.flatMap(it => (it.color || []).map(c => norm(c)));
   const hasRouge = colors.some(c => c.includes('rouge'));
   const hasCorail = colors.some(c => c.includes('corail'));
   if (hasRouge && hasCorail) {

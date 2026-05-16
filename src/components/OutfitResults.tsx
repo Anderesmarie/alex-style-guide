@@ -175,7 +175,7 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
           let smartBadge: 'ideal' | 'color' | 'morpho' | null = null;
 
           const colorAvg = userSeason
-            ? r.outfit.map(item => getColorScore(normalizeColor(item.color), userSeason)).reduce((a, b) => a + b, 0) / r.outfit.length
+            ? r.outfit.map(item => getColorScore(normalizeColor((item.color || [])[0] || ''), userSeason)).reduce((a, b) => a + b, 0) / r.outfit.length
             : 0;
 
           const morphoAvg = userProfile?.morphologie

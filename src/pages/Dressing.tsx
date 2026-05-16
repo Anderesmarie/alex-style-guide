@@ -539,7 +539,7 @@ export default function Dressing() {
       setFormError('Choisis une catégorie');
       return;
     }
-    const finalColor = colors.length ? colors.join(', ') : (customColor || 'Autre');
+    const finalColor: string[] = colors.length ? colors : (customColor ? [customColor] : []);
     const item: ClothingItem = {
       id: genId(), imageBase64: finalImage, category, subcategory, layer, type: type || category, color: finalColor,
       season: season.length ? season : ['Toutes saisons'],
@@ -569,7 +569,7 @@ export default function Dressing() {
 
   const handleUpdate = async () => {
     if (!selectedItem) return;
-    const finalColor = colors.length ? colors.join(', ') : (customColor || selectedItem.color);
+    const finalColor: string[] = colors.length ? colors : (customColor ? [customColor] : (selectedItem.color || []));
     const updated: ClothingItem = {
       ...selectedItem, category: category || selectedItem.category,
       subcategory: subcategory || selectedItem.subcategory,
@@ -654,9 +654,7 @@ export default function Dressing() {
     setSubcategory(item.subcategory || '');
     setType(item.type);
     // Reconstruit la sélection multiple depuis le champ stocké (joint par virgule)
-    const parsed = (item.color || '')
-      .split(',')
-      .map(s => s.trim())
+    const parsed = (item.color || [])
       .filter(v => v && COLOR_PALETTE.some(c => c.value === v))
       .slice(0, 3);
     setColors(parsed);
@@ -687,7 +685,7 @@ export default function Dressing() {
   const filtered = wardrobe.filter(i => {
     if (allowedTypes && !allowedTypes.includes(i.type)) return false;
     if (filterType && i.type !== filterType) return false;
-    if (filterColor && i.color !== filterColor) return false;
+    if (filterColor && !(i.color || []).includes(filterColor)) return false;
     if (filterSeason && !i.season.includes(filterSeason)) return false;
     return true;
   });
@@ -703,7 +701,7 @@ export default function Dressing() {
           onClick={e => e.stopPropagation()}
         >
           <h3 className="font-serif font-bold text-lg mb-1">Pourquoi tu supprimes cette pièce ?</h3>
-          <p className="text-sm text-muted-foreground mb-4">{deleteDialogItem.type} · {deleteDialogItem.color}</p>
+          <p className="text-sm text-muted-foreground mb-4">{deleteDialogItem.type} · {(deleteDialogItem.color || []).join(', ')}</p>
 
           <div className="space-y-2 mb-6">
             {DELETE_REASONS.map(r => (
@@ -1210,7 +1208,7 @@ export default function Dressing() {
       </div>
       <img src={selectedItem.imageBase64} alt="" className="w-full aspect-square object-contain bg-white rounded-xl card-shadow mb-4" />
       <div className="space-y-3">
-        <div><span className="text-sm text-muted-foreground">Couleur :</span> <span className="font-medium">{selectedItem.color}</span></div>
+        <div><span className="text-sm text-muted-foreground">Couleur :</span> <span className="font-medium">{(selectedItem.color || []).join(', ')}</span></div>
         <div><span className="text-sm text-muted-foreground">Saison :</span> <span className="font-medium">{selectedItem.season.join(', ')}</span></div>
         <div><span className="text-sm text-muted-foreground">Style :</span> <span className="font-medium">{selectedItem.style.join(', ')}</span></div>
         <div><span className="text-sm text-muted-foreground">Occasion :</span> <span className="font-medium">{selectedItem.occasion.join(', ')}</span></div>

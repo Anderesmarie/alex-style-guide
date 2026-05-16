@@ -5,7 +5,7 @@ export interface ClothingItem {
   subcategory: string;
   layer: number;
   type: string;
-  color: string;
+  color: string[];
   season: string[];
   style: string[];
   occasion: string[];
@@ -16,6 +16,18 @@ export interface ClothingItem {
   texture?: string;
   length?: string;
   fit?: string;
+}
+
+/** Normalise un champ couleur (legacy string ou nouveau string[]) en tableau. */
+export function toColorArray(c: unknown): string[] {
+  if (Array.isArray(c)) return c.map(x => String(x)).filter(Boolean);
+  if (typeof c === 'string') return c.split(',').map(s => s.trim()).filter(Boolean);
+  return [];
+}
+
+/** Représentation texte d'un champ couleur, pour affichage. */
+export function colorLabel(c: unknown): string {
+  return toColorArray(c).join(', ');
 }
 
 export interface OutfitLayoutPiece {

@@ -11,7 +11,7 @@ function item(category: string, type: string, subcategory = ''): ClothingItem {
     subcategory,
     layer: 0,
     type,
-    color: 'noir',
+    color: ['noir'],
     season: ['Toutes saisons'],
     style: [],
     occasion: [],

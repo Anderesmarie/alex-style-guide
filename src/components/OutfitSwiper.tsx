@@ -121,7 +121,7 @@ export default function OutfitSwiper({ outfits, weatherCode, temperature, onComp
   let smartBadge: 'ideal' | 'color' | 'morpho' | null = null;
 
   const colorAvg = userSeason
-    ? currentOutfit.map(item => getColorScore(normalizeColor(item.color), userSeason)).reduce((a, b) => a + b, 0) / currentOutfit.length
+    ? currentOutfit.map(item => getColorScore(normalizeColor((item.color || [])[0] || ''), userSeason)).reduce((a, b) => a + b, 0) / currentOutfit.length
     : 0;
 
   const silhouetteAvg = userProfile

@@ -304,7 +304,7 @@ export function getSilhouetteScore(
   // Règles Taille
   if (taille === 'petite') {
     if (item.style?.some(s => s === 'Bureau') || item.type === 'Robe') score += 2;
-    if (item.color?.toLowerCase() === 'noir' || item.color?.toLowerCase() === 'blanc') score += 1;
+    if ((item.color || []).some(c => c.toLowerCase() === 'noir' || c.toLowerCase() === 'blanc')) score += 1;
     if (item.type === 'Pantalon' && item.style?.some(s => s.toLowerCase().includes('large'))) score -= 2;
     if (item.type === 'Manteau' && item.occasion?.includes('Quotidien')) score -= 1;
   }
@@ -318,7 +318,7 @@ export function getSilhouetteScore(
   if (corpulence === 'ronde') {
     const itemDesc = `${item.type} ${item.category} ${item.subcategory}`.toLowerCase();
     if (['viscose', 'soie', 'jersey', 'modal'].some(m => itemDesc.includes(m))) score += 2;
-    if (item.color?.toLowerCase() === 'noir' || item.color?.toLowerCase() === 'marron') score += 1;
+    if ((item.color || []).some(c => c.toLowerCase() === 'noir' || c.toLowerCase() === 'marron')) score += 1;
     if (['tweed', 'rigide', 'structure'].some(m => itemDesc.includes(m))) score -= 2;
   }
 
@@ -361,7 +361,7 @@ export function getMorphologyScore(
   if (morphologie === 'V') {
     if (item.type === 'Jupe' && item.style?.includes('trapèze')) score += 2;
     if (item.type === 'Pantalon' && item.style?.includes('large')) score += 2;
-    if (item.color === 'noir' && item.type?.includes('Haut')) score += 1;
+    if ((item.color || []).map(c => c.toLowerCase()).includes('noir') && item.type?.includes('Haut')) score += 1;
     if (item.style?.includes('épaules')) score -= 2;
   }
 
@@ -386,8 +386,8 @@ export function getFavoriteColorScore(
   favoriteColors: string[]
 ): number {
   if (!favoriteColors || favoriteColors.length === 0) return 0;
-  const itemColor = item.color?.trim() ?? '';
-  if (favoriteColors.some(c => c.toLowerCase() === itemColor.toLowerCase())) {
+  const itemColors = (item.color || []).map(c => c.trim().toLowerCase());
+  if (favoriteColors.some(c => itemColors.includes(c.toLowerCase()))) {
     return 2;
   }
   return 0;
@@ -423,7 +423,7 @@ function scoreByProfile(
     if (item.style.some(s => s === 'Boho')) score += 3;
   }
   if (styles.includes('minimaliste')) {
-    if (['blanc', 'noir', 'gris', 'beige'].includes(item.color?.toLowerCase())) score += 2;
+    if ((item.color || []).some(c => ['blanc', 'noir', 'gris', 'beige'].includes(c.toLowerCase()))) score += 2;
   }
 
   // 2. Occasion du jour (+2)
