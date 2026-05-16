@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getWardrobe, getOutfits } from '@/lib/storage';
-import { ClothingItem, Outfit } from '@/lib/types';
+import { ClothingItem, Outfit, OCCASIONS } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import { updateStreak } from '@/lib/streak';
 import WardrobeStats from '@/components/WardrobeStats';
