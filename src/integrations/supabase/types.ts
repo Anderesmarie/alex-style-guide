@@ -377,7 +377,7 @@ export type Database = {
         Row: {
           brand: string | null
           category: string | null
-          color: string | null
+          color: Json
           created_at: string | null
           fit: string | null
           id: string
@@ -396,7 +396,7 @@ export type Database = {
         Insert: {
           brand?: string | null
           category?: string | null
-          color?: string | null
+          color?: Json
           created_at?: string | null
           fit?: string | null
           id?: string
@@ -415,7 +415,7 @@ export type Database = {
         Update: {
           brand?: string | null
           category?: string | null
-          color?: string | null
+          color?: Json
           created_at?: string | null
           fit?: string | null
           id?: string
