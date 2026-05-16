@@ -269,6 +269,21 @@ export const PALETTE_COLORS: Record<string, string> = {
   'Rouge': '#DC143C',
 };
 
+const SKIN_TO_SEASON: Record<string, Season> = {
+  'tres-clair': 'printemps',
+  'clair': 'printemps',
+  'clair-rose': 'ete',
+  'beige-dore': 'automne',
+  'miel': 'automne',
+  'caramel': 'hiver',
+  'brun': 'hiver',
+  'ebene': 'hiver',
+};
+
+export function getSeasonFromSkin(skin: string): Season {
+  return SKIN_TO_SEASON[skin] ?? 'ete';
+}
+
 export function determineSeason(
   skin: string,
   eyeColor: string,
