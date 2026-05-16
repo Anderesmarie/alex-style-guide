@@ -376,13 +376,17 @@ export type Database = {
           category: string | null
           color: string | null
           created_at: string | null
+          fit: string | null
           id: string
           image_base64: string | null
+          length: string | null
           occasion: Json | null
+          pattern: string | null
           price: number | null
           season: Json | null
           style: Json | null
           subcategory: string | null
+          texture: string | null
           type: string | null
           user_id: string
         }
@@ -391,13 +395,17 @@ export type Database = {
           category?: string | null
           color?: string | null
           created_at?: string | null
+          fit?: string | null
           id?: string
           image_base64?: string | null
+          length?: string | null
           occasion?: Json | null
+          pattern?: string | null
           price?: number | null
           season?: Json | null
           style?: Json | null
           subcategory?: string | null
+          texture?: string | null
           type?: string | null
           user_id: string
         }
@@ -406,13 +414,17 @@ export type Database = {
           category?: string | null
           color?: string | null
           created_at?: string | null
+          fit?: string | null
           id?: string
           image_base64?: string | null
+          length?: string | null
           occasion?: Json | null
+          pattern?: string | null
           price?: number | null
           season?: Json | null
           style?: Json | null
           subcategory?: string | null
+          texture?: string | null
           type?: string | null
           user_id?: string
         }
