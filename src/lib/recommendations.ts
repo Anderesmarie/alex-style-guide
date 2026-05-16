@@ -386,8 +386,8 @@ export function getFavoriteColorScore(
   favoriteColors: string[]
 ): number {
   if (!favoriteColors || favoriteColors.length === 0) return 0;
-  const itemColor = item.color?.trim() ?? '';
-  if (favoriteColors.some(c => c.toLowerCase() === itemColor.toLowerCase())) {
+  const itemColors = (item.color || []).map(c => c.trim().toLowerCase());
+  if (favoriteColors.some(c => itemColors.includes(c.toLowerCase()))) {
     return 2;
   }
   return 0;
