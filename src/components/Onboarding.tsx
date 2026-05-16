@@ -117,6 +117,7 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
           morphologie: morphoCode,
           lifestyle: lifestyle || null,
           makeup: makeup || null,
+          colorimetry: palette as unknown as object,
         }).eq('id', userData.user.id);
         console.log('Morphologie sauvegardée:', morphoCode);
       }
