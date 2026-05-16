@@ -1,0 +1,1 @@
+UPDATE public.wardrobe SET category = 'Manteaux' WHERE id IN ('298fc732-9216-4a15-8b56-23475f4f30c5', '9083fc19-6ab9-4a03-a1a2-af82bda2c4bd');
