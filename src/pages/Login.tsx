@@ -49,11 +49,8 @@ export default function Login({ onLogin, successMessage }: Props) {
       if (isSignUp) {
         const { error: signUpError } = await supabase.auth.signUp({ email, password });
         if (signUpError) {
-          if (signUpError.message.includes('already registered')) {
-            setError('Cet email est déjà utilisé');
-          } else {
-            setError(signUpError.message);
-          }
+          // Generic message to avoid leaking internal auth states
+          setError('Une erreur est survenue, réessaie plus tard');
           return;
         }
         setSuccessMsg('Compte créé ! Vérifie ton email pour confirmer ton inscription.');
@@ -63,7 +60,7 @@ export default function Login({ onLogin, successMessage }: Props) {
           if (signInError.message.includes('Invalid login')) {
             setError('Email ou mot de passe incorrect');
           } else {
-            setError(signInError.message);
+            setError('Une erreur est survenue, réessaie plus tard');
           }
           return;
         }
