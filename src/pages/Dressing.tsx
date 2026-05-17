@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { ClothingItem, COLORS, SEASONS, OCCASIONS, STYLE_OPTIONS } from '@/lib/types';
-import { getWardrobe, addClothing, updateClothing, deleteClothing, getOutfits, saveOutfits, genId } from '@/lib/storage';
+import { getWardrobe, addClothing, updateClothing, deleteClothing, getOutfits, saveOutfits, genId, setClothingImageUrl } from '@/lib/storage';
+import { uploadWardrobeImage } from '@/lib/wardrobeImages';
+import { supabase } from '@/lib/supabase';
 
 import { DRESSING_CATEGORIES, getAllTypesForCategory } from '@/lib/dressingTaxonomy';
 import { compressImage, recompressWithRotation } from '@/lib/imageUtils';
@@ -362,9 +364,33 @@ export default function Dressing() {
     const w = await getWardrobe();
     setWardrobe(w);
     setLoading(false);
+    // Migration auto en arrière-plan : items avec base64 mais sans URL Storage
+    void migrateLegacyImages(w);
   };
 
   useEffect(() => { loadWardrobe(); }, []);
+
+  // Migration silencieuse, 1 image à la fois pour ne pas saturer
+  const migrateLegacyImages = async (items: ClothingItem[]) => {
+    const toMigrate = items.filter(
+      (it) => !it.imageUrl && it.imageBase64 && it.imageBase64.startsWith('data:'),
+    );
+    if (toMigrate.length === 0) return;
+    const { data: userData } = await supabase.auth.getUser();
+    const uid = userData.user?.id;
+    if (!uid) return;
+    for (const it of toMigrate) {
+      try {
+        const url = await uploadWardrobeImage(it.imageBase64, uid, it.id);
+        await setClothingImageUrl(it.id, url);
+      } catch (err) {
+        console.warn('[migrate] échec pour', it.id, err);
+      }
+    }
+    // Recharge en silence pour basculer sur les URLs
+    const refreshed = await getWardrobe();
+    setWardrobe(refreshed);
+  };
 
   // Options de longueur selon la sous-catégorie / catégorie sélectionnée
   // Si aucune sous-catégorie n'est sélectionnée, on affiche les options par défaut
@@ -549,20 +575,36 @@ export default function Dressing() {
       return;
     }
     const finalColor: string[] = colors.length ? colors : (customColor ? [customColor] : []);
-    const item: ClothingItem = {
-      id: genId(), imageBase64: finalImage, category, subcategory, layer, type, color: finalColor,
-      season: season.length ? season : ['Toutes saisons'],
-      style: style,
-      occasion: occasion.length ? occasion : ['Quotidien'],
-      brand: brand || undefined,
-      price: price ? Number(price) : undefined,
-      pattern: pattern || 'uni',
-      texture: texture || undefined,
-      length: length || undefined,
-      fit: fit || undefined,
-    };
+    const newId = genId();
     setSaving(true);
     try {
+      // Upload de l'image vers Storage (WebP) → on stocke l'URL, pas le base64
+      let imageUrl: string | null = null;
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        const uid = userData.user?.id;
+        if (uid && finalImage.startsWith('data:')) {
+          imageUrl = await uploadWardrobeImage(finalImage, uid, newId);
+        }
+      } catch (uploadErr) {
+        console.warn('[upload] échec, fallback base64', uploadErr);
+      }
+
+      const item: ClothingItem = {
+        id: newId,
+        imageBase64: imageUrl ?? finalImage,
+        imageUrl: imageUrl,
+        category, subcategory, layer, type, color: finalColor,
+        season: season.length ? season : ['Toutes saisons'],
+        style: style,
+        occasion: occasion.length ? occasion : ['Quotidien'],
+        brand: brand || undefined,
+        price: price ? Number(price) : undefined,
+        pattern: pattern || 'uni',
+        texture: texture || undefined,
+        length: length || undefined,
+        fit: fit || undefined,
+      };
       await addClothing(item);
       updateStreak();
       await loadWardrobe();
@@ -590,6 +632,21 @@ export default function Dressing() {
       return;
     }
     const finalColor: string[] = colors.length ? colors : (customColor ? [customColor] : (selectedItem.color || []));
+    // Si une nouvelle photo a été choisie (dataURL), on la ré-uploade vers Storage
+    let nextImage = displayImage ?? selectedItem.imageBase64;
+    let nextImageUrl = selectedItem.imageUrl ?? null;
+    if (displayImage && displayImage.startsWith('data:')) {
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        const uid = userData.user?.id;
+        if (uid) {
+          nextImageUrl = await uploadWardrobeImage(displayImage, uid, selectedItem.id);
+          nextImage = nextImageUrl;
+        }
+      } catch (err) {
+        console.warn('[upload update] échec', err);
+      }
+    }
     const updated: ClothingItem = {
       ...selectedItem, category: category || selectedItem.category,
       subcategory: effSubcategory,
@@ -599,7 +656,8 @@ export default function Dressing() {
       occasion: occasion.length ? occasion : selectedItem.occasion,
       brand: brand || selectedItem.brand,
       price: price ? Number(price) : selectedItem.price,
-      imageBase64: displayImage ?? selectedItem.imageBase64,
+      imageBase64: nextImage,
+      imageUrl: nextImageUrl,
       pattern: pattern || selectedItem.pattern || 'uni',
       texture: texture || selectedItem.texture,
       length: length || selectedItem.length,

@@ -108,28 +108,36 @@ export async function getWardrobe(): Promise<ClothingItem[]> {
   const uid = await getUserId();
   const { data } = await supabase.from('wardrobe').select('*').eq('user_id', uid).order('created_at', { ascending: false });
   if (!data) return [];
-  return data.map(row => ({
-    id: row.id,
-    imageBase64: row.image_base64,
-    category: row.category || '',
-    subcategory: row.subcategory || '',
-    layer: row.layer ?? 1,
-    type: row.type,
-    color: Array.isArray(row.color) ? (row.color as string[]) : (typeof row.color === 'string' ? (row.color as string).split(',').map(s => s.trim()).filter(Boolean) : []),
-    season: row.season as string[],
-    style: row.style as string[],
-    occasion: row.occasion as string[],
-    brand: row.brand || undefined,
-    price: row.price || undefined,
-  }));
+  return data.map(row => {
+    const imageUrl = (row as any).image_url as string | null | undefined;
+    return {
+      id: row.id,
+      // Préfère l'URL Storage si dispo, fallback base64 legacy.
+      imageBase64: imageUrl || row.image_base64 || '',
+      imageUrl: imageUrl ?? null,
+      category: row.category || '',
+      subcategory: row.subcategory || '',
+      layer: row.layer ?? 1,
+      type: row.type,
+      color: Array.isArray(row.color) ? (row.color as string[]) : (typeof row.color === 'string' ? (row.color as string).split(',').map(s => s.trim()).filter(Boolean) : []),
+      season: row.season as string[],
+      style: row.style as string[],
+      occasion: row.occasion as string[],
+      brand: row.brand || undefined,
+      price: row.price || undefined,
+    };
+  });
 }
 
 export async function addClothing(item: ClothingItem): Promise<void> {
   const uid = await getUserId();
+  // Si on a une URL Storage, on n'écrit PAS le base64 en DB (économise l'egress).
+  const hasUrl = !!item.imageUrl;
   const { error } = await supabase.from('wardrobe').insert({
     id: item.id,
     user_id: uid,
-    image_base64: item.imageBase64,
+    image_base64: hasUrl ? null : item.imageBase64,
+    image_url: item.imageUrl ?? null,
     category: item.category || null,
     subcategory: item.subcategory || null,
     type: item.type,
@@ -139,7 +147,7 @@ export async function addClothing(item: ClothingItem): Promise<void> {
     occasion: item.occasion,
     brand: item.brand || null,
     price: item.price || null,
-  });
+  } as any);
   if (error) {
     console.error('addClothing error:', error);
     throw error;
@@ -148,8 +156,7 @@ export async function addClothing(item: ClothingItem): Promise<void> {
 
 export async function updateClothing(item: ClothingItem): Promise<void> {
   const uid = await getUserId();
-  const { error } = await supabase.from('wardrobe').update({
-    image_base64: item.imageBase64,
+  const patch: any = {
     category: item.category || null,
     subcategory: item.subcategory || null,
     type: item.type,
@@ -159,9 +166,30 @@ export async function updateClothing(item: ClothingItem): Promise<void> {
     occasion: item.occasion,
     brand: item.brand || null,
     price: item.price || null,
-  }).eq('id', item.id).eq('user_id', uid);
+  };
+  if (item.imageUrl) {
+    patch.image_url = item.imageUrl;
+    patch.image_base64 = null;
+  } else {
+    patch.image_base64 = item.imageBase64;
+  }
+  const { error } = await supabase.from('wardrobe').update(patch).eq('id', item.id).eq('user_id', uid);
   if (error) {
     console.error('updateClothing error:', error);
+    throw error;
+  }
+}
+
+/** Met à jour uniquement image_url (pour migration des anciennes pièces). image_base64 conservé pour fallback. */
+export async function setClothingImageUrl(id: string, imageUrl: string): Promise<void> {
+  const uid = await getUserId();
+  const { error } = await supabase
+    .from('wardrobe')
+    .update({ image_url: imageUrl } as any)
+    .eq('id', id)
+    .eq('user_id', uid);
+  if (error) {
+    console.error('setClothingImageUrl error:', error);
     throw error;
   }
 }
