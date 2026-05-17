@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { ClothingItem, COLORS, SEASONS, OCCASIONS, STYLE_OPTIONS } from '@/lib/types';
-import { getWardrobe, addClothing, updateClothing, deleteClothing, getOutfits, saveOutfits, genId } from '@/lib/storage';
+import { getWardrobe, addClothing, updateClothing, deleteClothing, getOutfits, saveOutfits, genId, setClothingImageUrl } from '@/lib/storage';
+import { uploadWardrobeImage } from '@/lib/wardrobeImages';
+import { supabase } from '@/lib/supabase';
 
 import { DRESSING_CATEGORIES, getAllTypesForCategory } from '@/lib/dressingTaxonomy';
 import { compressImage, recompressWithRotation } from '@/lib/imageUtils';
@@ -362,9 +364,33 @@ export default function Dressing() {
     const w = await getWardrobe();
     setWardrobe(w);
     setLoading(false);
+    // Migration auto en arrière-plan : items avec base64 mais sans URL Storage
+    void migrateLegacyImages(w);
   };
 
   useEffect(() => { loadWardrobe(); }, []);
+
+  // Migration silencieuse, 1 image à la fois pour ne pas saturer
+  const migrateLegacyImages = async (items: ClothingItem[]) => {
+    const toMigrate = items.filter(
+      (it) => !it.imageUrl && it.imageBase64 && it.imageBase64.startsWith('data:'),
+    );
+    if (toMigrate.length === 0) return;
+    const { data: userData } = await supabase.auth.getUser();
+    const uid = userData.user?.id;
+    if (!uid) return;
+    for (const it of toMigrate) {
+      try {
+        const url = await uploadWardrobeImage(it.imageBase64, uid, it.id);
+        await setClothingImageUrl(it.id, url);
+      } catch (err) {
+        console.warn('[migrate] échec pour', it.id, err);
+      }
+    }
+    // Recharge en silence pour basculer sur les URLs
+    const refreshed = await getWardrobe();
+    setWardrobe(refreshed);
+  };
 
   // Options de longueur selon la sous-catégorie / catégorie sélectionnée
   // Si aucune sous-catégorie n'est sélectionnée, on affiche les options par défaut
