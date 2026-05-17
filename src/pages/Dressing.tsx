@@ -575,20 +575,36 @@ export default function Dressing() {
       return;
     }
     const finalColor: string[] = colors.length ? colors : (customColor ? [customColor] : []);
-    const item: ClothingItem = {
-      id: genId(), imageBase64: finalImage, category, subcategory, layer, type, color: finalColor,
-      season: season.length ? season : ['Toutes saisons'],
-      style: style,
-      occasion: occasion.length ? occasion : ['Quotidien'],
-      brand: brand || undefined,
-      price: price ? Number(price) : undefined,
-      pattern: pattern || 'uni',
-      texture: texture || undefined,
-      length: length || undefined,
-      fit: fit || undefined,
-    };
+    const newId = genId();
     setSaving(true);
     try {
+      // Upload de l'image vers Storage (WebP) → on stocke l'URL, pas le base64
+      let imageUrl: string | null = null;
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        const uid = userData.user?.id;
+        if (uid && finalImage.startsWith('data:')) {
+          imageUrl = await uploadWardrobeImage(finalImage, uid, newId);
+        }
+      } catch (uploadErr) {
+        console.warn('[upload] échec, fallback base64', uploadErr);
+      }
+
+      const item: ClothingItem = {
+        id: newId,
+        imageBase64: imageUrl ?? finalImage,
+        imageUrl: imageUrl,
+        category, subcategory, layer, type, color: finalColor,
+        season: season.length ? season : ['Toutes saisons'],
+        style: style,
+        occasion: occasion.length ? occasion : ['Quotidien'],
+        brand: brand || undefined,
+        price: price ? Number(price) : undefined,
+        pattern: pattern || 'uni',
+        texture: texture || undefined,
+        length: length || undefined,
+        fit: fit || undefined,
+      };
       await addClothing(item);
       updateStreak();
       await loadWardrobe();
