@@ -104,17 +104,49 @@ export const savePalette = (palette: ColorPalette) => {
 };
 
 // ---------- Wardrobe ----------
+// Transforme une URL Storage publique en URL CDN avec resize (width=400) pour la grille.
+function toCdnThumbUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  // Ne touche qu'aux URLs Supabase Storage publiques
+  const marker = '/storage/v1/object/public/';
+  if (!url.includes(marker)) return url;
+  const transformed = url.replace(marker, '/storage/v1/render/image/public/');
+  const sep = transformed.includes('?') ? '&' : '?';
+  return `${transformed}${sep}width=400&quality=80`;
+}
+
 export async function getWardrobe(): Promise<ClothingItem[]> {
   const uid = await getUserId();
-  const { data } = await supabase.from('wardrobe').select('*').eq('user_id', uid).order('created_at', { ascending: false });
+  // 1) Sélection ciblée SANS image_base64 (gros payload). On le récupèrera seulement
+  //    pour les pièces legacy qui n'ont pas encore d'image_url.
+  const COLS = 'id,category,subcategory,layer,type,color,season,style,occasion,brand,price,image_url,created_at';
+  const { data } = await supabase
+    .from('wardrobe')
+    .select(COLS)
+    .eq('user_id', uid)
+    .order('created_at', { ascending: false });
   if (!data) return [];
+
+  // 2) Pour les items sans image_url, on fetch leur base64 en un seul appel groupé.
+  const legacyIds = data.filter(r => !(r as any).image_url).map(r => r.id);
+  let legacyMap = new Map<string, string>();
+  if (legacyIds.length > 0) {
+    const { data: legacy } = await supabase
+      .from('wardrobe')
+      .select('id,image_base64')
+      .in('id', legacyIds);
+    if (legacy) legacy.forEach(r => legacyMap.set(r.id, (r as any).image_base64 ?? ''));
+  }
+
   return data.map(row => {
-    const imageUrl = (row as any).image_url as string | null | undefined;
+    const rawUrl = (row as any).image_url as string | null | undefined;
+    const cdnUrl = toCdnThumbUrl(rawUrl);
+    const legacyB64 = legacyMap.get(row.id) ?? '';
     return {
       id: row.id,
-      // Préfère l'URL Storage si dispo, fallback base64 legacy.
-      imageBase64: imageUrl || row.image_base64 || '',
-      imageUrl: imageUrl ?? null,
+      // Affichage : URL CDN si dispo, sinon base64 legacy.
+      imageBase64: cdnUrl || legacyB64 || '',
+      imageUrl: cdnUrl ?? null,
       category: row.category || '',
       subcategory: row.subcategory || '',
       layer: row.layer ?? 1,

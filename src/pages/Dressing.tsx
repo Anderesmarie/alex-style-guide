@@ -1447,7 +1447,7 @@ export default function Dressing() {
               onClick={() => { setSelectedItem(item); setView('detail'); }}
               className="aspect-square rounded-lg overflow-hidden card-shadow active:scale-[0.96] transition-transform bg-white"
             >
-              <img src={item.imageBase64} alt={item.type} className="w-full h-full object-contain" />
+              <img src={item.imageBase64} alt={item.type} loading="lazy" decoding="async" className="w-full h-full object-contain" />
             </button>
           ))}
         </div>
