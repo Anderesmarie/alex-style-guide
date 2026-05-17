@@ -1,0 +1,1 @@
+UPDATE public.wardrobe SET image_base64 = NULL WHERE image_url IS NOT NULL;
