@@ -382,6 +382,7 @@ export type Database = {
           fit: string | null
           id: string
           image_base64: string | null
+          image_url: string | null
           length: string | null
           occasion: Json | null
           pattern: string | null
@@ -401,6 +402,7 @@ export type Database = {
           fit?: string | null
           id?: string
           image_base64?: string | null
+          image_url?: string | null
           length?: string | null
           occasion?: Json | null
           pattern?: string | null
@@ -420,6 +422,7 @@ export type Database = {
           fit?: string | null
           id?: string
           image_base64?: string | null
+          image_url?: string | null
           length?: string | null
           occasion?: Json | null
           pattern?: string | null
