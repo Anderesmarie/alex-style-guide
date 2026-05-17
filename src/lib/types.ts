@@ -1,6 +1,9 @@
 export interface ClothingItem {
   id: string;
+  /** URL publique Storage si disponible, sinon dataURL base64 (fallback legacy). Les composants affichent ce champ tel quel. */
   imageBase64: string;
+  /** URL publique Storage (présente si la pièce a été migrée vers wardrobe-images). */
+  imageUrl?: string | null;
   category: string;
   subcategory: string;
   layer: number;
