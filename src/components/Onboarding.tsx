@@ -120,7 +120,7 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
           colorimetry: palette as unknown as object,
           colorimetry_season: getSeasonFromSkin(avatar.skin),
         }).eq('id', userData.user.id);
-        console.log('Morphologie sauvegardée:', morphoCode);
+        if (import.meta.env.DEV) console.log('Morphologie sauvegardée:', morphoCode);
       }
     } catch {}
     setShowMessage(true);
