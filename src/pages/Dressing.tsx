@@ -632,6 +632,21 @@ export default function Dressing() {
       return;
     }
     const finalColor: string[] = colors.length ? colors : (customColor ? [customColor] : (selectedItem.color || []));
+    // Si une nouvelle photo a été choisie (dataURL), on la ré-uploade vers Storage
+    let nextImage = displayImage ?? selectedItem.imageBase64;
+    let nextImageUrl = selectedItem.imageUrl ?? null;
+    if (displayImage && displayImage.startsWith('data:')) {
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        const uid = userData.user?.id;
+        if (uid) {
+          nextImageUrl = await uploadWardrobeImage(displayImage, uid, selectedItem.id);
+          nextImage = nextImageUrl;
+        }
+      } catch (err) {
+        console.warn('[upload update] échec', err);
+      }
+    }
     const updated: ClothingItem = {
       ...selectedItem, category: category || selectedItem.category,
       subcategory: effSubcategory,
@@ -641,7 +656,8 @@ export default function Dressing() {
       occasion: occasion.length ? occasion : selectedItem.occasion,
       brand: brand || selectedItem.brand,
       price: price ? Number(price) : selectedItem.price,
-      imageBase64: displayImage ?? selectedItem.imageBase64,
+      imageBase64: nextImage,
+      imageUrl: nextImageUrl,
       pattern: pattern || selectedItem.pattern || 'uni',
       texture: texture || selectedItem.texture,
       length: length || selectedItem.length,
