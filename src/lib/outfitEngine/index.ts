@@ -100,7 +100,10 @@ function pickDiverse(sorted: OutfitCandidate[], input: EngineInput): OutfitCandi
       .filter(i => isAccessory(i) && picked[1].items.some(j => j.id === i.id))
       .map(i => i.id)
   );
+  const robeCount = picked.filter(hasRobe).length;
+  const forceNonRobe3 = canLimitRobes && robeCount >= 1;
   tryPick(c => {
+    if (forceNonRobe3 && hasRobe(c)) return false;
     for (const it of c.items) {
       if (isAccessory(it)) {
         if (accSharedByBoth.has(it.id)) return false;
@@ -110,7 +113,7 @@ function pickDiverse(sorted: OutfitCandidate[], input: EngineInput): OutfitCandi
     }
     return true;
   }) || tryPick(c => {
-    // Fallback : au minimum aucune pièce dans les 3 tenues
+    if (forceNonRobe3 && hasRobe(c)) return false;
     for (const it of c.items) {
       if (isAccessory(it)) {
         if (accSharedByBoth.has(it.id)) return false;
@@ -119,7 +122,7 @@ function pickDiverse(sorted: OutfitCandidate[], input: EngineInput): OutfitCandi
       }
     }
     return true;
-  }) || tryPick(() => true);
+  }) || tryPick(c => !forceNonRobe3 || !hasRobe(c)) || tryPick(() => true);
 
   // Garantir au moins une tenue avec couche amovible si amplitude >= 8
   if (needLayer && !picked.some(hasRemovableLayer)) {
