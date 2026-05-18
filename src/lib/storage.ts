@@ -200,6 +200,31 @@ export async function setClothingImageUrl(id: string, imageUrl: string): Promise
 
 export async function deleteClothing(id: string): Promise<void> {
   const uid = await getUserId();
+  // 1) Récupère image_url avant suppression
+  const { data: row } = await supabase
+    .from('wardrobe')
+    .select('image_url')
+    .eq('id', id)
+    .eq('user_id', uid)
+    .maybeSingle();
+  const imageUrl = (row as any)?.image_url as string | null | undefined;
+
+  // 2) Si l'image est stockée dans le bucket wardrobe-images, supprime le fichier
+  if (imageUrl && imageUrl.includes('/wardrobe-images/')) {
+    const marker = '/wardrobe-images/';
+    const idx = imageUrl.indexOf(marker);
+    const filePath = imageUrl.substring(idx + marker.length).split('?')[0];
+    if (filePath) {
+      const { error: storageError } = await supabase.storage
+        .from('wardrobe-images')
+        .remove([filePath]);
+      if (storageError) {
+        console.warn('deleteClothing storage remove failed:', storageError);
+      }
+    }
+  }
+
+  // 3) Supprime la ligne en DB
   await supabase.from('wardrobe').delete().eq('id', id).eq('user_id', uid);
 }
 
