@@ -74,11 +74,19 @@ function pickDiverse(sorted: OutfitCandidate[], input: EngineInput): OutfitCandi
     return false;
   };
 
-  // (tenue 2 sélectionnée plus bas avec règles unifiées)
+  // Règle "max 1 robe sur 3 tenues" — appliquée seulement si la garde-robe
+  // contient assez de combos non-robe pour la respecter sans vider la liste.
+  const hasRobe = (c: OutfitCandidate) => c.items.some(i => i.category === 'Robes');
+  const nonRobeAvailable = sorted.filter(c => !hasRobe(c)).length;
+  const canLimitRobes = nonRobeAvailable >= 2;
 
   // Tenue 2: aucune pièce non-accessoire en commun avec tenue 1
+  // + si tenue 1 = robe, forcer non-robe (si possible)
   const nonAccIds1 = new Set(picked[0].items.filter(i => !isAccessory(i)).map(i => i.id));
-  tryPick(c => !c.items.some(it => !isAccessory(it) && nonAccIds1.has(it.id)))
+  const forceNonRobe2 = canLimitRobes && hasRobe(picked[0]);
+  tryPick(c => (!forceNonRobe2 || !hasRobe(c)) && !c.items.some(it => !isAccessory(it) && nonAccIds1.has(it.id)))
+    || tryPick(c => (!forceNonRobe2 || !hasRobe(c)) && getMainPieceId(c) !== getMainPieceId(picked[0]))
+    || tryPick(c => !c.items.some(it => !isAccessory(it) && nonAccIds1.has(it.id)))
     || tryPick(c => getMainPieceId(c) !== getMainPieceId(picked[0]));
 
   if (picked.length < 2) return picked;
