@@ -549,6 +549,21 @@ function getCompatibleSeasons(temperature: number | null): string[] {
   return ['Hiver', 'Toutes saisons'];
 }
 
+function getOccasionFromLifestyle(lifestyle: string | null | undefined, dayOfWeek: number): string {
+  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+  switch (lifestyle) {
+    case 'lycee':
+      return isWeekend ? 'sortie' : 'cours_lycee';
+    case 'etudes_sup':
+      return isWeekend ? 'soiree_etudiante' : 'campus';
+    case 'premier_job':
+    case 'travail':
+      return isWeekend ? 'sortie' : 'travail';
+    default:
+      return isWeekend ? 'sortie' : 'quotidien';
+  }
+}
+
 export async function generateRecommendations(
   wardrobe: ClothingItem[],
   temperature: number | null,
@@ -571,10 +586,26 @@ export async function generateRecommendations(
   );
   const effectivePool = seasonPool.length >= 4 ? seasonPool : wardrobe;
 
-  const occasionFilter = isWeekday() ? ['Travail', 'Quotidien'] : ['Sortie', 'Quotidien'];
-  const occasionPool = effectivePool.filter(
-    i => i.occasion.length === 0 || i.occasion.some(o => occasionFilter.includes(o))
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+  const currentOccasion = getOccasionFromLifestyle(
+    (userProfile as unknown as { lifestyle?: string | null })?.lifestyle,
+    dayOfWeek
   );
+  const occasionTagMap: Record<string, string[]> = {
+    cours_lycee:      ['quotidien', 'sortie', 'cours'],
+    campus:           ['quotidien', 'sortie', 'campus', 'cours'],
+    travail:          ['travail', 'bureau', 'quotidien'],
+    sortie:           ['sortie', 'quotidien'],
+    soiree_etudiante: ['sortie', 'soiree', 'evenement', 'quotidien'],
+    quotidien:        ['quotidien', 'sortie'],
+  };
+  const acceptedTags = occasionTagMap[currentOccasion] ?? ['quotidien'];
+  let occasionPool = effectivePool.filter(item =>
+    !item.occasion ||
+    item.occasion.some((occ: string) => acceptedTags.includes(occ.toLowerCase()))
+  );
+  if (occasionPool.length < 4) occasionPool = effectivePool;
 
   const rankPool = (pool: ClothingItem[]) => {
     if (!userProfile) return pool;
