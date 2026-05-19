@@ -189,11 +189,6 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
       </>
     );
   }
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   // Show filter card
   return (
