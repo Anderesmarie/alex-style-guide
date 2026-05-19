@@ -526,6 +526,11 @@ function scoreByProfile(
     )) score -= 2;
   }
 
+  // Scoring spécifique sacs par type
+  if (item.category === 'Sacs') {
+    score += scoreSac(item.type, item.style ?? [], item.occasion ?? []);
+  }
+
   return score;
 }
 
