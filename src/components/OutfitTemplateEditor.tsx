@@ -64,7 +64,8 @@ interface Props {
   initialLayout?: OutfitLayoutData | null;
   wardrobe: ClothingItem[];
   onCancel: () => void;
-  onSave: (newItems: ClothingItem[], layoutData: OutfitLayoutData) => void;
+  onSave: (newItems: ClothingItem[], layoutData: OutfitLayoutData, name?: string) => void;
+  initialName?: string;
 }
 
 export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, onCancel, onSave }: Props) {
