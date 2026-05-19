@@ -607,8 +607,8 @@ export async function generateRecommendations(
     dayOfWeek
   );
   const occasionTagMap: Record<string, string[]> = {
-    cours_lycee:      ['quotidien', 'sortie', 'cours'],
-    campus:           ['quotidien', 'sortie', 'campus', 'cours'],
+    cours_lycee:      ['quotidien', 'sortie', 'cours', 'cours/campus'],
+    campus:           ['quotidien', 'sortie', 'campus', 'cours', 'cours/campus'],
     travail:          ['travail', 'bureau', 'quotidien'],
     sortie:           ['sortie', 'quotidien'],
     soiree_etudiante: ['sortie', 'soiree', 'evenement', 'quotidien'],
