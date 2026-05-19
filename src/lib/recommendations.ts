@@ -406,7 +406,8 @@ interface ScoringContext {
 function scoreByProfile(
   item: ClothingItem,
   profile: UserProfile | null,
-  ctx: ScoringContext | null = null
+  ctx: ScoringContext | null = null,
+  currentOccasion: string | null = null
 ): number {
   if (!profile) return 0;
   let score = 0;
@@ -453,6 +454,19 @@ function scoreByProfile(
 
     // 6. Fraîcheur (+1 if not proposed in 14+ days)
     if (!ctx.allProposedIds.has(item.id)) score += 1;
+  }
+
+  // Scoring spécifique soirée étudiante
+  if (currentOccasion === 'soiree_etudiante') {
+    if (item.style?.some((s: string) =>
+      ['y2k', 'streetwear', 'casual chic', 'casual_chic', 'romantique'].includes(s.toLowerCase())
+    )) score += 2;
+    if (item.occasion?.some((o: string) =>
+      ['soiree', 'sortie', 'evenement'].includes(o.toLowerCase())
+    )) score += 2;
+    if (item.occasion?.some((o: string) =>
+      ['travail', 'bureau'].includes(o.toLowerCase())
+    )) score -= 2;
   }
 
   return score;
@@ -607,11 +621,26 @@ export async function generateRecommendations(
   );
   if (occasionPool.length < 4) occasionPool = effectivePool;
 
+  // Exclusions bloquantes spécifiques à l'occasion
+  const applyOccasionExclusions = (pool: ClothingItem[]): ClothingItem[] => {
+    return pool.filter(item => {
+      if (currentOccasion === 'soiree_etudiante') {
+        if (item.category === 'loungewear' || item.category === 'beachwear') return false;
+        if (item.occasion?.length && item.occasion.every((o: string) =>
+          ['travail', 'bureau'].includes(o.toLowerCase())
+        )) return false;
+      }
+      return true;
+    });
+  };
+  const filteredOccasionPool = applyOccasionExclusions(occasionPool);
+  if (filteredOccasionPool.length >= 4) occasionPool = filteredOccasionPool;
+
   const rankPool = (pool: ClothingItem[]) => {
     if (!userProfile) return pool;
     return [...pool].sort((a, b) => {
-      const sa = scoreByProfile(a, userProfile, ctx);
-      const sb = scoreByProfile(b, userProfile, ctx);
+      const sa = scoreByProfile(a, userProfile, ctx, currentOccasion);
+      const sb = scoreByProfile(b, userProfile, ctx, currentOccasion);
       if (sb !== sa) return sb - sa;
       return Math.random() - 0.5;
     });
