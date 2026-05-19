@@ -90,11 +90,41 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
     setSaved(false);
   };
 
+  const handleEditorSave = async (
+    newItems: ClothingItem[],
+    layoutData: OutfitLayoutData,
+    name?: string,
+  ) => {
+    try {
+      const id = genId();
+      const ids = newItems.map(i => i.id);
+      await saveLastOutfit(ids);
+      await addOutfit({
+        id,
+        name: (name?.trim() || 'Tenue perso du ' + new Date().toLocaleDateString('fr-FR')),
+        itemIds: ids,
+        createdAt: new Date().toISOString(),
+        layoutData,
+      });
+      updateStreak();
+      setEditingItems(null);
+      toast.success('Tenue enregistrée ✨', {
+        style: { backgroundColor: '#C9956C', color: '#FFFFFF', border: 'none' },
+        duration: 2000,
+      });
+      navigate('/outfits');
+    } catch (e) {
+      console.error('Erreur sauvegarde tenue:', e);
+      toast.error('Erreur lors de la sauvegarde, réessaie.');
+    }
+  };
+
   const tips = generatedOutfit ? getStylingTips(generatedOutfit, weatherCode, temperature) : null;
 
   // Show result card
   if (generatedOutfit) {
     return (
+      <>
       <div className="bg-card rounded-xl overflow-hidden card-shadow" style={{ border: `2px solid ${ROSE_GOLD}` }}>
         <div className="p-4">
           <p className="text-sm font-serif font-semibold text-center mb-3" style={{ color: ROSE_GOLD }}>
