@@ -261,7 +261,33 @@ export async function setOutfitLiked(id: string, liked: boolean): Promise<void> 
 
 export async function deleteOutfit(id: string): Promise<void> {
   const uid = await getUserId();
-  await supabase.from('outfits').delete().eq('id', id).eq('user_id', uid);
+  if (!uid) throw new Error('Not authenticated');
+
+  // 1) Supprimer les références dans calendar_events
+  const { error: calErr } = await supabase
+    .from('calendar_events')
+    .delete()
+    .eq('outfit_id', id)
+    .eq('user_id', uid);
+  if (calErr) console.warn('deleteOutfit: calendar_events cleanup failed', calErr);
+
+  // 2) Supprimer les références dans trip_days (pas de user_id direct, RLS via trips)
+  const { error: tripErr } = await supabase
+    .from('trip_days')
+    .delete()
+    .eq('outfit_id', id);
+  if (tripErr) console.warn('deleteOutfit: trip_days cleanup failed', tripErr);
+
+  // 3) Supprimer la tenue elle-même
+  const { error } = await supabase
+    .from('outfits')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', uid);
+  if (error) {
+    console.error('deleteOutfit failed:', error);
+    throw error;
+  }
 }
 
 export async function saveOutfits(outfits: Outfit[]): Promise<void> {
