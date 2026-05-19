@@ -492,9 +492,30 @@ export default function Dressing() {
     try {
       const result = await analyze(compressed);
       if (result) {
-        if (result.category) setCategory(result.category);
-        if (result.subcategory) setSubcategory(result.subcategory);
-        if (result.type) setType(result.type);
+        // Normalisation : ignore casse + accents, retourne la valeur exacte de la taxonomie
+        const norm = (s: string) =>
+          s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+        const matchIn = (candidates: string[], value?: string): string => {
+          if (!value) return '';
+          const target = norm(value);
+          return candidates.find(c => norm(c) === target) ?? '';
+        };
+
+        const categoryKeys = DRESSING_CATEGORIES.map(c => c.key);
+        const matchedCategory = matchIn(categoryKeys, result.category);
+        if (matchedCategory) setCategory(matchedCategory);
+
+        const catDef = DRESSING_CATEGORIES.find(c => c.key === matchedCategory);
+        const subcategoryKeys = catDef?.subcategories?.map(s => s.key) ?? [];
+        const matchedSubcategory = matchIn(subcategoryKeys, result.subcategory);
+        if (matchedSubcategory) setSubcategory(matchedSubcategory);
+
+        const typeOptions = matchedSubcategory
+          ? catDef?.subcategories?.find(s => s.key === matchedSubcategory)?.types ?? []
+          : catDef?.types ?? (matchedCategory ? getAllTypesForCategory(matchedCategory) : []);
+        const matchedType = matchIn(typeOptions, result.type);
+        if (matchedType) setType(matchedType);
+
         if (result.color) {
           // L'IA renvoie une couleur unique : on la place comme première sélection (max 3)
           const aiColors = String(result.color).split(',').map(s => s.trim()).filter(Boolean).slice(0, 3);
