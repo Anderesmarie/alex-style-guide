@@ -121,11 +121,16 @@ export default function Outfits() {
 
   const confirmDeleteOutfit = async () => {
     if (!deleteConfirm) return;
-    await deleteOutfit(deleteConfirm.id);
-    const o = await getOutfits();
-    setOutfits(o);
-    setDeleteConfirm(null);
-    setView('gallery');
+    try {
+      await deleteOutfit(deleteConfirm.id);
+      const o = await getOutfits();
+      setOutfits(o);
+      setDeleteConfirm(null);
+      setView('gallery');
+    } catch (e) {
+      console.error('Erreur lors de la suppression de la tenue:', e);
+      alert('La suppression a échoué. Réessaie plus tard.');
+    }
   };
 
   const handleGenerate = async () => {
