@@ -456,6 +456,19 @@ function scoreByProfile(
     if (!ctx.allProposedIds.has(item.id)) score += 1;
   }
 
+  // Scoring spécifique soirée étudiante
+  if (currentOccasion === 'soiree_etudiante') {
+    if (item.style?.some((s: string) =>
+      ['y2k', 'streetwear', 'casual chic', 'casual_chic', 'romantique'].includes(s.toLowerCase())
+    )) score += 2;
+    if (item.occasion?.some((o: string) =>
+      ['soiree', 'sortie', 'evenement'].includes(o.toLowerCase())
+    )) score += 2;
+    if (item.occasion?.some((o: string) =>
+      ['travail', 'bureau'].includes(o.toLowerCase())
+    )) score -= 2;
+  }
+
   return score;
 }
 
