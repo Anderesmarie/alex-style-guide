@@ -477,6 +477,45 @@ export async function deleteTripDay(id: string): Promise<void> {
   await supabase.from('trip_days').delete().eq('id', id);
 }
 
+// ---------- Migration one-shot : split "Cours/Campus" -> "Cours lycée" | "Campus" ----------
+export async function migrerTagCours(userId: string): Promise<void> {
+  const flag = localStorage.getItem('cours_tag_migre');
+  if (flag) return;
+
+  const { data: profil } = await supabase
+    .from('profiles')
+    .select('lifestyle')
+    .eq('id', userId)
+    .maybeSingle();
+
+  const lifestyle = (profil as { lifestyle?: string | null } | null)?.lifestyle;
+  if (!lifestyle || !['lycee', 'etudes_sup'].includes(lifestyle)) return;
+
+  const nouveauTag = lifestyle === 'lycee' ? 'Cours lycée' : 'Campus';
+
+  const { data: pieces } = await supabase
+    .from('wardrobe')
+    .select('id, occasion')
+    .eq('user_id', userId);
+  if (!pieces) return;
+
+  for (const piece of pieces) {
+    const occasions: string[] = Array.isArray(piece.occasion) ? piece.occasion as string[] : [];
+    if (occasions.includes('Cours/Campus')) {
+      const miseAJour = occasions
+        .filter((o: string) => o !== 'Cours/Campus')
+        .concat(occasions.includes(nouveauTag) ? [] : [nouveauTag]);
+      await supabase
+        .from('wardrobe')
+        .update({ occasion: miseAJour })
+        .eq('id', piece.id);
+    }
+  }
+
+  localStorage.setItem('cours_tag_migre', 'true');
+}
+
+
 // ---------- Auth compat (deprecated — Supabase handles sessions) ----------
 export const getAuth = () => null;
 export const saveAuth = () => {};
