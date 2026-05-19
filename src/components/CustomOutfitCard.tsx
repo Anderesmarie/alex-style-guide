@@ -1,9 +1,11 @@
 import { useState, useMemo } from 'react';
-import { ClothingItem, UserProfile, STYLE_OPTIONS } from '@/lib/types';
+import { useNavigate } from 'react-router-dom';
+import { ClothingItem, UserProfile, STYLE_OPTIONS, OutfitLayoutData } from '@/lib/types';
 import { buildValidCustomOutfit } from '@/lib/recommendations';
 import { addOutfit, genId, saveLastOutfit } from '@/lib/storage';
 import { getStylingTips } from '@/lib/stylingTips';
 import { updateStreak } from '@/lib/streak';
+import OutfitTemplateEditor from './OutfitTemplateEditor';
 import { toast } from 'sonner';
 
 const ROSE_GOLD = '#C9956C';
@@ -20,6 +22,7 @@ interface Props {
 }
 
 export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }: Props) {
+  const navigate = useNavigate();
   const [occasion, setOccasion] = useState('');
   const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
   const [selectedStyle, setSelectedStyle] = useState('');
@@ -27,6 +30,7 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [editingItems, setEditingItems] = useState<ClothingItem[] | null>(null);
 
   const hasFilter = occasion || selectedItem || selectedStyle;
 
@@ -86,11 +90,41 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
     setSaved(false);
   };
 
+  const handleEditorSave = async (
+    newItems: ClothingItem[],
+    layoutData: OutfitLayoutData,
+    name?: string,
+  ) => {
+    try {
+      const id = genId();
+      const ids = newItems.map(i => i.id);
+      await saveLastOutfit(ids);
+      await addOutfit({
+        id,
+        name: (name?.trim() || 'Tenue perso du ' + new Date().toLocaleDateString('fr-FR')),
+        itemIds: ids,
+        createdAt: new Date().toISOString(),
+        layoutData,
+      });
+      updateStreak();
+      setEditingItems(null);
+      toast.success('Tenue enregistrée ✨', {
+        style: { backgroundColor: '#C9956C', color: '#FFFFFF', border: 'none' },
+        duration: 2000,
+      });
+      navigate('/outfits');
+    } catch (e) {
+      console.error('Erreur sauvegarde tenue:', e);
+      toast.error('Erreur lors de la sauvegarde, réessaie.');
+    }
+  };
+
   const tips = generatedOutfit ? getStylingTips(generatedOutfit, weatherCode, temperature) : null;
 
   // Show result card
   if (generatedOutfit) {
     return (
+      <>
       <div className="bg-card rounded-xl overflow-hidden card-shadow" style={{ border: `2px solid ${ROSE_GOLD}` }}>
         <div className="p-4">
           <p className="text-sm font-serif font-semibold text-center mb-3" style={{ color: ROSE_GOLD }}>
@@ -133,23 +167,26 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
             >
               Réessayer 🔄
             </button>
-            {saved ? (
-              <div className="flex-1 py-2.5 rounded-lg font-medium text-sm text-center text-white" style={{ backgroundColor: '#2E7D32' }}>
-                ✅ Sauvegardée !
-              </div>
-            ) : (
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="flex-1 py-2.5 rounded-lg font-medium text-sm text-white active:scale-[0.98] transition-transform disabled:opacity-60"
-                style={{ backgroundColor: ROSE_GOLD }}
-              >
-                {saving ? 'Sauvegarde...' : 'Sauvegarder 💾'}
-              </button>
-            )}
+            <button
+              onClick={() => setEditingItems(generatedOutfit)}
+              className="flex-1 py-2.5 rounded-lg font-medium text-sm text-white active:scale-[0.98] transition-transform"
+              style={{ backgroundColor: ROSE_GOLD }}
+            >
+              ✏️ Modifier
+            </button>
           </div>
         </div>
       </div>
+      {editingItems && (
+        <OutfitTemplateEditor
+          items={editingItems}
+          initialLayout={null}
+          wardrobe={wardrobe}
+          onCancel={() => setEditingItems(null)}
+          onSave={handleEditorSave}
+        />
+      )}
+      </>
     );
   }
 

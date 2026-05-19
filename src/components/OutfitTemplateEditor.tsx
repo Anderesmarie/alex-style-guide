@@ -64,10 +64,11 @@ interface Props {
   initialLayout?: OutfitLayoutData | null;
   wardrobe: ClothingItem[];
   onCancel: () => void;
-  onSave: (newItems: ClothingItem[], layoutData: OutfitLayoutData) => void;
+  onSave: (newItems: ClothingItem[], layoutData: OutfitLayoutData, name?: string) => void;
+  initialName?: string;
 }
 
-export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, onCancel, onSave }: Props) {
+export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, onCancel, onSave, initialName = '' }: Props) {
   const tplKey = selectTemplateForItems(items);
   const template = LAYOUT_TEMPLATES[tplKey];
 
@@ -106,7 +107,10 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sheet, setSheet] = useState<AddCategory | null>(null);
   const [showScrollHint, setShowScrollHint] = useState(true);
+  const [name, setName] = useState<string>(initialName);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const needsName = !initialName;
+  const nameValid = !needsName || name.trim().length > 0;
 
   useEffect(() => {
     if (!sheet) return;
@@ -273,7 +277,7 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
       canvasH: CANVAS_H,
       pieces: layoutPieces,
     };
-    onSave(pieces.map(p => p.item), layoutData);
+    onSave(pieces.map(p => p.item), layoutData, name.trim());
   };
 
   return (
@@ -383,8 +387,24 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
           })}
         </div>
 
+        {/* Name input (when no initial name) */}
+        {needsName && (
+          <div className="mt-6">
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">
+              Nom de la tenue
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Ex: Look du weekend ✨"
+              className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+        )}
+
         {/* Bottom action buttons */}
-        <div className="flex gap-2 mt-6">
+        <div className="flex gap-2 mt-4">
           <button
             onClick={onCancel}
             className="flex-1 py-3 rounded-xl bg-secondary text-secondary-foreground font-semibold text-sm active:scale-[0.98] transition-transform"
@@ -393,7 +413,7 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
           </button>
           <button
             onClick={handleSave}
-            disabled={pieces.length < 1}
+            disabled={pieces.length < 1 || !nameValid}
             className="flex-1 py-3 rounded-xl text-white font-semibold text-sm active:scale-[0.98] transition-transform disabled:opacity-50"
             style={{ backgroundColor: ROSE_GOLD }}
           >
