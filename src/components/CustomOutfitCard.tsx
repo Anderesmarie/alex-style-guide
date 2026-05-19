@@ -1,9 +1,11 @@
 import { useState, useMemo } from 'react';
-import { ClothingItem, UserProfile, STYLE_OPTIONS } from '@/lib/types';
+import { useNavigate } from 'react-router-dom';
+import { ClothingItem, UserProfile, STYLE_OPTIONS, OutfitLayoutData } from '@/lib/types';
 import { buildValidCustomOutfit } from '@/lib/recommendations';
 import { addOutfit, genId, saveLastOutfit } from '@/lib/storage';
 import { getStylingTips } from '@/lib/stylingTips';
 import { updateStreak } from '@/lib/streak';
+import OutfitTemplateEditor from './OutfitTemplateEditor';
 import { toast } from 'sonner';
 
 const ROSE_GOLD = '#C9956C';
