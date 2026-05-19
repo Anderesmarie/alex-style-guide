@@ -22,6 +22,7 @@ interface Props {
 }
 
 export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }: Props) {
+  const navigate = useNavigate();
   const [occasion, setOccasion] = useState('');
   const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
   const [selectedStyle, setSelectedStyle] = useState('');
@@ -29,6 +30,7 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [editingItems, setEditingItems] = useState<ClothingItem[] | null>(null);
 
   const hasFilter = occasion || selectedItem || selectedStyle;
 
