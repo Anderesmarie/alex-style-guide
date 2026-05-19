@@ -393,6 +393,63 @@ export function getFavoriteColorScore(
   return 0;
 }
 
+function scoreSac(type: string, style: string[], occasion: string[]): number {
+  let score = 0;
+  const t = type.toLowerCase();
+  const hasStyle = (s: string) => style.map(x => x.toLowerCase()).includes(s.toLowerCase());
+  const hasOcc = (o: string) => occasion.map(x => x.toLowerCase()).includes(o.toLowerCase());
+
+  // Sac à main
+  if (t.includes('sac à main') || t.includes('bandoulière')) {
+    if (hasStyle('Old Money') || hasStyle('Casual chic')) score += 2;
+    if (hasStyle('Romantique')) score += 1;
+    if (hasStyle('Streetwear')) score -= 1;
+    if (hasStyle('Sportswear')) score -= 2;
+    if (hasOcc('Travail')) score += 2;
+  }
+  // Tote bag
+  if (t.includes('tote') || t.includes('fourre-tout')) {
+    if (hasStyle('Casual chic') || hasStyle('Bohème') || hasStyle('Minimaliste') || hasStyle('Preppy')) score += 1;
+    if (hasOcc('Campus') || hasOcc('Cours lycée')) score += 2;
+    if (hasOcc('Soirée')) score -= 1;
+  }
+  // Sac à dos
+  if (t.includes('sac à dos') || t.includes('cartable')) {
+    if (hasStyle('Streetwear')) score += 2;
+    if (hasStyle('Casual chic') || hasStyle('Preppy')) score += 1;
+    if (hasStyle('Old Money')) score -= 2;
+    if (hasOcc('Campus') || hasOcc('Cours lycée')) score += 2;
+    if (hasOcc('Soirée')) score -= 2;
+  }
+  // Pochette
+  if (t.includes('pochette')) {
+    if (hasStyle('Y2K') || hasStyle('Romantique') || hasStyle('Dark')) score += 1;
+    if (hasOcc('Événement') || hasOcc('Evenement')) score += 3;
+    if (hasOcc('Travail')) score -= 1;
+  }
+  // Sac banane
+  if (t.includes('banane')) {
+    if (hasStyle('Streetwear')) score += 2;
+    if (hasStyle('Y2K') || hasStyle('Casual chic')) score += 1;
+    if (hasStyle('Old Money') || hasStyle('Romantique')) score -= 2;
+    if (hasOcc('Événement') || hasOcc('Evenement')) score -= 2;
+  }
+  // Sac baguette
+  if (t.includes('baguette')) {
+    if (hasStyle('Casual chic')) score += 2;
+    if (hasStyle('Old Money') || hasStyle('Y2K') || hasStyle('Romantique')) score += 1;
+    if (hasOcc('Travail')) score += 1;
+  }
+  // Mini sac
+  if (t.includes('mini sac') || t.includes('mini bag')) {
+    if (hasStyle('Y2K')) score += 2;
+    if (hasStyle('Romantique') || hasStyle('Dark')) score += 1;
+    if (hasOcc('Sport')) score -= 2;
+    if (hasOcc('Travail')) score -= 1;
+  }
+  return score;
+}
+
 // Context for advanced scoring (loaded async before generation)
 interface ScoringContext {
   recentOutfits: { itemIds: string[]; createdAt: string }[];
@@ -467,6 +524,11 @@ function scoreByProfile(
     if (item.occasion?.some((o: string) =>
       ['travail', 'bureau'].includes(o.toLowerCase())
     )) score -= 2;
+  }
+
+  // Scoring spécifique sacs par type
+  if (item.category === 'Sacs') {
+    score += scoreSac(item.type, item.style ?? [], item.occasion ?? []);
   }
 
   return score;
