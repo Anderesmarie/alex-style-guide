@@ -621,11 +621,26 @@ export async function generateRecommendations(
   );
   if (occasionPool.length < 4) occasionPool = effectivePool;
 
+  // Exclusions bloquantes spécifiques à l'occasion
+  const applyOccasionExclusions = (pool: ClothingItem[]): ClothingItem[] => {
+    return pool.filter(item => {
+      if (currentOccasion === 'soiree_etudiante') {
+        if (item.category === 'loungewear' || item.category === 'beachwear') return false;
+        if (item.occasion?.length && item.occasion.every((o: string) =>
+          ['travail', 'bureau'].includes(o.toLowerCase())
+        )) return false;
+      }
+      return true;
+    });
+  };
+  const filteredOccasionPool = applyOccasionExclusions(occasionPool);
+  if (filteredOccasionPool.length >= 4) occasionPool = filteredOccasionPool;
+
   const rankPool = (pool: ClothingItem[]) => {
     if (!userProfile) return pool;
     return [...pool].sort((a, b) => {
-      const sa = scoreByProfile(a, userProfile, ctx);
-      const sb = scoreByProfile(b, userProfile, ctx);
+      const sa = scoreByProfile(a, userProfile, ctx, currentOccasion);
+      const sb = scoreByProfile(b, userProfile, ctx, currentOccasion);
       if (sb !== sa) return sb - sa;
       return Math.random() - 0.5;
     });
