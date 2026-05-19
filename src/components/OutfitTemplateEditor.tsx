@@ -107,7 +107,10 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sheet, setSheet] = useState<AddCategory | null>(null);
   const [showScrollHint, setShowScrollHint] = useState(true);
+  const [name, setName] = useState<string>(initialName);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const needsName = !initialName;
+  const nameValid = !needsName || name.trim().length > 0;
 
   useEffect(() => {
     if (!sheet) return;
