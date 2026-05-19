@@ -406,7 +406,8 @@ interface ScoringContext {
 function scoreByProfile(
   item: ClothingItem,
   profile: UserProfile | null,
-  ctx: ScoringContext | null = null
+  ctx: ScoringContext | null = null,
+  currentOccasion: string | null = null
 ): number {
   if (!profile) return 0;
   let score = 0;
