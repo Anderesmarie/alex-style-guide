@@ -277,7 +277,7 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
       canvasH: CANVAS_H,
       pieces: layoutPieces,
     };
-    onSave(pieces.map(p => p.item), layoutData);
+    onSave(pieces.map(p => p.item), layoutData, name.trim());
   };
 
   return (
