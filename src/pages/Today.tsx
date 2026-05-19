@@ -136,6 +136,7 @@ export default function Today() {
         try {
           const { data: userData } = await supabase.auth.getUser();
           if (userData.user) {
+            migrerTagCours(userData.user.id).catch(() => {});
             const { data: prof } = await supabase
               .from('profiles')
               .select('*')
