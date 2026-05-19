@@ -127,7 +127,7 @@ export const TYPES = ['T-shirt', 'Chemise', 'Pull', 'Jean', 'Pantalon', 'Jupe', 
 export const COLORS = ['Blanc', 'Noir', 'Gris', 'Beige', 'Bleu', 'Rouge', 'Rose', 'Vert', 'Jaune', 'Marron'] as const;
 export const SEASONS = ['Été', 'Automne', 'Hiver', 'Printemps', 'Toutes saisons'] as const;
 export const STYLES = ['Casual', 'Chic', 'Sport', 'Boho', 'Bureau'] as const;
-export const OCCASIONS = ['Travail', 'Sortie', 'Sport', 'Événement', 'Quotidien', 'Plage', 'Cérémonie', 'Soirée', 'Cours/Campus'] as const;
+export const OCCASIONS = ['Travail', 'Sortie', 'Sport', 'Événement', 'Quotidien', 'Plage', 'Cérémonie', 'Soirée', 'Cours lycée', 'Campus'] as const;
 const SILHOUETTE_BASE_URL = 'https://tseermbuwyrzcrulhxba.supabase.co/storage/v1/object/public/silhouettes/';
 
 export const SILHOUETTES = [
