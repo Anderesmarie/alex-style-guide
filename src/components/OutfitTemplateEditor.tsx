@@ -68,7 +68,7 @@ interface Props {
   initialName?: string;
 }
 
-export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, onCancel, onSave }: Props) {
+export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, onCancel, onSave, initialName = '' }: Props) {
   const tplKey = selectTemplateForItems(items);
   const template = LAYOUT_TEMPLATES[tplKey];
 
