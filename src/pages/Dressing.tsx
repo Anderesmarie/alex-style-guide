@@ -1104,6 +1104,8 @@ export default function Dressing() {
           </div>
         </div>
 
+        {!['Chaussures', 'Sacs', 'Bijoux'].includes(category) && (
+        <>
         <hr className="border-t border-gray-200" />
 
         <div>
@@ -1142,7 +1144,11 @@ export default function Dressing() {
             })}
           </div>
         </div>
+        </>
+        )}
 
+        {!['Chaussures', 'Sacs', 'Accessoires', 'Bijoux'].includes(category) && (
+        <>
         <hr className="border-t border-gray-200" />
 
         <div>
@@ -1174,7 +1180,11 @@ export default function Dressing() {
             })}
           </div>
         </div>
+        </>
+        )}
 
+        {!['Chaussures', 'Sacs', 'Accessoires', 'Bijoux', 'Maillots'].includes(category) && (
+        <>
         <hr className="border-t border-gray-200" />
 
         <div>
@@ -1203,6 +1213,8 @@ export default function Dressing() {
             })}
           </div>
         </div>
+        </>
+        )}
 
         <div>
           <label className="block text-sm font-medium mb-3">Saison</label>
