@@ -1,0 +1,1 @@
+DELETE FROM public.wardrobe WHERE user_id <> '6807a220-2b96-443e-9130-b0dcdee6e241';
