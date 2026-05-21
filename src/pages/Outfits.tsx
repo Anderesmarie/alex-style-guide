@@ -9,6 +9,7 @@ import CalendarView from '@/components/CalendarView';
 import OutfitVisualLayout, { SlotKey, SlotMap, SLOT_CONFIG } from '@/components/OutfitVisualLayout';
 import OutfitLayout from '@/components/OutfitLayout';
 import OutfitGalleryCard from '@/components/OutfitGalleryCard';
+import ShareOutfitCard from '@/components/ShareOutfitCard';
 import OutfitFreeCanvas, { CHIPS, ChipKey, chipMatchesItem, defaultPositionForCategory, CANVAS_W, CANVAS_H } from '@/components/OutfitFreeCanvas';
 
 // Renvoie le nom de catégorie attendu par SLOT_CONFIG (compat anciens libellés)
