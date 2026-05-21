@@ -43,6 +43,7 @@ export default function Outfits() {
   const [outfitName, setOutfitName] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<Outfit | null>(null);
   const [pseudo, setPseudo] = useState<string | null>(null);
+  const [shareOutfit, setShareOutfit] = useState<Outfit | null>(null);
 
   // Visual layout state
   const [slots, setSlots] = useState<SlotMap>({});
