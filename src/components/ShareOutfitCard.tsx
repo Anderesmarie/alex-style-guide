@@ -163,52 +163,104 @@ export default function ShareOutfitCard({ outfit, items, userName, onClose }: Pr
             }}
           />
 
-          {/* Outfit pieces — vertical stack centered */}
-          <div
-            style={{
-              position: 'absolute',
-              left: '50%',
-              top: 140,
-              transform: 'translateX(-50%)',
-              width: 560,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 12,
-            }}
-          >
-            {orderedItems.map((it, i) => (
-              <img
-                key={it.id + i}
-                src={it.imageUrl || it.imageBase64}
-                crossOrigin="anonymous"
-                alt={it.type}
+          {/* Outfit pieces */}
+          {outfit.layoutData?.pieces?.length ? (
+            <>
+              {(() => {
+                const ZONE_W = 720;
+                const ZONE_H = 1000;
+                const ZONE_LEFT = (CARD_W - ZONE_W) / 2; // 105
+                const ZONE_TOP = 180;
+                const byId = new Map(items.map(it => [it.id, it]));
+                return outfit.layoutData.pieces
+                  .slice()
+                  .sort((a, b) => a.z - b.z)
+                  .map((piece) => {
+                    const item = byId.get(piece.itemId);
+                    if (!item) return null;
+                    return (
+                      <img
+                        key={piece.itemId}
+                        src={item.imageUrl || item.imageBase64}
+                        crossOrigin="anonymous"
+                        alt={item.type}
+                        style={{
+                          position: 'absolute',
+                          left: ZONE_LEFT + (piece.x / 100) * ZONE_W,
+                          top: ZONE_TOP + (piece.y / 100) * ZONE_H,
+                          width: (piece.w ?? 30) / 100 * ZONE_W,
+                          height: (piece.h ?? 30) / 100 * ZONE_H,
+                          zIndex: piece.z ?? 1,
+                          objectFit: 'contain',
+                          filter: 'drop-shadow(0 4px 10px rgba(0,0,0,0.15))',
+                        }}
+                      />
+                    );
+                  });
+              })()}
+              <div
                 style={{
-                  maxWidth: 360,
-                  maxHeight: 280,
-                  width: 'auto',
-                  height: 'auto',
-                  objectFit: 'contain',
-                  filter: 'drop-shadow(0 6px 14px rgba(0,0,0,0.18))',
+                  position: 'absolute',
+                  top: 1200,
+                  left: 0,
+                  width: '100%',
+                  textAlign: 'center',
+                  fontFamily: '"Playfair Display", "Brush Script MT", cursive, serif',
+                  fontStyle: 'italic',
+                  fontSize: 36,
+                  color: '#8B6F5E',
+                  lineHeight: 1.1,
                 }}
-              />
-            ))}
-
-            {/* Outfit name */}
+              >
+                {outfit.name || 'Ma tenue'}
+              </div>
+            </>
+          ) : (
             <div
               style={{
-                marginTop: 16,
-                fontFamily: '"Playfair Display", "Brush Script MT", cursive, serif',
-                fontStyle: 'italic',
-                fontSize: 44,
-                color: '#8B6F5E',
-                textAlign: 'center',
-                lineHeight: 1.1,
+                position: 'absolute',
+                left: '50%',
+                top: 140,
+                transform: 'translateX(-50%)',
+                width: 560,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 12,
               }}
             >
-              {outfit.name || 'Ma tenue'}
+              {orderedItems.map((it, i) => (
+                <img
+                  key={it.id + i}
+                  src={it.imageUrl || it.imageBase64}
+                  crossOrigin="anonymous"
+                  alt={it.type}
+                  style={{
+                    maxWidth: 360,
+                    maxHeight: 280,
+                    width: 'auto',
+                    height: 'auto',
+                    objectFit: 'contain',
+                    filter: 'drop-shadow(0 6px 14px rgba(0,0,0,0.18))',
+                  }}
+                />
+              ))}
+              <div
+                style={{
+                  marginTop: 16,
+                  fontFamily: '"Playfair Display", "Brush Script MT", cursive, serif',
+                  fontStyle: 'italic',
+                  fontSize: 44,
+                  color: '#8B6F5E',
+                  textAlign: 'center',
+                  lineHeight: 1.1,
+                }}
+              >
+                {outfit.name || 'Ma tenue'}
+              </div>
             </div>
-          </div>
+          )}
+
 
           {/* Pseudo bottom-right */}
           <div
