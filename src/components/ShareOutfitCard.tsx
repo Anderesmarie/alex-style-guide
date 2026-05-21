@@ -12,33 +12,35 @@ interface Props {
 
 const CARD_W = 930;
 const CARD_H = 1240;
+const OUTFIT_W = 360;
+const OUTFIT_H = 500;
+
+// Zone cible sur le fond pour l'image tenue
+const ZONE_TOP = 200;
+const ZONE_LEFT = 115;
+const ZONE_W = 700;
+const ZONE_H = 750;
+
+type Status = 'preparing' | 'rendering-outfit' | 'rendering-final' | 'sharing' | 'done' | 'error';
 
 export default function ShareOutfitCard({ outfit, items, userName, onClose }: Props) {
-  const captureRef = useRef<HTMLDivElement>(null);
-  const [status, setStatus] = useState<'preparing' | 'sharing' | 'done' | 'error'>('preparing');
+  const outfitRef = useRef<HTMLDivElement>(null);
+  const finalRef = useRef<HTMLDivElement>(null);
+  const [status, setStatus] = useState<Status>('preparing');
+  const [outfitImageDataUrl, setOutfitImageDataUrl] = useState<string | null>(null);
 
-  // Order pieces: layoutData order (sorted by z) if available, else natural items order
-  const orderedItems = (() => {
-    if (outfit.layoutData?.pieces?.length) {
-      const byId = new Map(items.map(it => [it.id, it]));
-      return outfit.layoutData.pieces
-        .slice()
-        .sort((a, b) => a.z - b.z)
-        .map(p => byId.get(p.itemId))
-        .filter((x): x is ClothingItem => !!x);
-    }
-    return items;
-  })();
+  const byId = new Map(items.map(it => [it.id, it]));
+  const pieces = outfit.layoutData?.pieces?.slice().sort((a, b) => a.z - b.z) ?? [];
+  const orderedFallback = items;
 
+  // ÉTAPE 1 — capture du div tenue (360×500) → dataURL
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
-      // Wait one frame so images start loading
       await new Promise(r => setTimeout(r, 100));
-      const node = captureRef.current;
+      const node = outfitRef.current;
       if (!node) return;
 
-      // Wait for all images inside to load
       const imgs = Array.from(node.querySelectorAll('img'));
       await Promise.all(
         imgs.map(img =>
@@ -50,11 +52,54 @@ export default function ShareOutfitCard({ outfit, items, userName, onClose }: Pr
               })
         )
       );
-
       if (cancelled) return;
 
       try {
-        setStatus('sharing');
+        setStatus('rendering-outfit');
+        const canvas = await html2canvas(node, {
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: null,
+          width: OUTFIT_W,
+          height: OUTFIT_H,
+          scale: 2,
+        });
+        if (cancelled) return;
+        setOutfitImageDataUrl(canvas.toDataURL('image/png'));
+      } catch (e) {
+        console.error('Outfit capture error', e);
+        if (!cancelled) setStatus('error');
+      }
+    };
+    run();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ÉTAPE 2 — une fois l'image tenue prête, capture du final
+  useEffect(() => {
+    if (!outfitImageDataUrl) return;
+    let cancelled = false;
+    const run = async () => {
+      await new Promise(r => setTimeout(r, 100));
+      const node = finalRef.current;
+      if (!node) return;
+
+      const imgs = Array.from(node.querySelectorAll('img'));
+      await Promise.all(
+        imgs.map(img =>
+          img.complete
+            ? Promise.resolve()
+            : new Promise(res => {
+                img.onload = () => res(null);
+                img.onerror = () => res(null);
+              })
+        )
+      );
+      if (cancelled) return;
+
+      try {
+        setStatus('rendering-final');
         const canvas = await html2canvas(node, {
           useCORS: true,
           allowTaint: false,
@@ -69,6 +114,7 @@ export default function ShareOutfitCard({ outfit, items, userName, onClose }: Pr
         const filename = `mystyl-${(outfit.name || 'tenue').replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.png`;
         const file = new File([blob], filename, { type: 'image/png' });
 
+        setStatus('sharing');
         const navAny = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
         if (navAny.share && navAny.canShare && navAny.canShare({ files: [file] })) {
           try {
@@ -92,27 +138,29 @@ export default function ShareOutfitCard({ outfit, items, userName, onClose }: Pr
         setStatus('done');
         onClose();
       } catch (e) {
-        console.error('Share capture error', e);
-        setStatus('error');
+        console.error('Final capture error', e);
+        if (!cancelled) setStatus('error');
       }
     };
     run();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [outfitImageDataUrl]);
 
   return (
     <>
-      {/* Overlay */}
+      {/* Overlay UI */}
       <div
         className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center"
-        onClick={() => status !== 'sharing' && onClose()}
+        onClick={() => status !== 'sharing' && status !== 'rendering-final' && onClose()}
       >
         <div className="bg-white rounded-2xl px-6 py-5 flex flex-col items-center gap-3 mx-6">
           <div className="text-3xl">{status === 'error' ? '⚠️' : '✨'}</div>
           <p className="text-sm text-center" style={{ fontFamily: 'Inter, sans-serif' }}>
             {status === 'preparing' && 'Préparation de ta tenue…'}
-            {status === 'sharing' && 'Création de l\'image…'}
+            {status === 'rendering-outfit' && 'Mise en scène…'}
+            {status === 'rendering-final' && 'Création de l\'image…'}
+            {status === 'sharing' && 'Partage en cours…'}
             {status === 'done' && 'Prête !'}
             {status === 'error' && 'Oups, échec du partage.'}
           </p>
@@ -127,157 +175,169 @@ export default function ShareOutfitCard({ outfit, items, userName, onClose }: Pr
         </div>
       </div>
 
-      {/* Off-screen capture target */}
+      {/* Off-screen — ÉTAPE 1 : div tenue 360×500 (fond transparent) */}
       <div
         style={{
           position: 'fixed',
           left: -99999,
           top: 0,
-          width: CARD_W,
-          height: CARD_H,
+          width: OUTFIT_W,
+          height: OUTFIT_H,
           pointerEvents: 'none',
         }}
         aria-hidden
       >
         <div
-          ref={captureRef}
+          ref={outfitRef}
           style={{
             position: 'relative',
-            width: CARD_W,
-            height: CARD_H,
+            width: OUTFIT_W,
+            height: OUTFIT_H,
+            background: 'transparent',
             overflow: 'hidden',
-            backgroundColor: '#F5F0EB',
           }}
         >
-          {/* Background */}
-          <img
-            src={SHARE_BACKGROUND_URL}
-            crossOrigin="anonymous"
-            alt=""
-            style={{
-              position: 'absolute',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-            }}
-          />
+          {pieces.length > 0
+            ? pieces.map((p) => {
+                const item = byId.get(p.itemId);
+                if (!item) return null;
+                const wPct = p.w ?? 30;
+                const hPct = p.h ?? wPct * (OUTFIT_W / OUTFIT_H);
+                return (
+                  <div
+                    key={p.itemId}
+                    style={{
+                      position: 'absolute',
+                      left: `${p.x}%`,
+                      top: `${p.y}%`,
+                      width: `${wPct}%`,
+                      height: `${hPct}%`,
+                      zIndex: (p.z ?? 1) + 1,
+                    }}
+                  >
+                    <img
+                      src={item.imageUrl || item.imageBase64}
+                      crossOrigin="anonymous"
+                      alt={item.type}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                        filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.10))',
+                      }}
+                    />
+                  </div>
+                );
+              })
+            : orderedFallback.map((it, i) => (
+                <div
+                  key={it.id + i}
+                  style={{
+                    position: 'absolute',
+                    left: '10%',
+                    top: `${5 + i * 22}%`,
+                    width: '80%',
+                    height: '20%',
+                    zIndex: i + 1,
+                  }}
+                >
+                  <img
+                    src={it.imageUrl || it.imageBase64}
+                    crossOrigin="anonymous"
+                    alt={it.type}
+                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                  />
+                </div>
+              ))}
+        </div>
+      </div>
 
-          {/* Outfit pieces */}
-          {outfit.layoutData?.pieces?.length ? (
-            <>
-              {(() => {
-                const ZONE_W = 720;
-                const ZONE_H = 1000;
-                const ZONE_LEFT = (CARD_W - ZONE_W) / 2; // 105
-                const ZONE_TOP = 180;
-                const byId = new Map(items.map(it => [it.id, it]));
-                return outfit.layoutData.pieces
-                  .slice()
-                  .sort((a, b) => a.z - b.z)
-                  .map((piece) => {
-                    const item = byId.get(piece.itemId);
-                    if (!item) return null;
-                    return (
-                      <img
-                        key={piece.itemId}
-                        src={item.imageUrl || item.imageBase64}
-                        crossOrigin="anonymous"
-                        alt={item.type}
-                        style={{
-                          position: 'absolute',
-                          left: ZONE_LEFT + (piece.x / 100) * ZONE_W,
-                          top: ZONE_TOP + (piece.y / 100) * ZONE_H,
-                          width: (piece.w ?? 30) / 100 * ZONE_W,
-                          height: (piece.h ?? 30) / 100 * ZONE_H,
-                          zIndex: piece.z ?? 1,
-                          objectFit: 'contain',
-                          filter: 'drop-shadow(0 4px 10px rgba(0,0,0,0.15))',
-                        }}
-                      />
-                    );
-                  });
-              })()}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 1200,
-                  left: 0,
-                  width: '100%',
-                  textAlign: 'center',
-                  fontFamily: '"Playfair Display", "Brush Script MT", cursive, serif',
-                  fontStyle: 'italic',
-                  fontSize: 36,
-                  color: '#8B6F5E',
-                  lineHeight: 1.1,
-                }}
-              >
-                {outfit.name || 'Ma tenue'}
-              </div>
-            </>
-          ) : (
+      {/* Off-screen — ÉTAPE 2 : carte finale 930×1240 */}
+      {outfitImageDataUrl && (
+        <div
+          style={{
+            position: 'fixed',
+            left: -99999,
+            top: 0,
+            width: CARD_W,
+            height: CARD_H,
+            pointerEvents: 'none',
+          }}
+          aria-hidden
+        >
+          <div
+            ref={finalRef}
+            style={{
+              position: 'relative',
+              width: CARD_W,
+              height: CARD_H,
+              overflow: 'hidden',
+              backgroundColor: '#F5F0EB',
+            }}
+          >
+            {/* Fond MyStyl */}
+            <img
+              src={SHARE_BACKGROUND_URL}
+              crossOrigin="anonymous"
+              alt=""
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+            />
+
+            {/* Image tenue capturée */}
+            <img
+              src={outfitImageDataUrl}
+              alt="tenue"
+              style={{
+                position: 'absolute',
+                top: ZONE_TOP,
+                left: ZONE_LEFT,
+                width: ZONE_W,
+                height: ZONE_H,
+                objectFit: 'contain',
+              }}
+            />
+
+            {/* Nom tenue */}
             <div
               style={{
                 position: 'absolute',
-                left: '50%',
-                top: 140,
-                transform: 'translateX(-50%)',
-                width: 560,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 12,
+                top: ZONE_TOP + ZONE_H + 20,
+                left: 0,
+                width: '100%',
+                textAlign: 'center',
+                fontFamily: '"Playfair Display", "Brush Script MT", cursive, serif',
+                fontStyle: 'italic',
+                fontSize: 44,
+                color: '#8B6F5E',
+                lineHeight: 1.1,
               }}
             >
-              {orderedItems.map((it, i) => (
-                <img
-                  key={it.id + i}
-                  src={it.imageUrl || it.imageBase64}
-                  crossOrigin="anonymous"
-                  alt={it.type}
-                  style={{
-                    maxWidth: 360,
-                    maxHeight: 280,
-                    width: 'auto',
-                    height: 'auto',
-                    objectFit: 'contain',
-                    filter: 'drop-shadow(0 6px 14px rgba(0,0,0,0.18))',
-                  }}
-                />
-              ))}
-              <div
-                style={{
-                  marginTop: 16,
-                  fontFamily: '"Playfair Display", "Brush Script MT", cursive, serif',
-                  fontStyle: 'italic',
-                  fontSize: 44,
-                  color: '#8B6F5E',
-                  textAlign: 'center',
-                  lineHeight: 1.1,
-                }}
-              >
-                {outfit.name || 'Ma tenue'}
-              </div>
+              {outfit.name || 'Ma tenue'}
             </div>
-          )}
 
-
-          {/* Pseudo bottom-right */}
-          <div
-            style={{
-              position: 'absolute',
-              right: 36,
-              bottom: 80,
-              fontFamily: 'Inter, sans-serif',
-              fontSize: 26,
-              color: '#2C2C2C',
-              opacity: 0.85,
-            }}
-          >
-            @{userName || 'moi'}
+            {/* @pseudo */}
+            <div
+              style={{
+                position: 'absolute',
+                right: 36,
+                bottom: 80,
+                fontFamily: 'Inter, sans-serif',
+                fontSize: 26,
+                color: '#2C2C2C',
+                opacity: 0.85,
+              }}
+            >
+              @{userName || 'moi'}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 }
