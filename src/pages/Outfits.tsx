@@ -706,14 +706,22 @@ export default function Outfits() {
               {outfits.map(outfit => {
                 const items = getItemsByIds(outfit.itemIds);
                 return (
-                  <OutfitGalleryCard
-                    key={outfit.id}
-                    outfit={outfit}
-                    items={items}
-                    pseudo={pseudo}
-                    onClick={() => { setSelectedOutfit(outfit); setView('detail'); }}
-                    onToggleLike={(next) => handleToggleLike(outfit, next)}
-                  />
+                  <div key={outfit.id} className="relative">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setShareOutfit(outfit); }}
+                      className="absolute z-30 top-2 left-2 bg-white/70 backdrop-blur-sm rounded-full px-2 py-1 text-xs text-[#C4A882] active:scale-95 transition-transform"
+                      aria-label="Partager la tenue"
+                    >
+                      @Partager
+                    </button>
+                    <OutfitGalleryCard
+                      outfit={outfit}
+                      items={items}
+                      pseudo={pseudo}
+                      onClick={() => { setSelectedOutfit(outfit); setView('detail'); }}
+                      onToggleLike={(next) => handleToggleLike(outfit, next)}
+                    />
+                  </div>
                 );
               })}
             </div>
