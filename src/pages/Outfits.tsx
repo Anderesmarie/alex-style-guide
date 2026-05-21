@@ -734,6 +734,15 @@ export default function Outfits() {
           )}
         </>
       )}
+
+      {shareOutfit && (
+        <ShareOutfitCard
+          outfit={shareOutfit}
+          items={getItemsByIds(shareOutfit.itemIds)}
+          userName={pseudo || 'moi'}
+          onClose={() => setShareOutfit(null)}
+        />
+      )}
     </div>
   );
 }
