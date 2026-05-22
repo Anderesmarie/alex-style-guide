@@ -94,6 +94,7 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
     newItems: ClothingItem[],
     layoutData: OutfitLayoutData,
     name?: string,
+    snapshotUrl?: string | null,
   ) => {
     try {
       const id = genId();
@@ -105,6 +106,7 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
         itemIds: ids,
         createdAt: new Date().toISOString(),
         layoutData,
+        snapshotUrl: snapshotUrl ?? null,
       });
       updateStreak();
       setEditingItems(null);

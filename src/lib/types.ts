@@ -56,6 +56,7 @@ export interface Outfit {
   createdAt: string;
   liked?: boolean;
   layoutData?: OutfitLayoutData | null;
+  snapshotUrl?: string | null;
 }
 
 export interface UserProfile {

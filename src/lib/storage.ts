@@ -240,6 +240,7 @@ export async function getOutfits(): Promise<Outfit[]> {
     createdAt: row.created_at,
     liked: (row as any).liked ?? false,
     layoutData: ((row as any).layout_data ?? null) as Outfit['layoutData'],
+    snapshotUrl: ((row as any).snapshot_url ?? null) as string | null,
   }));
 }
 
@@ -251,7 +252,8 @@ export async function addOutfit(outfit: Outfit): Promise<void> {
     name: outfit.name,
     item_ids: outfit.itemIds,
     layout_data: (outfit.layoutData ?? null) as any,
-  });
+    snapshot_url: outfit.snapshotUrl ?? null,
+  } as any);
 }
 
 export async function setOutfitLiked(id: string, liked: boolean): Promise<void> {
