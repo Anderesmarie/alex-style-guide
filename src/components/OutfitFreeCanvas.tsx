@@ -37,6 +37,7 @@ interface Props {
   onChange: (pieces: CanvasPiece[]) => void;
   selectedId: string | null;
   onSelectId: (id: string | null) => void;
+  showSafeZone?: boolean;
 }
 
 interface DragState {
@@ -47,7 +48,7 @@ interface DragState {
   startY: number; // px on canvas
 }
 
-export default function OutfitFreeCanvas({ pieces, onChange, selectedId, onSelectId }: Props) {
+export default function OutfitFreeCanvas({ pieces, onChange, selectedId, onSelectId, showSafeZone = false }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<DragState | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);

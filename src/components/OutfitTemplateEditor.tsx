@@ -66,9 +66,10 @@ interface Props {
   onCancel: () => void;
   onSave: (newItems: ClothingItem[], layoutData: OutfitLayoutData, name?: string) => void;
   initialName?: string;
+  showSafeZone?: boolean;
 }
 
-export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, onCancel, onSave, initialName = '' }: Props) {
+export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, onCancel, onSave, initialName = '', showSafeZone = true }: Props) {
   const tplKey = selectTemplateForItems(items);
   const template = LAYOUT_TEMPLATES[tplKey];
 
