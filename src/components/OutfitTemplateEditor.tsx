@@ -66,9 +66,10 @@ interface Props {
   onCancel: () => void;
   onSave: (newItems: ClothingItem[], layoutData: OutfitLayoutData, name?: string) => void;
   initialName?: string;
+  showSafeZone?: boolean;
 }
 
-export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, onCancel, onSave, initialName = '' }: Props) {
+export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, onCancel, onSave, initialName = '', showSafeZone = true }: Props) {
   const tplKey = selectTemplateForItems(items);
   const template = LAYOUT_TEMPLATES[tplKey];
 
@@ -345,6 +346,12 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
               </div>
             );
           })}
+          {showSafeZone && (
+            <div
+              className="absolute inset-3 border-2 border-dashed rounded-xl pointer-events-none"
+              style={{ borderColor: 'rgba(201,149,108,0.35)', zIndex: 9999 }}
+            />
+          )}
         </div>
 
         {/* Resize / delete controls */}

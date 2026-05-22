@@ -37,6 +37,7 @@ interface Props {
   onChange: (pieces: CanvasPiece[]) => void;
   selectedId: string | null;
   onSelectId: (id: string | null) => void;
+  showSafeZone?: boolean;
 }
 
 interface DragState {
@@ -47,7 +48,7 @@ interface DragState {
   startY: number; // px on canvas
 }
 
-export default function OutfitFreeCanvas({ pieces, onChange, selectedId, onSelectId }: Props) {
+export default function OutfitFreeCanvas({ pieces, onChange, selectedId, onSelectId, showSafeZone = false }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<DragState | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
@@ -173,6 +174,12 @@ export default function OutfitFreeCanvas({ pieces, onChange, selectedId, onSelec
         <div className="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm">
           Tape une catégorie pour ajouter une pièce ✨
         </div>
+      )}
+      {showSafeZone && (
+        <div
+          className="absolute inset-3 border-2 border-dashed rounded-xl pointer-events-none"
+          style={{ borderColor: 'rgba(201,149,108,0.35)', zIndex: 9999 }}
+        />
       )}
       {pieces.map(p => {
         const isDragging = dragId === p.itemId;

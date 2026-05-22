@@ -341,6 +341,7 @@ export default function Outfits() {
           })))}
           selectedId={freeSelectedId}
           onSelectId={setFreeSelectedId}
+          showSafeZone={true}
         />
 
         {/* Selection actions */}
