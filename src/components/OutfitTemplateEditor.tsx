@@ -348,8 +348,17 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
           })}
           {showSafeZone && (
             <div
-              className="absolute inset-3 border-2 border-dashed rounded-xl pointer-events-none"
-              style={{ borderColor: 'rgba(201,149,108,0.35)', zIndex: 9999 }}
+              style={{
+                position: 'absolute',
+                top: '20%',
+                left: '5.6%',
+                width: '88.8%',
+                height: '69.6%',
+                border: '2px dashed rgba(196, 168, 130, 0.5)',
+                borderRadius: 8,
+                pointerEvents: 'none',
+                zIndex: 0,
+              }}
             />
           )}
         </div>
