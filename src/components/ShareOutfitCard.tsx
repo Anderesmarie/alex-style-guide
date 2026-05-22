@@ -17,19 +17,6 @@ export default function ShareOutfitCard({ outfit, items, userName, onClose }: Pr
   const captureRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<'preparing' | 'sharing' | 'done' | 'error'>('preparing');
 
-  // Order pieces: layoutData order (sorted by z) if available, else natural items order
-  const orderedItems = (() => {
-    if (outfit.layoutData?.pieces?.length) {
-      const byId = new Map(items.map(it => [it.id, it]));
-      return outfit.layoutData.pieces
-        .slice()
-        .sort((a, b) => a.z - b.z)
-        .map(p => byId.get(p.itemId))
-        .filter((x): x is ClothingItem => !!x);
-    }
-    return items;
-  })();
-
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
@@ -163,52 +150,21 @@ export default function ShareOutfitCard({ outfit, items, userName, onClose }: Pr
             }}
           />
 
-          {/* Outfit pieces — vertical stack centered */}
-          <div
-            style={{
-              position: 'absolute',
-              left: '50%',
-              top: 140,
-              transform: 'translateX(-50%)',
-              width: 560,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 12,
-            }}
-          >
-            {orderedItems.map((it, i) => (
-              <img
-                key={it.id + i}
-                src={it.imageUrl || it.imageBase64}
-                crossOrigin="anonymous"
-                alt={it.type}
-                style={{
-                  maxWidth: 360,
-                  maxHeight: 280,
-                  width: 'auto',
-                  height: 'auto',
-                  objectFit: 'contain',
-                  filter: 'drop-shadow(0 6px 14px rgba(0,0,0,0.18))',
-                }}
-              />
-            ))}
-
-            {/* Outfit name */}
-            <div
+          {outfit.snapshotUrl && (
+            <img
+              src={outfit.snapshotUrl}
+              crossOrigin="anonymous"
+              alt="Outfit Snapshot"
               style={{
-                marginTop: 16,
-                fontFamily: '"Playfair Display", "Brush Script MT", cursive, serif',
-                fontStyle: 'italic',
-                fontSize: 44,
-                color: '#8B6F5E',
-                textAlign: 'center',
-                lineHeight: 1.1,
+                position: 'absolute',
+                top: '20%',
+                left: '5.6%',
+                width: '88.8%',
+                height: '69.6%',
+                objectFit: 'contain',
               }}
-            >
-              {outfit.name || 'Ma tenue'}
-            </div>
-          </div>
+            />
+          )}
 
           {/* Pseudo bottom-right */}
           <div
