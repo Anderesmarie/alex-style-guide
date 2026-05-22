@@ -139,7 +139,7 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
       const finalY = d.baseY + (offsetRef.current.dy / CANVAS_H) * 100;
       setPieces(prev => prev.map(p =>
         p.itemId === d.id
-          ? { ...p, x: Math.max(-5, Math.min(100, finalX)), y: Math.max(-5, Math.min(100, finalY)) }
+          ? { ...p, x: Math.max(5.6, Math.min(94.4, finalX)), y: Math.max(20, Math.min(89.6, finalY)) }
           : p
       ));
     }
