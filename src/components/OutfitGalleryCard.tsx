@@ -50,7 +50,7 @@ export default function OutfitGalleryCard({
               left: 8,
               fontSize: 12,
               lineHeight: 1,
-              background: 'rgba(255,255,255,2)',
+              background: 'rgba(255,255,255,0.7)',
               backdropFilter: 'blur(4px)',
               borderRadius: 999,
               minWidth: 44,
@@ -98,7 +98,7 @@ export default function OutfitGalleryCard({
 
         {/* Bottom band */}
         <div
-          className="absolute left-1 right-1 bottom-1 flex items-center justify-between px-4"
+          className="absolute left-0 right-0 bottom-0 flex items-center justify-between px-4"
           style={{
             background: 'rgba(255,255,255,0.85)',
             height: 36,
