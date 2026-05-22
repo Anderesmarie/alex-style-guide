@@ -266,7 +266,11 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
   }, [sheet]);
 
   // ---------- Save ----------
-  const handleSave = () => {
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
     const layoutPieces: OutfitLayoutPiece[] = pieces.map(p => ({
       itemId: p.itemId,
       x: p.x,
@@ -281,7 +285,58 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
       canvasH: CANVAS_H,
       pieces: layoutPieces,
     };
-    onSave(pieces.map(p => p.item), layoutData, name.trim());
+
+    // Capture safe-zone snapshot and upload to Supabase Storage
+    let snapshotUrl: string | null = null;
+    try {
+      if (canvasRef.current) {
+        const rect = canvasRef.current.getBoundingClientRect();
+        const renderedW = rect.width;
+        const renderedH = rect.height;
+        const safeX = renderedW * 0.056;
+        const safeY = renderedH * 0.20;
+        const safeW = renderedW * 0.888;
+        const safeH = renderedH * 0.696;
+
+        const canvas = await html2canvas(canvasRef.current, {
+          useCORS: true,
+          allowTaint: false,
+          scale: 1,
+          backgroundColor: '#ffffff',
+          x: safeX,
+          y: safeY,
+          width: safeW,
+          height: safeH,
+        });
+
+        const snapshotBlob: Blob | null = await new Promise(resolve =>
+          canvas.toBlob(resolve, 'image/jpeg', 0.8)
+        );
+
+        if (snapshotBlob) {
+          const { data: userData } = await supabase.auth.getUser();
+          const userId = userData.user?.id;
+          if (userId) {
+            const fileId = (crypto as any).randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+            const path = `${userId}/${fileId}.jpg`;
+            const { error: upErr } = await supabase.storage
+              .from('snapshots')
+              .upload(path, snapshotBlob, { contentType: 'image/jpeg', upsert: true });
+            if (!upErr) {
+              const { data } = supabase.storage.from('snapshots').getPublicUrl(path);
+              snapshotUrl = data.publicUrl;
+            } else {
+              console.warn('snapshot upload failed:', upErr);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('snapshot capture failed:', e);
+    }
+
+    onSave(pieces.map(p => p.item), layoutData, name.trim(), snapshotUrl);
+    setIsSaving(false);
   };
 
   return (
