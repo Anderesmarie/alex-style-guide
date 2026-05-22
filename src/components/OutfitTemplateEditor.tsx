@@ -349,6 +349,7 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
 
         {/* Canvas */}
         <div
+          ref={canvasRef}
           onClick={() => setSelectedId(null)}
           className="relative mx-auto bg-white rounded-2xl overflow-hidden"
           style={{
