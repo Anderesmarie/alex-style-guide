@@ -346,6 +346,12 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
               </div>
             );
           })}
+          {showSafeZone && (
+            <div
+              className="absolute inset-3 border-2 border-dashed rounded-xl pointer-events-none"
+              style={{ borderColor: 'rgba(201,149,108,0.35)', zIndex: 9999 }}
+            />
+          )}
         </div>
 
         {/* Resize / delete controls */}

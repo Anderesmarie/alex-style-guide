@@ -225,6 +225,7 @@ export default function OutfitDailyFeed({
           wardrobe={wardrobe}
           onCancel={() => setEditingIdx(null)}
           onSave={handleEditorSave}
+          showSafeZone={true}
         />
       )}
     </div>

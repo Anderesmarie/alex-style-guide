@@ -175,6 +175,12 @@ export default function OutfitFreeCanvas({ pieces, onChange, selectedId, onSelec
           Tape une catégorie pour ajouter une pièce ✨
         </div>
       )}
+      {showSafeZone && (
+        <div
+          className="absolute inset-3 border-2 border-dashed rounded-xl pointer-events-none"
+          style={{ borderColor: 'rgba(201,149,108,0.35)', zIndex: 9999 }}
+        />
+      )}
       {pieces.map(p => {
         const isDragging = dragId === p.itemId;
         const baseX = (p.x / 100) * CANVAS_W;

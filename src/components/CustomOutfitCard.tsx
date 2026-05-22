@@ -184,6 +184,7 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
           wardrobe={wardrobe}
           onCancel={() => setEditingItems(null)}
           onSave={handleEditorSave}
+          showSafeZone={true}
         />
       )}
       </>
