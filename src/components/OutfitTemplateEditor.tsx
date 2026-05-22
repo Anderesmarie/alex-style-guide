@@ -112,6 +112,7 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
   const [showScrollHint, setShowScrollHint] = useState(true);
   const [name, setName] = useState<string>(initialName);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
   const needsName = !initialName;
   const nameValid = !needsName || name.trim().length > 0;
 
