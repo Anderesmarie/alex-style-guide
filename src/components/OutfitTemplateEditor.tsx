@@ -66,7 +66,7 @@ interface Props {
   initialLayout?: OutfitLayoutData | null;
   wardrobe: ClothingItem[];
   onCancel: () => void;
-  onSave: (newItems: ClothingItem[], layoutData: OutfitLayoutData, name?: string) => void;
+  onSave: (newItems: ClothingItem[], layoutData: OutfitLayoutData, name?: string, snapshotUrl?: string | null) => void;
   initialName?: string;
   showSafeZone?: boolean;
 }
