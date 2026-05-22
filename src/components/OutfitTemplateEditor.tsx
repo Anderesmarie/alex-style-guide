@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import html2canvas from 'html2canvas';
+import { supabase } from '@/lib/supabase';
 import { ClothingItem, OutfitLayoutData, OutfitLayoutPiece } from '@/lib/types';
 import {
   LAYOUT_GRID,
