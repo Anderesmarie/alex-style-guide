@@ -22,7 +22,7 @@ export default function OutfitGalleryCard({
   badgeLabel,
   hideLike,
   hideName,
-  onShare?: () => void;
+  onShare,
 }: Props) {
   const liked = !!outfit.liked;
   const displayName =
