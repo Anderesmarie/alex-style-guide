@@ -150,7 +150,12 @@ export default function ShareOutfitCard({ outfit, items, userName, onClose }: Pr
             }}
           />
 
-          {outfit.snapshotUrl && (
+          {(() => {
+            console.log('snapshot_url:', (outfit as any).snapshot_url, '| snapshotUrl:', outfit.snapshotUrl);
+            return null;
+          })()}
+
+          {outfit.snapshotUrl ? (
             <img
               src={outfit.snapshotUrl}
               crossOrigin="anonymous"
@@ -164,6 +169,28 @@ export default function ShareOutfitCard({ outfit, items, userName, onClose }: Pr
                 objectFit: 'contain',
               }}
             />
+          ) : (
+            <div
+              style={{
+                position: 'absolute',
+                top: '20%',
+                left: '5.6%',
+                width: '88.8%',
+                height: '69.6%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '0 10%',
+                textAlign: 'center',
+                fontFamily: 'Inter, sans-serif',
+                fontSize: 26,
+                color: '#2C2C2C',
+                opacity: 0.75,
+                lineHeight: 1.4,
+              }}
+            >
+              Modifie et re-sauvegarde ta tenue pour activer le partage
+            </div>
           )}
 
           {/* Pseudo bottom-right */}
