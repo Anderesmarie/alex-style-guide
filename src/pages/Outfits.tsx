@@ -349,7 +349,7 @@ export default function Outfits() {
 
     const handleSaveFree = async () => {
       if (!canSave) return;
-      await addOutfit({
+      const newOutfit: Outfit = {
         id: genId(),
         name: outfitName.trim(),
         itemIds: freePieces.map(p => p.itemId),
@@ -361,7 +361,9 @@ export default function Outfits() {
             itemId: p.itemId, x: p.x, y: p.y, size: p.size, z: p.z,
           })),
         },
-      });
+      };
+      const itemsForSnap = freePieces.map(p => p.item);
+      await addOutfit(newOutfit);
       updateStreak();
       const o = await getOutfits();
       setOutfits(o);
@@ -369,6 +371,7 @@ export default function Outfits() {
       setFreeSelectedId(null);
       setOutfitName('');
       setView('gallery');
+      generateSnapshotForOutfit(newOutfit, itemsForSnap);
     };
 
     return (
