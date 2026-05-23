@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import html2canvas from 'html2canvas';
 import { ClothingItem, Outfit } from '@/lib/types';
 import { getWardrobe, getOutfits, addOutfit, deleteOutfit, setOutfitLiked, genId } from '@/lib/storage';
 import { generateRecommendations } from '@/lib/recommendations';
@@ -43,6 +44,41 @@ export default function Outfits() {
   const [outfitName, setOutfitName] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<Outfit | null>(null);
   const [pseudo, setPseudo] = useState<string | null>(null);
+  const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  async function handleShare(outfitId: string) {
+    const cardEl = cardRefs.current.get(outfitId);
+    if (!cardEl) return;
+
+    const canvas = await html2canvas(cardEl, {
+      useCORS: true,
+      allowTaint: false,
+      scale: 2,
+      backgroundColor: null,
+    });
+
+    const blob = await new Promise<Blob>(res =>
+      canvas.toBlob(b => res(b!), 'image/jpeg', 0.85),
+    );
+
+    const file = new File([blob], 'mystyl-tenue.jpg', { type: 'image/jpeg' });
+
+    const nav = navigator as Navigator & {
+      canShare?: (d: ShareData) => boolean;
+    };
+
+    if (nav.share && nav.canShare?.({ files: [file] })) {
+      await nav.share({ files: [file] });
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'mystyl-tenue.jpg';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  }
+  
   
 
   // Visual layout state
@@ -706,14 +742,26 @@ export default function Outfits() {
               {outfits.map(outfit => {
                 const items = getItemsByIds(outfit.itemIds);
                 return (
-                  <OutfitGalleryCard
-                    key={outfit.id}
-                    outfit={outfit}
-                    items={items}
-                    pseudo={pseudo}
-                    onClick={() => { setSelectedOutfit(outfit); setView('detail'); }}
-                    onToggleLike={(next) => handleToggleLike(outfit, next)}
-                  />
+                  <div key={outfit.id} className="relative">
+                    <OutfitGalleryCard
+                      ref={(el) => {
+                        if (el) cardRefs.current.set(outfit.id, el);
+                        else cardRefs.current.delete(outfit.id);
+                      }}
+                      outfit={outfit}
+                      items={items}
+                      pseudo={pseudo}
+                      onClick={() => { setSelectedOutfit(outfit); setView('detail'); }}
+                      onToggleLike={(next) => handleToggleLike(outfit, next)}
+                    />
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleShare(outfit.id); }}
+                      className="absolute z-20 bg-white/70 backdrop-blur-sm rounded-full px-2 py-1 text-xs text-[#C4A882]"
+                      style={{ top: 8, left: 8 }}
+                    >
+                      @Partager
+                    </button>
+                  </div>
                 );
               })}
             </div>
