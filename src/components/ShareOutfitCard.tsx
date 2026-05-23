@@ -150,7 +150,7 @@ export default function ShareOutfitCard({ outfit, items, userName, onClose }: Pr
             }}
           />
 
-          {outfit.snapshotUrl ? (
+          {outfit.snapshotUrl && (
             <img
               src={outfit.snapshotUrl}
               crossOrigin="anonymous"
@@ -164,68 +164,6 @@ export default function ShareOutfitCard({ outfit, items, userName, onClose }: Pr
                 objectFit: 'contain',
               }}
             />
-          ) : (
-            /* Fallback : pas de snapshot → on recompose les pièces dans la zone safe */
-            <div
-              style={{
-                position: 'absolute',
-                top: '20%',
-                left: '5.6%',
-                width: '88.8%',
-                height: '69.6%',
-              }}
-            >
-              {(() => {
-                const byId = new Map(items.map(it => [it.id, it]));
-                const layoutPieces = outfit.layoutData?.pieces ?? [];
-                if (layoutPieces.length > 0) {
-                  const ordered = [...layoutPieces].sort((a, b) => (a.z ?? 0) - (b.z ?? 0));
-                  return ordered.map(p => {
-                    const it = byId.get(p.itemId);
-                    if (!it) return null;
-                    // Coords layout en % du canvas 360x500. Safe zone: x∈[5.6,94.4], y∈[20,89.6]
-                    const left = ((p.x - 5.6) / 88.8) * 100;
-                    const top = ((p.y - 20) / 69.6) * 100;
-                    const width = ((p.w ?? 30) / 88.8) * 100;
-                    const height = ((p.h ?? 22) / 69.6) * 100;
-                    return (
-                      <img
-                        key={p.itemId}
-                        src={it.imageBase64}
-                        crossOrigin="anonymous"
-                        alt={it.type}
-                        style={{
-                          position: 'absolute',
-                          left: `${left}%`,
-                          top: `${top}%`,
-                          width: `${width}%`,
-                          height: `${height}%`,
-                          objectFit: 'contain',
-                          zIndex: p.z ?? 1,
-                        }}
-                      />
-                    );
-                  });
-                }
-                // Pas de layout → grille simple
-                return items.map((it, i) => (
-                  <img
-                    key={it.id}
-                    src={it.imageBase64}
-                    crossOrigin="anonymous"
-                    alt={it.type}
-                    style={{
-                      position: 'absolute',
-                      left: `${(i % 2) * 50}%`,
-                      top: `${Math.floor(i / 2) * 50}%`,
-                      width: '50%',
-                      height: '50%',
-                      objectFit: 'contain',
-                    }}
-                  />
-                ));
-              })()}
-            </div>
           )}
 
           {/* Pseudo bottom-right */}
