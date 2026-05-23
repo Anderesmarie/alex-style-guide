@@ -290,24 +290,13 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
     let snapshotUrl: string | null = null;
     try {
       if (canvasRef.current) {
-        const rect = canvasRef.current.getBoundingClientRect();
-        const renderedW = rect.width;
-        const renderedH = rect.height;
-        const safeX = renderedW * 0.056;
-        const safeY = renderedH * 0.20;
-        const safeW = renderedW * 0.888;
-        const safeH = renderedH * 0.696;
-
         const canvas = await html2canvas(canvasRef.current, {
           useCORS: true,
           allowTaint: false,
           scale: 1,
-          backgroundColor: '#ffffff',
-          x: safeX,
-          y: safeY,
-          width: safeW,
-          height: safeH,
+          backgroundColor: null,
         });
+
 
         const snapshotBlob: Blob | null = await new Promise(resolve =>
           canvas.toBlob(resolve, 'image/jpeg', 0.8)
