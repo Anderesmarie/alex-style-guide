@@ -64,7 +64,7 @@ export async function generateAndUploadShareSnapshot(
     const blob = await toBlob(target, {
       quality: 0.85,
       pixelRatio: window.devicePixelRatio || 2,
-      skipFonts: false,
+      skipFonts: true,
     });
     if (!blob) return null;
 
