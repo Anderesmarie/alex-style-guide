@@ -116,13 +116,14 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
       const id = genId();
       const ids = newItems.map(i => i.id);
       await saveLastOutfit(ids);
-      await addOutfit({
+      const newOutfit = {
         id,
         name: (name?.trim() || 'Tenue perso du ' + new Date().toLocaleDateString('fr-FR')),
         itemIds: ids,
         createdAt: new Date().toISOString(),
         layoutData,
-      });
+      };
+      await addOutfit(newOutfit);
       updateStreak();
       setEditingItems(null);
       toast.success('Tenue enregistrée ✨', {
@@ -130,6 +131,19 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
         duration: 2000,
       });
       navigate('/outfits');
+      // Background snapshot generation
+      (async () => {
+        try {
+          const { data: u } = await supabase.auth.getUser();
+          let pseudo: string | null = null;
+          if (u.user) {
+            const { data: prof } = await supabase.from('profiles').select('pseudo').eq('id', u.user.id).maybeSingle();
+            pseudo = prof?.pseudo ?? null;
+          }
+          const url = await generateAndUploadShareSnapshot(newOutfit, newItems, pseudo);
+          if (url) await setOutfitShareSnapshot(id, url);
+        } catch (e) { console.error('snapshot bg', e); }
+      })();
     } catch (e) {
       console.error('Erreur sauvegarde tenue:', e);
       toast.error('Erreur lors de la sauvegarde, réessaie.');
