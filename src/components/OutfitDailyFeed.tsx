@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClothingItem, OutfitLayoutData, UserProfile } from '@/lib/types';
-import { addOutfit, genId, saveLastOutfit } from '@/lib/storage';
+import { addOutfit, genId, saveLastOutfit, setOutfitShareSnapshot } from '@/lib/storage';
+import { generateAndUploadShareSnapshot } from '@/lib/shareSnapshot';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { updateStreak } from '@/lib/streak';
