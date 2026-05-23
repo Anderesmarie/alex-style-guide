@@ -1,4 +1,3 @@
-import { forwardRef } from 'react';
 import { ClothingItem, Outfit } from '@/lib/types';
 import OutfitLayout from '@/components/OutfitLayout';
 import { SHARE_BACKGROUND_URL } from '@/lib/constants';
@@ -14,10 +13,9 @@ interface Props {
   hideName?: boolean;
 }
 
-const OutfitGalleryCard = forwardRef<HTMLDivElement, Props>(function OutfitGalleryCard(
-  { outfit, items, pseudo, onClick, onToggleLike, badgeLabel, hideLike, hideName },
-  ref,
-) {
+export default function OutfitGalleryCard({
+  outfit, items, pseudo, onClick, onToggleLike, badgeLabel, hideLike, hideName,
+}: Props) {
   const liked = !!outfit.liked;
   const displayName =
     outfit.name?.trim() ||
@@ -26,7 +24,6 @@ const OutfitGalleryCard = forwardRef<HTMLDivElement, Props>(function OutfitGalle
   return (
     <div className="mb-4">
       <div
-        ref={ref}
         onClick={onClick}
         className="relative w-full cursor-pointer active:scale-[0.99] transition-transform mx-auto"
         style={{
@@ -36,6 +33,7 @@ const OutfitGalleryCard = forwardRef<HTMLDivElement, Props>(function OutfitGalle
           overflow: 'hidden',
         }}
       >
+
         <img
           src={SHARE_BACKGROUND_URL}
           alt=""
