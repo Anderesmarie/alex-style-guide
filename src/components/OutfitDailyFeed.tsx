@@ -135,13 +135,26 @@ export default function OutfitDailyFeed({
     if (editingIdx === null) return;
     try {
       const outfitId = genId();
-      await addOutfit({
+      const newOutfit = {
         id: outfitId,
         name: `Tenue du ${new Date().toLocaleDateString('fr-FR')}`,
         itemIds: newItems.map(i => i.id),
         createdAt: new Date().toISOString(),
         layoutData,
-      });
+      };
+      await addOutfit(newOutfit);
+      (async () => {
+        try {
+          const { data: u } = await supabase.auth.getUser();
+          let pseudo: string | null = null;
+          if (u.user) {
+            const { data: prof } = await supabase.from('profiles').select('pseudo').eq('id', u.user.id).maybeSingle();
+            pseudo = prof?.pseudo ?? null;
+          }
+          const url = await generateAndUploadShareSnapshot(newOutfit, newItems, pseudo);
+          if (url) await setOutfitShareSnapshot(outfitId, url);
+        } catch (e) { console.error('snapshot bg', e); }
+      })();
       const next = [...results];
       next[editingIdx] = {
         ...next[editingIdx],
