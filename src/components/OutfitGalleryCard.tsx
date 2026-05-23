@@ -124,6 +124,5 @@ export default function OutfitGalleryCard({
       )}
     </div>
   );
-});
+}
 
-export default OutfitGalleryCard;
