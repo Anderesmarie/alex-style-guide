@@ -46,6 +46,15 @@ export async function generateAndUploadShareSnapshot(
 
   const root = createRoot(inner);
   try {
+    // Précharger le fond avant tout
+    await new Promise<void>((resolve) => {
+      const preload = new window.Image();
+      preload.crossOrigin = 'anonymous';
+      preload.onload = () => resolve();
+      preload.onerror = () => resolve();
+      preload.src = SHARE_BACKGROUND_URL;
+    });
+
     root.render(
       createElement(OutfitGalleryCard, {
         outfit,
@@ -56,8 +65,8 @@ export async function generateAndUploadShareSnapshot(
       }),
     );
 
-    // Wait for React commit, then for images
-    await new Promise(r => setTimeout(r, 100));
+    // Puis attendre plus longtemps pour le rendu
+    await new Promise(r => setTimeout(r, 500));
     const cardEl = inner.querySelector('div > div') as HTMLElement | null;
     const target = cardEl || inner;
     await waitForImages(target);
