@@ -749,10 +749,6 @@ export default function Outfits() {
                 return (
                   <div key={outfit.id} className="relative">
                     <OutfitGalleryCard
-                      ref={(el) => {
-                        if (el) cardRefs.current.set(outfit.id, el);
-                        else cardRefs.current.delete(outfit.id);
-                      }}
                       outfit={outfit}
                       items={items}
                       pseudo={pseudo}
@@ -760,7 +756,7 @@ export default function Outfits() {
                       onToggleLike={(next) => handleToggleLike(outfit, next)}
                     />
                     <button
-                      onClick={(e) => { e.stopPropagation(); handleShare(outfit.id); }}
+                      onClick={(e) => { e.stopPropagation(); handleShare(outfit); }}
                       className="absolute z-20 bg-white/70 backdrop-blur-sm rounded-full px-2 py-1 text-xs text-[#C4A882]"
                       style={{ top: 8, left: 8 }}
                     >
