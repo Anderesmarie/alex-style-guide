@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
-import { toBlob } from 'html-to-image';
+import { useState, useEffect } from 'react';
 import { ClothingItem, Outfit } from '@/lib/types';
-import { getWardrobe, getOutfits, addOutfit, deleteOutfit, setOutfitLiked, genId } from '@/lib/storage';
+import { getWardrobe, getOutfits, addOutfit, deleteOutfit, setOutfitLiked, setOutfitShareSnapshot, genId } from '@/lib/storage';
 import { generateRecommendations } from '@/lib/recommendations';
 import { updateStreak } from '@/lib/streak';
 import { getCategoryForType, getSubcategoryForType } from '@/lib/dressingTaxonomy';
 import { supabase } from '@/integrations/supabase/client';
+import { generateAndUploadShareSnapshot } from '@/lib/shareSnapshot';
 import CalendarView from '@/components/CalendarView';
 import OutfitVisualLayout, { SlotKey, SlotMap, SLOT_CONFIG } from '@/components/OutfitVisualLayout';
 import OutfitLayout from '@/components/OutfitLayout';
@@ -44,41 +44,15 @@ export default function Outfits() {
   const [outfitName, setOutfitName] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<Outfit | null>(null);
   const [pseudo, setPseudo] = useState<string | null>(null);
-  const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  async function handleShare(outfitId: string) {
-    const cardEl = cardRefs.current.get(outfitId);
-    if (!cardEl) return;
+  async function handleShare(outfit: Outfit) {
+    if (!outfit.shareSnapshotUrl) {
+      alert('Modifie et re-sauvegarde ta tenue pour activer le partage');
+      return;
+    }
 
-    // Attendre que toutes les images soient chargées
-    const images = Array.from(cardEl.querySelectorAll('img'));
-    await Promise.all(
-      images.map(img => {
-        if (img.complete && img.naturalWidth > 0) {
-          return Promise.resolve();
-        }
-        return new Promise<void>((resolve) => {
-          img.onload = () => resolve();
-          img.onerror = () => resolve();
-          // Timeout de sécurité 5 secondes
-          setTimeout(resolve, 5000);
-        });
-      }),
-    );
-
-    // Attendre un frame supplémentaire
-    await new Promise(r => requestAnimationFrame(r));
-    await new Promise(r => setTimeout(r, 200));
-
-    // Capturer
-    const blob = await toBlob(cardEl, {
-      quality: 0.85,
-      pixelRatio: window.devicePixelRatio,
-      skipFonts: false,
-    });
-
-    if (!blob) return;
-
+    const res = await fetch(outfit.shareSnapshotUrl);
+    const blob = await res.blob();
     const file = new File([blob], 'mystyl-tenue.jpg', { type: 'image/jpeg' });
 
     const nav = navigator as Navigator & {
@@ -96,6 +70,19 @@ export default function Outfits() {
       URL.revokeObjectURL(url);
     }
   }
+
+  // Generate snapshot in background and persist URL on outfit row + local state
+  const generateSnapshotForOutfit = async (outfit: Outfit, items: ClothingItem[]) => {
+    try {
+      const url = await generateAndUploadShareSnapshot(outfit, items, pseudo);
+      if (!url) return;
+      await setOutfitShareSnapshot(outfit.id, url);
+      setOutfits(prev => prev.map(o => o.id === outfit.id ? { ...o, shareSnapshotUrl: url } : o));
+    } catch (e) {
+      console.error('generateSnapshotForOutfit failed', e);
+    }
+  };
+
   
   
 
