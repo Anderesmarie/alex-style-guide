@@ -130,36 +130,40 @@ export default function Outfits() {
 
   const handleSaveQuick = async () => {
     if (selectedIds.size < 2 || !outfitName.trim()) return;
-    await addOutfit({
+    const newOutfit: Outfit = {
       id: genId(),
       name: outfitName.trim(),
       itemIds: Array.from(selectedIds),
       createdAt: new Date().toISOString(),
-    });
+    };
+    await addOutfit(newOutfit);
     updateStreak();
     const o = await getOutfits();
     setOutfits(o);
     setSelectedIds(new Set());
     setOutfitName('');
     setView('gallery');
+    generateSnapshotForOutfit(newOutfit, getItemsByIds(newOutfit.itemIds));
   };
 
   const filledSlots = (Object.values(slots).filter(Boolean) as ClothingItem[]);
 
   const handleSaveVisual = async () => {
     if (filledSlots.length < 2 || !outfitName.trim()) return;
-    await addOutfit({
+    const newOutfit: Outfit = {
       id: genId(),
       name: outfitName.trim(),
       itemIds: filledSlots.map(i => i.id),
       createdAt: new Date().toISOString(),
-    });
+    };
+    await addOutfit(newOutfit);
     updateStreak();
     const o = await getOutfits();
     setOutfits(o);
     setSlots({});
     setOutfitName('');
     setView('gallery');
+    generateSnapshotForOutfit(newOutfit, filledSlots);
   };
 
   const confirmDeleteOutfit = async () => {
