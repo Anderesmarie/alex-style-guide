@@ -16,6 +16,12 @@ const FOND_H = 1478;
 const CARD_W = FOND_W;
 const CARD_H = FOND_H;
 
+// Zone d'affichage au ratio 360/500
+const DISPLAY_H = 1090;
+const DISPLAY_W = DISPLAY_H * (360 / 500); // 785
+const DISPLAY_LEFT = (FOND_W - DISPLAY_W) / 2; // 139
+const DISPLAY_TOP = 280;
+
 export default function ShareOutfitCard({ outfit, items, userName, onClose }: Props) {
   const captureRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<'preparing' | 'sharing' | 'done' | 'error'>('preparing');
