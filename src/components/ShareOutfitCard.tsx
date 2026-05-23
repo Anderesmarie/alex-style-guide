@@ -171,21 +171,21 @@ export default function ShareOutfitCard({ outfit, items, userName, onClose }: Pr
               alt="Outfit Snapshot"
               style={{
                 position: 'absolute',
-                left: '5.2%',
-                top: '18.9%',
-                width: '91.1%',
-                height: '73.7%',
-                objectFit: 'contain',
+                left: DISPLAY_LEFT + 'px',
+                top: DISPLAY_TOP + 'px',
+                width: DISPLAY_W + 'px',
+                height: DISPLAY_H + 'px',
+                objectFit: 'fill',
               }}
             />
           ) : (
             <div
               style={{
                 position: 'absolute',
-                left: '5.2%',
-                top: '18.9%',
-                width: '91.1%',
-                height: '73.7%',
+                left: DISPLAY_LEFT + 'px',
+                top: DISPLAY_TOP + 'px',
+                width: DISPLAY_W + 'px',
+                height: DISPLAY_H + 'px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
