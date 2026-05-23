@@ -10,6 +10,7 @@ interface Props {
   badgeLabel?: string;
   hideLike?: boolean;
   hideName?: boolean;
+  onShare?: () => void;
 }
 
 export default function OutfitGalleryCard({
