@@ -67,18 +67,33 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
     try {
       const ids = generatedOutfit.map(i => i.id);
       await saveLastOutfit(ids);
-      await addOutfit({
-        id: genId(),
+      const id = genId();
+      const newOutfit = {
+        id,
         name: 'Tenue perso du ' + new Date().toLocaleDateString('fr-FR'),
         itemIds: ids,
         createdAt: new Date().toISOString(),
-      });
+      };
+      await addOutfit(newOutfit);
       setSaved(true);
       updateStreak();
       toast.success('Tenue sauvegardée ! ✨', {
         style: { backgroundColor: '#C9956C', color: '#FFFFFF', border: 'none' },
         duration: 2000,
       });
+      // Generate share snapshot in background
+      (async () => {
+        try {
+          const { data: u } = await supabase.auth.getUser();
+          let pseudo: string | null = null;
+          if (u.user) {
+            const { data: prof } = await supabase.from('profiles').select('pseudo').eq('id', u.user.id).maybeSingle();
+            pseudo = prof?.pseudo ?? null;
+          }
+          const url = await generateAndUploadShareSnapshot(newOutfit, generatedOutfit, pseudo);
+          if (url) await setOutfitShareSnapshot(id, url);
+        } catch (e) { console.error('snapshot bg', e); }
+      })();
     } catch (e) {
       console.error('Erreur sauvegarde tenue:', e);
       toast.error('Erreur lors de la sauvegarde, réessaie.');
