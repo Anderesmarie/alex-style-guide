@@ -119,7 +119,7 @@ export default function OutfitLayout({ items, layoutData, readOnly = true, class
     const ch = layoutData.canvasH || 500;
     return (
       <div
-        className={`relative mx-auto bg-white rounded-2xl overflow-hidden ${className}`}
+        className={`relative mx-auto rounded-2xl overflow-hidden ${className}`}
         style={{
           width: '100%',
           maxWidth: 360,
@@ -175,7 +175,7 @@ export default function OutfitLayout({ items, layoutData, readOnly = true, class
 
   return (
     <div
-      className={`relative mx-auto bg-white rounded-2xl overflow-hidden ${className}`}
+      className={`relative mx-auto rounded-2xl overflow-hidden ${className}`}
       style={{
         width: '100%',
         maxWidth: 360,

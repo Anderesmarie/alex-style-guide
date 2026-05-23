@@ -33,8 +33,15 @@ export default function OutfitGalleryCard({
     <div className="mb-4">
       <div
         onClick={onClick}
-        className="relative w-full cursor-pointer active:scale-[0.99] transition-transform mx-auto"
-        style={{ maxWidth: 360 }}
+        className="relative w-full cursor-pointer active:scale-[0.99] transition-transform mx-auto overflow-hidden"
+        style={{
+          maxWidth: 360,
+          aspectRatio: '360 / 500',
+          backgroundImage: 'url("https://tseermbuwyrzcrulhxba.supabase.co/storage/v1/object/public/assets/ChatGPT%20Image%2023%20mai%202026%20final.png")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          borderRadius: 16,
+        }}
       >
         {/* Like button */}
         {!hideLike && (
