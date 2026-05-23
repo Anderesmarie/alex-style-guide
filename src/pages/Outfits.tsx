@@ -53,7 +53,7 @@ export default function Outfits() {
     const canvas = await html2canvas(cardEl, {
       useCORS: true,
       allowTaint: false,
-      scale: 2,
+      scale: window.devicePixelRatio,
       backgroundColor: null,
     });
 
