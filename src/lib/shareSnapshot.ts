@@ -4,6 +4,7 @@ import { toBlob } from 'html-to-image';
 import { supabase } from '@/integrations/supabase/client';
 import OutfitGalleryCard from '@/components/OutfitGalleryCard';
 import { ClothingItem, Outfit } from './types';
+import { SHARE_BACKGROUND_URL } from './constants';
 
 async function waitForImages(root: HTMLElement): Promise<void> {
   const imgs = Array.from(root.querySelectorAll('img'));
