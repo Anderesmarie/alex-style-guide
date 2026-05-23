@@ -64,6 +64,29 @@ export default function OutfitGalleryCard({
           </button>
         )}
 
+        {/* Share button */}
+        <button
+          onClick={e => {
+            e.stopPropagation();
+            onShare?.();
+          }}
+          className="absolute z-20"
+          style={{
+            top: 8,
+            left: 8,
+            background: 'rgba(255,255,255,0.75)',
+            backdropFilter: 'blur(4px)',
+            borderRadius: 999,
+            padding: '4px 10px',
+            fontSize: 11,
+            color: '#C4A882',
+            border: 'none',
+            cursor: 'pointer',
+          }}
+        >
+          @Partager
+        </button>
+
         <OutfitLayout
           items={items}
           layoutData={outfit.layoutData ?? null}
