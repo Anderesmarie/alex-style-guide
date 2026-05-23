@@ -176,10 +176,10 @@ export default function ShareOutfitCard({ outfit, items, userName, onClose }: Pr
             <div
               style={{
                 position: 'absolute',
-                top: '20%',
-                left: '5.6%',
-                width: '88.8%',
-                height: '69.6%',
+                left: '5.2%',
+                top: '18.9%',
+                width: '91.1%',
+                height: '73.7%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
