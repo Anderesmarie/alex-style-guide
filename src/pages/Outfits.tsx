@@ -46,38 +46,28 @@ export default function Outfits() {
   const [pseudo, setPseudo] = useState<string | null>(null);
 
   async function handleShare(outfit: Outfit) {
-    console.log('1. snapshot url:', outfit.shareSnapshotUrl);
     if (!outfit.shareSnapshotUrl) {
       alert('Modifie et re-sauvegarde ta tenue pour activer le partage');
       return;
     }
 
-    try {
-      const res = await fetch(outfit.shareSnapshotUrl);
-      console.log('2. fetch result:', res.status, res.ok);
-      const blob = await res.blob();
-      console.log('3. blob size:', blob.size, 'type:', blob.type);
-      const file = new File([blob], 'mystyl-tenue.jpg', { type: 'image/jpeg' });
+    const res = await fetch(outfit.shareSnapshotUrl);
+    const blob = await res.blob();
+    const file = new File([blob], 'mystyl-tenue.jpg', { type: 'image/jpeg' });
 
-      const nav = navigator as Navigator & {
-        canShare?: (d: ShareData) => boolean;
-      };
-      const canShareFiles = !!nav.canShare?.({ files: [file] });
-      console.log('4. canShare:', canShareFiles, 'hasShare:', !!nav.share);
+    const nav = navigator as Navigator & {
+      canShare?: (d: ShareData) => boolean;
+    };
 
-      if (nav.share && canShareFiles) {
-        await nav.share({ files: [file] });
-      } else {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'mystyl-tenue.jpg';
-        a.click();
-        URL.revokeObjectURL(url);
-      }
-    } catch (e) {
-      console.error('handleShare failed:', e);
-      alert('Partage impossible : ' + (e as Error).message);
+    if (nav.share && nav.canShare?.({ files: [file] })) {
+      await nav.share({ files: [file] });
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'mystyl-tenue.jpg';
+      a.click();
+      URL.revokeObjectURL(url);
     }
   }
 
