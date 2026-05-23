@@ -50,6 +50,27 @@ export default function Outfits() {
     const cardEl = cardRefs.current.get(outfitId);
     if (!cardEl) return;
 
+    // Attendre que toutes les images soient chargées
+    const images = Array.from(cardEl.querySelectorAll('img'));
+    await Promise.all(
+      images.map(img => {
+        if (img.complete && img.naturalWidth > 0) {
+          return Promise.resolve();
+        }
+        return new Promise<void>((resolve) => {
+          img.onload = () => resolve();
+          img.onerror = () => resolve();
+          // Timeout de sécurité 5 secondes
+          setTimeout(resolve, 5000);
+        });
+      }),
+    );
+
+    // Attendre un frame supplémentaire
+    await new Promise(r => requestAnimationFrame(r));
+    await new Promise(r => setTimeout(r, 200));
+
+    // Capturer
     const blob = await toBlob(cardEl, {
       quality: 0.85,
       pixelRatio: window.devicePixelRatio,
