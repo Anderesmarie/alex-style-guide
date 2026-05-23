@@ -31,6 +31,7 @@ export async function generateAndUploadShareSnapshot(
   items: ClothingItem[],
   pseudo: string | null,
 ): Promise<string | null> {
+  console.log('1. Début génération snapshot');
   const { data: u } = await supabase.auth.getUser();
   const userId = u.user?.id;
   if (!userId) return null;
@@ -64,18 +65,30 @@ export async function generateAndUploadShareSnapshot(
         hideName: true,
       }),
     );
+    console.log('2. Host créé, rendu OutfitGalleryCard');
 
     // Puis attendre plus longtemps pour le rendu
     await new Promise(r => setTimeout(r, 500));
     const cardEl = inner.querySelector('div > div') as HTMLElement | null;
     const target = cardEl || inner;
+    console.log('3. Après attente, target:', target);
     await waitForImages(target);
+    console.log('4. Images chargées');
+    console.log(
+      '4b. Images dans target:',
+      Array.from(target.querySelectorAll('img')).map(img => ({
+        src: img.src.substring(0, 50),
+        complete: img.complete,
+        naturalW: img.naturalWidth,
+      })),
+    );
 
     const blob = await toBlob(target, {
       quality: 0.85,
       pixelRatio: window.devicePixelRatio || 2,
       skipFonts: true,
     });
+    console.log('5. Blob généré:', blob?.size, blob?.type);
     if (!blob) return null;
 
     const path = `${userId}/${outfit.id}.jpg`;
@@ -86,13 +99,15 @@ export async function generateAndUploadShareSnapshot(
         upsert: true,
         cacheControl: '3600',
       });
+    console.log('6. Upload result:', error);
     if (error) {
       console.error('Snapshot upload failed:', error);
       return null;
     }
     const { data } = supabase.storage.from('outfit-shares').getPublicUrl(path);
-    // Cache-bust so updates refresh
-    return `${data.publicUrl}?v=${Date.now()}`;
+    const publicUrl = `${data.publicUrl}?v=${Date.now()}`;
+    console.log('7. snapshot URL:', publicUrl);
+    return publicUrl;
   } catch (e) {
     console.error('Snapshot generation failed:', e);
     return null;
@@ -101,3 +116,4 @@ export async function generateAndUploadShareSnapshot(
     host.remove();
   }
 }
+
