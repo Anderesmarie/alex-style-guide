@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import html2canvas from 'html2canvas';
+import { toBlob } from 'html-to-image';
 import { ClothingItem, Outfit } from '@/lib/types';
 import { getWardrobe, getOutfits, addOutfit, deleteOutfit, setOutfitLiked, genId } from '@/lib/storage';
 import { generateRecommendations } from '@/lib/recommendations';
@@ -50,16 +50,13 @@ export default function Outfits() {
     const cardEl = cardRefs.current.get(outfitId);
     if (!cardEl) return;
 
-    const canvas = await html2canvas(cardEl, {
-      useCORS: true,
-      allowTaint: false,
-      scale: window.devicePixelRatio,
-      backgroundColor: null,
+    const blob = await toBlob(cardEl, {
+      quality: 0.85,
+      pixelRatio: window.devicePixelRatio,
+      skipFonts: false,
     });
 
-    const blob = await new Promise<Blob>(res =>
-      canvas.toBlob(b => res(b!), 'image/jpeg', 0.85),
-    );
+    if (!blob) return;
 
     const file = new File([blob], 'mystyl-tenue.jpg', { type: 'image/jpeg' });
 
