@@ -159,7 +159,6 @@ export type Database = {
           layout_data: Json | null
           liked: boolean
           name: string | null
-          snapshot_url: string | null
           user_id: string
         }
         Insert: {
@@ -169,7 +168,6 @@ export type Database = {
           layout_data?: Json | null
           liked?: boolean
           name?: string | null
-          snapshot_url?: string | null
           user_id: string
         }
         Update: {
@@ -179,7 +177,6 @@ export type Database = {
           layout_data?: Json | null
           liked?: boolean
           name?: string | null
-          snapshot_url?: string | null
           user_id?: string
         }
         Relationships: []

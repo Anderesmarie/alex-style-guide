@@ -10,7 +10,6 @@ interface Props {
   badgeLabel?: string;
   hideLike?: boolean;
   hideName?: boolean;
-  onShare?: () => void;
 }
 
 export default function OutfitGalleryCard({
@@ -22,7 +21,6 @@ export default function OutfitGalleryCard({
   badgeLabel,
   hideLike,
   hideName,
-  onShare,
 }: Props) {
   const liked = !!outfit.liked;
   const displayName =
@@ -33,15 +31,8 @@ export default function OutfitGalleryCard({
     <div className="mb-4">
       <div
         onClick={onClick}
-        className="relative w-full cursor-pointer active:scale-[0.99] transition-transform mx-auto overflow-hidden"
-        style={{
-          maxWidth: 360,
-          aspectRatio: '360 / 500',
-          backgroundImage: 'url("https://tseermbuwyrzcrulhxba.supabase.co/storage/v1/object/public/assets/ChatGPT%20Image%2023%20mai%202026%20final.png")',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          borderRadius: 16,
-        }}
+        className="relative w-full cursor-pointer active:scale-[0.99] transition-transform mx-auto"
+        style={{ maxWidth: 360 }}
       >
         {/* Like button */}
         {!hideLike && (
@@ -70,29 +61,6 @@ export default function OutfitGalleryCard({
             {liked ? '❤️' : '🤍'}
           </button>
         )}
-
-        {/* Share button */}
-        <button
-          onClick={e => {
-            e.stopPropagation();
-            onShare?.();
-          }}
-          className="absolute z-20"
-          style={{
-            top: 8,
-            left: 8,
-            background: 'rgba(255,255,255,0.75)',
-            backdropFilter: 'blur(4px)',
-            borderRadius: 999,
-            padding: '4px 10px',
-            fontSize: 11,
-            color: '#C4A882',
-            border: 'none',
-            cursor: 'pointer',
-          }}
-        >
-          @Partager
-        </button>
 
         <OutfitLayout
           items={items}
