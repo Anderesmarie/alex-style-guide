@@ -7,7 +7,6 @@ interface Props {
   pseudo?: string | null;
   onClick?: () => void;
   onToggleLike?: (next: boolean) => void;
-  onShare?: () => void;
   badgeLabel?: string;
   hideLike?: boolean;
   hideName?: boolean;
@@ -19,7 +18,6 @@ export default function OutfitGalleryCard({
   pseudo,
   onClick,
   onToggleLike,
-  onShare,
   badgeLabel,
   hideLike,
   hideName,
@@ -36,32 +34,6 @@ export default function OutfitGalleryCard({
         className="relative w-full cursor-pointer active:scale-[0.99] transition-transform mx-auto"
         style={{ maxWidth: 360 }}
       >
-        {/* Share button */}
-        {onShare && (
-          <button
-            onClick={e => {
-              e.stopPropagation();
-              onShare();
-            }}
-            aria-label="Partager la tenue"
-            className="absolute z-30 active:scale-95 transition-transform flex items-center justify-center"
-            style={{
-              top: 8,
-              left: 8,
-              fontSize: 12,
-              lineHeight: 1,
-              background: 'rgba(255,255,255,0.7)',
-              backdropFilter: 'blur(4px)',
-              borderRadius: 999,
-              minWidth: 44,
-              minHeight: 44,
-              color: '#C4A882',
-            }}
-          >
-            @Partager
-          </button>
-        )}
-
         {/* Like button */}
         {!hideLike && (
           <button

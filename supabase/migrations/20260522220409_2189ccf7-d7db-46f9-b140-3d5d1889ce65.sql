@@ -1,1 +1,0 @@
-DROP POLICY IF EXISTS "Snapshots are publicly readable" ON storage.objects;

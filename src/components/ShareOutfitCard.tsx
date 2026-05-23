@@ -10,21 +10,25 @@ interface Props {
   onClose: () => void;
 }
 
-const FOND_W = 1064;
-const FOND_H = 1478;
-
-const CARD_W = FOND_W;
-const CARD_H = FOND_H;
-
-// Zone d'affichage au ratio 360/500
-const DISPLAY_H = 1090;
-const DISPLAY_W = DISPLAY_H * (360 / 500); // 785
-const DISPLAY_LEFT = (FOND_W - DISPLAY_W) / 2; // 139
-const DISPLAY_TOP = 280;
+const CARD_W = 930;
+const CARD_H = 1240;
 
 export default function ShareOutfitCard({ outfit, items, userName, onClose }: Props) {
   const captureRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<'preparing' | 'sharing' | 'done' | 'error'>('preparing');
+
+  // Order pieces: layoutData order (sorted by z) if available, else natural items order
+  const orderedItems = (() => {
+    if (outfit.layoutData?.pieces?.length) {
+      const byId = new Map(items.map(it => [it.id, it]));
+      return outfit.layoutData.pieces
+        .slice()
+        .sort((a, b) => a.z - b.z)
+        .map(p => byId.get(p.itemId))
+        .filter((x): x is ClothingItem => !!x);
+    }
+    return items;
+  })();
 
   useEffect(() => {
     let cancelled = false;
@@ -159,48 +163,52 @@ export default function ShareOutfitCard({ outfit, items, userName, onClose }: Pr
             }}
           />
 
-          {(() => {
-            console.log('snapshot_url:', (outfit as any).snapshot_url, '| snapshotUrl:', outfit.snapshotUrl);
-            return null;
-          })()}
+          {/* Outfit pieces — vertical stack centered */}
+          <div
+            style={{
+              position: 'absolute',
+              left: '50%',
+              top: 140,
+              transform: 'translateX(-50%)',
+              width: 560,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 12,
+            }}
+          >
+            {orderedItems.map((it, i) => (
+              <img
+                key={it.id + i}
+                src={it.imageUrl || it.imageBase64}
+                crossOrigin="anonymous"
+                alt={it.type}
+                style={{
+                  maxWidth: 360,
+                  maxHeight: 280,
+                  width: 'auto',
+                  height: 'auto',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 6px 14px rgba(0,0,0,0.18))',
+                }}
+              />
+            ))}
 
-          {outfit.snapshotUrl ? (
-            <img
-              src={outfit.snapshotUrl}
-              crossOrigin="anonymous"
-              alt="Outfit Snapshot"
-              style={{
-                position: 'absolute',
-                left: DISPLAY_LEFT + 'px',
-                top: DISPLAY_TOP + 'px',
-                width: DISPLAY_W + 'px',
-                height: DISPLAY_H + 'px',
-                objectFit: 'fill',
-              }}
-            />
-          ) : (
+            {/* Outfit name */}
             <div
               style={{
-                position: 'absolute',
-                left: DISPLAY_LEFT + 'px',
-                top: DISPLAY_TOP + 'px',
-                width: DISPLAY_W + 'px',
-                height: DISPLAY_H + 'px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '0 10%',
+                marginTop: 16,
+                fontFamily: '"Playfair Display", "Brush Script MT", cursive, serif',
+                fontStyle: 'italic',
+                fontSize: 44,
+                color: '#8B6F5E',
                 textAlign: 'center',
-                fontFamily: 'Inter, sans-serif',
-                fontSize: 26,
-                color: '#2C2C2C',
-                opacity: 0.75,
-                lineHeight: 1.4,
+                lineHeight: 1.1,
               }}
             >
-              Modifie et re-sauvegarde ta tenue pour activer le partage
+              {outfit.name || 'Ma tenue'}
             </div>
-          )}
+          </div>
 
           {/* Pseudo bottom-right */}
           <div

@@ -122,7 +122,7 @@ export default function OutfitDailyFeed({
     }
   };
 
-  const handleEditorSave = async (newItems: ClothingItem[], layoutData: OutfitLayoutData, _name?: string, snapshotUrl?: string | null) => {
+  const handleEditorSave = async (newItems: ClothingItem[], layoutData: OutfitLayoutData) => {
     if (editingIdx === null) return;
     try {
       const outfitId = genId();
@@ -132,7 +132,6 @@ export default function OutfitDailyFeed({
         itemIds: newItems.map(i => i.id),
         createdAt: new Date().toISOString(),
         layoutData,
-        snapshotUrl: snapshotUrl ?? null,
       });
       const next = [...results];
       next[editingIdx] = {
@@ -226,7 +225,6 @@ export default function OutfitDailyFeed({
           wardrobe={wardrobe}
           onCancel={() => setEditingIdx(null)}
           onSave={handleEditorSave}
-          showSafeZone={true}
         />
       )}
     </div>

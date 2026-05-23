@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import html2canvas from 'html2canvas';
-import { supabase } from '@/lib/supabase';
 import { ClothingItem, OutfitLayoutData, OutfitLayoutPiece } from '@/lib/types';
 import {
   LAYOUT_GRID,
@@ -66,12 +64,11 @@ interface Props {
   initialLayout?: OutfitLayoutData | null;
   wardrobe: ClothingItem[];
   onCancel: () => void;
-  onSave: (newItems: ClothingItem[], layoutData: OutfitLayoutData, name?: string, snapshotUrl?: string | null) => void;
+  onSave: (newItems: ClothingItem[], layoutData: OutfitLayoutData, name?: string) => void;
   initialName?: string;
-  showSafeZone?: boolean;
 }
 
-export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, onCancel, onSave, initialName = '', showSafeZone = true }: Props) {
+export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, onCancel, onSave, initialName = '' }: Props) {
   const tplKey = selectTemplateForItems(items);
   const template = LAYOUT_TEMPLATES[tplKey];
 
@@ -112,7 +109,6 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
   const [showScrollHint, setShowScrollHint] = useState(true);
   const [name, setName] = useState<string>(initialName);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLDivElement>(null);
   const needsName = !initialName;
   const nameValid = !needsName || name.trim().length > 0;
 
@@ -142,7 +138,7 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
       const finalY = d.baseY + (offsetRef.current.dy / CANVAS_H) * 100;
       setPieces(prev => prev.map(p =>
         p.itemId === d.id
-          ? { ...p, x: Math.max(5.6, Math.min(94.4, finalX)), y: Math.max(20, Math.min(89.6, finalY)) }
+          ? { ...p, x: Math.max(-5, Math.min(100, finalX)), y: Math.max(-5, Math.min(100, finalY)) }
           : p
       ));
     }
@@ -266,11 +262,7 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
   }, [sheet]);
 
   // ---------- Save ----------
-  const [isSaving, setIsSaving] = useState(false);
-
-  const handleSave = async () => {
-    if (isSaving) return;
-    setIsSaving(true);
+  const handleSave = () => {
     const layoutPieces: OutfitLayoutPiece[] = pieces.map(p => ({
       itemId: p.itemId,
       x: p.x,
@@ -285,47 +277,7 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
       canvasH: CANVAS_H,
       pieces: layoutPieces,
     };
-
-    // Capture safe-zone snapshot and upload to Supabase Storage
-    let snapshotUrl: string | null = null;
-    try {
-      if (canvasRef.current) {
-        const canvas = await html2canvas(canvasRef.current, {
-          useCORS: true,
-          allowTaint: false,
-          scale: 1,
-          backgroundColor: null,
-        });
-
-
-        const snapshotBlob: Blob | null = await new Promise(resolve =>
-          canvas.toBlob(resolve, 'image/jpeg', 0.8)
-        );
-
-        if (snapshotBlob) {
-          const { data: userData } = await supabase.auth.getUser();
-          const userId = userData.user?.id;
-          if (userId) {
-            const fileId = (crypto as any).randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-            const path = `${userId}/${fileId}.jpg`;
-            const { error: upErr } = await supabase.storage
-              .from('snapshots')
-              .upload(path, snapshotBlob, { contentType: 'image/jpeg', upsert: true });
-            if (!upErr) {
-              const { data } = supabase.storage.from('snapshots').getPublicUrl(path);
-              snapshotUrl = data.publicUrl;
-            } else {
-              console.warn('snapshot upload failed:', upErr);
-            }
-          }
-        }
-      }
-    } catch (e) {
-      console.warn('snapshot capture failed:', e);
-    }
-
-    onSave(pieces.map(p => p.item), layoutData, name.trim(), snapshotUrl);
-    setIsSaving(false);
+    onSave(pieces.map(p => p.item), layoutData, name.trim());
   };
 
   return (
@@ -338,7 +290,6 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
 
         {/* Canvas */}
         <div
-          ref={canvasRef}
           onClick={() => setSelectedId(null)}
           className="relative mx-auto bg-white rounded-2xl overflow-hidden"
           style={{
@@ -394,21 +345,6 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
               </div>
             );
           })}
-          {showSafeZone && (
-            <div
-              style={{
-                position: 'absolute',
-                top: '20%',
-                left: '5.6%',
-                width: '88.8%',
-                height: '69.6%',
-                border: '2px dashed rgba(196, 168, 130, 0.5)',
-                borderRadius: 8,
-                pointerEvents: 'none',
-                zIndex: 0,
-              }}
-            />
-          )}
         </div>
 
         {/* Resize / delete controls */}
