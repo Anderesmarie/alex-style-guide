@@ -12,6 +12,8 @@ import OutfitGalleryCard from '@/components/OutfitGalleryCard';
 
 import OutfitFreeCanvas, { CHIPS, ChipKey, chipMatchesItem, defaultPositionForCategory, CANVAS_W, CANVAS_H } from '@/components/OutfitFreeCanvas';
 
+const ROSE_GOLD = '#C9956C';
+
 // Renvoie le nom de catégorie attendu par SLOT_CONFIG (compat anciens libellés)
 function legacyCategoryName(it: ClothingItem): string {
   const cat = getCategoryForType(it.type);
@@ -714,6 +716,16 @@ export default function Outfits() {
                       onClick={() => { setSelectedOutfit(outfit); setView('detail'); }}
                       onToggleLike={(next) => handleToggleLike(outfit, next)}
                     />
+                    <button
+                      onClick={() => {}}
+                      className="w-full py-2.5 rounded-xl text-sm font-semibold mt-2 active:scale-[0.98] transition-transform"
+                      style={{
+                        backgroundColor: ROSE_GOLD,
+                        color: 'white',
+                      }}
+                    >
+                      📤 Partager
+                    </button>
                   </div>
                 );
               })}
