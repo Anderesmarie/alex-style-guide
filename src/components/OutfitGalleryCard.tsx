@@ -1,5 +1,6 @@
 import { ClothingItem, Outfit } from '@/lib/types';
 import OutfitLayout from '@/components/OutfitLayout';
+import { SHARE_BACKGROUND_URL } from '@/lib/constants';
 
 interface Props {
   outfit: Outfit & { liked?: boolean };
