@@ -301,6 +301,20 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
             userSelect: 'none',
           }}
         >
+          <img
+            src="https://tseermbuwyrzcrulhxba.supabase.co/storage/v1/object/public/assets/fond-mystyl-final.png"
+            alt=""
+            style={{
+              position: 'absolute',
+              inset:  0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'top center',
+              pointerEvents: 'none',
+              zIndex: 0,
+            }}
+          />
           {pieces.map(p => {
             const isDrag = dragId === p.itemId;
             const offX = isDrag ? (dragOffset.dx / CANVAS_W) * 100 : 0;
