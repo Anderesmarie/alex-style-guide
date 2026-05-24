@@ -67,6 +67,7 @@ export default function OutfitGalleryCard({
           items={items}
           layoutData={outfit.layoutData ?? null}
           readOnly={true}
+          backgroundUrl={SHARE_BACKGROUND_URL}
         />
 
         {/* Bottom band */}
