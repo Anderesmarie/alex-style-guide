@@ -716,6 +716,16 @@ export default function Outfits() {
                       onClick={() => { setSelectedOutfit(outfit); setView('detail'); }}
                       onToggleLike={(next) => handleToggleLike(outfit, next)}
                     />
+                    <button
+                      onClick={() => {}}
+                      className="w-full py-2.5 rounded-xl text-sm font-semibold mt-2 active:scale-[0.98] transition-transform"
+                      style={{
+                        backgroundColor: ROSE_GOLD,
+                        color: 'white',
+                      }}
+                    >
+                      📤 Partager
+                    </button>
                   </div>
                 );
               })}
