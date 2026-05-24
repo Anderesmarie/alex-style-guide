@@ -106,9 +106,11 @@ interface Props {
   /** readOnly = pas de drag, pas de resize, placement fixe via template. */
   readOnly?: boolean;
   className?: string;
+  /** Image de fond à afficher derrière les pièces. */
+  backgroundUrl?: string;
 }
 
-export default function OutfitLayout({ items, layoutData, readOnly = true, className = '' }: Props) {
+export default function OutfitLayout({ items, layoutData, readOnly = true, className = '', backgroundUrl }: Props) {
   void readOnly;
 
   // ---------- Render depuis layoutData ----------
