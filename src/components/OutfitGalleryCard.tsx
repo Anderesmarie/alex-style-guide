@@ -70,24 +70,6 @@ export default function OutfitGalleryCard({
           backgroundUrl={SHARE_BACKGROUND_URL}
         />
 
-        {/* Bottom band */}
-        <div
-          className="absolute left-0 right-0 bottom-0 flex items-center justify-between px-4"
-          style={{
-            background: 'rgba(255,255,255,0.85)',
-            height: 36,
-            backdropFilter: 'blur(4px)',
-            borderBottomLeftRadius: 16,
-            borderBottomRightRadius: 16,
-          }}
-        >
-          <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#9CA3AF' }}>
-            {badgeLabel || '✨ Créée par MyStyl'}
-          </span>
-          <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#9CA3AF' }}>
-            @{pseudo || 'moi'}
-          </span>
-        </div>
       </div>
 
       {/* Outfit name below card */}
