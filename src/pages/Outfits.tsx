@@ -46,6 +46,81 @@ export default function Outfits() {
   const [pseudo, setPseudo] = useState<string | null>(null);
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
+  async function generateAndSaveSnapshot(outfitId: string) {
+    try {
+      // Attendre que la carte soit montée dans le DOM
+      let cardEl: HTMLDivElement | undefined;
+      for (let i = 0; i < 30; i++) {
+        cardEl = cardRefs.current.get(outfitId);
+        if (cardEl) break;
+        await new Promise(r => setTimeout(r, 100));
+      }
+      if (!cardEl) {
+        console.error('Snapshot: cardEl introuvable pour', outfitId);
+        return;
+      }
+
+      // Attendre que toutes les images soient chargées
+      const images = Array.from(cardEl.querySelectorAll('img'));
+      await Promise.all(
+        images.map(img => {
+          if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+          return new Promise<void>((resolve) => {
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+            setTimeout(resolve, 3000);
+          });
+        })
+      );
+      await new Promise(r => setTimeout(r, 300));
+
+      const blob = await toBlob(cardEl, {
+        quality: 0.85,
+        pixelRatio: 2,
+        skipFonts: true,
+      });
+      if (!blob) {
+        console.error('Snapshot: blob null');
+        return;
+      }
+      console.log('Snapshot blob généré:', blob.size);
+
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return;
+
+      const fileName = `${u.user.id}/${outfitId}.jpg`;
+      const { error: uploadError } = await supabase.storage
+        .from('outfit-shares')
+        .upload(fileName, blob, {
+          contentType: 'image/jpeg',
+          upsert: true,
+        });
+      if (uploadError) {
+        console.error('Snapshot upload error:', uploadError);
+        return;
+      }
+
+      const { data } = supabase.storage
+        .from('outfit-shares')
+        .getPublicUrl(fileName);
+      console.log('Snapshot URL:', data.publicUrl);
+
+      const { error: updateError } = await supabase
+        .from('outfits')
+        .update({ share_snapshot_url: data.publicUrl })
+        .eq('id', outfitId);
+      if (updateError) {
+        console.error('Snapshot update error:', updateError);
+        return;
+      }
+      console.log('Snapshot sauvegardé avec succès !');
+    } catch (e) {
+      console.error('Snapshot error:', e);
+    }
+  }
+
+
+
   async function handleShare(outfitId: string) {
     const cardEl = cardRefs.current.get(outfitId);
     if (!cardEl) return;
