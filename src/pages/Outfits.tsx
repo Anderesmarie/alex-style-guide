@@ -218,8 +218,9 @@ export default function Outfits() {
 
   const handleSaveQuick = async () => {
     if (selectedIds.size < 2 || !outfitName.trim()) return;
+    const newId = genId();
     await addOutfit({
-      id: genId(),
+      id: newId,
       name: outfitName.trim(),
       itemIds: Array.from(selectedIds),
       createdAt: new Date().toISOString(),
@@ -230,7 +231,9 @@ export default function Outfits() {
     setSelectedIds(new Set());
     setOutfitName('');
     setView('gallery');
+    void generateAndSaveSnapshot(newId);
   };
+
 
   const filledSlots = (Object.values(slots).filter(Boolean) as ClothingItem[]);
 
