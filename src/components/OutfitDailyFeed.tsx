@@ -162,9 +162,14 @@ export default function OutfitDailyFeed({
           const isWorn = wornIdx === idx;
           const isDisliked = r.liked === false;
           const isLocked = !!r.savedOutfitId;
+          const isGreyedOut = wornIdx !== null && wornIdx !== idx;
 
           return (
-            <div key={idx} className={isDisliked ? 'opacity-40 pointer-events-none' : ''}>
+            <div
+              key={idx}
+              className={isDisliked ? 'opacity-40 pointer-events-none' : ''}
+              style={!isDisliked && isGreyedOut ? { opacity: 0.4, pointerEvents: 'none' } : undefined}
+            >
               <div className="relative">
                 <OutfitLayout
                   items={r.outfit}
@@ -193,18 +198,29 @@ export default function OutfitDailyFeed({
                 </div>
               </div>
 
-              {!isDisliked && (
+              {!isDisliked && !isGreyedOut && (
                 <div className="mt-3 space-y-2 max-w-[360px] mx-auto">
-                  <button
-                    onClick={() => handleWear(r.outfit, idx)}
-                    disabled={isWorn}
-                    className="w-full py-3 rounded-xl text-white font-semibold text-sm active:scale-[0.98] transition-transform disabled:opacity-80"
-                    style={{ backgroundColor: isWorn ? '#4CAF50' : ROSE_GOLD }}
-                  >
-                    {isWorn ? 'Portée aujourd\'hui 🌸' : '✨ Je la mets !'}
-                  </button>
+                  {isWorn && (
+                    <button
+                      onClick={() => {}}
+                      className="w-full py-3 rounded-xl text-white font-semibold text-sm active:scale-[0.98] transition-transform"
+                      style={{ backgroundColor: ROSE_GOLD }}
+                    >
+                      📤 Partager
+                    </button>
+                  )}
 
-                  {!isLocked && (
+                  {!isWorn && isLocked && (
+                    <button
+                      onClick={() => handleWear(r.outfit, idx)}
+                      className="w-full py-3 rounded-xl text-white font-semibold text-sm active:scale-[0.98] transition-transform"
+                      style={{ backgroundColor: ROSE_GOLD }}
+                    >
+                      ✨ Je la mets !
+                    </button>
+                  )}
+
+                  {!isWorn && !isLocked && (
                     <button
                       onClick={() => setEditingIdx(idx)}
                       className="w-full py-2.5 rounded-xl text-sm font-semibold active:scale-[0.98] transition-transform"
