@@ -166,7 +166,12 @@ export default function OutfitDailyFeed({
           return (
             <div key={idx} className={isDisliked ? 'opacity-40 pointer-events-none' : ''}>
               <div className="relative">
-                <OutfitLayout items={r.outfit} layoutData={r.layoutData ?? null} readOnly />
+                <OutfitLayout
+                  items={r.outfit}
+                  layoutData={r.layoutData ?? null}
+                  readOnly
+                  backgroundUrl={r.layoutData || r.savedOutfitId ? SHARE_BACKGROUND_URL : undefined}
+                />
                 <div
                   className="absolute left-0 right-0 bottom-0 flex items-center justify-between px-4"
                   style={{
