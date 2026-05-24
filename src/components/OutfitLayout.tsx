@@ -201,6 +201,22 @@ export default function OutfitLayout({ items, layoutData, readOnly = true, class
         boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
       }}
     >
+      {backgroundUrl && (
+        <img
+          src={backgroundUrl}
+          alt=""
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'top center',
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
+        />
+      )}
       {order.map((k, i) => {
         const item = slots[k];
         const cell = template[k];
