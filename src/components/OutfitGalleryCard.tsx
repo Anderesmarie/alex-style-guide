@@ -1,5 +1,6 @@
 import { ClothingItem, Outfit } from '@/lib/types';
 import OutfitLayout from '@/components/OutfitLayout';
+import { SHARE_BACKGROUND_URL } from '@/lib/constants';
 
 interface Props {
   outfit: Outfit & { liked?: boolean };
@@ -66,6 +67,7 @@ export default function OutfitGalleryCard({
           items={items}
           layoutData={outfit.layoutData ?? null}
           readOnly={true}
+          backgroundUrl={SHARE_BACKGROUND_URL}
         />
 
         {/* Bottom band */}
