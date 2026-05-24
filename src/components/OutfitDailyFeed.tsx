@@ -44,6 +44,21 @@ export default function OutfitDailyFeed({
 
   // Detect already-worn outfit today
   useEffect(() => {
+    const stored = localStorage.getItem('mystyl_worn_today');
+    if (stored) {
+      try {
+        const { date, outfitId } = JSON.parse(stored);
+        if (date === today) {
+          const matchIdx = results.findIndex(r => r.savedOutfitId === outfitId);
+          if (matchIdx >= 0) {
+            setWornIdx(matchIdx);
+            return;
+          }
+        }
+      } catch {}
+      localStorage.removeItem('mystyl_worn_today');
+    }
+
     (async () => {
       try {
         const { data: userData } = await supabase.auth.getUser();
@@ -79,6 +94,10 @@ export default function OutfitDailyFeed({
     }
     setWornIdx(idx);
     setSavedIdxs(prev => new Set(prev).add(idx));
+    localStorage.setItem('mystyl_worn_today', JSON.stringify({
+      date: new Date().toISOString().split('T')[0],
+      outfitId: results[idx].savedOutfitId,
+    }));
     updateStreak();
     toast("Belle journée avec cette tenue ! 🌸", {
       style: { backgroundColor: ROSE_GOLD, color: '#FFFFFF', border: 'none' },
