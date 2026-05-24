@@ -159,6 +159,7 @@ export type Database = {
           layout_data: Json | null
           liked: boolean
           name: string | null
+          share_snapshot_url: string | null
           snapshot_url: string | null
           user_id: string
         }
@@ -169,6 +170,7 @@ export type Database = {
           layout_data?: Json | null
           liked?: boolean
           name?: string | null
+          share_snapshot_url?: string | null
           snapshot_url?: string | null
           user_id: string
         }
@@ -179,6 +181,7 @@ export type Database = {
           layout_data?: Json | null
           liked?: boolean
           name?: string | null
+          share_snapshot_url?: string | null
           snapshot_url?: string | null
           user_id?: string
         }
