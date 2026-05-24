@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ClothingItem, OutfitLayoutData, UserProfile } from '@/lib/types';
-import { addOutfit, genId, saveLastOutfit } from '@/lib/storage';
+import { addOutfit, genId } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { updateStreak } from '@/lib/streak';
@@ -36,7 +35,7 @@ export default function OutfitDailyFeed({
   wardrobe,
   onResultsChange,
 }: Props) {
-  const navigate = useNavigate();
+  
   const [savedIdxs, setSavedIdxs] = useState<Set<number>>(new Set());
   const [wornIdx, setWornIdx] = useState<number | null>(null);
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
@@ -70,57 +69,20 @@ export default function OutfitDailyFeed({
     })();
   }, [today, results]);
 
-  const handleWear = async (items: ClothingItem[], idx: number) => {
+  const handleWear = async (idx: number) => {
     const hour = new Date().getHours();
-    if (wornIdx !== null && wornIdx !== idx) {
-      if (hour >= 12) {
-        toast.error("Tu as déjà choisi ta tenue du jour 😊", {
-          description: "Après midi, la tenue est définitivement enregistrée.",
-        });
-        return;
-      }
-      try {
-        const { data: userData } = await supabase.auth.getUser();
-        if (userData.user) {
-          await supabase
-            .from('user_preferences')
-            .delete()
-            .eq('user_id', userData.user.id)
-            .eq('reaction', 'portee')
-            .gte('created_at', `${today}T00:00:00`)
-            .lte('created_at', `${today}T23:59:59`);
-        }
-      } catch {}
+    if (wornIdx !== null && wornIdx !== idx && hour >= 12) {
+      toast.error("Tu as déjà choisi ta tenue du jour 😊", {
+        description: "Après midi, la tenue est définitivement enregistrée.",
+      });
+      return;
     }
-    try {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) return;
-      const itemIds = items.map(i => i.id);
-      await saveLastOutfit(itemIds);
-      await supabase.from('user_preferences').insert({
-        user_id: userData.user.id,
-        item_ids: itemIds,
-        reaction: 'portee',
-        created_at: new Date().toISOString(),
-      });
-      const r = results[idx];
-      await addOutfit({
-        id: genId(),
-        name: `Tenue du ${new Date().toLocaleDateString('fr-FR')}`,
-        itemIds,
-        createdAt: new Date().toISOString(),
-        layoutData: r.layoutData ?? null,
-      });
-      setWornIdx(idx);
-      setSavedIdxs(prev => new Set(prev).add(idx));
-      updateStreak();
-      toast("Belle journée avec cette tenue ! 🌸", {
-        style: { backgroundColor: ROSE_GOLD, color: '#FFFFFF', border: 'none' },
-      });
-    } catch (e) {
-      console.error(e);
-      toast.error("Erreur lors de l'enregistrement");
-    }
+    setWornIdx(idx);
+    setSavedIdxs(prev => new Set(prev).add(idx));
+    updateStreak();
+    toast("Belle journée avec cette tenue ! 🌸", {
+      style: { backgroundColor: ROSE_GOLD, color: '#FFFFFF', border: 'none' },
+    });
   };
 
   const handleEditorSave = async (newItems: ClothingItem[], layoutData: OutfitLayoutData) => {
@@ -146,7 +108,6 @@ export default function OutfitDailyFeed({
         style: { backgroundColor: ROSE_GOLD, color: '#FFFFFF', border: 'none' },
       });
       setEditingIdx(null);
-      navigate('/outfits');
     } catch (e) {
       console.error(e);
       toast.error("Erreur lors de l'enregistrement");
@@ -212,7 +173,7 @@ export default function OutfitDailyFeed({
 
                   {!isWorn && isLocked && (
                     <button
-                      onClick={() => handleWear(r.outfit, idx)}
+                      onClick={() => handleWear(idx)}
                       className="w-full py-3 rounded-xl text-white font-semibold text-sm active:scale-[0.98] transition-transform"
                       style={{ backgroundColor: ROSE_GOLD }}
                     >
