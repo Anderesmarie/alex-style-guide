@@ -439,8 +439,9 @@ export default function Outfits() {
 
     const handleSaveFree = async () => {
       if (!canSave) return;
+      const newId = genId();
       await addOutfit({
-        id: genId(),
+        id: newId,
         name: outfitName.trim(),
         itemIds: freePieces.map(p => p.itemId),
         createdAt: new Date().toISOString(),
@@ -459,7 +460,9 @@ export default function Outfits() {
       setFreeSelectedId(null);
       setOutfitName('');
       setView('gallery');
+      void generateAndSaveSnapshot(newId);
     };
+
 
     return (
       <div className="fade-enter pb-4">
