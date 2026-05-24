@@ -239,8 +239,9 @@ export default function Outfits() {
 
   const handleSaveVisual = async () => {
     if (filledSlots.length < 2 || !outfitName.trim()) return;
+    const newId = genId();
     await addOutfit({
-      id: genId(),
+      id: newId,
       name: outfitName.trim(),
       itemIds: filledSlots.map(i => i.id),
       createdAt: new Date().toISOString(),
@@ -251,7 +252,9 @@ export default function Outfits() {
     setSlots({});
     setOutfitName('');
     setView('gallery');
+    void generateAndSaveSnapshot(newId);
   };
+
 
   const confirmDeleteOutfit = async () => {
     if (!deleteConfirm) return;
