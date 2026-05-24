@@ -8,6 +8,7 @@ import { updateStreak } from '@/lib/streak';
 import type { Season } from '@/lib/colorimetry';
 import OutfitLayout from '@/components/OutfitLayout';
 import OutfitTemplateEditor from '@/components/OutfitTemplateEditor';
+import { SHARE_BACKGROUND_URL } from '@/lib/constants';
 
 export interface OutfitResult {
   outfit: ClothingItem[];
