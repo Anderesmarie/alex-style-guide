@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { toBlob } from 'html-to-image';
 import { ClothingItem, Outfit } from '@/lib/types';
-import { getWardrobe, getOutfits, addOutfit, deleteOutfit, setOutfitLiked, setOutfitShareSnapshot, genId } from '@/lib/storage';
+import { getWardrobe, getOutfits, addOutfit, deleteOutfit, setOutfitLiked, genId } from '@/lib/storage';
 import { generateRecommendations } from '@/lib/recommendations';
 import { updateStreak } from '@/lib/streak';
 import { getCategoryForType, getSubcategoryForType } from '@/lib/dressingTaxonomy';
 import { supabase } from '@/integrations/supabase/client';
-import { generateAndUploadShareSnapshot } from '@/lib/shareSnapshot';
 import CalendarView from '@/components/CalendarView';
 import OutfitVisualLayout, { SlotKey, SlotMap, SLOT_CONFIG } from '@/components/OutfitVisualLayout';
 import OutfitLayout from '@/components/OutfitLayout';
@@ -44,15 +44,41 @@ export default function Outfits() {
   const [outfitName, setOutfitName] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<Outfit | null>(null);
   const [pseudo, setPseudo] = useState<string | null>(null);
+  const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  async function handleShare(outfit: Outfit) {
-    if (!outfit.shareSnapshotUrl) {
-      alert('Modifie et re-sauvegarde ta tenue pour activer le partage');
-      return;
-    }
+  async function handleShare(outfitId: string) {
+    const cardEl = cardRefs.current.get(outfitId);
+    if (!cardEl) return;
 
-    const res = await fetch(outfit.shareSnapshotUrl);
-    const blob = await res.blob();
+    // Attendre que toutes les images soient chargées
+    const images = Array.from(cardEl.querySelectorAll('img'));
+    await Promise.all(
+      images.map(img => {
+        if (img.complete && img.naturalWidth > 0) {
+          return Promise.resolve();
+        }
+        return new Promise<void>((resolve) => {
+          img.onload = () => resolve();
+          img.onerror = () => resolve();
+          // Timeout de sécurité 5 secondes
+          setTimeout(resolve, 5000);
+        });
+      }),
+    );
+
+    // Attendre un frame supplémentaire
+    await new Promise(r => requestAnimationFrame(r));
+    await new Promise(r => setTimeout(r, 200));
+
+    // Capturer
+    const blob = await toBlob(cardEl, {
+      quality: 0.85,
+      pixelRatio: window.devicePixelRatio,
+      skipFonts: false,
+    });
+
+    if (!blob) return;
+
     const file = new File([blob], 'mystyl-tenue.jpg', { type: 'image/jpeg' });
 
     const nav = navigator as Navigator & {
@@ -70,19 +96,6 @@ export default function Outfits() {
       URL.revokeObjectURL(url);
     }
   }
-
-  // Generate snapshot in background and persist URL on outfit row + local state
-  const generateSnapshotForOutfit = async (outfit: Outfit, items: ClothingItem[]) => {
-    try {
-      const url = await generateAndUploadShareSnapshot(outfit, items, pseudo);
-      if (!url) return;
-      await setOutfitShareSnapshot(outfit.id, url);
-      setOutfits(prev => prev.map(o => o.id === outfit.id ? { ...o, shareSnapshotUrl: url } : o));
-    } catch (e) {
-      console.error('generateSnapshotForOutfit failed', e);
-    }
-  };
-
   
   
 
@@ -130,40 +143,36 @@ export default function Outfits() {
 
   const handleSaveQuick = async () => {
     if (selectedIds.size < 2 || !outfitName.trim()) return;
-    const newOutfit: Outfit = {
+    await addOutfit({
       id: genId(),
       name: outfitName.trim(),
       itemIds: Array.from(selectedIds),
       createdAt: new Date().toISOString(),
-    };
-    await addOutfit(newOutfit);
+    });
     updateStreak();
     const o = await getOutfits();
     setOutfits(o);
     setSelectedIds(new Set());
     setOutfitName('');
     setView('gallery');
-    generateSnapshotForOutfit(newOutfit, getItemsByIds(newOutfit.itemIds));
   };
 
   const filledSlots = (Object.values(slots).filter(Boolean) as ClothingItem[]);
 
   const handleSaveVisual = async () => {
     if (filledSlots.length < 2 || !outfitName.trim()) return;
-    const newOutfit: Outfit = {
+    await addOutfit({
       id: genId(),
       name: outfitName.trim(),
       itemIds: filledSlots.map(i => i.id),
       createdAt: new Date().toISOString(),
-    };
-    await addOutfit(newOutfit);
+    });
     updateStreak();
     const o = await getOutfits();
     setOutfits(o);
     setSlots({});
     setOutfitName('');
     setView('gallery');
-    generateSnapshotForOutfit(newOutfit, filledSlots);
   };
 
   const confirmDeleteOutfit = async () => {
@@ -349,7 +358,7 @@ export default function Outfits() {
 
     const handleSaveFree = async () => {
       if (!canSave) return;
-      const newOutfit: Outfit = {
+      await addOutfit({
         id: genId(),
         name: outfitName.trim(),
         itemIds: freePieces.map(p => p.itemId),
@@ -361,9 +370,7 @@ export default function Outfits() {
             itemId: p.itemId, x: p.x, y: p.y, size: p.size, z: p.z,
           })),
         },
-      };
-      const itemsForSnap = freePieces.map(p => p.item);
-      await addOutfit(newOutfit);
+      });
       updateStreak();
       const o = await getOutfits();
       setOutfits(o);
@@ -371,7 +378,6 @@ export default function Outfits() {
       setFreeSelectedId(null);
       setOutfitName('');
       setView('gallery');
-      generateSnapshotForOutfit(newOutfit, itemsForSnap);
     };
 
     return (
@@ -756,6 +762,10 @@ export default function Outfits() {
                 return (
                   <div key={outfit.id} className="relative">
                     <OutfitGalleryCard
+                      ref={(el) => {
+                        if (el) cardRefs.current.set(outfit.id, el);
+                        else cardRefs.current.delete(outfit.id);
+                      }}
                       outfit={outfit}
                       items={items}
                       pseudo={pseudo}
@@ -763,7 +773,7 @@ export default function Outfits() {
                       onToggleLike={(next) => handleToggleLike(outfit, next)}
                     />
                     <button
-                      onClick={(e) => { e.stopPropagation(); handleShare(outfit); }}
+                      onClick={(e) => { e.stopPropagation(); handleShare(outfit.id); }}
                       className="absolute z-20 bg-white/70 backdrop-blur-sm rounded-full px-2 py-1 text-xs text-[#C4A882]"
                       style={{ top: 8, left: 8 }}
                     >

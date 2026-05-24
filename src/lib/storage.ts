@@ -240,7 +240,6 @@ export async function getOutfits(): Promise<Outfit[]> {
     createdAt: row.created_at,
     liked: (row as any).liked ?? false,
     layoutData: ((row as any).layout_data ?? null) as Outfit['layoutData'],
-    shareSnapshotUrl: ((row as any).share_snapshot_url ?? null) as string | null,
   }));
 }
 
@@ -252,13 +251,7 @@ export async function addOutfit(outfit: Outfit): Promise<void> {
     name: outfit.name,
     item_ids: outfit.itemIds,
     layout_data: (outfit.layoutData ?? null) as any,
-    share_snapshot_url: outfit.shareSnapshotUrl ?? null,
-  } as any);
-}
-
-export async function setOutfitShareSnapshot(id: string, url: string): Promise<void> {
-  const uid = await getUserId();
-  await supabase.from('outfits').update({ share_snapshot_url: url } as any).eq('id', id).eq('user_id', uid);
+  });
 }
 
 export async function setOutfitLiked(id: string, liked: boolean): Promise<void> {

@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClothingItem, OutfitLayoutData, UserProfile } from '@/lib/types';
-import { addOutfit, genId, saveLastOutfit, setOutfitShareSnapshot } from '@/lib/storage';
-import { generateAndUploadShareSnapshot } from '@/lib/shareSnapshot';
+import { addOutfit, genId, saveLastOutfit } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { updateStreak } from '@/lib/streak';
@@ -104,21 +103,13 @@ export default function OutfitDailyFeed({
         created_at: new Date().toISOString(),
       });
       const r = results[idx];
-      const newOutfit = {
+      await addOutfit({
         id: genId(),
         name: `Tenue du ${new Date().toLocaleDateString('fr-FR')}`,
         itemIds,
         createdAt: new Date().toISOString(),
         layoutData: r.layoutData ?? null,
-      };
-      await addOutfit(newOutfit);
-      (async () => {
-        try {
-          const { data: prof } = await supabase.from('profiles').select('pseudo').eq('id', userData.user.id).maybeSingle();
-          const url = await generateAndUploadShareSnapshot(newOutfit, items, prof?.pseudo ?? null);
-          if (url) await setOutfitShareSnapshot(newOutfit.id, url);
-        } catch (e) { console.error('snapshot bg', e); }
-      })();
+      });
       setWornIdx(idx);
       setSavedIdxs(prev => new Set(prev).add(idx));
       updateStreak();
@@ -135,26 +126,13 @@ export default function OutfitDailyFeed({
     if (editingIdx === null) return;
     try {
       const outfitId = genId();
-      const newOutfit = {
+      await addOutfit({
         id: outfitId,
         name: `Tenue du ${new Date().toLocaleDateString('fr-FR')}`,
         itemIds: newItems.map(i => i.id),
         createdAt: new Date().toISOString(),
         layoutData,
-      };
-      await addOutfit(newOutfit);
-      (async () => {
-        try {
-          const { data: u } = await supabase.auth.getUser();
-          let pseudo: string | null = null;
-          if (u.user) {
-            const { data: prof } = await supabase.from('profiles').select('pseudo').eq('id', u.user.id).maybeSingle();
-            pseudo = prof?.pseudo ?? null;
-          }
-          const url = await generateAndUploadShareSnapshot(newOutfit, newItems, pseudo);
-          if (url) await setOutfitShareSnapshot(outfitId, url);
-        } catch (e) { console.error('snapshot bg', e); }
-      })();
+      });
       const next = [...results];
       next[editingIdx] = {
         ...next[editingIdx],
