@@ -9,7 +9,7 @@ import CalendarView from '@/components/CalendarView';
 import OutfitVisualLayout, { SlotKey, SlotMap, SLOT_CONFIG } from '@/components/OutfitVisualLayout';
 import OutfitLayout from '@/components/OutfitLayout';
 import OutfitGalleryCard from '@/components/OutfitGalleryCard';
-import ShareOutfitCard from '@/components/ShareOutfitCard';
+
 import OutfitFreeCanvas, { CHIPS, ChipKey, chipMatchesItem, defaultPositionForCategory, CANVAS_W, CANVAS_H } from '@/components/OutfitFreeCanvas';
 
 // Renvoie le nom de catégorie attendu par SLOT_CONFIG (compat anciens libellés)
@@ -43,7 +43,7 @@ export default function Outfits() {
   const [outfitName, setOutfitName] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<Outfit | null>(null);
   const [pseudo, setPseudo] = useState<string | null>(null);
-  const [shareOutfit, setShareOutfit] = useState<Outfit | null>(null);
+  
 
   // Visual layout state
   const [slots, setSlots] = useState<SlotMap>({});
@@ -706,14 +706,7 @@ export default function Outfits() {
               {outfits.map(outfit => {
                 const items = getItemsByIds(outfit.itemIds);
                 return (
-                  <div key={outfit.id} className="relative">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setShareOutfit(outfit); }}
-                      className="absolute z-30 top-2 left-2 bg-white/70 backdrop-blur-sm rounded-full px-2 py-1 text-xs text-[#C4A882] active:scale-95 transition-transform"
-                      aria-label="Partager la tenue"
-                    >
-                      @Partager
-                    </button>
+                  <div key={outfit.id}>
                     <OutfitGalleryCard
                       outfit={outfit}
                       items={items}
@@ -735,14 +728,6 @@ export default function Outfits() {
         </>
       )}
 
-      {shareOutfit && (
-        <ShareOutfitCard
-          outfit={shareOutfit}
-          items={getItemsByIds(shareOutfit.itemIds)}
-          userName={pseudo || 'moi'}
-          onClose={() => setShareOutfit(null)}
-        />
-      )}
     </div>
   );
 }
