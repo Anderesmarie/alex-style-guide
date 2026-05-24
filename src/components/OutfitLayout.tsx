@@ -147,7 +147,6 @@ export default function OutfitLayout({ items, layoutData, readOnly = true, class
               <img
                 src={item.imageBase64}
                 alt={item.type}
-                crossOrigin="anonymous"
                 draggable={false}
                 style={{
                   width: '100%',
@@ -207,7 +206,6 @@ export default function OutfitLayout({ items, layoutData, readOnly = true, class
             <img
               src={item.imageBase64}
               alt={item.type}
-              crossOrigin="anonymous"
               draggable={false}
               style={{
                 width: '100%',

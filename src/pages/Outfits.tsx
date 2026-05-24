@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
-import { toBlob } from 'html-to-image';
+import { useState, useEffect } from 'react';
 import { ClothingItem, Outfit } from '@/lib/types';
 import { getWardrobe, getOutfits, addOutfit, deleteOutfit, setOutfitLiked, genId } from '@/lib/storage';
 import { generateRecommendations } from '@/lib/recommendations';
@@ -10,7 +9,7 @@ import CalendarView from '@/components/CalendarView';
 import OutfitVisualLayout, { SlotKey, SlotMap, SLOT_CONFIG } from '@/components/OutfitVisualLayout';
 import OutfitLayout from '@/components/OutfitLayout';
 import OutfitGalleryCard from '@/components/OutfitGalleryCard';
-
+import ShareOutfitCard from '@/components/ShareOutfitCard';
 import OutfitFreeCanvas, { CHIPS, ChipKey, chipMatchesItem, defaultPositionForCategory, CANVAS_W, CANVAS_H } from '@/components/OutfitFreeCanvas';
 
 // Renvoie le nom de catégorie attendu par SLOT_CONFIG (compat anciens libellés)
@@ -44,135 +43,7 @@ export default function Outfits() {
   const [outfitName, setOutfitName] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<Outfit | null>(null);
   const [pseudo, setPseudo] = useState<string | null>(null);
-  const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
-
-  async function generateAndSaveSnapshot(outfitId: string) {
-    try {
-      // Attendre que la carte soit montée dans le DOM
-      let cardEl: HTMLDivElement | undefined;
-      for (let i = 0; i < 30; i++) {
-        cardEl = cardRefs.current.get(outfitId);
-        if (cardEl) break;
-        await new Promise(r => setTimeout(r, 100));
-      }
-      if (!cardEl) {
-        console.error('Snapshot: cardEl introuvable pour', outfitId);
-        return;
-      }
-
-      // Attendre que toutes les images soient chargées
-      const images = Array.from(cardEl.querySelectorAll('img'));
-      await Promise.all(
-        images.map(img => {
-          if (img.complete && img.naturalWidth > 0) return Promise.resolve();
-          return new Promise<void>((resolve) => {
-            img.onload = () => resolve();
-            img.onerror = () => resolve();
-            setTimeout(resolve, 3000);
-          });
-        })
-      );
-      await new Promise(r => setTimeout(r, 300));
-
-      const blob = await toBlob(cardEl, {
-        quality: 0.85,
-        pixelRatio: 2,
-        skipFonts: true,
-      });
-      if (!blob) {
-        console.error('Snapshot: blob null');
-        return;
-      }
-      console.log('Snapshot blob généré:', blob.size);
-
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) return;
-
-      const fileName = `${u.user.id}/${outfitId}.jpg`;
-      const { error: uploadError } = await supabase.storage
-        .from('outfit-shares')
-        .upload(fileName, blob, {
-          contentType: 'image/jpeg',
-          upsert: true,
-        });
-      if (uploadError) {
-        console.error('Snapshot upload error:', uploadError);
-        return;
-      }
-
-      const { data } = supabase.storage
-        .from('outfit-shares')
-        .getPublicUrl(fileName);
-      console.log('Snapshot URL:', data.publicUrl);
-
-      const { error: updateError } = await supabase
-        .from('outfits')
-        .update({ share_snapshot_url: data.publicUrl })
-        .eq('id', outfitId);
-      if (updateError) {
-        console.error('Snapshot update error:', updateError);
-        return;
-      }
-      console.log('Snapshot sauvegardé avec succès !');
-    } catch (e) {
-      console.error('Snapshot error:', e);
-    }
-  }
-
-
-
-  async function handleShare(outfitId: string) {
-    const cardEl = cardRefs.current.get(outfitId);
-    if (!cardEl) return;
-
-    // Attendre que toutes les images soient chargées
-    const images = Array.from(cardEl.querySelectorAll('img'));
-    await Promise.all(
-      images.map(img => {
-        if (img.complete && img.naturalWidth > 0) {
-          return Promise.resolve();
-        }
-        return new Promise<void>((resolve) => {
-          img.onload = () => resolve();
-          img.onerror = () => resolve();
-          // Timeout de sécurité 5 secondes
-          setTimeout(resolve, 5000);
-        });
-      }),
-    );
-
-    // Attendre un frame supplémentaire
-    await new Promise(r => requestAnimationFrame(r));
-    await new Promise(r => setTimeout(r, 200));
-
-    // Capturer
-    const blob = await toBlob(cardEl, {
-      quality: 0.85,
-      pixelRatio: window.devicePixelRatio,
-      skipFonts: false,
-    });
-
-    if (!blob) return;
-
-    const file = new File([blob], 'mystyl-tenue.jpg', { type: 'image/jpeg' });
-
-    const nav = navigator as Navigator & {
-      canShare?: (d: ShareData) => boolean;
-    };
-
-    if (nav.share && nav.canShare?.({ files: [file] })) {
-      await nav.share({ files: [file] });
-    } else {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'mystyl-tenue.jpg';
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-  }
-  
-  
+  const [shareOutfit, setShareOutfit] = useState<Outfit | null>(null);
 
   // Visual layout state
   const [slots, setSlots] = useState<SlotMap>({});
@@ -218,9 +89,8 @@ export default function Outfits() {
 
   const handleSaveQuick = async () => {
     if (selectedIds.size < 2 || !outfitName.trim()) return;
-    const newId = genId();
     await addOutfit({
-      id: newId,
+      id: genId(),
       name: outfitName.trim(),
       itemIds: Array.from(selectedIds),
       createdAt: new Date().toISOString(),
@@ -231,17 +101,14 @@ export default function Outfits() {
     setSelectedIds(new Set());
     setOutfitName('');
     setView('gallery');
-    void generateAndSaveSnapshot(newId);
   };
-
 
   const filledSlots = (Object.values(slots).filter(Boolean) as ClothingItem[]);
 
   const handleSaveVisual = async () => {
     if (filledSlots.length < 2 || !outfitName.trim()) return;
-    const newId = genId();
     await addOutfit({
-      id: newId,
+      id: genId(),
       name: outfitName.trim(),
       itemIds: filledSlots.map(i => i.id),
       createdAt: new Date().toISOString(),
@@ -252,9 +119,7 @@ export default function Outfits() {
     setSlots({});
     setOutfitName('');
     setView('gallery');
-    void generateAndSaveSnapshot(newId);
   };
-
 
   const confirmDeleteOutfit = async () => {
     if (!deleteConfirm) return;
@@ -439,9 +304,8 @@ export default function Outfits() {
 
     const handleSaveFree = async () => {
       if (!canSave) return;
-      const newId = genId();
       await addOutfit({
-        id: newId,
+        id: genId(),
         name: outfitName.trim(),
         itemIds: freePieces.map(p => p.itemId),
         createdAt: new Date().toISOString(),
@@ -460,9 +324,7 @@ export default function Outfits() {
       setFreeSelectedId(null);
       setOutfitName('');
       setView('gallery');
-      void generateAndSaveSnapshot(newId);
     };
-
 
     return (
       <div className="fade-enter pb-4">
@@ -845,24 +707,20 @@ export default function Outfits() {
                 const items = getItemsByIds(outfit.itemIds);
                 return (
                   <div key={outfit.id} className="relative">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setShareOutfit(outfit); }}
+                      className="absolute z-30 top-2 left-2 bg-white/70 backdrop-blur-sm rounded-full px-2 py-1 text-xs text-[#C4A882] active:scale-95 transition-transform"
+                      aria-label="Partager la tenue"
+                    >
+                      @Partager
+                    </button>
                     <OutfitGalleryCard
-                      ref={(el) => {
-                        if (el) cardRefs.current.set(outfit.id, el);
-                        else cardRefs.current.delete(outfit.id);
-                      }}
                       outfit={outfit}
                       items={items}
                       pseudo={pseudo}
                       onClick={() => { setSelectedOutfit(outfit); setView('detail'); }}
                       onToggleLike={(next) => handleToggleLike(outfit, next)}
                     />
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleShare(outfit.id); }}
-                      className="absolute z-20 bg-white/70 backdrop-blur-sm rounded-full px-2 py-1 text-xs text-[#C4A882]"
-                      style={{ top: 8, left: 8 }}
-                    >
-                      @Partager
-                    </button>
                   </div>
                 );
               })}
@@ -877,6 +735,14 @@ export default function Outfits() {
         </>
       )}
 
+      {shareOutfit && (
+        <ShareOutfitCard
+          outfit={shareOutfit}
+          items={getItemsByIds(shareOutfit.itemIds)}
+          userName={pseudo || 'moi'}
+          onClose={() => setShareOutfit(null)}
+        />
+      )}
     </div>
   );
 }
