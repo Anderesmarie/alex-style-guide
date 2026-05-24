@@ -12,6 +12,8 @@ import OutfitGalleryCard from '@/components/OutfitGalleryCard';
 
 import OutfitFreeCanvas, { CHIPS, ChipKey, chipMatchesItem, defaultPositionForCategory, CANVAS_W, CANVAS_H } from '@/components/OutfitFreeCanvas';
 
+const ROSE_GOLD = '#C9956C';
+
 // Renvoie le nom de catégorie attendu par SLOT_CONFIG (compat anciens libellés)
 function legacyCategoryName(it: ClothingItem): string {
   const cat = getCategoryForType(it.type);
