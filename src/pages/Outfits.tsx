@@ -716,6 +716,16 @@ export default function Outfits() {
                       onClick={() => { setSelectedOutfit(outfit); setView('detail'); }}
                       onToggleLike={(next) => handleToggleLike(outfit, next)}
                     />
+                    <p style={{
+                      textAlign: 'center',
+                      fontSize: 14,
+                      fontStyle: 'italic',
+                      color: '#8B6F5E',
+                      marginTop: 8,
+                      marginBottom: 4,
+                    }}>
+                      {outfit.name || 'Tenue sans nom'}
+                    </p>
                     <button
                       onClick={() => {}}
                       className="w-full py-2.5 rounded-xl text-sm font-semibold mt-2 active:scale-[0.98] transition-transform"
