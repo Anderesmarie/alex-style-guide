@@ -715,6 +715,7 @@ export default function Outfits() {
                       pseudo={pseudo}
                       onClick={() => { setSelectedOutfit(outfit); setView('detail'); }}
                       onToggleLike={(next) => handleToggleLike(outfit, next)}
+                      hideName
                     />
                     <p style={{
                       textAlign: 'center',
