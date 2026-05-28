@@ -297,16 +297,22 @@ export default function Today() {
       setDailyCount(0);
       setSwipeResults(null);
       setSwipeComplete(false);
-      // Regenerate fresh outfits immediately (don't rely on the memoized generate closure)
+
+      // Clear today's localStorage cache so outfits are regenerated fresh
+      clearStoredToday();
+
+      // Regenerate fresh outfits immediately and re-store them
       if (enough) {
         const candidates = generateOutfits(buildEngineInput());
         const recs = candidates.map(c => c.items);
+        writeStoredToday(today, recs);
         setRecommendations(recs);
         setPendingSwipe(recs.length > 0 ? recs : null);
       } else {
         setRecommendations([]);
         setPendingSwipe(null);
       }
+
 
     } catch (e) {
       console.error('Reset error:', e);
