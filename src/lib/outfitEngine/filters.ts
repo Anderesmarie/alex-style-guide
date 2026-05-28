@@ -109,6 +109,34 @@ export function applyFilters(
     }
   }
 
+  // Dès qu'il fait chaud (tempMax >= 25), on bloque les pulls/mailles
+  // et les manteaux. Au-delà de 22°C en minimum, on bloque aussi les vestes.
+  if (tempMax >= 25) {
+    const hasSweater = items.some(it => it.subcategory === SWEATERS_SUB);
+    if (hasSweater) {
+      return block(candidate, '🚫 Trop chaud pour un pull');
+    }
+    const hasCoat = items.some(it => it.subcategory === 'Manteaux' || it.category === 'Manteaux');
+    if (hasCoat) {
+      return block(candidate, '🚫 Trop chaud pour un manteau');
+    }
+  }
+  if (tempMin >= 22) {
+    const hasJacket = items.some(it => it.subcategory === 'Vestes');
+    if (hasJacket) {
+      return block(candidate, '🚫 Trop chaud pour une veste');
+    }
+  }
+
+  // Pull + veste/manteau ensemble : seulement quand il fait vraiment frais
+  const hasSweaterLayer = items.some(it => it.subcategory === SWEATERS_SUB);
+  const hasOuterLayer = items.some(
+    it => COATS_AND_JACKETS_SUBS.includes(it.subcategory) || it.category === 'Manteaux'
+  );
+  if (hasSweaterLayer && hasOuterLayer && tempMin >= 15) {
+    return block(candidate, '🚫 Pull + veste/manteau inutile à cette température');
+  }
+
   if (tempMin < 5) {
     const hasCoat = items.some(it => it.subcategory === 'Manteaux');
     if (!hasCoat) {
