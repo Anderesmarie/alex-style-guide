@@ -35,47 +35,8 @@ interface SavedTodayData {
   results: SavedOutfitResult[];
 }
 
-async function loadTodayData(today: string, wardrobe: ClothingItem[]): Promise<{ outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[] | null> {
-  try {
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) return null;
-    const { data } = await supabase
-      .from('daily_outfits')
-      .select('results')
-      .eq('user_id', userData.user.id)
-      .eq('date', today)
-      .maybeSingle();
-    if (!data) return null;
-    const results = data.results as SavedOutfitResult[];
-    const resolved = results.map(r => {
-      const items = r.outfitIds.map(id => wardrobe.find(i => i.id === id)).filter(Boolean) as ClothingItem[];
-      return { outfit: items, liked: r.liked, layoutData: r.layoutData ?? null, savedOutfitId: r.savedOutfitId ?? null };
-    }).filter(r => r.outfit.length > 0);
-    return resolved.length > 0 ? resolved : null;
-  } catch {
-    return null;
-  }
-}
 
-async function saveTodayData(today: string, results: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[]) {
-  try {
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) return;
-    const payload: SavedOutfitResult[] = results.map(r => ({
-      outfitIds: r.outfit.map(i => i.id),
-      liked: r.liked,
-      layoutData: r.layoutData ?? null,
-      savedOutfitId: r.savedOutfitId ?? null,
-    }));
-    await supabase.from('daily_outfits').upsert({
-      user_id: userData.user.id,
-      date: today,
-      results: payload,
-    }, { onConflict: 'user_id,date' });
-  } catch (e) {
-    console.error('Error saving today data:', e);
-  }
-}
+
 
 function getAvatarFromStorage(): AvatarData {
   try {
@@ -122,15 +83,8 @@ export default function Today() {
         setUserProfile(p);
         setDailyCount(c.date === today ? c.count : 0);
 
-        // Restore today's saved results — always show them even if limit reached
-        const saved = await loadTodayData(today, w);
-        const dailyUsed = c.date === today ? c.count : 0;
-        if (saved) {
-          setSwipeResults(saved);
-          setSwipeComplete(true);
-        } else if (dailyUsed >= 3) {
-          // Ne rien faire — laisser l'écran afficher le message limite sans bloquer
-        }
+        // No cache — outfits are always generated fresh on each load
+
 
         // Fetch full profile (colorimetry, morpho, taille, corpulence, favorite_colors)
         try {
@@ -254,7 +208,7 @@ export default function Today() {
     setSwipeResults(results);
     setSwipeComplete(true);
     setPendingSwipe(null);
-    await saveTodayData(today, results);
+    // No cache — results live only in component state
     const newCount = dailyCount + 1;
     setDailyCount(newCount);
     await saveDailyCounter({ date: today, count: newCount });
@@ -269,7 +223,7 @@ export default function Today() {
 
   const handleResultsChange = (next: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[]) => {
     setSwipeResults(next);
-    saveTodayData(today, next);
+    // No cache — state-only
   };
 
   const avatarData = getAvatarFromStorage();
@@ -302,12 +256,8 @@ export default function Today() {
         await supabase
           .from('daily_counter')
           .upsert({ user_id: userData.user.id, date: today, count: 0 }, { onConflict: 'user_id,date' });
-        await supabase
-          .from('daily_outfits')
-          .delete()
-          .eq('user_id', userData.user.id)
-          .eq('date', today);
       }
+
       await saveDailyCounter({ date: today, count: 0 });
       setDailyCount(0);
       setSwipeResults(null);
