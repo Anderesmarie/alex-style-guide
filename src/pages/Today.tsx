@@ -206,13 +206,32 @@ export default function Today() {
   const generate = useCallback(async () => {
     if (!enough || swipeComplete || pendingSwipe) return;
     if (!canSuggest) return;
-    const candidates = generateOutfits(buildEngineInput());
-    const recs = candidates.map(c => c.items);
+
+    let recs: ClothingItem[][] = [];
+
+    // Try to restore today's outfits from localStorage
+    const stored = readStoredToday();
+    if (stored && stored.date === today) {
+      recs = stored.outfits
+        .map(ids => ids
+          .map(id => wardrobe.find(w => w.id === id))
+          .filter((it): it is ClothingItem => !!it))
+        .filter(o => o.length > 0);
+    }
+
+    // No valid cache for today → generate fresh and store
+    if (recs.length === 0) {
+      const candidates = generateOutfits(buildEngineInput());
+      recs = candidates.map(c => c.items);
+      writeStoredToday(today, recs);
+    }
+
     setRecommendations(recs);
     if (recs.length > 0) {
       setPendingSwipe(recs);
     }
-  }, [enough, swipeComplete, pendingSwipe, canSuggest, buildEngineInput]);
+  }, [enough, swipeComplete, pendingSwipe, canSuggest, buildEngineInput, wardrobe, today]);
+
 
   const handleSwipeComplete = useCallback(async (likes: boolean[]) => {
     if (!pendingSwipe) return;
