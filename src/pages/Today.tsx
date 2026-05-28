@@ -256,12 +256,8 @@ export default function Today() {
         await supabase
           .from('daily_counter')
           .upsert({ user_id: userData.user.id, date: today, count: 0 }, { onConflict: 'user_id,date' });
-        await supabase
-          .from('daily_outfits')
-          .delete()
-          .eq('user_id', userData.user.id)
-          .eq('date', today);
       }
+
       await saveDailyCounter({ date: today, count: 0 });
       setDailyCount(0);
       setSwipeResults(null);
