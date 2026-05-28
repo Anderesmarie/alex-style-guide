@@ -208,7 +208,7 @@ export default function Today() {
     setSwipeResults(results);
     setSwipeComplete(true);
     setPendingSwipe(null);
-    await saveTodayData(today, results);
+    // No cache — results live only in component state
     const newCount = dailyCount + 1;
     setDailyCount(newCount);
     await saveDailyCounter({ date: today, count: newCount });
@@ -223,7 +223,7 @@ export default function Today() {
 
   const handleResultsChange = (next: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[]) => {
     setSwipeResults(next);
-    saveTodayData(today, next);
+    // No cache — state-only
   };
 
   const avatarData = getAvatarFromStorage();
