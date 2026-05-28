@@ -262,8 +262,17 @@ export default function Today() {
       setDailyCount(0);
       setSwipeResults(null);
       setSwipeComplete(false);
-      setRecommendations([]);
-      setTimeout(() => generate(), 0);
+      // Regenerate fresh outfits immediately (don't rely on the memoized generate closure)
+      if (enough) {
+        const candidates = generateOutfits(buildEngineInput());
+        const recs = candidates.map(c => c.items);
+        setRecommendations(recs);
+        setPendingSwipe(recs.length > 0 ? recs : null);
+      } else {
+        setRecommendations([]);
+        setPendingSwipe(null);
+      }
+
     } catch (e) {
       console.error('Reset error:', e);
     }
