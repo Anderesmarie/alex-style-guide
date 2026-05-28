@@ -35,47 +35,8 @@ interface SavedTodayData {
   results: SavedOutfitResult[];
 }
 
-async function loadTodayData(today: string, wardrobe: ClothingItem[]): Promise<{ outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[] | null> {
-  try {
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) return null;
-    const { data } = await supabase
-      .from('daily_outfits')
-      .select('results')
-      .eq('user_id', userData.user.id)
-      .eq('date', today)
-      .maybeSingle();
-    if (!data) return null;
-    const results = data.results as SavedOutfitResult[];
-    const resolved = results.map(r => {
-      const items = r.outfitIds.map(id => wardrobe.find(i => i.id === id)).filter(Boolean) as ClothingItem[];
-      return { outfit: items, liked: r.liked, layoutData: r.layoutData ?? null, savedOutfitId: r.savedOutfitId ?? null };
-    }).filter(r => r.outfit.length > 0);
-    return resolved.length > 0 ? resolved : null;
-  } catch {
-    return null;
-  }
-}
 
-async function saveTodayData(today: string, results: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[]) {
-  try {
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) return;
-    const payload: SavedOutfitResult[] = results.map(r => ({
-      outfitIds: r.outfit.map(i => i.id),
-      liked: r.liked,
-      layoutData: r.layoutData ?? null,
-      savedOutfitId: r.savedOutfitId ?? null,
-    }));
-    await supabase.from('daily_outfits').upsert({
-      user_id: userData.user.id,
-      date: today,
-      results: payload,
-    }, { onConflict: 'user_id,date' });
-  } catch (e) {
-    console.error('Error saving today data:', e);
-  }
-}
+
 
 function getAvatarFromStorage(): AvatarData {
   try {
