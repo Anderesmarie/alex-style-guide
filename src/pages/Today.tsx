@@ -23,26 +23,42 @@ type WeatherState =
   | { status: 'city_input'; error?: string; searching?: boolean }
   | { status: 'error'; message: string };
 
-interface SavedOutfitResult {
-  outfitIds: string[];
-  liked: boolean | null;
-  layoutData?: OutfitLayoutData | null;
-  savedOutfitId?: string | null;
-}
+const TODAY_STORAGE_KEY = 'mystyl_today';
 
-interface SavedTodayData {
+interface StoredToday {
   date: string;
-  results: SavedOutfitResult[];
+  outfits: string[][]; // arrays of clothing item ids
 }
 
+function readStoredToday(): StoredToday | null {
+  try {
+    const raw = localStorage.getItem(TODAY_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed.date === 'string' && Array.isArray(parsed.outfits)) {
+      return parsed as StoredToday;
+    }
+    return null;
+  } catch { return null; }
+}
 
+function writeStoredToday(date: string, outfits: ClothingItem[][]) {
+  try {
+    const data: StoredToday = { date, outfits: outfits.map(o => o.map(i => i.id)) };
+    localStorage.setItem(TODAY_STORAGE_KEY, JSON.stringify(data));
+  } catch {}
+}
 
+function clearStoredToday() {
+  try { localStorage.removeItem(TODAY_STORAGE_KEY); } catch {}
+}
 
 function getAvatarFromStorage(): AvatarData {
   try {
     const raw = localStorage.getItem('alex_avatar');
     return raw ? JSON.parse(raw) : DEFAULT_AVATAR;
   } catch { return DEFAULT_AVATAR; }
+
 }
 
 export default function Today() {
