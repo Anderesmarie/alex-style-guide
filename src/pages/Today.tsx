@@ -23,26 +23,42 @@ type WeatherState =
   | { status: 'city_input'; error?: string; searching?: boolean }
   | { status: 'error'; message: string };
 
-interface SavedOutfitResult {
-  outfitIds: string[];
-  liked: boolean | null;
-  layoutData?: OutfitLayoutData | null;
-  savedOutfitId?: string | null;
-}
+const TODAY_STORAGE_KEY = 'mystyl_today';
 
-interface SavedTodayData {
+interface StoredToday {
   date: string;
-  results: SavedOutfitResult[];
+  outfits: string[][]; // arrays of clothing item ids
 }
 
+function readStoredToday(): StoredToday | null {
+  try {
+    const raw = localStorage.getItem(TODAY_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed.date === 'string' && Array.isArray(parsed.outfits)) {
+      return parsed as StoredToday;
+    }
+    return null;
+  } catch { return null; }
+}
 
+function writeStoredToday(date: string, outfits: ClothingItem[][]) {
+  try {
+    const data: StoredToday = { date, outfits: outfits.map(o => o.map(i => i.id)) };
+    localStorage.setItem(TODAY_STORAGE_KEY, JSON.stringify(data));
+  } catch {}
+}
 
+function clearStoredToday() {
+  try { localStorage.removeItem(TODAY_STORAGE_KEY); } catch {}
+}
 
 function getAvatarFromStorage(): AvatarData {
   try {
     const raw = localStorage.getItem('alex_avatar');
     return raw ? JSON.parse(raw) : DEFAULT_AVATAR;
   } catch { return DEFAULT_AVATAR; }
+
 }
 
 export default function Today() {
@@ -190,13 +206,32 @@ export default function Today() {
   const generate = useCallback(async () => {
     if (!enough || swipeComplete || pendingSwipe) return;
     if (!canSuggest) return;
-    const candidates = generateOutfits(buildEngineInput());
-    const recs = candidates.map(c => c.items);
+
+    let recs: ClothingItem[][] = [];
+
+    // Try to restore today's outfits from localStorage
+    const stored = readStoredToday();
+    if (stored && stored.date === today) {
+      recs = stored.outfits
+        .map(ids => ids
+          .map(id => wardrobe.find(w => w.id === id))
+          .filter((it): it is ClothingItem => !!it))
+        .filter(o => o.length > 0);
+    }
+
+    // No valid cache for today → generate fresh and store
+    if (recs.length === 0) {
+      const candidates = generateOutfits(buildEngineInput());
+      recs = candidates.map(c => c.items);
+      writeStoredToday(today, recs);
+    }
+
     setRecommendations(recs);
     if (recs.length > 0) {
       setPendingSwipe(recs);
     }
-  }, [enough, swipeComplete, pendingSwipe, canSuggest, buildEngineInput]);
+  }, [enough, swipeComplete, pendingSwipe, canSuggest, buildEngineInput, wardrobe, today]);
+
 
   const handleSwipeComplete = useCallback(async (likes: boolean[]) => {
     if (!pendingSwipe) return;
@@ -262,16 +297,22 @@ export default function Today() {
       setDailyCount(0);
       setSwipeResults(null);
       setSwipeComplete(false);
-      // Regenerate fresh outfits immediately (don't rely on the memoized generate closure)
+
+      // Clear today's localStorage cache so outfits are regenerated fresh
+      clearStoredToday();
+
+      // Regenerate fresh outfits immediately and re-store them
       if (enough) {
         const candidates = generateOutfits(buildEngineInput());
         const recs = candidates.map(c => c.items);
+        writeStoredToday(today, recs);
         setRecommendations(recs);
         setPendingSwipe(recs.length > 0 ? recs : null);
       } else {
         setRecommendations([]);
         setPendingSwipe(null);
       }
+
 
     } catch (e) {
       console.error('Reset error:', e);
