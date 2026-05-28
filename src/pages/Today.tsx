@@ -83,15 +83,8 @@ export default function Today() {
         setUserProfile(p);
         setDailyCount(c.date === today ? c.count : 0);
 
-        // Restore today's saved results — always show them even if limit reached
-        const saved = await loadTodayData(today, w);
-        const dailyUsed = c.date === today ? c.count : 0;
-        if (saved) {
-          setSwipeResults(saved);
-          setSwipeComplete(true);
-        } else if (dailyUsed >= 3) {
-          // Ne rien faire — laisser l'écran afficher le message limite sans bloquer
-        }
+        // No cache — outfits are always generated fresh on each load
+
 
         // Fetch full profile (colorimetry, morpho, taille, corpulence, favorite_colors)
         try {
