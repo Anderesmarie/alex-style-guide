@@ -79,12 +79,13 @@ function clearStoredToday() {
   try { localStorage.removeItem(TODAY_STORAGE_KEY); } catch {}
 }
 
+function getAvatarFromStorage(): AvatarData {
   try {
     const raw = localStorage.getItem('alex_avatar');
     return raw ? JSON.parse(raw) : DEFAULT_AVATAR;
   } catch { return DEFAULT_AVATAR; }
-
 }
+
 
 export default function Today() {
   const [ws, setWs] = useState<WeatherState>({ status: 'loading' });
