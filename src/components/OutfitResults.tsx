@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getThumb } from '@/lib/wardrobeImages';
 import { ClothingItem, UserProfile } from '@/lib/types';
 import { addOutfit, genId, saveLastOutfit } from '@/lib/storage';
 import { getStylingTips } from '@/lib/stylingTips';
@@ -244,10 +245,9 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
                 {r.outfit.map(item => (
                   <div key={item.id} className="aspect-square rounded-lg overflow-hidden bg-muted">
                     <img
-                      src={item.imageBase64}
-                      alt={item.type}
-                      className="w-full h-full object-cover"
-                    />
+ src={getThumb(item.imageBase64, 400)}
+ alt={item.type}
+ className="w-full h-full object-cover" loading="lazy" decoding="async" />
                   </div>
                 ))}
               </div>

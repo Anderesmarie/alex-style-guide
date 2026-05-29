@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { getThumb } from '@/lib/wardrobeImages';
 import { useNavigate } from 'react-router-dom';
 import { ClothingItem, UserProfile, STYLE_OPTIONS, OutfitLayoutData } from '@/lib/types';
 import { buildValidCustomOutfit } from '@/lib/recommendations';
@@ -133,7 +134,7 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
           <div className="grid grid-cols-2 gap-2 mb-3">
             {generatedOutfit.map(item => (
               <div key={item.id} className="aspect-square rounded-lg overflow-hidden bg-muted">
-                <img src={item.imageBase64} alt={item.type} className="w-full h-full object-cover" />
+                <img src={getThumb(item.imageBase64, 400)} alt={item.type} className="w-full h-full object-cover" loading="lazy" decoding="async" />
               </div>
             ))}
           </div>
@@ -227,7 +228,7 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
                 opacity: selectedItem && selectedItem.id !== item.id ? 0.5 : 1,
               }}
             >
-              <img src={item.imageBase64} alt={item.type} className="w-full h-full object-cover" />
+              <img src={getThumb(item.imageBase64, 400)} alt={item.type} className="w-full h-full object-cover" loading="lazy" decoding="async" />
             </button>
           ))}
         </div>

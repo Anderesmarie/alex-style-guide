@@ -60,7 +60,7 @@ export default function SilhouetteCarousel({ value, onChange }: Props) {
             minWidth: 180,
           }}
         >
-          <img src={current.image} alt={current.label} className="w-40 h-52 object-contain" />
+          <img src={current.image} alt={current.label} className="w-40 h-52 object-contain" loading="lazy" decoding="async" />
         </button>
 
         <button

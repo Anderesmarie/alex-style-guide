@@ -117,7 +117,7 @@ export default function Wishlist({ onPurchase }: Props) {
         <div className="flex flex-col gap-5 pb-24">
           {photo ? (
             <div className="relative">
-              <img src={photo} alt="pièce" className="w-full rounded-2xl object-cover max-h-64" />
+              <img src={photo} alt="pièce" className="w-full rounded-2xl object-cover max-h-64" loading="lazy" decoding="async" />
               <button onClick={() => fileRef.current?.click()} className="absolute bottom-3 right-3 bg-white/90 text-xs px-3 py-1.5 rounded-full border border-gray-200">Changer</button>
             </div>
           ) : (
@@ -181,7 +181,7 @@ export default function Wishlist({ onPurchase }: Props) {
           <button onClick={() => { setView('grid'); setSelected(null); }} className="text-2xl">←</button>
           <h1 className="text-xl font-serif font-bold flex-1 truncate">{selected.name}</h1>
         </div>
-        <img src={selected.photo} alt={selected.name} className="w-full aspect-square object-cover rounded-xl card-shadow mb-4" />
+        <img src={selected.photo} alt={selected.name} className="w-full aspect-square object-cover rounded-xl card-shadow mb-4" loading="lazy" decoding="async" />
         <div className="space-y-3">
           <div><span className="text-sm text-muted-foreground">Nom :</span> <span className="font-medium">{selected.name}</span></div>
           {selected.url && (
@@ -249,7 +249,7 @@ export default function Wishlist({ onPurchase }: Props) {
               onClick={() => { setSelected(item); setView('detail'); }}
               className="aspect-square rounded-lg overflow-hidden card-shadow active:scale-[0.96] transition-transform relative group"
             >
-              <img src={item.photo} alt={item.name} className="w-full h-full object-cover" />
+              <img src={item.photo} alt={item.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-1.5">
                 <p className="text-[10px] text-white font-medium truncate text-left">{item.name}</p>
               </div>

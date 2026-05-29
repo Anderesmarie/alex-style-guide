@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getThumb } from '@/lib/wardrobeImages';
 import { ClothingItem, Outfit } from '@/lib/types';
 import { getWardrobe, getOutfits, addOutfit, deleteOutfit, setOutfitLiked, genId } from '@/lib/storage';
 import { generateRecommendations } from '@/lib/recommendations';
@@ -244,7 +245,7 @@ export default function Outfits() {
                   onClick={() => assignToSlot(item)}
                   className="aspect-square rounded-lg overflow-hidden active:scale-[0.96] transition-transform"
                 >
-                  <img src={item.imageBase64} alt={item.type} className="w-full h-full object-cover" />
+                  <img src={getThumb(item.imageBase64, 400)} alt={item.type} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                 </button>
               ))}
             </div>
@@ -407,7 +408,7 @@ export default function Outfits() {
                       onClick={() => addPieceFromItem(item)}
                       className="aspect-square rounded-lg overflow-hidden bg-white active:scale-[0.96] transition-transform"
                     >
-                      <img src={item.imageBase64} alt={item.type} className="w-full h-full object-contain" />
+                      <img src={getThumb(item.imageBase64, 400)} alt={item.type} className="w-full h-full object-contain" loading="lazy" decoding="async" />
                     </button>
                   ))}
                 </div>
@@ -501,8 +502,8 @@ export default function Outfits() {
         {selected.length > 0 && (
           <div className="flex gap-2 overflow-x-auto no-scrollbar mb-4 pb-1">
             {selected.map(item => (
-              <img key={item.id} src={item.imageBase64} alt={item.type}
-                className="w-16 h-16 rounded-lg object-cover flex-shrink-0 ring-2 ring-primary" />
+              <img key={item.id} src={getThumb(item.imageBase64, 400)} alt={item.type}
+ className="w-16 h-16 rounded-lg object-cover flex-shrink-0 ring-2 ring-primary" loading="lazy" decoding="async" />
             ))}
           </div>
         )}
@@ -525,7 +526,7 @@ export default function Outfits() {
                 selectedIds.has(item.id) ? 'ring-3 ring-primary' : ''
               }`}
             >
-              <img src={item.imageBase64} alt={item.type} className="w-full h-full object-cover" />
+              <img src={getThumb(item.imageBase64, 400)} alt={item.type} className="w-full h-full object-cover" loading="lazy" decoding="async" />
               {selectedIds.has(item.id) && (
                 <div className="absolute top-1 right-1 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
                   ✓
@@ -580,7 +581,7 @@ export default function Outfits() {
         <div className="grid grid-cols-3 gap-2 mt-4 mb-4">
           {items.map(item => (
             <div key={item.id} className="rounded-lg overflow-hidden card-shadow">
-              <img src={item.imageBase64} alt={item.type} className="w-full aspect-square object-cover bg-white" />
+              <img src={getThumb(item.imageBase64, 400)} alt={item.type} className="w-full aspect-square object-cover bg-white" loading="lazy" decoding="async" />
               <div className="p-2 bg-card">
                 <p className="text-xs font-medium truncate">{item.type}</p>
                 <p className="text-xs text-muted-foreground truncate">{(item.color || []).join(', ')}</p>

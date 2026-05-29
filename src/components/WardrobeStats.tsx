@@ -1,4 +1,5 @@
 import { ClothingItem, Outfit } from '@/lib/types';
+import { getThumb } from '@/lib/wardrobeImages';
 
 const COLOR_MAP: Record<string, string> = {
   'blanc': '#F5F5F5', 'noir': '#2C2C2C', 'gris': '#9E9E9E', 'beige': '#D4C5A9',
@@ -75,12 +76,11 @@ export default function WardrobeStats({ wardrobe, outfits, loading }: Props) {
               <div className="flex gap-2 mb-2">
                 {neverWorn.slice(0, 3).map(i => (
                   <img
-                    key={i.id}
-                    src={i.imageBase64}
-                    alt={i.type}
-                    className="rounded-lg object-cover"
-                    style={{ width: 40, height: 40 }}
-                  />
+ key={i.id}
+ src={getThumb(i.imageBase64, 120)}
+ alt={i.type}
+ className="rounded-lg object-cover"
+ style={{ width: 40, height: 40 }} loading="lazy" decoding="async" />
                 ))}
               </div>
               <p className="text-[11px]" style={{ color: '#C9956C' }}>
@@ -156,7 +156,7 @@ export default function WardrobeStats({ wardrobe, outfits, loading }: Props) {
             <div className="space-y-2">
               {costPerWear.map(i => (
                 <div key={i.id} className="flex items-center gap-2">
-                  <img src={i.imageBase64} alt={i.type} className="rounded-lg object-cover" style={{ width: 40, height: 40 }} />
+                  <img src={getThumb(i.imageBase64, 120)} alt={i.type} className="rounded-lg object-cover" style={{ width: 40, height: 40 }} loading="lazy" decoding="async" />
                   <div className="flex-1">
                     <p className="text-xs font-medium" style={{ color: '#2C2C2C' }}>{i.type}</p>
                     <p className="text-xs font-bold" style={{ color: '#4CAF50' }}>{i.cpw.toFixed(2)}€ par port</p>

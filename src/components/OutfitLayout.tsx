@@ -1,4 +1,5 @@
 import { ClothingItem, OutfitLayoutData } from '@/lib/types';
+import { getThumb } from '@/lib/wardrobeImages';
 import { getCategoryForType, getSubcategoryForType } from '@/lib/dressingTaxonomy';
 
 type SlotCat = 'Hauts' | 'Pulls' | 'Bas' | 'Robes' | 'Manteaux' | 'Chaussures' | 'Sacs' | 'Bijoux' | 'Accessoires' | 'Autre';
@@ -131,19 +132,18 @@ export default function OutfitLayout({ items, layoutData, readOnly = true, class
       >
         {backgroundUrl && (
           <img
-            src={backgroundUrl}
-            alt=""
-            style={{
-              position: 'absolute',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              objectPosition: 'top center',
-              pointerEvents: 'none',
-              zIndex: 0,
-            }}
-          />
+ src={backgroundUrl}
+ alt=""
+ style={{
+ position: 'absolute',
+ inset: 0,
+ width: '100%',
+ height: '100%',
+ objectFit: 'cover',
+ objectPosition: 'top center',
+ pointerEvents: 'none',
+ zIndex: 0,
+ }} loading="lazy" decoding="async" />
         )}
         {sorted.map((p, i) => {
           const item = byId.get(p.itemId);
@@ -163,18 +163,17 @@ export default function OutfitLayout({ items, layoutData, readOnly = true, class
               }}
             >
               <img
-                src={item.imageBase64}
-                alt={item.type}
-                draggable={false}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain',
-                  filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.10))',
-                  pointerEvents: 'none',
-                  userSelect: 'none',
-                }}
-              />
+ src={getThumb(item.imageBase64, 600)}
+ alt={item.type}
+ draggable={false}
+ style={{
+ width: '100%',
+ height: '100%',
+ objectFit: 'contain',
+ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.10))',
+ pointerEvents: 'none',
+ userSelect: 'none',
+ }} loading="lazy" decoding="async" />
             </div>
           );
         })}
@@ -203,19 +202,18 @@ export default function OutfitLayout({ items, layoutData, readOnly = true, class
     >
       {backgroundUrl && (
         <img
-          src={backgroundUrl}
-          alt=""
-          style={{
-            position: 'absolute',
-            inset: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            objectPosition: 'top center',
-            pointerEvents: 'none',
-            zIndex: 0,
-          }}
-        />
+ src={backgroundUrl}
+ alt=""
+ style={{
+ position: 'absolute',
+ inset: 0,
+ width: '100%',
+ height: '100%',
+ objectFit: 'cover',
+ objectPosition: 'top center',
+ pointerEvents: 'none',
+ zIndex: 0,
+ }} loading="lazy" decoding="async" />
       )}
       {order.map((k, i) => {
         const item = slots[k];
@@ -238,18 +236,17 @@ export default function OutfitLayout({ items, layoutData, readOnly = true, class
             }}
           >
             <img
-              src={item.imageBase64}
-              alt={item.type}
-              draggable={false}
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'contain',
-                filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.10))',
-                pointerEvents: 'none',
-                userSelect: 'none',
-              }}
-            />
+ src={getThumb(item.imageBase64, 600)}
+ alt={item.type}
+ draggable={false}
+ style={{
+ width: '100%',
+ height: '100%',
+ objectFit: 'contain',
+ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.10))',
+ pointerEvents: 'none',
+ userSelect: 'none',
+ }} loading="lazy" decoding="async" />
           </div>
         );
       })}

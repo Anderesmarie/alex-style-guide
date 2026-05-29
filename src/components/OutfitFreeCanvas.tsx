@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
+import { getThumb } from '@/lib/wardrobeImages';
 import { ClothingItem, OutfitLayoutPiece } from '@/lib/types';
 import { getCategoryForType } from '@/lib/dressingTaxonomy';
 
@@ -216,11 +217,10 @@ export default function OutfitFreeCanvas({ pieces, onChange, selectedId, onSelec
             }}
           >
             <img
-              src={p.item.imageBase64}
-              alt={p.item.type}
-              draggable={false}
-              style={{ width: '100%', height: 'auto', display: 'block', pointerEvents: 'none' }}
-            />
+ src={getThumb(p.item.imageBase64, 600)}
+ alt={p.item.type}
+ draggable={false}
+ style={{ width: '100%', height: 'auto', display: 'block', pointerEvents: 'none' }} loading="lazy" decoding="async" />
           </div>
         );
       })}
