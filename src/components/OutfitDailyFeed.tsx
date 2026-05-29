@@ -41,24 +41,83 @@ export default function OutfitDailyFeed({
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
   const [sharingIdx, setSharingIdx] = useState<number | null>(null);
 
+  const loadImage = (url: string): Promise<HTMLImageElement> =>
+    new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = url;
+    });
+
   const handleShare = async (idx: number) => {
-    const outfitId = results[idx].savedOutfitId;
-    if (!outfitId) {
-      toast.error("Tenue non enregistrée");
-      return;
-    }
+    if (sharingIdx !== null) return;
     setSharingIdx(idx);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-outfit-share', {
-        body: { outfit_id: outfitId },
+      const result = results[idx];
+      const CANVAS_W = 360;
+      const CANVAS_H = 500;
+      const canvas = document.createElement('canvas');
+      canvas.width = CANVAS_W;
+      canvas.height = CANVAS_H;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Canvas non supporté');
+
+      // Background
+      const bg = await loadImage(SHARE_BACKGROUND_URL);
+      ctx.drawImage(bg, 0, 0, CANVAS_W, CANVAS_H);
+
+      // Pieces sorted by z ascending
+      const pieces = [...(result.layoutData?.pieces || [])].sort(
+        (a, b) => (a.z ?? 0) - (b.z ?? 0)
+      );
+
+      for (const piece of pieces) {
+        const item = result.outfit.find(i => i.id === piece.itemId);
+        if (!item) continue;
+        const src = item.imageUrl || item.imageBase64;
+        if (!src) continue;
+        try {
+          const img = await loadImage(src);
+          const w = ((piece.w ?? 0) / 100) * CANVAS_W;
+          const h = ((piece.h ?? 0) / 100) * CANVAS_H;
+          const x = (piece.x / 100) * CANVAS_W;
+          const y = ((100 - piece.y - (piece.h ?? 0)) / 100) * CANVAS_H;
+          ctx.drawImage(img, x, y, w, h);
+        } catch (err) {
+          console.warn('Image piece non chargée (CORS ?)', err);
+        }
+      }
+
+      const blob: Blob = await new Promise((resolve, reject) => {
+        canvas.toBlob(b => (b ? resolve(b) : reject(new Error('toBlob failed'))), 'image/png');
       });
-      if (error) throw error;
-      const shareUrl = (data as any)?.share_url;
-      if (!shareUrl) throw new Error('Pas d\'URL retournée');
+
+      const baseName = `tenue-${result.savedOutfitId || idx}`.replace(/[^\w.-]+/g, '_');
+      const file = new File([blob], `${baseName}.png`, { type: 'image/png' });
+
+      const navAny = navigator as any;
+      if (navAny.canShare && navAny.canShare({ files: [file] })) {
+        try {
+          await navAny.share({ files: [file], title: 'Ma tenue' });
+          return;
+        } catch {
+          // fall through
+        }
+      }
+
+      // Fallback: upload to outfit-shares
+      const path = `${baseName}-${Date.now()}.png`;
+      const { error: upErr } = await supabase.storage
+        .from('outfit-shares')
+        .upload(path, blob, { contentType: 'image/png', upsert: true });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from('outfit-shares').getPublicUrl(path);
+      const shareUrl = pub.publicUrl;
 
       if (navigator.share) {
         try {
-          await navigator.share({ url: shareUrl });
+          await navigator.share({ url: shareUrl, title: 'Ma tenue' });
         } catch {}
       } else {
         await navigator.clipboard.writeText(shareUrl);
@@ -73,6 +132,7 @@ export default function OutfitDailyFeed({
       setSharingIdx(null);
     }
   };
+
 
   const today = new Date().toISOString().split('T')[0];
 
