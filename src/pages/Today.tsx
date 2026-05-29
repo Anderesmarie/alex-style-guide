@@ -25,7 +25,6 @@ type WeatherState =
 
 const TODAY_STORAGE_KEY = 'mystyl_today';
 
-interface StoredToday {
 interface StoredSwipeResult {
   outfitIds: string[];
   liked: boolean | null;
