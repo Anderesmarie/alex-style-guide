@@ -26,8 +26,17 @@ type WeatherState =
 const TODAY_STORAGE_KEY = 'mystyl_today';
 
 interface StoredToday {
+interface StoredSwipeResult {
+  outfitIds: string[];
+  liked: boolean | null;
+  savedOutfitId?: string | null;
+}
+
+interface StoredToday {
   date: string;
   outfits: string[][]; // arrays of clothing item ids
+  swipeComplete?: boolean;
+  swipeResults?: StoredSwipeResult[];
 }
 
 function readStoredToday(): StoredToday | null {
@@ -42,10 +51,28 @@ function readStoredToday(): StoredToday | null {
   } catch { return null; }
 }
 
-function writeStoredToday(date: string, outfits: ClothingItem[][]) {
+function writeStoredToday(
+  date: string,
+  outfits: ClothingItem[][],
+  extra?: { swipeComplete?: boolean; swipeResults?: StoredSwipeResult[] }
+) {
   try {
-    const data: StoredToday = { date, outfits: outfits.map(o => o.map(i => i.id)) };
+    const data: StoredToday = {
+      date,
+      outfits: outfits.map(o => o.map(i => i.id)),
+      ...(extra ?? {}),
+    };
     localStorage.setItem(TODAY_STORAGE_KEY, JSON.stringify(data));
+  } catch {}
+}
+
+function updateStoredTodaySwipe(extra: { swipeComplete?: boolean; swipeResults?: StoredSwipeResult[] }) {
+  try {
+    const raw = localStorage.getItem(TODAY_STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    const next = { ...parsed, ...extra };
+    localStorage.setItem(TODAY_STORAGE_KEY, JSON.stringify(next));
   } catch {}
 }
 
@@ -53,7 +80,6 @@ function clearStoredToday() {
   try { localStorage.removeItem(TODAY_STORAGE_KEY); } catch {}
 }
 
-function getAvatarFromStorage(): AvatarData {
   try {
     const raw = localStorage.getItem('alex_avatar');
     return raw ? JSON.parse(raw) : DEFAULT_AVATAR;
