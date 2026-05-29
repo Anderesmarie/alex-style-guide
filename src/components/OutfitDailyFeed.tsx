@@ -39,6 +39,40 @@ export default function OutfitDailyFeed({
   const [savedIdxs, setSavedIdxs] = useState<Set<number>>(new Set());
   const [wornIdx, setWornIdx] = useState<number | null>(null);
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
+  const [sharingIdx, setSharingIdx] = useState<number | null>(null);
+
+  const handleShare = async (idx: number) => {
+    const outfitId = results[idx].savedOutfitId;
+    if (!outfitId) {
+      toast.error("Tenue non enregistrée");
+      return;
+    }
+    setSharingIdx(idx);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-outfit-share', {
+        body: { outfit_id: outfitId },
+      });
+      if (error) throw error;
+      const shareUrl = (data as any)?.share_url;
+      if (!shareUrl) throw new Error('Pas d\'URL retournée');
+
+      if (navigator.share) {
+        try {
+          await navigator.share({ url: shareUrl });
+        } catch {}
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        toast("Lien copié ! ✨", {
+          style: { backgroundColor: ROSE_GOLD, color: '#FFFFFF', border: 'none' },
+        });
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("Erreur lors du partage");
+    } finally {
+      setSharingIdx(null);
+    }
+  };
 
   const today = new Date().toISOString().split('T')[0];
 
