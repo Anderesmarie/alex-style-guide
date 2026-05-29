@@ -213,11 +213,19 @@ export default function OutfitDailyFeed({
                 <div className="mt-3 space-y-2 max-w-[360px] mx-auto">
                   {isWorn && (
                     <button
-                      onClick={() => {}}
-                      className="w-full py-3 rounded-xl text-white font-semibold text-sm active:scale-[0.98] transition-transform"
+                      onClick={() => handleShare(idx)}
+                      disabled={sharingIdx === idx}
+                      className="w-full py-3 rounded-xl text-white font-semibold text-sm active:scale-[0.98] transition-transform flex items-center justify-center gap-2 disabled:opacity-70"
                       style={{ backgroundColor: ROSE_GOLD }}
                     >
-                      📤 Partager
+                      {sharingIdx === idx ? (
+                        <span
+                          className="inline-block w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin"
+                          aria-label="Chargement"
+                        />
+                      ) : (
+                        <>📤 Partager</>
+                      )}
                     </button>
                   )}
 
