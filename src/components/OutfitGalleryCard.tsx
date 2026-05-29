@@ -74,28 +74,8 @@ export default function OutfitGalleryCard({
           </button>
         )}
 
-        {/* Capture button */}
-        <button
-          onClick={handleCapture}
-          aria-label="Capturer"
-          className="absolute z-20 active:scale-90 transition-transform"
-          style={{
-            top: 8,
-            right: hideLike ? 8 : 52,
-            background: 'rgba(255,255,255,0.9)',
-            borderRadius: 999,
-            width: 36,
-            height: 36,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-            fontSize: 16,
-            lineHeight: 1,
-          }}
-        >
-          📸
-        </button>
+
+
 
 
         <OutfitLayout
