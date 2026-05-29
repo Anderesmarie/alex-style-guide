@@ -6,6 +6,7 @@ import Onboarding from '@/components/Onboarding';
 import AppShell from '@/components/AppShell';
 import Login from '@/pages/Login';
 import ResetPassword from '@/pages/ResetPassword';
+import TestShare from '@/pages/TestShare';
 
 function MainApp() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
@@ -117,6 +118,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/test-share" element={<TestShare />} />
       <Route path="/*" element={<MainApp />} />
     </Routes>
   );
