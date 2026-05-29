@@ -288,6 +288,7 @@ export default function Today() {
         .filter(o => o.length > 0);
 
       // Also restore swipe phase if completed earlier today
+      if (stored.swipeComplete && stored.swipeResults && stored.swipeResults.length > 0) {
         restoredResults = stored.swipeResults.map(r => ({
           outfit: r.outfitIds
             .map(id => wardrobe.find(w => w.id === id))
@@ -297,7 +298,6 @@ export default function Today() {
           savedOutfitId: r.savedOutfitId ?? null,
         })).filter(r => r.outfit.length > 0);
         restoredComplete = restoredResults.length > 0;
-      }
       }
     }
 
