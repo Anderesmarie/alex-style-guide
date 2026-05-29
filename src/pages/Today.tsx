@@ -29,6 +29,7 @@ interface StoredSwipeResult {
   outfitIds: string[];
   liked: boolean | null;
   savedOutfitId?: string | null;
+  layoutData?: OutfitLayoutData | null;
 }
 
 interface StoredToday {
