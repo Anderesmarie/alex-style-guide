@@ -6,6 +6,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+const CANVAS_W = 360
+const CANVAS_H = 500
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -19,7 +22,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
-    // Lire la tenue
+    // 1. Lire la tenue
     const { data: outfit, error: outfitError } = await supabase
       .from('outfits')
       .select('id, name, item_ids, layout_data, user_id')
@@ -33,39 +36,52 @@ serve(async (req) => {
       )
     }
 
-    // Lire le pseudo depuis profils
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('username')
-      .eq('id', outfit.user_id)
-      .single()
-
-    const pseudo = profile?.username || 'MyStyl'
-    console.log('Pseudo:', pseudo)
-
-    // Lire les images des vêtements
-    const { data: garments, error: garmentError } = await supabase
+    // 2. Lire les images
+    const { data: garments } = await supabase
       .from('wardrobe')
       .select('id, image_url')
       .in('id', outfit.item_ids)
 
-    if (garmentError || !garments) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Vêtements non trouvés' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
-      )
-    }
+    const pieces = outfit.layout_data?.pieces || []
 
-    console.log('Vêtements trouvés:', garments.length)
-    garments.forEach(g => console.log('  -', g.id, '→', g.image_url?.substring(0, 60)))
+    // 3. Construire le SVG
+    const imageEmbeds = await Promise.all(
+      pieces.map(async (piece: any) => {
+        const garment = garments?.find(g => g.id === piece.itemId)
+        if (!garment?.image_url) return ''
+
+        try {
+          const res = await fetch(garment.image_url)
+          const blob = await res.arrayBuffer()
+          const b64 = btoa(String.fromCharCode(...new Uint8Array(blob)))
+          const mime = res.headers.get('content-type') || 'image/jpeg'
+
+          const px = (piece.x / 100) * CANVAS_W
+          const py = (piece.y / 100) * CANVAS_H
+          const pw = (piece.w / 100) * CANVAS_W
+          const ph = (piece.h / 100) * CANVAS_H
+
+          return `<image href="data:${mime};base64,${b64}" x="${px}" y="${py}" width="${pw}" height="${ph}" preserveAspectRatio="xMidYMid meet"/>`
+        } catch {
+          return ''
+        }
+      })
+    )
+
+    const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="${CANVAS_W}" height="${CANVAS_H}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <rect width="${CANVAS_W}" height="${CANVAS_H}" fill="#FDF8F5"/>
+  ${imageEmbeds.join('\n  ')}
+</svg>`
+
+    console.log('SVG généré, longueur:', svg.length)
 
     return new Response(
       JSON.stringify({
         success: true,
-        pseudo,
-        garments_count: garments.length,
-        garments: garments.map(g => ({ id: g.id, has_image: !!g.image_url })),
-        layout_pieces: outfit.layout_data?.pieces?.length,
+        svg_length: svg.length,
+        pieces_count: pieces.length,
+        images_embedded: imageEmbeds.filter(e => e !== '').length,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     )
