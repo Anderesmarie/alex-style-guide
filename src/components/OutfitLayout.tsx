@@ -1,4 +1,5 @@
 import { ClothingItem, OutfitLayoutData } from '@/lib/types';
+import { getThumb } from '@/lib/wardrobeImages';
 import { getCategoryForType, getSubcategoryForType } from '@/lib/dressingTaxonomy';
 
 type SlotCat = 'Hauts' | 'Pulls' | 'Bas' | 'Robes' | 'Manteaux' | 'Chaussures' | 'Sacs' | 'Bijoux' | 'Accessoires' | 'Autre';
@@ -163,7 +164,7 @@ export default function OutfitLayout({ items, layoutData, readOnly = true, class
               }}
             >
               <img
-                src={item.imageBase64}
+                src={getThumb(item.imageBase64, 600)}
                 alt={item.type}
                 draggable={false}
                 style={{
@@ -238,7 +239,7 @@ export default function OutfitLayout({ items, layoutData, readOnly = true, class
             }}
           >
             <img
-              src={item.imageBase64}
+              src={getThumb(item.imageBase64, 600)}
               alt={item.type}
               draggable={false}
               style={{

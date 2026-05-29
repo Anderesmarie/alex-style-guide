@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { getThumb } from '@/lib/wardrobeImages';
 import { ClothingItem, OutfitLayoutData, OutfitLayoutPiece } from '@/lib/types';
 import {
   LAYOUT_GRID,
@@ -345,7 +346,7 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
                 }}
               >
                 <img
-                  src={p.item.imageBase64}
+                  src={getThumb(p.item.imageBase64, 600)}
                   alt={p.item.type}
                   draggable={false}
                   style={{
@@ -487,7 +488,7 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
                         onClick={() => addPiece(it)}
                         className="aspect-square rounded-lg overflow-hidden bg-white active:scale-[0.96] transition-transform"
                       >
-                        <img src={it.imageBase64} alt={it.type} className="w-full h-full object-contain" />
+                        <img src={getThumb(it.imageBase64, 600)} alt={it.type} className="w-full h-full object-contain" />
                       </button>
                     ))}
                   </div>

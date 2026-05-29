@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { getThumb } from '@/lib/wardrobeImages';
 import { toast } from 'sonner';
 import { ClothingItem } from '@/lib/types';
 import { getWardrobe, getProfile } from '@/lib/storage';
@@ -104,7 +105,7 @@ export default function AIGenerateSection({ dateKey, onUseOutfit }: Props) {
             {generated.map(item => (
               <img
                 key={item.id}
-                src={item.imageBase64}
+                src={getThumb(item.imageBase64, 200)}
                 alt={item.type}
                 className="w-14 h-14 rounded-md object-cover flex-shrink-0"
               />

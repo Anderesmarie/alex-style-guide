@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { getThumb } from '@/lib/wardrobeImages';
 import { toast } from 'sonner';
 import { ClothingItem, Outfit, Trip, TripDay } from '@/lib/types';
 import { getTripDays, getOutfits, getWardrobe, upsertTripDay, addOutfit, genId } from '@/lib/storage';
@@ -196,7 +197,7 @@ export default function TripDetail({ trip, onBack }: Props) {
                     {items.slice(0, 5).map(item => (
                       <img
                         key={item.id}
-                        src={item.imageBase64}
+                        src={getThumb(item.imageBase64, 300)}
                         alt={item.type}
                         className="w-12 h-12 rounded-md object-cover"
                       />
@@ -275,7 +276,7 @@ export default function TripDetail({ trip, onBack }: Props) {
             <div className="grid grid-cols-3 gap-2">
               {packingItems.map(item => (
                 <div key={item.id} className="rounded-lg overflow-hidden bg-card card-shadow">
-                  <img src={item.imageBase64} alt={item.type} className="w-full aspect-square object-cover" />
+                  <img src={getThumb(item.imageBase64, 300)} alt={item.type} className="w-full aspect-square object-cover" />
                   <p className="text-[10px] px-1.5 py-1 truncate">{item.type}</p>
                 </div>
               ))}
@@ -313,7 +314,7 @@ export default function TripDetail({ trip, onBack }: Props) {
                       className="rounded-xl overflow-hidden bg-background border border-border active:scale-[0.97] transition-transform text-left"
                     >
                       {first ? (
-                        <img src={first.imageBase64} alt={o.name} className="w-full aspect-square object-cover" />
+                        <img src={getThumb(first.imageBase64, 300)} alt={o.name} className="w-full aspect-square object-cover" />
                       ) : (
                         <div className="w-full aspect-square bg-muted" />
                       )}

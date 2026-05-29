@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { getThumb } from '@/lib/wardrobeImages';
 import { ClothingItem, OCCASIONS } from '@/lib/types';
 
 const STYLES = ['Casual', 'Chic', 'Boho', 'Sportswear', 'Élégant', 'Minimaliste'];
@@ -69,7 +70,7 @@ export default function SuggestionBuilder({ wardrobe, onComplete }: Props) {
               {wardrobe.map(item => (
                 <button key={item.id} onClick={() => handlePieceSelect(item)}
                   className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 border-transparent hover:border-primary transition-colors active:scale-95">
-                  <img src={item.imageBase64} alt={item.type} className="w-full h-full object-cover" />
+                  <img src={getThumb(item.imageBase64, 200)} alt={item.type} className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { ClothingItem, COLORS, SEASONS, OCCASIONS, STYLE_OPTIONS } from '@/lib/types';
 import { getWardrobe, addClothing, updateClothing, deleteClothing, getOutfits, saveOutfits, genId, setClothingImageUrl } from '@/lib/storage';
-import { uploadWardrobeImage } from '@/lib/wardrobeImages';
+import { getThumb, uploadWardrobeImage } from '@/lib/wardrobeImages';
 import { supabase } from '@/lib/supabase';
 
 import { DRESSING_CATEGORIES, getAllTypesForCategory } from '@/lib/dressingTaxonomy';
@@ -1340,7 +1340,7 @@ export default function Dressing() {
         <button onClick={() => setView('grid')} className="text-2xl">←</button>
         <h1 className="text-xl font-serif font-bold">{selectedItem.type}</h1>
       </div>
-      <img src={selectedItem.imageBase64} alt="" className="w-full aspect-square object-contain bg-white rounded-xl card-shadow mb-4" />
+      <img src={getThumb(selectedItem.imageBase64, 300)} alt="" className="w-full aspect-square object-contain bg-white rounded-xl card-shadow mb-4" />
       <div className="space-y-3">
         <div><span className="text-sm text-muted-foreground">Couleur :</span> <span className="font-medium">{(selectedItem.color || []).join(', ')}</span></div>
         <div><span className="text-sm text-muted-foreground">Saison :</span> <span className="font-medium">{selectedItem.season.join(', ')}</span></div>
@@ -1480,7 +1480,7 @@ export default function Dressing() {
               onClick={() => { setSelectedItem(item); setView('detail'); }}
               className="aspect-square rounded-lg overflow-hidden card-shadow active:scale-[0.96] transition-transform bg-white"
             >
-              <img src={item.imageBase64} alt={item.type} loading="lazy" decoding="async" className="w-full h-full object-contain" />
+              <img src={getThumb(item.imageBase64, 300)} alt={item.type} loading="lazy" decoding="async" className="w-full h-full object-contain" />
             </button>
           ))}
         </div>
