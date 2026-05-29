@@ -367,7 +367,6 @@ export default function Today() {
       })),
     });
   };
-  };
 
 
   const avatarData = getAvatarFromStorage();
