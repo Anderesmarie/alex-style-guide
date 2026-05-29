@@ -47,6 +47,34 @@ export default function Outfits() {
   const [outfitName, setOutfitName] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<Outfit | null>(null);
   const [pseudo, setPseudo] = useState<string | null>(null);
+  const [sharingId, setSharingId] = useState<string | null>(null);
+
+  const handleShareOutfit = async (outfitId: string) => {
+    if (sharingId) return;
+    setSharingId(outfitId);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-outfit-share', {
+        body: { outfit_id: outfitId },
+      });
+      if (error) throw error;
+      const shareUrl = (data as any)?.share_url;
+      if (!shareUrl) throw new Error("Pas d'URL retournée");
+      if (navigator.share) {
+        try { await navigator.share({ url: shareUrl }); } catch {}
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        toast('Lien copié ! ✨', {
+          style: { backgroundColor: ROSE_GOLD, color: '#FFFFFF', border: 'none' },
+        });
+      }
+    } catch (e) {
+      console.error('Share error:', e);
+      toast.error('Erreur lors du partage');
+    } finally {
+      setSharingId(null);
+    }
+  };
+
   
 
   // Visual layout state
