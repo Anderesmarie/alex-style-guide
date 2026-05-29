@@ -241,7 +241,7 @@ export default function Today() {
       wardrobe,
       weatherTemp,
       3,
-      userProfile ? { ...userProfile, lifestyle: lifestyle ?? userProfile.lifestyle ?? null } : null
+      userProfile
     );
 
     return fallbackOutfits.filter(outfit => outfit.length > 0);
