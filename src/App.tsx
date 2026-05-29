@@ -6,6 +6,7 @@ import Onboarding from '@/components/Onboarding';
 import AppShell from '@/components/AppShell';
 import Login from '@/pages/Login';
 import ResetPassword from '@/pages/ResetPassword';
+import TestShare from '@/pages/TestShare';
 
 function MainApp() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
