@@ -312,7 +312,8 @@ export default function Today() {
     if (!loading && ws.status !== 'loading' && enough && !swipeComplete && recommendations.length === 0 && canSuggest) {
       generate();
     }
-  }, [loading, ws.status, enough, swipeComplete]); // eslint-disable-line
+  }, [loading, ws.status, enough, swipeComplete, recommendations.length, canSuggest, generate]); // eslint-disable-line
+
 
   const handleResultsChange = (next: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[]) => {
     setSwipeResults(next);
