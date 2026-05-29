@@ -80,10 +80,10 @@ export default function OutfitGalleryCard({
             textShadow: '0 1px 3px rgba(0,0,0,0.6)',
           }}
         >
-          <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#FFFFFF' }}>
+          <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#000000' }}>
             ✨ Générée par MyStyl
           </span>
-          <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#FFFFFF' }}>
+          <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#000000' }}>
             @{pseudo || 'moi'}
           </span>
         </div>
