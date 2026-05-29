@@ -54,3 +54,19 @@ export async function uploadWardrobeImage(
   const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
   return data.publicUrl;
 }
+
+/**
+ * Renvoie une URL transformée (resize + qualité) via Supabase Image Transformations.
+ * - Si l'entrée est une dataURL base64 (ancien format), on la renvoie telle quelle.
+ * - Sinon, on ajoute ?width=...&quality=...&resize=contain pour servir une miniature.
+ * Réduit massivement l'egress (≈ -70 à -85%).
+ */
+export function getThumb(src: string | undefined | null, width = 400, quality = 70): string {
+  if (!src) return '';
+  if (src.startsWith('data:')) return src;
+  // Évite de doubler les params si déjà transformé
+  if (src.includes('width=')) return src;
+  const sep = src.includes('?') ? '&' : '?';
+  return `${src}${sep}width=${width}&quality=${quality}&resize=contain`;
+}
+
