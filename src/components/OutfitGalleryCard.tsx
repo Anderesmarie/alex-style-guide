@@ -83,15 +83,23 @@ export default function OutfitGalleryCard({
       }
 
       // Canvas to Blob
-      const blob: Blob = await new Promise((resolve, reject) => {
-        canvas.toBlob(b => (b ? resolve(b) : reject(new Error('toBlob failed'))), 'image/png');
-      });
+      let blob: Blob;
+      try {
+        blob = await new Promise<Blob>((resolve, reject) => {
+          canvas.toBlob(b => (b ? resolve(b) : reject(new Error('toBlob failed'))), 'image/png');
+        });
+      } catch (err) {
+        console.error('Canvas tainted', err);
+        throw err;
+      }
+      console.log('Blob size:', blob.size);
 
       const fileName = `${outfit.name?.trim() || 'tenue'}.png`.replace(/[^\w.-]+/g, '_');
       const file = new File([blob], fileName, { type: 'image/png' });
 
       // Try native share with file (mobile)
       const navAny = navigator as any;
+      console.log('canShare files:', navAny.canShare?.({ files: [file] }));
       if (navAny.canShare && navAny.canShare({ files: [file] })) {
         try {
           await navAny.share({ files: [file], title: outfit.name || 'Ma tenue' });
