@@ -138,6 +138,59 @@ export default function OutfitGalleryCard({
           {displayName}
         </p>
       )}
+
+      {capturing && (
+        <div
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.92)' }}
+        >
+          <div
+            className="text-center mb-4 px-4 py-2 rounded-lg"
+            style={{
+              backgroundColor: 'rgba(255,255,255,0.95)',
+              color: '#2C2C2C',
+              fontFamily: 'Inter, sans-serif',
+              fontSize: 14,
+              fontWeight: 600,
+            }}
+          >
+            📸 Fais une capture d'écran puis partage !
+          </div>
+
+          <div className="relative w-full" style={{ maxWidth: 360 }}>
+            <OutfitLayout
+              items={items}
+              layoutData={outfit.layoutData ?? null}
+              readOnly={true}
+              backgroundUrl={SHARE_BACKGROUND_URL}
+            />
+            <div
+              className="absolute left-0 right-0 bottom-0 flex items-center justify-between px-4"
+              style={{
+                height: 36,
+                maxWidth: 360,
+                margin: '0 auto',
+                textShadow: '0 1px 3px rgba(0,0,0,0.6)',
+              }}
+            >
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#000000' }}>
+                ✨ Générée par MyStyl
+              </span>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#000000' }}>
+                @{pseudo || 'moi'}
+              </span>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setCapturing(false)}
+            className="mt-6 px-6 py-3 rounded-xl text-white font-semibold text-sm active:scale-[0.98] transition-transform"
+            style={{ backgroundColor: ROSE_GOLD }}
+          >
+            Fermer
+          </button>
+        </div>
+      )}
     </div>
   );
 }
