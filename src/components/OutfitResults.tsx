@@ -245,10 +245,9 @@ export default function OutfitResults({ results, weatherCode, temperature, userS
                 {r.outfit.map(item => (
                   <div key={item.id} className="aspect-square rounded-lg overflow-hidden bg-muted">
                     <img
-                      src={getThumb(item.imageBase64, 400)}
-                      alt={item.type}
-                      className="w-full h-full object-cover"
-                    />
+ src={getThumb(item.imageBase64, 400)}
+ alt={item.type}
+ className="w-full h-full object-cover" loading="lazy" decoding="async" />
                   </div>
                 ))}
               </div>

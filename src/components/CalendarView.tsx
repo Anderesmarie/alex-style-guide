@@ -248,10 +248,9 @@ export default function CalendarView() {
               <div className="mt-2 flex items-center justify-center">
                 {firstItem ? (
                   <img
-                    src={getThumb(firstItem.imageBase64, 200)}
-                    alt={firstItem.type}
-                    className="w-14 h-14 rounded-lg object-cover"
-                  />
+ src={getThumb(firstItem.imageBase64, 200)}
+ alt={firstItem.type}
+ className="w-14 h-14 rounded-lg object-cover" loading="lazy" decoding="async" />
                 ) : (
                   <div className="w-14 h-14 rounded-lg bg-muted flex items-center justify-center text-2xl text-muted-foreground/60">
                     +
@@ -420,7 +419,7 @@ export default function CalendarView() {
                       style={selected ? { borderColor: '#C9956C' } : undefined}
                     >
                       {item ? (
-                        <img src={getThumb(item.imageBase64, 200)} alt={o.name} className="w-24 h-24 object-cover" />
+                        <img src={getThumb(item.imageBase64, 200)} alt={o.name} className="w-24 h-24 object-cover" loading="lazy" decoding="async" />
                       ) : (
                         <div className="w-24 h-24 bg-muted" />
                       )}

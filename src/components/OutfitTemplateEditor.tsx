@@ -303,19 +303,18 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
           }}
         >
           <img
-            src="https://tseermbuwyrzcrulhxba.supabase.co/storage/v1/object/public/assets/fond-mystyl-final.png"
-            alt=""
-            style={{
-              position: 'absolute',
-              inset:  0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              objectPosition: 'top center',
-              pointerEvents: 'none',
-              zIndex: 0,
-            }}
-          />
+ src="https://tseermbuwyrzcrulhxba.supabase.co/storage/v1/object/public/assets/fond-mystyl-final.png"
+ alt=""
+ style={{
+ position: 'absolute',
+ inset: 0,
+ width: '100%',
+ height: '100%',
+ objectFit: 'cover',
+ objectPosition: 'top center',
+ pointerEvents: 'none',
+ zIndex: 0,
+ }} loading="lazy" decoding="async" />
           {pieces.map(p => {
             const isDrag = dragId === p.itemId;
             const offX = isDrag ? (dragOffset.dx / CANVAS_W) * 100 : 0;
@@ -346,17 +345,16 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
                 }}
               >
                 <img
-                  src={getThumb(p.item.imageBase64, 600)}
-                  alt={p.item.type}
-                  draggable={false}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain',
-                    filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.10))',
-                    pointerEvents: 'none',
-                  }}
-                />
+ src={getThumb(p.item.imageBase64, 600)}
+ alt={p.item.type}
+ draggable={false}
+ style={{
+ width: '100%',
+ height: '100%',
+ objectFit: 'contain',
+ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.10))',
+ pointerEvents: 'none',
+ }} loading="lazy" decoding="async" />
               </div>
             );
           })}
@@ -488,7 +486,7 @@ export default function OutfitTemplateEditor({ items, initialLayout, wardrobe, o
                         onClick={() => addPiece(it)}
                         className="aspect-square rounded-lg overflow-hidden bg-white active:scale-[0.96] transition-transform"
                       >
-                        <img src={getThumb(it.imageBase64, 600)} alt={it.type} className="w-full h-full object-contain" />
+                        <img src={getThumb(it.imageBase64, 600)} alt={it.type} className="w-full h-full object-contain" loading="lazy" decoding="async" />
                       </button>
                     ))}
                   </div>

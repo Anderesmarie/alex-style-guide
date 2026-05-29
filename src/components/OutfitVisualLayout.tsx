@@ -36,7 +36,7 @@ function SlotCell({ slotKey, item, onTap, size = 'normal' }: SlotCellProps) {
         className={base}
         disabled={isMini}
       >
-        <img src={getThumb(item.imageBase64, 200)} alt={item.type} className="w-full h-full object-cover" />
+        <img src={getThumb(item.imageBase64, 200)} alt={item.type} className="w-full h-full object-cover" loading="lazy" decoding="async" />
         {!isMini && cfg.pinned && (
           <div className="absolute top-1 right-1 text-xs">📌</div>
         )}

@@ -210,11 +210,10 @@ export default function OutfitSwiper({ outfits, weatherCode, temperature, onComp
               {currentOutfit.map(item => (
                 <div key={item.id} className="aspect-square rounded-xl overflow-hidden bg-muted">
                   <img
-                    src={getThumb(item.imageBase64, 400)}
-                    alt={item.type}
-                    className="w-full h-full object-cover"
-                    draggable={false}
-                  />
+ src={getThumb(item.imageBase64, 400)}
+ alt={item.type}
+ className="w-full h-full object-cover"
+ draggable={false} loading="lazy" decoding="async" />
                 </div>
               ))}
             </div>

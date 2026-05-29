@@ -104,11 +104,10 @@ export default function AIGenerateSection({ dateKey, onUseOutfit }: Props) {
           <div className="flex gap-1.5 mb-3 overflow-x-auto no-scrollbar">
             {generated.map(item => (
               <img
-                key={item.id}
-                src={getThumb(item.imageBase64, 200)}
-                alt={item.type}
-                className="w-14 h-14 rounded-md object-cover flex-shrink-0"
-              />
+ key={item.id}
+ src={getThumb(item.imageBase64, 200)}
+ alt={item.type}
+ className="w-14 h-14 rounded-md object-cover flex-shrink-0" loading="lazy" decoding="async" />
             ))}
           </div>
           <div className="flex gap-2">

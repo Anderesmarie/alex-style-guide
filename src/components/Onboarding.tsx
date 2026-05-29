@@ -326,7 +326,7 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
                 <div className="grid grid-cols-3 gap-2">
                   {stylePhotos.map((photo, i) => (
                     <div key={i} className="relative aspect-square rounded-lg overflow-hidden">
-                      <img src={photo} alt={`Inspo ${i + 1}`} className="w-full h-full object-cover" />
+                      <img src={photo} alt={`Inspo ${i + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                       <button onClick={() => {
                         const updated = stylePhotos.filter((_, idx) => idx !== i);
                         setStylePhotos(updated);

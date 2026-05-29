@@ -134,7 +134,7 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
           <div className="grid grid-cols-2 gap-2 mb-3">
             {generatedOutfit.map(item => (
               <div key={item.id} className="aspect-square rounded-lg overflow-hidden bg-muted">
-                <img src={getThumb(item.imageBase64, 400)} alt={item.type} className="w-full h-full object-cover" />
+                <img src={getThumb(item.imageBase64, 400)} alt={item.type} className="w-full h-full object-cover" loading="lazy" decoding="async" />
               </div>
             ))}
           </div>
@@ -228,7 +228,7 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }:
                 opacity: selectedItem && selectedItem.id !== item.id ? 0.5 : 1,
               }}
             >
-              <img src={getThumb(item.imageBase64, 400)} alt={item.type} className="w-full h-full object-cover" />
+              <img src={getThumb(item.imageBase64, 400)} alt={item.type} className="w-full h-full object-cover" loading="lazy" decoding="async" />
             </button>
           ))}
         </div>
