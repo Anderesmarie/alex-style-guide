@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { WeatherData, fetchWeatherByGeolocation, fetchWeatherByCity, getSavedCity, saveCity } from '@/lib/weather';
 import { getWardrobe, getDailyCounter, saveDailyCounter, getProfile, migrerTagCours } from '@/lib/storage';
-import { generateRecommendations } from '@/lib/recommendations';
+import { buildValidCustomOutfit, generateRecommendations } from '@/lib/recommendations';
 import { generateOutfits } from '@/lib/outfitEngine';
 import { ClothingItem, OutfitLayoutData, UserProfile } from '@/lib/types';
 import { loadBeautyProfile } from '@/lib/stylingTips';
@@ -229,6 +229,46 @@ export default function Today() {
     };
   }, [ws, weatherTemp, wardrobe, userProfile, userSeason, lifestyle]);
 
+  const generateFreshOutfits = useCallback(async () => {
+    const engineCandidates = generateOutfits(buildEngineInput());
+    const engineOutfits = engineCandidates.map(candidate => candidate.items).filter(outfit => outfit.length > 0);
+
+    if (engineOutfits.length > 0) {
+      return engineOutfits;
+    }
+
+    const fallbackOutfits = await generateRecommendations(
+      wardrobe,
+      weatherTemp,
+      3,
+      userProfile
+    );
+
+    const validFallbackOutfits = fallbackOutfits.filter(outfit => outfit.length > 0);
+    if (validFallbackOutfits.length > 0) {
+      return validFallbackOutfits;
+    }
+
+    const emergencyOutfits: ClothingItem[][] = [];
+    const globallyUsedIds = new Set<string>();
+    const occasion = buildEngineInput().occasion;
+    const style = userProfile?.styles?.[0] ?? '';
+
+    for (let i = 0; i < 3; i += 1) {
+      const outfit = buildValidCustomOutfit(wardrobe, null, occasion, style, globallyUsedIds, 8);
+      if (!outfit || outfit.length === 0) continue;
+
+      const key = outfit.map(item => item.id).sort().join(',');
+      const alreadyExists = emergencyOutfits.some(existing => existing.map(item => item.id).sort().join(',') === key);
+      if (alreadyExists) continue;
+
+      emergencyOutfits.push(outfit);
+      outfit.forEach(item => globallyUsedIds.add(item.id));
+    }
+
+    return emergencyOutfits;
+  }, [buildEngineInput, wardrobe, weatherTemp, userProfile, lifestyle]);
+
   const generate = useCallback(async () => {
     if (!enough || swipeComplete || pendingSwipe) return;
     if (!canSuggest) return;
@@ -262,8 +302,7 @@ export default function Today() {
 
     // No valid cache for today → generate fresh
     if (recs.length === 0) {
-      const candidates = generateOutfits(buildEngineInput());
-      recs = candidates.map(c => c.items);
+      recs = await generateFreshOutfits();
       // Only persist if we actually produced outfits — never cache an empty result
       if (recs.length > 0) {
         writeStoredToday(today, recs);
@@ -279,7 +318,7 @@ export default function Today() {
       setPendingSwipe(recs);
     }
 
-  }, [enough, swipeComplete, pendingSwipe, canSuggest, buildEngineInput, wardrobe, today]);
+  }, [enough, swipeComplete, pendingSwipe, canSuggest, wardrobe, today, generateFreshOutfits]);
 
 
 
@@ -371,9 +410,10 @@ export default function Today() {
 
       // Regenerate fresh outfits immediately and re-store them
       if (enough) {
-        const candidates = generateOutfits(buildEngineInput());
-        const recs = candidates.map(c => c.items);
-        writeStoredToday(today, recs);
+        const recs = await generateFreshOutfits();
+        if (recs.length > 0) {
+          writeStoredToday(today, recs);
+        }
         setRecommendations(recs);
         setPendingSwipe(recs.length > 0 ? recs : null);
       } else {
@@ -505,8 +545,7 @@ export default function Today() {
 
       <EventBanner onViewOutfits={async () => {
         if (!enough) return;
-        const candidates = generateOutfits(buildEngineInput());
-        const recs = candidates.map(c => c.items);
+        const recs = await generateFreshOutfits();
         setRecommendations(recs);
         setSwipeComplete(false);
         setSwipeResults(null);
