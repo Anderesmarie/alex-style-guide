@@ -118,7 +118,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/test-share" element={<TestShare />} />
+      
       <Route path="/*" element={<MainApp />} />
     </Routes>
   );
