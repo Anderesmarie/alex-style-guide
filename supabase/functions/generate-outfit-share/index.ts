@@ -56,7 +56,8 @@ serve(async (req) => {
 
     console.log('Garments:', garments?.length)
 
-    const pieces = outfit.layout_data?.pieces || []
+    const pieces = (outfit.layout_data?.pieces || [])
+      .sort((a: any, b: any) => a.z - b.z)
 
     // Fond MyStyl
     let bgEmbed = ''
