@@ -74,12 +74,11 @@ export default function OutfitGalleryCard({
           </button>
         )}
 
-        {/* Share button */}
+        {/* Capture button */}
         <button
-          onClick={handleShare}
-          disabled={sharing}
-          aria-label="Partager"
-          className="absolute z-20 active:scale-90 transition-transform disabled:opacity-70"
+          onClick={handleCapture}
+          aria-label="Capturer"
+          className="absolute z-20 active:scale-90 transition-transform"
           style={{
             top: 8,
             right: hideLike ? 8 : 52,
@@ -95,15 +94,9 @@ export default function OutfitGalleryCard({
             lineHeight: 1,
           }}
         >
-          {sharing ? (
-            <span
-              className="inline-block w-4 h-4 rounded-full border-2 animate-spin"
-              style={{ borderColor: ROSE_GOLD, borderTopColor: 'transparent' }}
-            />
-          ) : (
-            '📤'
-          )}
+          📸
         </button>
+
 
         <OutfitLayout
           items={items}
