@@ -39,6 +39,40 @@ export default function OutfitDailyFeed({
   const [savedIdxs, setSavedIdxs] = useState<Set<number>>(new Set());
   const [wornIdx, setWornIdx] = useState<number | null>(null);
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
+  const [sharingIdx, setSharingIdx] = useState<number | null>(null);
+
+  const handleShare = async (idx: number) => {
+    const outfitId = results[idx].savedOutfitId;
+    if (!outfitId) {
+      toast.error("Tenue non enregistrée");
+      return;
+    }
+    setSharingIdx(idx);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-outfit-share', {
+        body: { outfit_id: outfitId },
+      });
+      if (error) throw error;
+      const shareUrl = (data as any)?.share_url;
+      if (!shareUrl) throw new Error('Pas d\'URL retournée');
+
+      if (navigator.share) {
+        try {
+          await navigator.share({ url: shareUrl });
+        } catch {}
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        toast("Lien copié ! ✨", {
+          style: { backgroundColor: ROSE_GOLD, color: '#FFFFFF', border: 'none' },
+        });
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("Erreur lors du partage");
+    } finally {
+      setSharingIdx(null);
+    }
+  };
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -179,11 +213,19 @@ export default function OutfitDailyFeed({
                 <div className="mt-3 space-y-2 max-w-[360px] mx-auto">
                   {isWorn && (
                     <button
-                      onClick={() => {}}
-                      className="w-full py-3 rounded-xl text-white font-semibold text-sm active:scale-[0.98] transition-transform"
+                      onClick={() => handleShare(idx)}
+                      disabled={sharingIdx === idx}
+                      className="w-full py-3 rounded-xl text-white font-semibold text-sm active:scale-[0.98] transition-transform flex items-center justify-center gap-2 disabled:opacity-70"
                       style={{ backgroundColor: ROSE_GOLD }}
                     >
-                      📤 Partager
+                      {sharingIdx === idx ? (
+                        <span
+                          className="inline-block w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin"
+                          aria-label="Chargement"
+                        />
+                      ) : (
+                        <>📤 Partager</>
+                      )}
                     </button>
                   )}
 

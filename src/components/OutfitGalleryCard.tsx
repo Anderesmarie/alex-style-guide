@@ -1,6 +1,9 @@
+import { useState } from 'react';
 import { ClothingItem, Outfit } from '@/lib/types';
 import OutfitLayout from '@/components/OutfitLayout';
 import { SHARE_BACKGROUND_URL } from '@/lib/constants';
+import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 
 interface Props {
   outfit: Outfit & { liked?: boolean };
@@ -13,6 +16,8 @@ interface Props {
   hideName?: boolean;
 }
 
+const ROSE_GOLD = '#C9956C';
+
 export default function OutfitGalleryCard({
   outfit,
   items,
@@ -24,9 +29,40 @@ export default function OutfitGalleryCard({
   hideName,
 }: Props) {
   const liked = !!outfit.liked;
+  const [sharing, setSharing] = useState(false);
   const displayName =
     outfit.name?.trim() ||
     new Date(outfit.createdAt).toLocaleDateString('fr-FR');
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (sharing) return;
+    setSharing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-outfit-share', {
+        body: { outfit_id: outfit.id },
+      });
+      if (error) throw error;
+      const shareUrl = (data as any)?.share_url;
+      if (!shareUrl) throw new Error('Pas d\'URL retournée');
+
+      if (navigator.share) {
+        try {
+          await navigator.share({ url: shareUrl });
+        } catch {}
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        toast('Lien copié ! ✨', {
+          style: { backgroundColor: ROSE_GOLD, color: '#FFFFFF', border: 'none' },
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Erreur lors du partage');
+    } finally {
+      setSharing(false);
+    }
+  };
 
   return (
     <div className="mb-4">
@@ -62,6 +98,37 @@ export default function OutfitGalleryCard({
             {liked ? '❤️' : '🤍'}
           </button>
         )}
+
+        {/* Share button */}
+        <button
+          onClick={handleShare}
+          disabled={sharing}
+          aria-label="Partager"
+          className="absolute z-20 active:scale-90 transition-transform disabled:opacity-70"
+          style={{
+            top: 8,
+            right: hideLike ? 8 : 52,
+            background: 'rgba(255,255,255,0.9)',
+            borderRadius: 999,
+            width: 36,
+            height: 36,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+            fontSize: 16,
+            lineHeight: 1,
+          }}
+        >
+          {sharing ? (
+            <span
+              className="inline-block w-4 h-4 rounded-full border-2 animate-spin"
+              style={{ borderColor: ROSE_GOLD, borderTopColor: 'transparent' }}
+            />
+          ) : (
+            '📤'
+          )}
+        </button>
 
         <OutfitLayout
           items={items}
