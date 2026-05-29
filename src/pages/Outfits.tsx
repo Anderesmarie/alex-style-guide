@@ -777,24 +777,6 @@ export default function Outfits() {
                     }}>
                       {outfit.name || 'Tenue sans nom'}
                     </p>
-                    <button
-                      onClick={() => handleShareOutfit(outfit.id)}
-                      disabled={sharingId === outfit.id}
-                      className="w-full py-2.5 rounded-xl text-sm font-semibold mt-2 active:scale-[0.98] transition-transform flex items-center justify-center gap-2 disabled:opacity-70"
-                      style={{
-                        backgroundColor: ROSE_GOLD,
-                        color: 'white',
-                      }}
-                    >
-                      {sharingId === outfit.id ? (
-                        <span
-                          className="inline-block w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin"
-                          aria-label="Chargement"
-                        />
-                      ) : (
-                        <>📤 Partager</>
-                      )}
-                    </button>
                   </div>
                 );
               })}
