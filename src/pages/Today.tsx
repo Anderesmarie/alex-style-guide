@@ -29,6 +29,7 @@ interface StoredSwipeResult {
   outfitIds: string[];
   liked: boolean | null;
   savedOutfitId?: string | null;
+  layoutData?: OutfitLayoutData | null;
 }
 
 interface StoredToday {
@@ -293,7 +294,7 @@ export default function Today() {
             .map(id => wardrobe.find(w => w.id === id))
             .filter((it): it is ClothingItem => !!it),
           liked: r.liked,
-          layoutData: null,
+          layoutData: r.layoutData ?? null,
           savedOutfitId: r.savedOutfitId ?? null,
         })).filter(r => r.outfit.length > 0);
         restoredComplete = restoredResults.length > 0;
@@ -356,13 +357,13 @@ export default function Today() {
 
   const handleResultsChange = (next: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[]) => {
     setSwipeResults(next);
-    // Persist updated savedOutfitId / liked so they survive navigation
     updateStoredTodaySwipe({
       swipeComplete: true,
       swipeResults: next.map(r => ({
         outfitIds: r.outfit.map(i => i.id),
         liked: r.liked,
         savedOutfitId: r.savedOutfitId ?? null,
+        layoutData: r.layoutData ?? null,
       })),
     });
   };
