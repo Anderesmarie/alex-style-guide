@@ -119,6 +119,20 @@ export default function OutfitGalleryCard({
         </p>
       )}
 
+      <button
+        onClick={handleCapture}
+        className="w-full py-2.5 rounded-xl text-sm font-semibold mt-2 active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+        style={{
+          backgroundColor: ROSE_GOLD,
+          color: 'white',
+          maxWidth: 360,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+        }}
+      >
+        📸 Capturer & Partager
+      </button>
+
       {capturing && (
         <div
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center p-4"
