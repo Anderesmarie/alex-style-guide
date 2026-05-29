@@ -13,38 +13,59 @@ serve(async (req) => {
 
   try {
     const { outfit_id } = await req.json()
-    console.log('outfit_id reçu:', outfit_id)
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
-    const { data: outfit, error } = await supabase
+    // Lire la tenue
+    const { data: outfit, error: outfitError } = await supabase
       .from('outfits')
       .select('id, name, item_ids, layout_data, user_id')
       .eq('id', outfit_id)
       .single()
 
-    if (error || !outfit) {
-      console.error('Tenue non trouvée:', error)
+    if (outfitError || !outfit) {
       return new Response(
         JSON.stringify({ success: false, error: 'Tenue non trouvée' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
       )
     }
 
-    console.log('Tenue trouvée:', JSON.stringify(outfit))
-    console.log('item_ids:', outfit.item_ids)
-    console.log('layout_data:', JSON.stringify(outfit.layout_data))
+    // Lire le pseudo depuis profils
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('id', outfit.user_id)
+      .single()
+
+    const pseudo = profile?.username || 'MyStyl'
+    console.log('Pseudo:', pseudo)
+
+    // Lire les images des vêtements
+    const { data: garments, error: garmentError } = await supabase
+      .from('wardrobe')
+      .select('id, image_url')
+      .in('id', outfit.item_ids)
+
+    if (garmentError || !garments) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Vêtements non trouvés' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
+      )
+    }
+
+    console.log('Vêtements trouvés:', garments.length)
+    garments.forEach(g => console.log('  -', g.id, '→', g.image_url?.substring(0, 60)))
 
     return new Response(
       JSON.stringify({
         success: true,
-        outfit_id: outfit.id,
-        name: outfit.name,
-        item_ids: outfit.item_ids,
-        layout_data: outfit.layout_data,
+        pseudo,
+        garments_count: garments.length,
+        garments: garments.map(g => ({ id: g.id, has_image: !!g.image_url })),
+        layout_pieces: outfit.layout_data?.pieces?.length,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     )
