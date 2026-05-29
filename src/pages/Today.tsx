@@ -357,15 +357,16 @@ export default function Today() {
 
   const handleResultsChange = (next: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[]) => {
     setSwipeResults(next);
-    // Persist updated savedOutfitId / liked so they survive navigation
     updateStoredTodaySwipe({
       swipeComplete: true,
       swipeResults: next.map(r => ({
         outfitIds: r.outfit.map(i => i.id),
         liked: r.liked,
         savedOutfitId: r.savedOutfitId ?? null,
+        layoutData: r.layoutData ?? null,
       })),
     });
+  };
   };
 
 
