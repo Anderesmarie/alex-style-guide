@@ -25,9 +25,17 @@ type WeatherState =
 
 const TODAY_STORAGE_KEY = 'mystyl_today';
 
+interface StoredSwipeResult {
+  outfitIds: string[];
+  liked: boolean | null;
+  savedOutfitId?: string | null;
+}
+
 interface StoredToday {
   date: string;
   outfits: string[][]; // arrays of clothing item ids
+  swipeComplete?: boolean;
+  swipeResults?: StoredSwipeResult[];
 }
 
 function readStoredToday(): StoredToday | null {
@@ -42,10 +50,28 @@ function readStoredToday(): StoredToday | null {
   } catch { return null; }
 }
 
-function writeStoredToday(date: string, outfits: ClothingItem[][]) {
+function writeStoredToday(
+  date: string,
+  outfits: ClothingItem[][],
+  extra?: { swipeComplete?: boolean; swipeResults?: StoredSwipeResult[] }
+) {
   try {
-    const data: StoredToday = { date, outfits: outfits.map(o => o.map(i => i.id)) };
+    const data: StoredToday = {
+      date,
+      outfits: outfits.map(o => o.map(i => i.id)),
+      ...(extra ?? {}),
+    };
     localStorage.setItem(TODAY_STORAGE_KEY, JSON.stringify(data));
+  } catch {}
+}
+
+function updateStoredTodaySwipe(extra: { swipeComplete?: boolean; swipeResults?: StoredSwipeResult[] }) {
+  try {
+    const raw = localStorage.getItem(TODAY_STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    const next = { ...parsed, ...extra };
+    localStorage.setItem(TODAY_STORAGE_KEY, JSON.stringify(next));
   } catch {}
 }
 
@@ -58,8 +84,8 @@ function getAvatarFromStorage(): AvatarData {
     const raw = localStorage.getItem('alex_avatar');
     return raw ? JSON.parse(raw) : DEFAULT_AVATAR;
   } catch { return DEFAULT_AVATAR; }
-
 }
+
 
 export default function Today() {
   const [ws, setWs] = useState<WeatherState>({ status: 'loading' });
@@ -208,6 +234,8 @@ export default function Today() {
     if (!canSuggest) return;
 
     let recs: ClothingItem[][] = [];
+    let restoredResults: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[] | null = null;
+    let restoredComplete = false;
 
     // Try to restore today's outfits from localStorage
     const stored = readStoredToday();
@@ -217,6 +245,19 @@ export default function Today() {
           .map(id => wardrobe.find(w => w.id === id))
           .filter((it): it is ClothingItem => !!it))
         .filter(o => o.length > 0);
+
+      // Also restore swipe phase if completed earlier today
+      if (stored.swipeComplete && stored.swipeResults && stored.swipeResults.length > 0) {
+        restoredResults = stored.swipeResults.map(r => ({
+          outfit: r.outfitIds
+            .map(id => wardrobe.find(w => w.id === id))
+            .filter((it): it is ClothingItem => !!it),
+          liked: r.liked,
+          layoutData: null,
+          savedOutfitId: r.savedOutfitId ?? null,
+        })).filter(r => r.outfit.length > 0);
+        restoredComplete = restoredResults.length > 0;
+      }
     }
 
     // No valid cache for today → generate fresh and store
@@ -227,10 +268,15 @@ export default function Today() {
     }
 
     setRecommendations(recs);
-    if (recs.length > 0) {
+    if (restoredComplete && restoredResults) {
+      setSwipeResults(restoredResults);
+      setSwipeComplete(true);
+      setPendingSwipe(null);
+    } else if (recs.length > 0) {
       setPendingSwipe(recs);
     }
   }, [enough, swipeComplete, pendingSwipe, canSuggest, buildEngineInput, wardrobe, today]);
+
 
 
   const handleSwipeComplete = useCallback(async (likes: boolean[]) => {
@@ -243,7 +289,15 @@ export default function Today() {
     setSwipeResults(results);
     setSwipeComplete(true);
     setPendingSwipe(null);
-    // No cache — results live only in component state
+    // Persist swipe state so returning to the page restores results instead of regenerating
+    updateStoredTodaySwipe({
+      swipeComplete: true,
+      swipeResults: results.map(r => ({
+        outfitIds: r.outfit.map(i => i.id),
+        liked: r.liked,
+        savedOutfitId: null,
+      })),
+    });
     const newCount = dailyCount + 1;
     setDailyCount(newCount);
     await saveDailyCounter({ date: today, count: newCount });
@@ -258,8 +312,17 @@ export default function Today() {
 
   const handleResultsChange = (next: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[]) => {
     setSwipeResults(next);
-    // No cache — state-only
+    // Persist updated savedOutfitId / liked so they survive navigation
+    updateStoredTodaySwipe({
+      swipeComplete: true,
+      swipeResults: next.map(r => ({
+        outfitIds: r.outfit.map(i => i.id),
+        liked: r.liked,
+        savedOutfitId: r.savedOutfitId ?? null,
+      })),
+    });
   };
+
 
   const avatarData = getAvatarFromStorage();
 
