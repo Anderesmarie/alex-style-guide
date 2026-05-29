@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { WeatherData, fetchWeatherByGeolocation, fetchWeatherByCity, getSavedCity, saveCity } from '@/lib/weather';
 import { getWardrobe, getDailyCounter, saveDailyCounter, getProfile, migrerTagCours } from '@/lib/storage';
-import { generateRecommendations } from '@/lib/recommendations';
+import { buildValidCustomOutfit, generateRecommendations } from '@/lib/recommendations';
 import { generateOutfits } from '@/lib/outfitEngine';
 import { ClothingItem, OutfitLayoutData, UserProfile } from '@/lib/types';
 import { loadBeautyProfile } from '@/lib/stylingTips';
@@ -244,7 +244,29 @@ export default function Today() {
       userProfile
     );
 
-    return fallbackOutfits.filter(outfit => outfit.length > 0);
+    const validFallbackOutfits = fallbackOutfits.filter(outfit => outfit.length > 0);
+    if (validFallbackOutfits.length > 0) {
+      return validFallbackOutfits;
+    }
+
+    const emergencyOutfits: ClothingItem[][] = [];
+    const globallyUsedIds = new Set<string>();
+    const occasion = buildEngineInput().occasion;
+    const style = userProfile?.styles?.[0] ?? '';
+
+    for (let i = 0; i < 3; i += 1) {
+      const outfit = buildValidCustomOutfit(wardrobe, null, occasion, style, globallyUsedIds, 8);
+      if (!outfit || outfit.length === 0) continue;
+
+      const key = outfit.map(item => item.id).sort().join(',');
+      const alreadyExists = emergencyOutfits.some(existing => existing.map(item => item.id).sort().join(',') === key);
+      if (alreadyExists) continue;
+
+      emergencyOutfits.push(outfit);
+      outfit.forEach(item => globallyUsedIds.add(item.id));
+    }
+
+    return emergencyOutfits;
   }, [buildEngineInput, wardrobe, weatherTemp, userProfile, lifestyle]);
 
   const generate = useCallback(async () => {
