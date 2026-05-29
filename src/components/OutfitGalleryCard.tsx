@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { ClothingItem, Outfit } from '@/lib/types';
 import OutfitLayout from '@/components/OutfitLayout';
 import { SHARE_BACKGROUND_URL } from '@/lib/constants';
-import { supabase } from '@/lib/supabase';
-import { toast } from 'sonner';
+
 
 interface Props {
   outfit: Outfit & { liked?: boolean };
