@@ -52,28 +52,48 @@ export default function Outfits() {
   const handleShareOutfit = async (outfitId: string) => {
     if (sharingId) return;
     setSharingId(outfitId);
+    console.log('[share] Début pour outfit', outfitId);
     try {
       const { data, error } = await supabase.functions.invoke('generate-outfit-share', {
         body: { outfit_id: outfitId },
       });
+      console.log('[share] Réponse:', { data, error });
       if (error) throw error;
       const shareUrl = (data as any)?.share_url;
       if (!shareUrl) throw new Error("Pas d'URL retournée");
+
+      // Try native share first
       if (navigator.share) {
-        try { await navigator.share({ url: shareUrl }); } catch {}
-      } else {
-        await navigator.clipboard.writeText(shareUrl);
-        toast('Lien copié ! ✨', {
-          style: { backgroundColor: ROSE_GOLD, color: '#FFFFFF', border: 'none' },
-        });
+        try {
+          await navigator.share({ url: shareUrl });
+          return;
+        } catch (err) {
+          console.warn('[share] navigator.share annulé/échec', err);
+        }
       }
-    } catch (e) {
-      console.error('Share error:', e);
-      toast.error('Erreur lors du partage');
+
+      // Fallback: clipboard
+      let copied = false;
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        copied = true;
+      } catch (err) {
+        console.warn('[share] clipboard.writeText échec', err);
+      }
+
+      toast(copied ? 'Lien copié ! ✨' : 'Lien prêt à partager', {
+        description: shareUrl,
+        duration: 10000,
+        style: { backgroundColor: ROSE_GOLD, color: '#FFFFFF', border: 'none' },
+      });
+    } catch (e: any) {
+      console.error('[share] Erreur:', e);
+      toast.error(`Erreur partage : ${e?.message ?? 'inconnue'}`);
     } finally {
       setSharingId(null);
     }
   };
+
 
   
 
