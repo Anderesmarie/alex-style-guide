@@ -160,19 +160,16 @@ export default function OutfitDailyFeed({
                 <div
                   className="absolute left-0 right-0 bottom-0 flex items-center justify-between px-4"
                   style={{
-                    background: 'rgba(255,255,255,0.85)',
                     height: 36,
-                    backdropFilter: 'blur(4px)',
-                    borderBottomLeftRadius: 16,
-                    borderBottomRightRadius: 16,
                     maxWidth: 360,
                     margin: '0 auto',
+                    textShadow: '0 1px 3px rgba(0,0,0,0.6)',
                   }}
                 >
-                  <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#9CA3AF' }}>
+                  <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#FFFFFF' }}>
                     ✨ Générée par MyStyl
                   </span>
-                  <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#9CA3AF' }}>
+                  <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: '#FFFFFF' }}>
                     @{pseudo || 'moi'}
                   </span>
                 </div>
