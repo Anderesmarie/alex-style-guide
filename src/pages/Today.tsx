@@ -260,11 +260,14 @@ export default function Today() {
       }
     }
 
-    // No valid cache for today → generate fresh and store
+    // No valid cache for today → generate fresh
     if (recs.length === 0) {
       const candidates = generateOutfits(buildEngineInput());
       recs = candidates.map(c => c.items);
-      writeStoredToday(today, recs);
+      // Only persist if we actually produced outfits — never cache an empty result
+      if (recs.length > 0) {
+        writeStoredToday(today, recs);
+      }
     }
 
     setRecommendations(recs);
@@ -275,6 +278,7 @@ export default function Today() {
     } else if (recs.length > 0) {
       setPendingSwipe(recs);
     }
+
   }, [enough, swipeComplete, pendingSwipe, canSuggest, buildEngineInput, wardrobe, today]);
 
 
