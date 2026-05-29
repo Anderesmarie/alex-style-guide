@@ -289,7 +289,15 @@ export default function Today() {
     setSwipeResults(results);
     setSwipeComplete(true);
     setPendingSwipe(null);
-    // No cache — results live only in component state
+    // Persist swipe state so returning to the page restores results instead of regenerating
+    updateStoredTodaySwipe({
+      swipeComplete: true,
+      swipeResults: results.map(r => ({
+        outfitIds: r.outfit.map(i => i.id),
+        liked: r.liked,
+        savedOutfitId: null,
+      })),
+    });
     const newCount = dailyCount + 1;
     setDailyCount(newCount);
     await saveDailyCounter({ date: today, count: newCount });
@@ -304,8 +312,17 @@ export default function Today() {
 
   const handleResultsChange = (next: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[]) => {
     setSwipeResults(next);
-    // No cache — state-only
+    // Persist updated savedOutfitId / liked so they survive navigation
+    updateStoredTodaySwipe({
+      swipeComplete: true,
+      swipeResults: next.map(r => ({
+        outfitIds: r.outfit.map(i => i.id),
+        liked: r.liked,
+        savedOutfitId: r.savedOutfitId ?? null,
+      })),
+    });
   };
+
 
   const avatarData = getAvatarFromStorage();
 
