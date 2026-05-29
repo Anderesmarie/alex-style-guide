@@ -77,13 +77,14 @@ serve(async (req) => {
     console.log('SVG généré, longueur:', svg.length)
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        svg_length: svg.length,
-        pieces_count: pieces.length,
-        images_embedded: imageEmbeds.filter(e => e !== '').length,
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+      svg,
+      {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'image/svg+xml'
+        },
+        status: 200
+      }
     )
 
   } catch (error) {
