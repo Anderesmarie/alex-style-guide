@@ -47,52 +47,8 @@ export default function Outfits() {
   const [outfitName, setOutfitName] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<Outfit | null>(null);
   const [pseudo, setPseudo] = useState<string | null>(null);
-  const [sharingId, setSharingId] = useState<string | null>(null);
 
-  const handleShareOutfit = async (outfitId: string) => {
-    if (sharingId) return;
-    setSharingId(outfitId);
-    console.log('[share] Début pour outfit', outfitId);
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-outfit-share', {
-        body: { outfit_id: outfitId },
-      });
-      console.log('[share] Réponse:', { data, error });
-      if (error) throw error;
-      const shareUrl = (data as any)?.share_url;
-      if (!shareUrl) throw new Error("Pas d'URL retournée");
 
-      // Try native share first
-      if (navigator.share) {
-        try {
-          await navigator.share({ url: shareUrl });
-          return;
-        } catch (err) {
-          console.warn('[share] navigator.share annulé/échec', err);
-        }
-      }
-
-      // Fallback: clipboard
-      let copied = false;
-      try {
-        await navigator.clipboard.writeText(shareUrl);
-        copied = true;
-      } catch (err) {
-        console.warn('[share] clipboard.writeText échec', err);
-      }
-
-      toast(copied ? 'Lien copié ! ✨' : 'Lien prêt à partager', {
-        description: shareUrl,
-        duration: 10000,
-        style: { backgroundColor: ROSE_GOLD, color: '#FFFFFF', border: 'none' },
-      });
-    } catch (e: any) {
-      console.error('[share] Erreur:', e);
-      toast.error(`Erreur partage : ${e?.message ?? 'inconnue'}`);
-    } finally {
-      setSharingId(null);
-    }
-  };
 
 
   
@@ -777,24 +733,6 @@ export default function Outfits() {
                     }}>
                       {outfit.name || 'Tenue sans nom'}
                     </p>
-                    <button
-                      onClick={() => handleShareOutfit(outfit.id)}
-                      disabled={sharingId === outfit.id}
-                      className="w-full py-2.5 rounded-xl text-sm font-semibold mt-2 active:scale-[0.98] transition-transform flex items-center justify-center gap-2 disabled:opacity-70"
-                      style={{
-                        backgroundColor: ROSE_GOLD,
-                        color: 'white',
-                      }}
-                    >
-                      {sharingId === outfit.id ? (
-                        <span
-                          className="inline-block w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin"
-                          aria-label="Chargement"
-                        />
-                      ) : (
-                        <>📤 Partager</>
-                      )}
-                    </button>
                   </div>
                 );
               })}
