@@ -76,15 +76,41 @@ serve(async (req) => {
 
     console.log('SVG généré, longueur:', svg.length)
 
+    // 4. Upload du SVG dans le bucket outfit-shares
+    const filePath = `${outfit_id}.svg`
+    const { error: uploadError } = await supabase.storage
+      .from('outfit-shares')
+      .upload(filePath, new Blob([svg], { type: 'image/svg+xml' }), {
+        contentType: 'image/svg+xml',
+        upsert: true,
+      })
+
+    if (uploadError) {
+      console.error('Erreur upload:', uploadError)
+      throw uploadError
+    }
+
+    // 5. Récupérer l'URL publique
+    const { data: publicData } = supabase.storage
+      .from('outfit-shares')
+      .getPublicUrl(filePath)
+
+    const shareUrl = `${publicData.publicUrl}?t=${Date.now()}`
+
+    // 6. Mettre à jour la ligne outfits
+    const { error: updateError } = await supabase
+      .from('outfits')
+      .update({ share_snapshot_url: shareUrl })
+      .eq('id', outfit_id)
+
+    if (updateError) {
+      console.error('Erreur update:', updateError)
+      throw updateError
+    }
+
     return new Response(
-      svg,
-      {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'image/svg+xml'
-        },
-        status: 200
-      }
+      JSON.stringify({ success: true, share_url: shareUrl }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     )
 
   } catch (error) {
