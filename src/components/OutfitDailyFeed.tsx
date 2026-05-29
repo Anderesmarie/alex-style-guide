@@ -188,10 +188,10 @@ export default function OutfitDailyFeed({
                   {isWorn && (
                     <button
                       onClick={() => handleCapture(idx)}
-                      className="w-full py-3 rounded-xl text-white font-semibold text-sm active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
-                      style={{ backgroundColor: ROSE_GOLD }}
+                      className="w-full py-2.5 rounded-xl text-sm font-semibold active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+                      style={{ backgroundColor: ROSE_GOLD, color: 'white' }}
                     >
-                      📸 Capturer
+                      📸 Capturer & Partager
                     </button>
                   )}
 
