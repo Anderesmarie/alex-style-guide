@@ -91,6 +91,28 @@ function getAvatarFromStorage(): AvatarData {
 export default function Today() {
   const [ws, setWs] = useState<WeatherState>({ status: 'loading' });
   const [cityInput, setCityInput] = useState('');
+  const [editingCity, setEditingCity] = useState(false);
+  const [editCityValue, setEditCityValue] = useState('');
+  const [editCityError, setEditCityError] = useState<string | null>(null);
+  const [editCityLoading, setEditCityLoading] = useState(false);
+
+  const submitEditCity = async () => {
+    const name = editCityValue.trim();
+    if (!name) return;
+    setEditCityLoading(true);
+    setEditCityError(null);
+    try {
+      const data = await fetchWeatherByCity(name);
+      setWs({ status: 'done', data });
+      saveCity(data.city || name);
+      setEditingCity(false);
+      setEditCityValue('');
+    } catch {
+      setEditCityError('Ville non trouvée');
+    } finally {
+      setEditCityLoading(false);
+    }
+  };
   const [recommendations, setRecommendations] = useState<ClothingItem[][]>([]);
   const [swipeResults, setSwipeResults] = useState<{ outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[] | null>(null);
   const [swipeComplete, setSwipeComplete] = useState(false);
