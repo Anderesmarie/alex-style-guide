@@ -833,7 +833,7 @@ export async function generateRecommendations(
 
     const rankedPool = rankPool(pool);
     const missing = count - results.length;
-    const generated = collectOutfits(rankedPool, missing, temperature, blockedKeys, seenKeys);
+    const generated = collectOutfits(rankedPool, missing, temperature, blockedKeys, seenKeys, tempMin, tempMax, amplitude);
     results.push(...generated);
   }
 
