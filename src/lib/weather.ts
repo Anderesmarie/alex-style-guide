@@ -7,6 +7,9 @@ export interface WeatherData {
   tempMin?: number;
   tempMax?: number;
   amplitude?: number;
+  windspeed: number;
+  isRainy: boolean;
+  isWindy: boolean;
 }
 
 const weatherMap: Record<number, { emoji: string; desc: string }> = {
