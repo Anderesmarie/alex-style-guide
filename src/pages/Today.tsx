@@ -242,7 +242,11 @@ export default function Today() {
       wardrobe,
       weatherTemp,
       3,
-      userProfile
+      userProfile,
+      ws.status === 'done' ? ws.data.tempMin : undefined,
+      ws.status === 'done' ? ws.data.tempMax : undefined,
+      ws.status === 'done' ? ws.data.isRainy : false,
+      ws.status === 'done' ? ws.data.isWindy : false
     );
 
     const validFallbackOutfits = fallbackOutfits.filter(outfit => outfit.length > 0);
