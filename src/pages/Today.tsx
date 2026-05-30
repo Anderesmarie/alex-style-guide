@@ -91,6 +91,28 @@ function getAvatarFromStorage(): AvatarData {
 export default function Today() {
   const [ws, setWs] = useState<WeatherState>({ status: 'loading' });
   const [cityInput, setCityInput] = useState('');
+  const [editingCity, setEditingCity] = useState(false);
+  const [editCityValue, setEditCityValue] = useState('');
+  const [editCityError, setEditCityError] = useState<string | null>(null);
+  const [editCityLoading, setEditCityLoading] = useState(false);
+
+  const submitEditCity = async () => {
+    const name = editCityValue.trim();
+    if (!name) return;
+    setEditCityLoading(true);
+    setEditCityError(null);
+    try {
+      const data = await fetchWeatherByCity(name);
+      setWs({ status: 'done', data });
+      saveCity(data.city || name);
+      setEditingCity(false);
+      setEditCityValue('');
+    } catch {
+      setEditCityError('Ville non trouvée');
+    } finally {
+      setEditCityLoading(false);
+    }
+  };
   const [recommendations, setRecommendations] = useState<ClothingItem[][]>([]);
   const [swipeResults, setSwipeResults] = useState<{ outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[] | null>(null);
   const [swipeComplete, setSwipeComplete] = useState(false);
@@ -507,8 +529,44 @@ export default function Today() {
               {typeof ws.data.amplitude === 'number' && ws.data.amplitude >= 8 && ws.data.amplitude < 15 && (
                 <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>Pensez à une couche amovible 🧣</p>
               )}
-              {ws.data.city && (
-                <p className="text-xs text-muted-foreground mt-0.5">📍 {ws.data.city}</p>
+              {ws.data.city && !editingCity && (
+                <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+                  📍 {ws.data.city}
+                  <button
+                    type="button"
+                    onClick={() => { setEditingCity(true); setEditCityValue(ws.status === 'done' ? (ws.data.city || '') : ''); setEditCityError(null); }}
+                    className="text-xs hover:opacity-70"
+                    aria-label="Modifier la ville"
+                  >
+                    ✏️
+                  </button>
+                </p>
+              )}
+              {editingCity && (
+                <div className="mt-1">
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="text"
+                      value={editCityValue}
+                      onChange={(e) => setEditCityValue(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') submitEditCity(); }}
+                      placeholder="Nouvelle ville"
+                      className="text-xs px-2 py-1 rounded border border-input bg-background w-32"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={submitEditCity}
+                      disabled={editCityLoading}
+                      className="text-xs px-2 py-1 rounded bg-primary text-primary-foreground disabled:opacity-50"
+                    >
+                      {editCityLoading ? '...' : 'OK'}
+                    </button>
+                  </div>
+                  {editCityError && (
+                    <p className="text-xs text-destructive mt-0.5">{editCityError}</p>
+                  )}
+                </div>
               )}
             </div>
           </div>
