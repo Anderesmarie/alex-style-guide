@@ -45,12 +45,15 @@ function parseWeather(data: any, city?: string): WeatherData {
     description: info.desc,
     emoji: info.emoji,
     city,
+    windspeed: 0,
+    isRainy: false,
+    isWindy: false,
   };
 }
 
 async function fetchWeatherByCoords(lat: number, lon: number, city?: string): Promise<WeatherData> {
   const res = await fetch(
-    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m&timezone=auto&forecast_days=1`,
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m&timezone=auto&forecast_days=1&wind_speed_unit=kmh`,
   );
   if (!res.ok) throw new Error("API indisponible");
   const data = await res.json();
@@ -70,6 +73,13 @@ async function fetchWeatherByCoords(lat: number, lon: number, city?: string): Pr
   if (tempMin !== null) weather.tempMin = tempMin;
   if (tempMax !== null) weather.tempMax = tempMax;
   if (tempMin !== null && tempMax !== null) weather.amplitude = tempMax - tempMin;
+  const cw = data.current_weather;
+  const windspeed = Math.round(cw?.windspeed ?? 0);
+  const isRainy = [51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99].includes(cw?.weathercode);
+  const isWindy = windspeed > 20;
+  weather.windspeed = windspeed;
+  weather.isRainy = isRainy;
+  weather.isWindy = isWindy;
   return weather;
 }
 
