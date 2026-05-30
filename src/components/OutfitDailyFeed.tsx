@@ -112,13 +112,13 @@ export default function OutfitDailyFeed({
     });
   };
 
-  const handleEditorSave = async (newItems: ClothingItem[], layoutData: OutfitLayoutData) => {
+  const handleEditorSave = async (newItems: ClothingItem[], layoutData: OutfitLayoutData, name?: string) => {
     if (editingIdx === null) return;
     try {
       const outfitId = genId();
       await addOutfit({
         id: outfitId,
-        name: `Tenue du ${new Date().toLocaleDateString('fr-FR')}`,
+        name: (name && name.trim()) || `Tenue du ${new Date().toLocaleDateString('fr-FR')}`,
         itemIds: newItems.map(i => i.id),
         createdAt: new Date().toISOString(),
         layoutData,
