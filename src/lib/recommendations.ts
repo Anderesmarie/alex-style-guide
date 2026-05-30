@@ -558,7 +558,10 @@ function collectOutfits(
   targetCount: number,
   temperature: number | null,
   blockedKeys: Set<string>,
-  seenKeys: Set<string>
+  seenKeys: Set<string>,
+  tempMin?: number,
+  tempMax?: number,
+  amplitude = 0
 ): ClothingItem[][] {
   const results: ClothingItem[][] = [];
   let attempts = 0;
@@ -572,6 +575,32 @@ function collectOutfits(
 
     const key = outfit.map(i => i.id).sort().join(',');
     if (blockedKeys.has(key) || seenKeys.has(key)) continue;
+
+    const hasCouche = outfit.some(p => {
+      const c = (p.category || '').toLowerCase();
+      return c.includes('manteaux') || c.includes('vestes');
+    });
+    const hasPull = outfit.some(p => {
+      const t = (p.type || '').toLowerCase();
+      return t.includes('pull') || t.includes('sweat') || t.includes('gilet');
+    });
+    const hasTshirt = outfit.some(p => {
+      const t = (p.type || '').toLowerCase();
+      return t.includes('t-shirt') || t.includes('crop') || t.includes('débardeur') || t.includes('body');
+    });
+
+    let ampScore = 0;
+    if (amplitude >= 15 && hasCouche) ampScore += 3;
+    if (amplitude >= 10 && hasCouche) ampScore += 2;
+    if (amplitude >= 10 && !hasCouche) ampScore -= 2;
+    if (hasTshirt && hasPull && tempMin !== undefined && tempMin < 15) ampScore += 3;
+    if (hasTshirt && hasCouche && tempMin !== undefined && tempMin < 15 && tempMax !== undefined && tempMax >= 17) ampScore += 3;
+    if (hasTshirt && hasPull && hasCouche && amplitude >= 10) ampScore += 4;
+    if (hasPull && !hasTshirt && !hasCouche && tempMin !== undefined && tempMin < 15) ampScore -= 3;
+    if (hasTshirt && !hasPull && !hasCouche && tempMin !== undefined && tempMin < 12) ampScore -= 3;
+    if (!hasCouche && !hasPull && tempMin !== undefined && tempMin < 13) ampScore -= 2;
+
+    if (ampScore < -3) continue;
 
     seenKeys.add(key);
     results.push(outfit);
@@ -728,7 +757,6 @@ export async function generateRecommendations(
 ): Promise<ClothingItem[][]> {
   const tAvg = (tempMin !== undefined && tempMax !== undefined) ? (tempMin + tempMax) / 2 : null;
   const amplitude = (tempMin !== undefined && tempMax !== undefined) ? tempMax - tempMin : 0;
-  void amplitude;
   const lastOutfit = await getLastOutfit();
   const rejected = await getRejected();
   const lastKey = lastOutfit.sort().join(',');
@@ -805,7 +833,7 @@ export async function generateRecommendations(
 
     const rankedPool = rankPool(pool);
     const missing = count - results.length;
-    const generated = collectOutfits(rankedPool, missing, temperature, blockedKeys, seenKeys);
+    const generated = collectOutfits(rankedPool, missing, temperature, blockedKeys, seenKeys, tempMin, tempMax, amplitude);
     results.push(...generated);
   }
 
