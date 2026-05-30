@@ -61,7 +61,7 @@ function outfitVibe(c: OutfitCandidate): 'casual' | 'dressy' | 'mid' {
 function pickDiverse(sorted: OutfitCandidate[], input: EngineInput): OutfitCandidate[] {
   if (sorted.length === 0) return [];
   const picked: OutfitCandidate[] = [sorted[0]];
-  const needLayer = input.amplitude >= 8 || input.tempMin < 14;
+  const needLayer = input.amplitude >= 10 || (input.tempMin !== undefined && input.tempMin < 14);
 
   const tryPick = (predicate: (c: OutfitCandidate) => boolean) => {
     for (const c of sorted) {
