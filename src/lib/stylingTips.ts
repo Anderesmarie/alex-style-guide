@@ -134,10 +134,11 @@ export function getStylingTips(
   weatherCode: number | null,
   temperature: number | null
 ): StylingTips {
+  const tempNow = temperature;
   const profile = getBeautyProfile();
   const occasion = detectOccasion(items);
   const style = detectStyle(items);
-  const weather = getWeatherType(weatherCode, temperature);
+  const weather = getWeatherType(weatherCode, tempNow);
 
   // Beauty
   let beauty = BEAUTY_RULES[occasion] || BEAUTY_RULES.quotidien;
