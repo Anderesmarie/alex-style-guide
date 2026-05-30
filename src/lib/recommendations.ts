@@ -757,7 +757,6 @@ export async function generateRecommendations(
 ): Promise<ClothingItem[][]> {
   const tAvg = (tempMin !== undefined && tempMax !== undefined) ? (tempMin + tempMax) / 2 : null;
   const amplitude = (tempMin !== undefined && tempMax !== undefined) ? tempMax - tempMin : 0;
-  void amplitude;
   const lastOutfit = await getLastOutfit();
   const rejected = await getRejected();
   const lastKey = lastOutfit.sort().join(',');
