@@ -784,8 +784,8 @@ export async function generateRecommendations(
   const rankPool = (pool: ClothingItem[]) => {
     if (!userProfile) return pool;
     return [...pool].sort((a, b) => {
-      const sa = scoreByProfile(a, userProfile, ctx, currentOccasion);
-      const sb = scoreByProfile(b, userProfile, ctx, currentOccasion);
+      const sa = scoreByProfile(a, userProfile, ctx, currentOccasion) + getWeatherScore(a, tempMin, tempMax, tAvg, isRainy, isWindy);
+      const sb = scoreByProfile(b, userProfile, ctx, currentOccasion) + getWeatherScore(b, tempMin, tempMax, tAvg, isRainy, isWindy);
       if (sb !== sa) return sb - sa;
       return Math.random() - 0.5;
     });
