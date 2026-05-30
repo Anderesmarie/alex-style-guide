@@ -640,12 +640,95 @@ function getOccasionFromLifestyle(lifestyle: string | null | undefined, dayOfWee
   }
 }
 
+function getWeatherScore(
+  item: ClothingItem,
+  tempMin: number | undefined,
+  tempMax: number | undefined,
+  tAvg: number | null,
+  isRainy: boolean,
+  isWindy: boolean
+): number {
+  let score = 0;
+  const type = (item.type || '').toLowerCase();
+  const category = (item.category || '').toLowerCase();
+
+  if (/t-shirt|crop|débardeur|body|bralette/.test(type)) {
+    if (tempMin !== undefined && tempMin < 8) score -= 2;
+    if (tempMin !== undefined && tempMin < 12) score -= 1;
+    if (tAvg !== null && tAvg > 28) score += 1;
+  }
+  if (/pull|sweat|gilet|cardigan/.test(type)) {
+    if (tAvg !== null && tAvg > 25) score -= 2;
+    if (tAvg !== null && tAvg < 12) score += 2;
+  }
+  if (category.includes('manteaux') && type.includes('doudoune')) {
+    if (tempMin !== undefined && tempMin < 10) score += 3;
+    if (tAvg !== null && tAvg > 20) score -= 3;
+    if (tempMin !== undefined && tempMin < 5) score += 3;
+  } else if (category.includes('manteaux') && type.includes('parka')) {
+    if (tempMin !== undefined && tempMin < 10) score += 3;
+    if (tAvg !== null && tAvg > 20) score -= 3;
+    if (tempMin !== undefined && tempMin < 5) score += 2;
+  } else if (category.includes('manteaux')) {
+    if (tempMin !== undefined && tempMin < 10) score += 3;
+    if (tAvg !== null && tAvg > 20) score -= 3;
+  }
+  if (/blazer|trench|bomber/.test(type)) {
+    if (tAvg !== null && tAvg >= 12 && tAvg <= 22) score += 1;
+  }
+  if (type.includes('imperméable')) {
+    if (tempMin !== undefined && tempMin < 15 && isRainy) score += 3;
+    if (tempMax !== undefined && tempMax > 28) score -= 1;
+  }
+  if (type.includes('coupe-vent')) {
+    if (tempMin !== undefined && tempMin < 15 && isWindy) score += 2;
+  }
+  if (/short|mini|combishort/.test(type)) {
+    if (tAvg !== null && tAvg > 22) score += 1;
+    if (tAvg !== null && tAvg > 28) score += 1;
+    if (tAvg !== null && tAvg < 15) score -= 2;
+  }
+  if (category.includes('robes')) {
+    if (tAvg !== null && tAvg > 20) score += 1;
+    if (tAvg !== null && tAvg > 28) score += 1;
+    if (tAvg !== null && tAvg < 15) score -= 1;
+  }
+  if (type.includes('sandale')) {
+    if (tAvg !== null && tAvg > 22) score += 1;
+    if (tAvg !== null && tAvg > 28) score += 1;
+    if (tAvg !== null && tAvg < 18) score -= 2;
+  }
+  if (type.includes('botte')) {
+    if (tAvg !== null && tAvg < 15) score += 1;
+    if (tAvg !== null && tAvg > 25) score -= 2;
+  }
+
+  // Season bonus
+  if (tAvg !== null && item.season && item.season.length > 0) {
+    const month = new Date().getMonth();
+    let active = 'Hiver';
+    if (tAvg >= 25) active = 'Été';
+    else if (tAvg >= 15 && month >= 8) active = 'Automne';
+    else if (tAvg >= 15 && month < 8) active = 'Printemps';
+    if (item.season.includes(active)) score += 1;
+  }
+
+  return score;
+}
+
 export async function generateRecommendations(
   wardrobe: ClothingItem[],
   temperature: number | null,
   count = 2,
-  userProfile: UserProfile | null = null
+  userProfile: UserProfile | null = null,
+  tempMin?: number,
+  tempMax?: number,
+  isRainy = false,
+  isWindy = false
 ): Promise<ClothingItem[][]> {
+  const tAvg = (tempMin !== undefined && tempMax !== undefined) ? (tempMin + tempMax) / 2 : null;
+  const amplitude = (tempMin !== undefined && tempMax !== undefined) ? tempMax - tempMin : 0;
+  void amplitude;
   const lastOutfit = await getLastOutfit();
   const rejected = await getRejected();
   const lastKey = lastOutfit.sort().join(',');
