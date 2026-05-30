@@ -242,7 +242,11 @@ export default function Today() {
       wardrobe,
       weatherTemp,
       3,
-      userProfile
+      userProfile,
+      ws.status === 'done' ? ws.data.tempMin : undefined,
+      ws.status === 'done' ? ws.data.tempMax : undefined,
+      ws.status === 'done' ? ws.data.isRainy : false,
+      ws.status === 'done' ? ws.data.isWindy : false
     );
 
     const validFallbackOutfits = fallbackOutfits.filter(outfit => outfit.length > 0);
@@ -494,6 +498,9 @@ export default function Today() {
               <p className="text-2xl font-serif font-bold">{ws.data.tempMin}°C — {ws.data.tempMax}°C</p>
               <p className="text-xs text-muted-foreground">{(() => { const h = new Date().getHours(); if (h < 12) return 'Habillée pour ce matin ☀️'; if (h < 17) return 'Habillée pour cet après-midi 🌤️'; return 'Habillée pour ce soir 🌙'; })()}</p>
               <p className="text-muted-foreground">{ws.data.description}</p>
+              {typeof ws.data.tempMin === 'number' && typeof ws.data.tempMax === 'number' && (
+                <p className="text-xs text-muted-foreground mt-0.5">Min {ws.data.tempMin}° · Max {ws.data.tempMax}°</p>
+              )}
               {typeof ws.data.amplitude === 'number' && ws.data.amplitude >= 15 && (
                 <p className="text-xs mt-0.5" style={{ color: '#C9956C' }}>Grande amplitude aujourd'hui 🧥</p>
               )}
