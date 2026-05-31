@@ -49,12 +49,21 @@ interface Props {
   occasion?: string;
   /** If provided, skips internal weather fetch and uses this directly. */
   weather?: DayWeather | null;
+  /** Item IDs to avoid reusing (e.g. items already worn other days of the trip) */
+  avoidItemIds?: string[];
   onUseOutfit: (itemIds: string[]) => Promise<void> | void;
 }
 
-export default function AIGenerateSection({ dateKey, occasion, weather, onUseOutfit }: Props) {
+function hashStr(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
+export default function AIGenerateSection({ dateKey, occasion, weather, avoidItemIds, onUseOutfit }: Props) {
   const [showPaywall, setShowPaywall] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [regenIndex, setRegenIndex] = useState(0);
   const [generated, setGenerated] = useState<ClothingItem[] | null>(null);
   const [applying, setApplying] = useState(false);
 
