@@ -469,6 +469,7 @@ export default function CalendarView() {
             {openDate >= today && (
               <AIGenerateSection
                 dateKey={formatDateKey(openDate)}
+                occasion={draftOccasion}
                 onUseOutfit={async (itemIds) => {
                   if (!openDate) return;
                   try {
