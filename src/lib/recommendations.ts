@@ -576,31 +576,7 @@ function collectOutfits(
     const key = outfit.map(i => i.id).sort().join(',');
     if (blockedKeys.has(key) || seenKeys.has(key)) continue;
 
-    const hasCouche = outfit.some(p => {
-      const c = (p.category || '').toLowerCase();
-      return c.includes('manteaux') || c.includes('vestes');
-    });
-    const hasPull = outfit.some(p => {
-      const t = (p.type || '').toLowerCase();
-      return t.includes('pull') || t.includes('sweat') || t.includes('gilet');
-    });
-    const hasTshirt = outfit.some(p => {
-      const t = (p.type || '').toLowerCase();
-      return t.includes('t-shirt') || t.includes('crop') || t.includes('débardeur') || t.includes('body');
-    });
-
-    let ampScore = 0;
-    if (amplitude >= 15 && hasCouche) ampScore += 3;
-    if (amplitude >= 10 && hasCouche) ampScore += 2;
-    if (amplitude >= 10 && !hasCouche) ampScore -= 2;
-    if (hasTshirt && hasPull && tempMin !== undefined && tempMin < 15) ampScore += 3;
-    if (hasTshirt && hasCouche && tempMin !== undefined && tempMin < 15 && tempMax !== undefined && tempMax >= 17) ampScore += 3;
-    if (hasTshirt && hasPull && hasCouche && amplitude >= 10) ampScore += 4;
-    if (hasPull && !hasTshirt && !hasCouche && tempMin !== undefined && tempMin < 15) ampScore -= 3;
-    if (hasTshirt && !hasPull && !hasCouche && tempMin !== undefined && tempMin < 12) ampScore -= 3;
-    if (!hasCouche && !hasPull && tempMin !== undefined && tempMin < 13) ampScore -= 2;
-
-    if (ampScore < -3) continue;
+    if (computeAmpScore(outfit, tempMin, tempMax, amplitude) < -3) continue;
 
     seenKeys.add(key);
     results.push(outfit);
