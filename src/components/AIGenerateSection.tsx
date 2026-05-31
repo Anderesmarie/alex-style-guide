@@ -87,13 +87,10 @@ function itemMatchesOccasion(item: ClothingItem, occasion: string): boolean {
     return isBeach || isLightDress || occs.includes('plage');
   }
 
-  // Événement, Cérémonie, Soirée : exclure sport / loungewear / beachwear
+  // Événement / Cérémonie / Soirée : géré directement par le moteur (filters.ts + scoring.ts)
+  // pour éviter un double filtrage qui vide la garde-robe.
   if (o === 'événement' || o === 'evenement' || o === 'cérémonie' || o === 'ceremonie' || o === 'soirée' || o === 'soiree') {
-    const isSport = occs.includes('sport') || styles.some(s => SPORT_STYLES.map(x => x.toLowerCase()).includes(s));
-    const isBeach = BEACHWEAR_TYPES.some(t => type.includes(t.toLowerCase()) || subcat.includes(t.toLowerCase())) || occs.includes('plage');
-    const isLounge = LOUNGEWEAR_KEYWORDS.some(k => type.includes(k) || subcat.includes(k));
-    if (isSport || isBeach || isLounge) return false;
-    return occs.includes(o) || occs.includes('quotidien');
+    return true;
   }
 
   // Cas général : la pièce doit contenir l'occasion OU "Quotidien" comme fallback universel

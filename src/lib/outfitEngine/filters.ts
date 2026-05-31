@@ -235,5 +235,51 @@ export function applyFilters(
     return block(candidate, '🚫 Rouge + corail');
   }
 
+  // ---- Occasion : Cérémonie (exclusions bloquantes) ----
+  const occLower = (input.occasion || '').toLowerCase();
+  if (occLower === 'cérémonie' || occLower === 'ceremonie') {
+    const DRESSY_STYLES_CER = ['casual chic', 'chic', 'old money', 'romantique', 'preppy', 'minimaliste'];
+    for (const it of items) {
+      const itStyles = (it.style || []).map(s => norm(s));
+      const itType = norm(it.type);
+      const itSubcat = norm(it.subcategory);
+      const itOccs = (it.occasion || []).map(o => norm(o));
+      const itPattern = norm(it.pattern);
+
+      // Sport / loungewear
+      const isSport = itOccs.includes('sport')
+        || itStyles.includes('sportswear')
+        || itStyles.includes('sport')
+        || ['jogging', 'legging', 'sweat', 'hoodie'].includes(itType)
+        || itSubcat === 'leggings & joggings';
+      if (isSport) return block(candidate, '🚫 Sport hors cérémonie');
+
+      // Beachwear
+      if (it.category === 'Maillots' || itOccs.includes('plage')
+        || ['shorty de bain', 'bikini', 'maillot 1 pièce', 'tankini'].includes(itType)) {
+        return block(candidate, '🚫 Beachwear hors cérémonie');
+      }
+
+      // Tongs / claquettes
+      if (['claquettes / mules', 'sandales plates'].includes(itType)) {
+        return block(candidate, '🚫 Tongs/claquettes hors cérémonie');
+      }
+
+      // Streetwear exclusif (sans contrepartie habillée)
+      const hasStreetOnly = (itStyles.includes('streetwear') || itStyles.includes('grunge'))
+        && !itStyles.some(s => DRESSY_STYLES_CER.includes(s));
+      if (hasStreetOnly) return block(candidate, '🚫 Streetwear exclusif hors cérémonie');
+
+      // Jean déchiré
+      if (itPattern.includes('déchir') || itPattern.includes('dechir')
+        || itType.includes('déchir') || itType.includes('dechir')) {
+        return block(candidate, '🚫 Jean déchiré hors cérémonie');
+      }
+
+      // Baskets : toutes interdites en cérémonie
+      if (itType === 'baskets') return block(candidate, '🚫 Baskets hors cérémonie');
+    }
+  }
+
   return candidate;
 }

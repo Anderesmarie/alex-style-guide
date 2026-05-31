@@ -542,10 +542,38 @@ export function applyScoring(
       break;
     }
     case 'Cérémonie': {
+      const robes = items.filter(i => i.category === 'Robes');
+      const hasRobe = robes.length > 0;
+
+      for (const r of robes) {
+        const occs = r.occasion || [];
+        if (occs.includes('Cérémonie') || occs.includes('Événement')) {
+          ({ score, reasons } = add(score, reasons, 3, 'Robe taguée cérémonie'));
+        } else if (['Robe longue', 'Robe midi', 'Robe habillée'].includes(r.type)) {
+          ({ score, reasons } = add(score, reasons, 2, `${r.type} adaptée à la cérémonie`));
+        }
+      }
+
+      // Fallback : blazer + bas habillé (combo scoré ensemble)
+      if (!hasRobe) {
+        const blazer = items.find(i => i.type === 'Blazer');
+        const dressyBottom = items.find(i =>
+          ['Pantalon droit', 'Pantalon large', 'Jupe crayon', 'Jupe mi-longue', 'Jupe longue'].includes(i.type)
+        );
+        if (blazer && dressyBottom) {
+          ({ score, reasons } = add(score, reasons, 2, 'Tailleur blazer + bas habillé'));
+        } else if (blazer) {
+          ({ score, reasons } = add(score, reasons, 1, 'Blazer habillé pour cérémonie'));
+        }
+      }
+
+      // Bonus générique pièces taguées
       const matchCeremonie = items.filter(i =>
         i.occasion?.includes('Cérémonie') || i.occasion?.includes('Événement')
       ).length;
-      if (matchCeremonie > 0) ({ score, reasons } = add(score, reasons, 3, 'Pièces cérémonie'));
+      if (matchCeremonie > 0 && !hasRobe) {
+        ({ score, reasons } = add(score, reasons, 1, 'Pièces cérémonie'));
+      }
       break;
     }
     case 'Plage': {
