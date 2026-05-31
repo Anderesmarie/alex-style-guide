@@ -252,8 +252,8 @@ export default function Today() {
     };
   }, [ws, weatherTemp, wardrobe, userProfile, userSeason, lifestyle]);
 
-  const generateFreshOutfits = useCallback(async () => {
-    const engineCandidates = generateOutfits(buildEngineInput());
+  const generateFreshOutfits = useCallback(async (occasionOverride?: string) => {
+    const engineCandidates = generateOutfits(buildEngineInput(occasionOverride));
     const engineOutfits = engineCandidates.map(candidate => candidate.items).filter(outfit => outfit.length > 0);
 
     if (engineOutfits.length > 0) {
