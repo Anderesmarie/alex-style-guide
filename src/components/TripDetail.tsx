@@ -353,6 +353,7 @@ export default function TripDetail({ trip, onBack }: Props) {
               <AIGenerateSection
                 dateKey={key}
                 occasion={occasionDrafts[key] ?? 'Quotidien'}
+                weather={dayWeathers[key] ?? null}
                 onUseOutfit={async (itemIds) => {
                   try {
                     const newOutfitId = genId();
