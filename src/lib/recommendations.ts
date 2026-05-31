@@ -553,6 +553,42 @@ export function isValidOutfit(outfit: ClothingItem[]): boolean {
   return hasTop && hasBottom;
 }
 
+/**
+ * Compute layering coherence score for an outfit given the day's temperature range.
+ * Same rules used both for daily auto-suggestions and "Crée ta tenue du moment".
+ */
+export function computeAmpScore(
+  outfit: ClothingItem[],
+  tempMin?: number,
+  tempMax?: number,
+  amplitude = 0,
+): number {
+  const hasCouche = outfit.some(p => {
+    const c = (p.category || '').toLowerCase();
+    return c.includes('manteaux') || c.includes('vestes');
+  });
+  const hasPull = outfit.some(p => {
+    const t = (p.type || '').toLowerCase();
+    return t.includes('pull') || t.includes('sweat') || t.includes('gilet');
+  });
+  const hasTshirt = outfit.some(p => {
+    const t = (p.type || '').toLowerCase();
+    return t.includes('t-shirt') || t.includes('crop') || t.includes('débardeur') || t.includes('body');
+  });
+
+  let s = 0;
+  if (amplitude >= 15 && hasCouche) s += 3;
+  if (amplitude >= 10 && hasCouche) s += 2;
+  if (amplitude >= 10 && !hasCouche) s -= 2;
+  if (hasTshirt && hasPull && tempMin !== undefined && tempMin < 15) s += 3;
+  if (hasTshirt && hasCouche && tempMin !== undefined && tempMin < 15 && tempMax !== undefined && tempMax >= 17) s += 3;
+  if (hasTshirt && hasPull && hasCouche && amplitude >= 10) s += 4;
+  if (hasPull && !hasTshirt && !hasCouche && tempMin !== undefined && tempMin < 15) s -= 3;
+  if (hasTshirt && !hasPull && !hasCouche && tempMin !== undefined && tempMin < 12) s -= 3;
+  if (!hasCouche && !hasPull && tempMin !== undefined && tempMin < 13) s -= 2;
+  return s;
+}
+
 function collectOutfits(
   pool: ClothingItem[],
   targetCount: number,
