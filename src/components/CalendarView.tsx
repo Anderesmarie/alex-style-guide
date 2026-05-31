@@ -166,6 +166,20 @@ export default function CalendarView() {
       toast.error('La date de retour doit être après le départ');
       return;
     }
+    // Limite à 15 jours (météo réelle Open-Meteo dispo sur 16 jours max)
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const days = Math.round((new Date(tripEnd).getTime() - new Date(tripStart).getTime()) / msPerDay) + 1;
+    if (days > 15) {
+      toast.error('15 jours max par voyage ✈️ Crée un second voyage pour la suite.');
+      return;
+    }
+    // La météo réelle n'est dispo que ~16 jours à l'avance
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const maxStart = new Date(today); maxStart.setDate(maxStart.getDate() + 15);
+    if (new Date(tripEnd) > maxStart) {
+      toast.error('Voyage trop loin dans le futur (15 jours max) ☁️');
+      return;
+    }
     setCreatingTrip(true);
     try {
       await upsertTrip({
