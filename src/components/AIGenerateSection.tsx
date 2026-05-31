@@ -1,15 +1,24 @@
 import { useState } from 'react';
 import { getThumb } from '@/lib/wardrobeImages';
 import { toast } from 'sonner';
-import { ClothingItem } from '@/lib/types';
+import { ClothingItem, UserProfile } from '@/lib/types';
 import { getWardrobe, getProfile } from '@/lib/storage';
+import { generateOutfits } from '@/lib/outfitEngine';
 import { generateRecommendations } from '@/lib/recommendations';
 import { geocodeCity, getSavedCity } from '@/lib/weather';
+import { supabase } from '@/lib/supabase';
 
 // Premium flag — hardcoded for now, will be wired to Stripe later
 const IS_PREMIUM = true;
 
-async function fetchTemperatureForDate(dateKey: string): Promise<number | null> {
+interface DayWeather {
+  tempMin: number;
+  tempMax: number;
+  amplitude: number;
+  avg: number;
+}
+
+async function fetchWeatherForDate(dateKey: string): Promise<DayWeather | null> {
   try {
     const city = getSavedCity();
     if (!city) return null;
@@ -26,7 +35,10 @@ async function fetchTemperatureForDate(dateKey: string): Promise<number | null> 
       .filter(x => x.hour >= 7 && x.hour <= 22)
       .map(x => x.temp);
     if (dayTemps.length === 0) return null;
-    return Math.round(dayTemps.reduce((a, b) => a + b, 0) / dayTemps.length);
+    const tempMin = Math.round(Math.min(...dayTemps));
+    const tempMax = Math.round(Math.max(...dayTemps));
+    const avg = Math.round(dayTemps.reduce((a, b) => a + b, 0) / dayTemps.length);
+    return { tempMin, tempMax, amplitude: tempMax - tempMin, avg };
   } catch {
     return null;
   }
@@ -34,10 +46,11 @@ async function fetchTemperatureForDate(dateKey: string): Promise<number | null> 
 
 interface Props {
   dateKey: string;
+  occasion?: string;
   onUseOutfit: (itemIds: string[]) => Promise<void> | void;
 }
 
-export default function AIGenerateSection({ dateKey, onUseOutfit }: Props) {
+export default function AIGenerateSection({ dateKey, occasion, onUseOutfit }: Props) {
   const [showPaywall, setShowPaywall] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState<ClothingItem[] | null>(null);
@@ -51,16 +64,69 @@ export default function AIGenerateSection({ dateKey, onUseOutfit }: Props) {
     setGenerating(true);
     setGenerated(null);
     try {
-      const [wardrobe, profile, temp] = await Promise.all([
+      const [wardrobe, profile, weather] = await Promise.all([
         getWardrobe(),
         getProfile(),
-        fetchTemperatureForDate(dateKey),
+        fetchWeatherForDate(dateKey),
       ]);
-      const results = await generateRecommendations(wardrobe, temp, 1, profile);
-      if (results.length === 0) {
+
+      // Pull full profile (colorimetry, morpho, taille, corpulence, favorite_colors)
+      let fullProfile: UserProfile | null = profile;
+      let userSeason: string | undefined;
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData.user) {
+          const { data: prof } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', userData.user.id)
+            .maybeSingle();
+          if (prof) {
+            fullProfile = {
+              ...(profile ?? {} as UserProfile),
+              morphologie: prof.morphologie as any,
+              taille: prof.taille as any,
+              corpulence: prof.corpulence as any,
+              styles: prof.styles as any ?? [],
+              favorite_colors: prof.favorite_colors as any ?? [],
+            };
+            userSeason = (prof.colorimetry_season as string) || undefined;
+          }
+        }
+      } catch {}
+
+      const tempMin = weather?.tempMin ?? 18;
+      const tempMax = weather?.tempMax ?? 18;
+      const amplitude = weather?.amplitude ?? 0;
+      const finalOccasion = occasion?.trim() || 'Quotidien';
+
+      const candidates = generateOutfits({
+        wardrobe,
+        tempMin,
+        tempMax,
+        amplitude,
+        occasion: finalOccasion,
+        morphologie: fullProfile?.morphologie ?? null,
+        taille: fullProfile?.taille ?? null,
+        corpulence: fullProfile?.corpulence ?? null,
+        colorimetry: userSeason,
+        favStyles: fullProfile?.styles ?? [],
+        favoriteColors: fullProfile?.favorite_colors,
+        wornItemIds: [],
+      });
+
+      const first = candidates.find(c => c.items.length > 0);
+      if (first) {
+        setGenerated(first.items);
+        return;
+      }
+
+      // Fallback to legacy recommender if engine returns nothing
+      const fallback = await generateRecommendations(wardrobe, weather?.avg ?? null, 1, fullProfile);
+      if (fallback.length === 0 || fallback[0].length === 0) {
         toast.error('Pas assez de pièces pour générer une tenue');
       } else {
-        setGenerated(results[0]);
+        setGenerated(fallback[0]);
       }
     } catch {
       toast.error('Erreur lors de la génération');
