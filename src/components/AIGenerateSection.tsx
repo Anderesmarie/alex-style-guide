@@ -66,11 +66,12 @@ export default function AIGenerateSection({ dateKey, occasion, weather, onUseOut
     setGenerating(true);
     setGenerated(null);
     try {
-      const [wardrobe, profile, weather] = await Promise.all([
+      const [wardrobe, profile, fetchedWeather] = await Promise.all([
         getWardrobe(),
         getProfile(),
-        fetchWeatherForDate(dateKey),
+        weather !== undefined ? Promise.resolve(weather) : fetchWeatherForDate(dateKey),
       ]);
+      const dayWeather = weather !== undefined ? weather : fetchedWeather;
 
       // Pull full profile (colorimetry, morpho, taille, corpulence, favorite_colors)
       let fullProfile: UserProfile | null = profile;
