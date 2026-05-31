@@ -80,6 +80,70 @@ function clearStoredToday() {
   try { localStorage.removeItem(TODAY_STORAGE_KEY); } catch {}
 }
 
+// --- Supabase sync (multi-device) ---
+interface DailyOutfitRow {
+  outfit_index: number;
+  outfit_data: string[]; // item ids
+  swipe_result: string | null;
+  layout_data: OutfitLayoutData | null;
+  saved_outfit_id: string | null;
+}
+
+async function fetchDailyOutfitsFromSupabase(date: string): Promise<DailyOutfitRow[]> {
+  try {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return [];
+    const { data } = await supabase
+      .from('daily_outfits')
+      .select('outfit_index, outfit_data, swipe_result, layout_data, saved_outfit_id')
+      .eq('user_id', userData.user.id)
+      .eq('date', date)
+      .order('outfit_index', { ascending: true });
+    return (data as DailyOutfitRow[]) || [];
+  } catch { return []; }
+}
+
+async function insertDailyOutfitsToSupabase(date: string, outfits: ClothingItem[][]) {
+  try {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return;
+    const rows = outfits.map((o, i) => ({
+      user_id: userData.user!.id,
+      date,
+      outfit_index: i,
+      outfit_data: o.map(item => item.id),
+    }));
+    await supabase.from('daily_outfits').upsert(rows, { onConflict: 'user_id,date,outfit_index', ignoreDuplicates: true });
+  } catch {}
+}
+
+async function updateSwipeResultInSupabase(date: string, index: number, result: 'like' | 'dislike') {
+  try {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return;
+    await supabase
+      .from('daily_outfits')
+      .update({ swipe_result: result })
+      .eq('user_id', userData.user.id)
+      .eq('date', date)
+      .eq('outfit_index', index);
+  } catch {}
+}
+
+async function updateOutfitMetaInSupabase(date: string, index: number, meta: { layout_data?: OutfitLayoutData | null; saved_outfit_id?: string | null }) {
+  try {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return;
+    await supabase
+      .from('daily_outfits')
+      .update(meta)
+      .eq('user_id', userData.user.id)
+      .eq('date', date)
+      .eq('outfit_index', index);
+  } catch {}
+}
+
+
 function getAvatarFromStorage(): AvatarData {
   try {
     const raw = localStorage.getItem('alex_avatar');
