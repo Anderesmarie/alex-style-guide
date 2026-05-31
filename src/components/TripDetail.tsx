@@ -73,8 +73,13 @@ export default function TripDetail({ trip, onBack }: Props) {
     setOutfits(o);
     setWardrobe(w);
     const drafts: Record<string, string> = {};
-    d.forEach(day => { drafts[day.date] = day.eventName ?? ''; });
+    const occDrafts: Record<string, string> = {};
+    d.forEach(day => {
+      drafts[day.date] = day.eventName ?? '';
+      occDrafts[day.date] = day.occasion ?? 'Quotidien';
+    });
     setActivityDrafts(drafts);
+    setOccasionDrafts(occDrafts);
     setLoading(false);
   };
 
@@ -161,12 +166,32 @@ export default function TripDetail({ trip, onBack }: Props) {
         date: dateKey,
         outfitId: existing?.outfitId ?? null,
         eventName,
+        occasion: occasionDrafts[dateKey] ?? existing?.occasion ?? 'Quotidien',
       });
       const d = await getTripDays(trip.id);
       setDays(d);
       toast.success('Activité enregistrée');
     } catch {
       toast.error('Erreur');
+    }
+  };
+
+  const handleOccasionChange = async (dateKey: string, occasion: string) => {
+    setOccasionDrafts(prev => ({ ...prev, [dateKey]: occasion }));
+    const existing = getDayFor(dateKey);
+    try {
+      await upsertTripDay({
+        id: existing?.id,
+        tripId: trip.id,
+        date: dateKey,
+        outfitId: existing?.outfitId ?? null,
+        eventName: existing?.eventName ?? activityDrafts[dateKey]?.trim() ?? null,
+        occasion,
+      });
+      const d = await getTripDays(trip.id);
+      setDays(d);
+    } catch {
+      toast.error('Erreur enregistrement occasion');
     }
   };
 
@@ -306,8 +331,8 @@ export default function TripDetail({ trip, onBack }: Props) {
               />
 
               <select
-                value={occasionDrafts[key] ?? 'Quotidien'}
-                onChange={e => setOccasionDrafts(prev => ({ ...prev, [key]: e.target.value }))}
+                value={occasionDrafts[key] ?? day?.occasion ?? 'Quotidien'}
+                onChange={e => handleOccasionChange(key, e.target.value)}
                 className="w-full px-3 py-2 rounded-lg bg-background border border-border outline-none focus:ring-2 focus:ring-primary/30 text-sm mb-3"
               >
                 {OCCASIONS.map(o => (
@@ -353,7 +378,7 @@ export default function TripDetail({ trip, onBack }: Props) {
 
               <AIGenerateSection
                 dateKey={key}
-                occasion={occasionDrafts[key] ?? 'Quotidien'}
+                occasion={occasionDrafts[key] ?? day?.occasion ?? 'Quotidien'}
                 weather={dayWeathers[key] ?? null}
                 avoidItemIds={Array.from(new Set(
                   days
