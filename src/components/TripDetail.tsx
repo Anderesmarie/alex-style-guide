@@ -3,7 +3,8 @@ import { getThumb } from '@/lib/wardrobeImages';
 import { toast } from 'sonner';
 import { ClothingItem, Outfit, Trip, TripDay, OCCASIONS } from '@/lib/types';
 import { getTripDays, getOutfits, getWardrobe, upsertTripDay, addOutfit, genId } from '@/lib/storage';
-import AIGenerateSection from './AIGenerateSection';
+import { geocodeCity } from '@/lib/weather';
+import AIGenerateSection, { DayWeather } from './AIGenerateSection';
 
 const DAYS_FULL_FR = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 const MONTHS_FR = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
@@ -54,6 +55,18 @@ export default function TripDetail({ trip, onBack }: Props) {
   const [activityDrafts, setActivityDrafts] = useState<Record<string, string>>({});
   const [occasionDrafts, setOccasionDrafts] = useState<Record<string, string>>({});
 
+  // Weather centralized at trip level
+  const cityStorageKey = `mystyl_trip_city_${trip.id}`;
+  const [weatherCity, setWeatherCity] = useState<string>(() => {
+    try { return localStorage.getItem(cityStorageKey) || trip.destination; }
+    catch { return trip.destination; }
+  });
+  const [cityEditing, setCityEditing] = useState(false);
+  const [cityDraft, setCityDraft] = useState(weatherCity);
+  const [weatherStatus, setWeatherStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const [weatherError, setWeatherError] = useState<string | null>(null);
+  const [dayWeathers, setDayWeathers] = useState<Record<string, DayWeather>>({});
+
   const load = async () => {
     const [d, o, w] = await Promise.all([getTripDays(trip.id), getOutfits(), getWardrobe()]);
     setDays(d);
@@ -66,6 +79,60 @@ export default function TripDetail({ trip, onBack }: Props) {
   };
 
   useEffect(() => { load(); }, [trip.id]);
+
+  // Fetch weather ONCE for the whole trip range whenever weatherCity changes
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      if (!weatherCity.trim()) return;
+      setWeatherStatus('loading');
+      setWeatherError(null);
+      try {
+        const geo = await geocodeCity(weatherCity.trim());
+        const res = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${geo.latitude}&longitude=${geo.longitude}&hourly=temperature_2m&timezone=auto&start_date=${trip.startDate}&end_date=${trip.endDate}`
+        );
+        if (!res.ok) throw new Error('METEO_KO');
+        const data = await res.json();
+        const times: string[] = data.hourly?.time ?? [];
+        const temps: number[] = data.hourly?.temperature_2m ?? [];
+        const buckets: Record<string, number[]> = {};
+        times.forEach((t, i) => {
+          const dt = new Date(t);
+          const hour = dt.getHours();
+          if (hour < 7 || hour > 22) return;
+          const k = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+          (buckets[k] = buckets[k] || []).push(temps[i]);
+        });
+        const result: Record<string, DayWeather> = {};
+        Object.entries(buckets).forEach(([k, arr]) => {
+          if (arr.length === 0) return;
+          const tempMin = Math.round(Math.min(...arr));
+          const tempMax = Math.round(Math.max(...arr));
+          const avg = Math.round(arr.reduce((a, b) => a + b, 0) / arr.length);
+          result[k] = { tempMin, tempMax, amplitude: tempMax - tempMin, avg };
+        });
+        if (!cancelled) {
+          setDayWeathers(result);
+          setWeatherStatus('done');
+        }
+      } catch (e: any) {
+        if (cancelled) return;
+        setWeatherStatus('error');
+        setWeatherError(e?.message === 'CITY_NOT_FOUND' ? 'Ville non trouvée' : 'Météo indisponible');
+      }
+    };
+    run();
+    return () => { cancelled = true; };
+  }, [weatherCity, trip.startDate, trip.endDate]);
+
+  const handleCityValidate = () => {
+    const v = cityDraft.trim();
+    if (!v) return;
+    try { localStorage.setItem(cityStorageKey, v); } catch {}
+    setWeatherCity(v);
+    setCityEditing(false);
+  };
 
   const allDates = daysBetween(trip.startDate, trip.endDate);
   const totalDays = allDates.length;
