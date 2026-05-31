@@ -207,7 +207,7 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode, t
           className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
         >
           <option value="">Pour quelle occasion ?</option>
-          {ALL_OCCASIONS.map(o => (
+          {OCCASIONS.map(o => (
             <option key={o} value={o}>{o}</option>
           ))}
         </select>
