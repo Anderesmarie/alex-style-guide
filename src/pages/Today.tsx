@@ -227,14 +227,15 @@ export default function Today() {
     }
   };
 
-  const buildEngineInput = useCallback(() => {
+  const buildEngineInput = useCallback((occasionOverride?: string) => {
     const tempMin = ws.status === 'done' ? ws.data.tempMin : (weatherTemp ?? 18);
     const tempMax = ws.status === 'done' ? ws.data.tempMax : (weatherTemp ?? 18);
     const amplitude = ws.status === 'done' ? (ws.data.amplitude ?? Math.max(0, tempMax - tempMin)) : 0;
     const day = new Date().getDay(); // 0=Sun, 6=Sat
     const isWeekday = day >= 1 && day <= 5;
     const worksLifestyle = lifestyle === 'Premier job' || lifestyle === 'Je travaille';
-    const occasion = isWeekday && worksLifestyle ? 'Travail' : 'Quotidien';
+    const defaultOccasion = isWeekday && worksLifestyle ? 'Travail' : 'Quotidien';
+    const occasion = occasionOverride?.trim() || defaultOccasion;
     return {
       wardrobe,
       tempMin,
