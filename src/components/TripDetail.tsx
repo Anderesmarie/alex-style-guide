@@ -355,6 +355,11 @@ export default function TripDetail({ trip, onBack }: Props) {
                 dateKey={key}
                 occasion={occasionDrafts[key] ?? 'Quotidien'}
                 weather={dayWeathers[key] ?? null}
+                avoidItemIds={Array.from(new Set(
+                  days
+                    .filter(dd => dd.date !== key)
+                    .flatMap(dd => getOutfit(dd.outfitId)?.itemIds ?? [])
+                ))}
                 onUseOutfit={async (itemIds) => {
                   try {
                     const newOutfitId = genId();
