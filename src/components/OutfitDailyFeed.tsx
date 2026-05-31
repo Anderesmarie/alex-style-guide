@@ -143,16 +143,7 @@ export default function OutfitDailyFeed({
 
   return (
     <div className="space-y-2 fade-enter">
-      <h2 className="text-lg font-serif font-semibold text-center mb-2">Tes tenues likées du jour ✨</h2>
-
-      {results.length === 0 && (
-        <div className="bg-card rounded-xl p-6 card-shadow text-center">
-          <p className="text-muted-foreground text-sm">
-            Tu n'as liké aucune tenue aujourd'hui 💭<br />
-            Reviens demain pour de nouvelles idées !
-          </p>
-        </div>
-      )}
+      <h2 className="text-lg font-serif font-semibold text-center mb-2">Tes tenues du jour</h2>
 
       <div className="space-y-4">
         {results.map((r, idx) => {
