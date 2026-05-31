@@ -152,8 +152,15 @@ export default function AIGenerateSection({ dateKey, occasion, weather, avoidIte
       const amplitude = dayWeather?.amplitude ?? 0;
       const finalOccasion = occasion?.trim() || 'Quotidien';
 
+      // Pré-filtre du dressing selon l'occasion (les pièces non compatibles
+      // sont exclues avant scoring afin d'éviter qu'une tenue Plage = Événement).
+      const filteredWardrobe = wardrobe.filter(it => itemMatchesOccasion(it, finalOccasion));
+      // Garde-fou : si le filtre est trop strict (ex : pas de maillot), on
+      // retombe sur la garde-robe complète pour ne pas renvoyer 0 candidat.
+      const wardrobeForEngine = filteredWardrobe.length >= 3 ? filteredWardrobe : wardrobe;
+
       const candidates = generateOutfits({
-        wardrobe,
+        wardrobe: wardrobeForEngine,
         tempMin,
         tempMax,
         amplitude,
