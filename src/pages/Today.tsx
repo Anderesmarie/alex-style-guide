@@ -417,41 +417,6 @@ export default function Today() {
     );
   }
 
-  const resetDailyForTest = async () => {
-    try {
-      const { data: userData } = await supabase.auth.getUser();
-      if (userData.user) {
-        await supabase
-          .from('daily_counter')
-          .upsert({ user_id: userData.user.id, date: today, count: 0 }, { onConflict: 'user_id,date' });
-      }
-
-      await saveDailyCounter({ date: today, count: 0 });
-      setDailyCount(0);
-      setSwipeResults(null);
-      setSwipeComplete(false);
-
-      // Clear today's localStorage cache so outfits are regenerated fresh
-      clearStoredToday();
-
-      // Regenerate fresh outfits immediately and re-store them
-      if (enough) {
-        const recs = await generateFreshOutfits();
-        if (recs.length > 0) {
-          writeStoredToday(today, recs);
-        }
-        setRecommendations(recs);
-        setPendingSwipe(recs.length > 0 ? recs : null);
-      } else {
-        setRecommendations([]);
-        setPendingSwipe(null);
-      }
-
-
-    } catch (e) {
-      console.error('Reset error:', e);
-    }
-  };
 
   return (
     <div className="fade-enter pb-4">
