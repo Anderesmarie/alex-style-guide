@@ -124,12 +124,17 @@ export default function AIGenerateSection({ dateKey, occasion, weather, avoidIte
         colorimetry: userSeason,
         favStyles: fullProfile?.styles ?? [],
         favoriteColors: fullProfile?.favorite_colors,
-        wornItemIds: [],
+        wornItemIds: avoidItemIds ?? [],
       });
 
-      const first = candidates.find(c => c.items.length > 0);
-      if (first) {
-        setGenerated(first.items);
+      const valid = candidates.filter(c => c.items.length > 0);
+      if (valid.length > 0) {
+        // Deterministic per (date + occasion) so a same occasion on different
+        // days yields different outfits, and regenerate cycles through options.
+        const seed = hashStr(`${dateKey}|${(occasion || 'Quotidien').toLowerCase()}`);
+        const idx = (seed + regenIndex) % valid.length;
+        setGenerated(valid[idx].items);
+        setRegenIndex(r => r + 1);
         return;
       }
 
@@ -140,6 +145,7 @@ export default function AIGenerateSection({ dateKey, occasion, weather, avoidIte
       } else {
         setGenerated(fallback[0]);
       }
+
     } catch {
       toast.error('Erreur lors de la génération');
     } finally {
