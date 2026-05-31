@@ -368,7 +368,7 @@ export default function Today() {
     let restoredResults: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[] | null = null;
     let restoredComplete = false;
 
-    // Try to restore today's outfits from localStorage (toujours, même si quota épuisé)
+    // 1. Try localStorage cache first (fast path)
     const stored = readStoredToday();
     if (stored && stored.date === today) {
       recs = stored.outfits
@@ -377,7 +377,6 @@ export default function Today() {
           .filter((it): it is ClothingItem => !!it))
         .filter(o => o.length > 0);
 
-      // Also restore swipe phase if completed earlier today
       if (stored.swipeComplete && stored.swipeResults && stored.swipeResults.length > 0) {
         restoredResults = stored.swipeResults.map(r => ({
           outfit: r.outfitIds
@@ -391,12 +390,51 @@ export default function Today() {
       }
     }
 
-    // Pas de cache valide → générer seulement si on a encore du quota
+    // 2. If no local cache, try Supabase (multi-device sync)
+    if (recs.length === 0) {
+      const remote = await fetchDailyOutfitsFromSupabase(today);
+      if (remote.length > 0) {
+        recs = remote
+          .map(r => (r.outfit_data || [])
+            .map(id => wardrobe.find(w => w.id === id))
+            .filter((it): it is ClothingItem => !!it))
+          .filter(o => o.length > 0);
+
+        // If any swipe has been recorded, hydrate swipe phase
+        const anySwiped = remote.some(r => r.swipe_result === 'like' || r.swipe_result === 'dislike');
+        if (anySwiped && recs.length > 0) {
+          restoredResults = remote.map(r => ({
+            outfit: (r.outfit_data || [])
+              .map(id => wardrobe.find(w => w.id === id))
+              .filter((it): it is ClothingItem => !!it),
+            liked: r.swipe_result === 'like' ? true : r.swipe_result === 'dislike' ? false : null,
+            layoutData: r.layout_data ?? null,
+            savedOutfitId: r.saved_outfit_id ?? null,
+          })).filter(r => r.outfit.length > 0);
+          restoredComplete = restoredResults.length > 0;
+        }
+
+        if (recs.length > 0) {
+          writeStoredToday(today, recs, restoredComplete && restoredResults ? {
+            swipeComplete: true,
+            swipeResults: restoredResults.map(r => ({
+              outfitIds: r.outfit.map(i => i.id),
+              liked: r.liked,
+              savedOutfitId: r.savedOutfitId ?? null,
+              layoutData: r.layoutData ?? null,
+            })),
+          } : undefined);
+        }
+      }
+    }
+
+    // 3. Still nothing → generate fresh if quota allows
     if (recs.length === 0) {
       if (!canSuggest) return;
       recs = await generateFreshOutfits();
       if (recs.length > 0) {
         writeStoredToday(today, recs);
+        insertDailyOutfitsToSupabase(today, recs);
       }
     }
 
@@ -410,6 +448,7 @@ export default function Today() {
     }
 
   }, [enough, swipeComplete, pendingSwipe, canSuggest, wardrobe, today, generateFreshOutfits]);
+
 
 
 
