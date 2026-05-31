@@ -128,8 +128,7 @@ export default function Today() {
 
   const today = new Date().toISOString().split('T')[0];
   const enough = wardrobe.length >= 8;
-  // TEMP: limite augmentée à 99 pour les tests (remettre à 3 ensuite)
-  const canSuggest = dailyCount < 99;
+  const canSuggest = dailyCount < 3;
   const weatherTemp = ws.status === 'done' ? ws.data.temperature : null;
 
   // Load data
@@ -456,15 +455,6 @@ export default function Today() {
 
   return (
     <div className="fade-enter pb-4">
-      {/* TEMP test button — remove before prod */}
-      <div className="flex justify-end mb-2">
-        <button
-          onClick={resetDailyForTest}
-          className="text-xs text-muted-foreground underline active:opacity-60"
-        >
-          🔄 Reset tenues (test)
-        </button>
-      </div>
       {(() => {
         const hour = new Date().getHours();
         const name = pseudo || 'toi';
