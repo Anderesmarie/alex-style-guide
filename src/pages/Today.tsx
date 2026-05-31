@@ -128,7 +128,8 @@ export default function Today() {
 
   const today = new Date().toISOString().split('T')[0];
   const enough = wardrobe.length >= 8;
-  const canSuggest = dailyCount < 3;
+  // 1 session de swipe par jour = 3 tenues (limite freemium)
+  const canSuggest = dailyCount < 1;
   const weatherTemp = ws.status === 'done' ? ws.data.temperature : null;
 
   // Load data
@@ -298,13 +299,12 @@ export default function Today() {
 
   const generate = useCallback(async () => {
     if (!enough || swipeComplete || pendingSwipe) return;
-    if (!canSuggest) return;
 
     let recs: ClothingItem[][] = [];
     let restoredResults: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[] | null = null;
     let restoredComplete = false;
 
-    // Try to restore today's outfits from localStorage
+    // Try to restore today's outfits from localStorage (toujours, même si quota épuisé)
     const stored = readStoredToday();
     if (stored && stored.date === today) {
       recs = stored.outfits
@@ -327,10 +327,10 @@ export default function Today() {
       }
     }
 
-    // No valid cache for today → generate fresh
+    // Pas de cache valide → générer seulement si on a encore du quota
     if (recs.length === 0) {
+      if (!canSuggest) return;
       recs = await generateFreshOutfits();
-      // Only persist if we actually produced outfits — never cache an empty result
       if (recs.length > 0) {
         writeStoredToday(today, recs);
       }
@@ -374,11 +374,12 @@ export default function Today() {
   }, [pendingSwipe, today, dailyCount]);
 
   // Auto-generate only if no saved results for today and has quota
+  // Auto-generate / auto-restore : tente toujours, generate() décide s'il y a quota
   useEffect(() => {
-    if (!loading && ws.status !== 'loading' && enough && !swipeComplete && recommendations.length === 0 && canSuggest) {
+    if (!loading && ws.status !== 'loading' && enough && !swipeComplete && recommendations.length === 0) {
       generate();
     }
-  }, [loading, ws.status, enough, swipeComplete, recommendations.length, canSuggest, generate]); // eslint-disable-line
+  }, [loading, ws.status, enough, swipeComplete, recommendations.length, generate]); // eslint-disable-line
 
 
   const handleResultsChange = (next: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[]) => {
