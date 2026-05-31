@@ -11,7 +11,7 @@ import { supabase } from '@/lib/supabase';
 // Premium flag — hardcoded for now, will be wired to Stripe later
 const IS_PREMIUM = true;
 
-interface DayWeather {
+export interface DayWeather {
   tempMin: number;
   tempMax: number;
   amplitude: number;
@@ -47,10 +47,12 @@ async function fetchWeatherForDate(dateKey: string): Promise<DayWeather | null> 
 interface Props {
   dateKey: string;
   occasion?: string;
+  /** If provided, skips internal weather fetch and uses this directly. */
+  weather?: DayWeather | null;
   onUseOutfit: (itemIds: string[]) => Promise<void> | void;
 }
 
-export default function AIGenerateSection({ dateKey, occasion, onUseOutfit }: Props) {
+export default function AIGenerateSection({ dateKey, occasion, weather, onUseOutfit }: Props) {
   const [showPaywall, setShowPaywall] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState<ClothingItem[] | null>(null);
@@ -64,11 +66,12 @@ export default function AIGenerateSection({ dateKey, occasion, onUseOutfit }: Pr
     setGenerating(true);
     setGenerated(null);
     try {
-      const [wardrobe, profile, weather] = await Promise.all([
+      const [wardrobe, profile, fetchedWeather] = await Promise.all([
         getWardrobe(),
         getProfile(),
-        fetchWeatherForDate(dateKey),
+        weather !== undefined ? Promise.resolve(weather) : fetchWeatherForDate(dateKey),
       ]);
+      const dayWeather = weather !== undefined ? weather : fetchedWeather;
 
       // Pull full profile (colorimetry, morpho, taille, corpulence, favorite_colors)
       let fullProfile: UserProfile | null = profile;
@@ -95,9 +98,9 @@ export default function AIGenerateSection({ dateKey, occasion, onUseOutfit }: Pr
         }
       } catch {}
 
-      const tempMin = weather?.tempMin ?? 18;
-      const tempMax = weather?.tempMax ?? 18;
-      const amplitude = weather?.amplitude ?? 0;
+      const tempMin = dayWeather?.tempMin ?? 18;
+      const tempMax = dayWeather?.tempMax ?? 18;
+      const amplitude = dayWeather?.amplitude ?? 0;
       const finalOccasion = occasion?.trim() || 'Quotidien';
 
       const candidates = generateOutfits({
@@ -122,7 +125,7 @@ export default function AIGenerateSection({ dateKey, occasion, onUseOutfit }: Pr
       }
 
       // Fallback to legacy recommender if engine returns nothing
-      const fallback = await generateRecommendations(wardrobe, weather?.avg ?? null, 1, fullProfile);
+      const fallback = await generateRecommendations(wardrobe, dayWeather?.avg ?? null, 1, fullProfile);
       if (fallback.length === 0 || fallback[0].length === 0) {
         toast.error('Pas assez de pièces pour générer une tenue');
       } else {
