@@ -98,9 +98,9 @@ export default function AIGenerateSection({ dateKey, occasion, weather, onUseOut
         }
       } catch {}
 
-      const tempMin = weather?.tempMin ?? 18;
-      const tempMax = weather?.tempMax ?? 18;
-      const amplitude = weather?.amplitude ?? 0;
+      const tempMin = dayWeather?.tempMin ?? 18;
+      const tempMax = dayWeather?.tempMax ?? 18;
+      const amplitude = dayWeather?.amplitude ?? 0;
       const finalOccasion = occasion?.trim() || 'Quotidien';
 
       const candidates = generateOutfits({
@@ -125,7 +125,7 @@ export default function AIGenerateSection({ dateKey, occasion, weather, onUseOut
       }
 
       // Fallback to legacy recommender if engine returns nothing
-      const fallback = await generateRecommendations(wardrobe, weather?.avg ?? null, 1, fullProfile);
+      const fallback = await generateRecommendations(wardrobe, dayWeather?.avg ?? null, 1, fullProfile);
       if (fallback.length === 0 || fallback[0].length === 0) {
         toast.error('Pas assez de pièces pour générer une tenue');
       } else {
