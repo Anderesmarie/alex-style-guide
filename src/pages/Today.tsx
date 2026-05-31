@@ -143,6 +143,36 @@ async function updateOutfitMetaInSupabase(date: string, index: number, meta: { l
   } catch {}
 }
 
+async function backfillStoredTodayToSupabase(
+  date: string,
+  outfits: ClothingItem[][],
+  swipeResults?: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[] | null,
+) {
+  try {
+    const remote = await fetchDailyOutfitsFromSupabase(date);
+    if (remote.length > 0) return;
+
+    await insertDailyOutfitsToSupabase(date, outfits);
+
+    if (!swipeResults || swipeResults.length === 0) return;
+
+    await Promise.all(
+      swipeResults.map(async (result, index) => {
+        if (result.liked === true || result.liked === false) {
+          await updateSwipeResultInSupabase(date, index, result.liked ? 'like' : 'dislike');
+        }
+
+        if (result.layoutData || result.savedOutfitId) {
+          await updateOutfitMetaInSupabase(date, index, {
+            layout_data: result.layoutData ?? null,
+            saved_outfit_id: result.savedOutfitId ?? null,
+          });
+        }
+      })
+    );
+  } catch {}
+}
+
 
 function getAvatarFromStorage(): AvatarData {
   try {
@@ -367,10 +397,12 @@ export default function Today() {
     let recs: ClothingItem[][] = [];
     let restoredResults: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[] | null = null;
     let restoredComplete = false;
+    let shouldBackfillStoredCache = false;
 
     // 1. Try localStorage cache first (fast path)
     const stored = readStoredToday();
     if (stored && stored.date === today) {
+      shouldBackfillStoredCache = true;
       recs = stored.outfits
         .map(ids => ids
           .map(id => wardrobe.find(w => w.id === id))
@@ -388,6 +420,14 @@ export default function Today() {
         })).filter(r => r.outfit.length > 0);
         restoredComplete = restoredResults.length > 0;
       }
+
+      if (recs.length === 0) {
+        shouldBackfillStoredCache = false;
+      }
+    }
+
+    if (shouldBackfillStoredCache && recs.length > 0) {
+      backfillStoredTodayToSupabase(today, recs, restoredResults);
     }
 
     // 2. If no local cache, try Supabase (multi-device sync)
