@@ -347,7 +347,8 @@ export default function CalendarView() {
             onClick={e => e.stopPropagation()}
           >
             <div className="w-12 h-1.5 rounded-full bg-muted mx-auto mb-4" />
-            <h3 className="font-serif text-xl font-bold mb-4">Nouveau voyage</h3>
+            <h3 className="font-serif text-xl font-bold mb-1">Nouveau voyage</h3>
+            <p className="text-xs text-muted-foreground mb-4">15 jours max ✈️</p>
 
             <label className="block text-sm font-medium mb-1.5">Destination</label>
             <input
