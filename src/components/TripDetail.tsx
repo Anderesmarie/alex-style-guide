@@ -81,6 +81,8 @@ export default function TripDetail({ trip, onBack }: Props) {
   useEffect(() => { load(); }, [trip.id]);
 
   // Fetch weather ONCE for the whole trip range whenever weatherCity changes
+  // - Forecast API for dates within ~16 days
+  // - Archive API (last year, same period) as climatological estimate for further dates
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
@@ -89,21 +91,66 @@ export default function TripDetail({ trip, onBack }: Props) {
       setWeatherError(null);
       try {
         const geo = await geocodeCity(weatherCity.trim());
-        const res = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${geo.latitude}&longitude=${geo.longitude}&hourly=temperature_2m&timezone=auto&start_date=${trip.startDate}&end_date=${trip.endDate}`
-        );
-        if (!res.ok) throw new Error('METEO_KO');
-        const data = await res.json();
-        const times: string[] = data.hourly?.time ?? [];
-        const temps: number[] = data.hourly?.temperature_2m ?? [];
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const maxForecast = new Date(today);
+        maxForecast.setDate(maxForecast.getDate() + 16);
+
+        const start = new Date(trip.startDate);
+        const end = new Date(trip.endDate);
+
+        // Split range into forecast window and far-future window
+        const forecastEnd = end < maxForecast ? end : maxForecast;
+        const farStart = new Date(maxForecast);
+        farStart.setDate(farStart.getDate() + 1);
+
+        const needsForecast = start <= maxForecast;
+        const needsArchive = end > maxForecast;
+
+        const fmt = (d: Date) =>
+          `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
         const buckets: Record<string, number[]> = {};
-        times.forEach((t, i) => {
-          const dt = new Date(t);
-          const hour = dt.getHours();
-          if (hour < 7 || hour > 22) return;
-          const k = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
-          (buckets[k] = buckets[k] || []).push(temps[i]);
-        });
+        const addHourly = (times: string[], temps: number[], keyShift = 0) => {
+          times.forEach((t, i) => {
+            const dt = new Date(t);
+            const hour = dt.getHours();
+            if (hour < 7 || hour > 22) return;
+            if (keyShift !== 0) dt.setFullYear(dt.getFullYear() + keyShift);
+            const k = fmt(dt);
+            (buckets[k] = buckets[k] || []).push(temps[i]);
+          });
+        };
+
+        if (needsForecast) {
+          const sd = fmt(start);
+          const ed = fmt(forecastEnd);
+          const res = await fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${geo.latitude}&longitude=${geo.longitude}&hourly=temperature_2m&timezone=auto&start_date=${sd}&end_date=${ed}`
+          );
+          if (res.ok) {
+            const data = await res.json();
+            addHourly(data.hourly?.time ?? [], data.hourly?.temperature_2m ?? []);
+          }
+        }
+
+        if (needsArchive) {
+          // Use same period one year ago as a climatological estimate
+          const archiveStart = new Date(needsForecast ? farStart : start);
+          const archiveEnd = new Date(end);
+          archiveStart.setFullYear(archiveStart.getFullYear() - 1);
+          archiveEnd.setFullYear(archiveEnd.getFullYear() - 1);
+          const res = await fetch(
+            `https://archive-api.open-meteo.com/v1/archive?latitude=${geo.latitude}&longitude=${geo.longitude}&hourly=temperature_2m&timezone=auto&start_date=${fmt(archiveStart)}&end_date=${fmt(archiveEnd)}`
+          );
+          if (res.ok) {
+            const data = await res.json();
+            // Shift back to current year so keys match trip dates
+            addHourly(data.hourly?.time ?? [], data.hourly?.temperature_2m ?? [], +1);
+          }
+        }
+
         const result: Record<string, DayWeather> = {};
         Object.entries(buckets).forEach(([k, arr]) => {
           if (arr.length === 0) return;
@@ -112,6 +159,9 @@ export default function TripDetail({ trip, onBack }: Props) {
           const avg = Math.round(arr.reduce((a, b) => a + b, 0) / arr.length);
           result[k] = { tempMin, tempMax, amplitude: tempMax - tempMin, avg };
         });
+
+        if (Object.keys(result).length === 0) throw new Error('METEO_KO');
+
         if (!cancelled) {
           setDayWeathers(result);
           setWeatherStatus('done');
