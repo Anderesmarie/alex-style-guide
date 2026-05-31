@@ -11,7 +11,7 @@ import { supabase } from '@/lib/supabase';
 // Premium flag — hardcoded for now, will be wired to Stripe later
 const IS_PREMIUM = true;
 
-interface DayWeather {
+export interface DayWeather {
   tempMin: number;
   tempMax: number;
   amplitude: number;
@@ -47,10 +47,12 @@ async function fetchWeatherForDate(dateKey: string): Promise<DayWeather | null> 
 interface Props {
   dateKey: string;
   occasion?: string;
+  /** If provided, skips internal weather fetch and uses this directly. */
+  weather?: DayWeather | null;
   onUseOutfit: (itemIds: string[]) => Promise<void> | void;
 }
 
-export default function AIGenerateSection({ dateKey, occasion, onUseOutfit }: Props) {
+export default function AIGenerateSection({ dateKey, occasion, weather, onUseOutfit }: Props) {
   const [showPaywall, setShowPaywall] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState<ClothingItem[] | null>(null);
