@@ -44,7 +44,11 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode, t
       occasion || 'Quotidien',
       selectedStyle || '',
       new Set<string>(),
-      5,
+      12,
+      temperature,
+      tempMin,
+      tempMax,
+      amplitude,
     );
 
     if (!outfit) {
