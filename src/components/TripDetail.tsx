@@ -383,12 +383,24 @@ export default function TripDetail({ trip, onBack }: Props) {
                 dateKey={key}
                 occasion={occasionDrafts[key] ?? day?.occasion ?? 'Quotidien'}
                 weather={dayWeathers[key] ?? null}
-                avoidItemIds={Array.from(new Set(
-                  days
+                avoidItemIds={Array.from(new Set([
+                  ...days
                     .filter(dd => dd.date !== key)
-                    .flatMap(dd => getOutfit(dd.outfitId)?.itemIds ?? [])
-                ))}
+                    .flatMap(dd => getOutfit(dd.outfitId)?.itemIds ?? []),
+                  ...Object.entries(outfitDrafts)
+                    .filter(([dk]) => dk !== key)
+                    .flatMap(([, ids]) => ids),
+                ]))}
+                onDraftChange={(ids) => {
+                  setOutfitDrafts(prev => {
+                    const next = { ...prev };
+                    if (ids && ids.length > 0) next[key] = ids;
+                    else delete next[key];
+                    return next;
+                  });
+                }}
                 onUseOutfit={async (itemIds) => {
+
                   try {
                     const newOutfitId = genId();
                     await addOutfit({
