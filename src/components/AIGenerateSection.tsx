@@ -104,8 +104,13 @@ export default function AIGenerateSection({ dateKey, occasion, weather, avoidIte
   const [showPaywall, setShowPaywall] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [regenIndex, setRegenIndex] = useState(0);
-  const [generated, setGenerated] = useState<ClothingItem[] | null>(null);
+  const [generated, setGeneratedState] = useState<ClothingItem[] | null>(null);
   const [applying, setApplying] = useState(false);
+
+  const setGenerated = (items: ClothingItem[] | null) => {
+    setGeneratedState(items);
+    onDraftChange?.(items ? items.map(i => i.id) : null);
+  };
 
   const handleGenerate = async () => {
     if (!IS_PREMIUM) {
@@ -114,6 +119,7 @@ export default function AIGenerateSection({ dateKey, occasion, weather, avoidIte
     }
     setGenerating(true);
     setGenerated(null);
+
     try {
       const [wardrobe, profile, fetchedWeather] = await Promise.all([
         getWardrobe(),
