@@ -113,6 +113,7 @@ export interface TripDay {
   date: string;
   outfitId: string | null;
   eventName: string | null;
+  occasion: string;
   createdAt: string;
 }
 

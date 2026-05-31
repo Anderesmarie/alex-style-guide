@@ -449,6 +449,7 @@ export async function getTripDays(tripId: string): Promise<TripDay[]> {
     date: row.date,
     outfitId: row.outfit_id,
     eventName: row.event_name,
+    occasion: (row as any).occasion ?? 'Quotidien',
     createdAt: row.created_at,
   }));
 }
@@ -460,6 +461,7 @@ export async function upsertTripDay(day: Partial<TripDay> & { tripId: string; da
     outfit_id: day.outfitId ?? null,
     event_name: day.eventName ?? null,
   };
+  if (day.occasion !== undefined) payload.occasion = day.occasion;
   if (day.id) payload.id = day.id;
   const { data, error } = await supabase.from('trip_days').upsert(payload).select().single();
   if (error) throw error;
@@ -469,6 +471,7 @@ export async function upsertTripDay(day: Partial<TripDay> & { tripId: string; da
     date: data.date,
     outfitId: data.outfit_id,
     eventName: data.event_name,
+    occasion: (data as any).occasion ?? 'Quotidien',
     createdAt: data.created_at,
   };
 }
