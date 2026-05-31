@@ -51,8 +51,11 @@ interface Props {
   weather?: DayWeather | null;
   /** Item IDs to avoid reusing (e.g. items already worn other days of the trip) */
   avoidItemIds?: string[];
+  /** Called whenever a draft outfit is generated/cleared, so parent can share it across days */
+  onDraftChange?: (itemIds: string[] | null) => void;
   onUseOutfit: (itemIds: string[]) => Promise<void> | void;
 }
+
 
 function hashStr(s: string): number {
   let h = 0;
@@ -97,12 +100,17 @@ function itemMatchesOccasion(item: ClothingItem, occasion: string): boolean {
   return occs.includes(o) || occs.includes('quotidien');
 }
 
-export default function AIGenerateSection({ dateKey, occasion, weather, avoidItemIds, onUseOutfit }: Props) {
+export default function AIGenerateSection({ dateKey, occasion, weather, avoidItemIds, onDraftChange, onUseOutfit }: Props) {
   const [showPaywall, setShowPaywall] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [regenIndex, setRegenIndex] = useState(0);
-  const [generated, setGenerated] = useState<ClothingItem[] | null>(null);
+  const [generated, setGeneratedState] = useState<ClothingItem[] | null>(null);
   const [applying, setApplying] = useState(false);
+
+  const setGenerated = (items: ClothingItem[] | null) => {
+    setGeneratedState(items);
+    onDraftChange?.(items ? items.map(i => i.id) : null);
+  };
 
   const handleGenerate = async () => {
     if (!IS_PREMIUM) {
@@ -111,6 +119,7 @@ export default function AIGenerateSection({ dateKey, occasion, weather, avoidIte
     }
     setGenerating(true);
     setGenerated(null);
+
     try {
       const [wardrobe, profile, fetchedWeather] = await Promise.all([
         getWardrobe(),
@@ -148,6 +157,21 @@ export default function AIGenerateSection({ dateKey, occasion, weather, avoidIte
       const tempMax = dayWeather?.tempMax ?? 18;
       const amplitude = dayWeather?.amplitude ?? 0;
       const finalOccasion = occasion?.trim() || 'Quotidien';
+      const occLower = finalOccasion.toLowerCase();
+      const isFormal = ['événement','evenement','cérémonie','ceremonie','soirée','soiree'].includes(occLower);
+
+      // Garde-fou Cérémonie/Soirée/Événement : si AUCUNE pièce du dressing
+      // n'a ce tag, on refuse de générer une tenue plage/casual aberrante.
+      if (isFormal) {
+        const hasFormalPiece = wardrobe.some(it => {
+          const occs = (it.occasion ?? []).map((o: string) => o.toLowerCase());
+          return occs.some(o => ['événement','evenement','cérémonie','ceremonie','soirée','soiree'].includes(o));
+        });
+        if (!hasFormalPiece) {
+          toast.error(`Aucune pièce taguée ${finalOccasion} dans ton dressing 👗 Ajoute-en pour générer une tenue adaptée.`);
+          return;
+        }
+      }
 
       // Pré-filtre du dressing selon l'occasion (les pièces non compatibles
       // sont exclues avant scoring afin d'éviter qu'une tenue Plage = Événement).
@@ -156,8 +180,16 @@ export default function AIGenerateSection({ dateKey, occasion, weather, avoidIte
       // retombe sur la garde-robe complète pour ne pas renvoyer 0 candidat.
       const wardrobeForEngine = filteredWardrobe.length >= 3 ? filteredWardrobe : wardrobe;
 
+      // Anti-doublon STRICT entre jours du voyage : on retire d'abord
+      // complètement les pièces déjà utilisées ailleurs. Si ça vide trop la
+      // garde-robe, on retombe sur une simple pénalité (wornItemIds).
+      const avoidSet = new Set(avoidItemIds ?? []);
+      const strictWardrobe = wardrobeForEngine.filter(it => !avoidSet.has(it.id));
+      const useStrict = strictWardrobe.length >= 4;
+      const finalWardrobe = useStrict ? strictWardrobe : wardrobeForEngine;
+
       const candidates = generateOutfits({
-        wardrobe: wardrobeForEngine,
+        wardrobe: finalWardrobe,
         tempMin,
         tempMax,
         amplitude,
@@ -168,7 +200,7 @@ export default function AIGenerateSection({ dateKey, occasion, weather, avoidIte
         colorimetry: userSeason,
         favStyles: fullProfile?.styles ?? [],
         favoriteColors: fullProfile?.favorite_colors,
-        wornItemIds: avoidItemIds ?? [],
+        wornItemIds: useStrict ? [] : (avoidItemIds ?? []),
       });
 
       const valid = candidates.filter(c => c.items.length > 0);
@@ -189,6 +221,7 @@ export default function AIGenerateSection({ dateKey, occasion, weather, avoidIte
       } else {
         setGenerated(fallback[0]);
       }
+
 
     } catch {
       toast.error('Erreur lors de la génération');

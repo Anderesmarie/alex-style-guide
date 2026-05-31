@@ -54,6 +54,9 @@ export default function TripDetail({ trip, onBack }: Props) {
   const [pickerForDate, setPickerForDate] = useState<string | null>(null);
   const [activityDrafts, setActivityDrafts] = useState<Record<string, string>>({});
   const [occasionDrafts, setOccasionDrafts] = useState<Record<string, string>>({});
+  // Tenues générées non encore sauvées, par date — partagées entre jours pour anti-doublon
+  const [outfitDrafts, setOutfitDrafts] = useState<Record<string, string[]>>({});
+
 
   // Weather centralized at trip level
   const cityStorageKey = `mystyl_trip_city_${trip.id}`;
@@ -380,12 +383,24 @@ export default function TripDetail({ trip, onBack }: Props) {
                 dateKey={key}
                 occasion={occasionDrafts[key] ?? day?.occasion ?? 'Quotidien'}
                 weather={dayWeathers[key] ?? null}
-                avoidItemIds={Array.from(new Set(
-                  days
+                avoidItemIds={Array.from(new Set([
+                  ...days
                     .filter(dd => dd.date !== key)
-                    .flatMap(dd => getOutfit(dd.outfitId)?.itemIds ?? [])
-                ))}
+                    .flatMap(dd => getOutfit(dd.outfitId)?.itemIds ?? []),
+                  ...Object.entries(outfitDrafts)
+                    .filter(([dk]) => dk !== key)
+                    .flatMap(([, ids]) => ids),
+                ]))}
+                onDraftChange={(ids) => {
+                  setOutfitDrafts(prev => {
+                    const next = { ...prev };
+                    if (ids && ids.length > 0) next[key] = ids;
+                    else delete next[key];
+                    return next;
+                  });
+                }}
                 onUseOutfit={async (itemIds) => {
+
                   try {
                     const newOutfitId = genId();
                     await addOutfit({
