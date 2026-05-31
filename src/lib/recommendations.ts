@@ -922,7 +922,11 @@ export function buildValidCustomOutfit(
   occasion: string,
   style: string,
   excludeIds: Set<string>,
-  maxAttempts = 5,
+  maxAttempts = 12,
+  temperature: number | null = null,
+  tempMin?: number,
+  tempMax?: number,
+  amplitude = 0,
 ): ClothingItem[] | null {
   const pickCentral = (): ClothingItem | null => {
     if (centralPiece) return centralPiece;
@@ -940,11 +944,15 @@ export function buildValidCustomOutfit(
     return candidates[Math.floor(Math.random() * candidates.length)];
   };
 
+  let fallback: ClothingItem[] | null = null;
   for (let i = 0; i < maxAttempts; i++) {
     const central = pickCentral();
     if (!central) return null;
-    const outfit = buildCustomOutfit(wardrobe, central, occasion, style, excludeIds);
-    if (isValidOutfit(outfit)) return outfit;
+    const outfit = buildCustomOutfit(wardrobe, central, occasion, style, excludeIds, temperature);
+    if (!isValidOutfit(outfit)) continue;
+    if (!fallback) fallback = outfit;
+    if (computeAmpScore(outfit, tempMin, tempMax, amplitude) >= -3) return outfit;
   }
-  return null;
+  // No outfit passed the layering check — return the last valid one rather than null.
+  return fallback;
 }
