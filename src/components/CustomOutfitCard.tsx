@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { getThumb } from '@/lib/wardrobeImages';
 import { useNavigate } from 'react-router-dom';
-import { ClothingItem, UserProfile, STYLE_OPTIONS, OutfitLayoutData } from '@/lib/types';
+import { ClothingItem, UserProfile, STYLE_OPTIONS, OCCASIONS, OutfitLayoutData } from '@/lib/types';
 import { buildValidCustomOutfit } from '@/lib/recommendations';
 import { addOutfit, genId, saveLastOutfit } from '@/lib/storage';
 import { getStylingTips } from '@/lib/stylingTips';
@@ -11,18 +11,17 @@ import { toast } from 'sonner';
 
 const ROSE_GOLD = '#C9956C';
 
-const ALL_OCCASIONS = [
-  'Travail', 'Sortie', 'Sport', 'Événement', 'Mariage', 'Voyage', 'Plage', 'Quotidien'
-];
-
 interface Props {
   wardrobe: ClothingItem[];
   temperature: number | null;
   weatherCode: number | null;
+  tempMin?: number;
+  tempMax?: number;
+  amplitude?: number;
   userProfile?: UserProfile | null;
 }
 
-export default function CustomOutfitCard({ wardrobe, temperature, weatherCode }: Props) {
+export default function CustomOutfitCard({ wardrobe, temperature, weatherCode, tempMin, tempMax, amplitude = 0 }: Props) {
   const navigate = useNavigate();
   const [occasion, setOccasion] = useState('');
   const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
