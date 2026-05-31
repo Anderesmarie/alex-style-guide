@@ -100,7 +100,7 @@ function itemMatchesOccasion(item: ClothingItem, occasion: string): boolean {
   return occs.includes(o) || occs.includes('quotidien');
 }
 
-export default function AIGenerateSection({ dateKey, occasion, weather, avoidItemIds, onUseOutfit }: Props) {
+export default function AIGenerateSection({ dateKey, occasion, weather, avoidItemIds, onDraftChange, onUseOutfit }: Props) {
   const [showPaywall, setShowPaywall] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [regenIndex, setRegenIndex] = useState(0);
