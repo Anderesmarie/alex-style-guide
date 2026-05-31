@@ -565,14 +565,15 @@ export default function Today() {
         )}
       </div>
 
-      <EventBanner onViewOutfits={async () => {
+      <EventBanner onViewOutfits={async (occasion) => {
         if (!enough) return;
-        const recs = await generateFreshOutfits();
+        const recs = await generateFreshOutfits(occasion);
         setRecommendations(recs);
         setSwipeComplete(false);
         setSwipeResults(null);
         setPendingSwipe(recs);
       }} />
+
 
       {!enough && (
         <div className="bg-card rounded-xl p-6 card-shadow text-center">
