@@ -54,6 +54,9 @@ export default function TripDetail({ trip, onBack }: Props) {
   const [pickerForDate, setPickerForDate] = useState<string | null>(null);
   const [activityDrafts, setActivityDrafts] = useState<Record<string, string>>({});
   const [occasionDrafts, setOccasionDrafts] = useState<Record<string, string>>({});
+  // Tenues générées non encore sauvées, par date — partagées entre jours pour anti-doublon
+  const [outfitDrafts, setOutfitDrafts] = useState<Record<string, string[]>>({});
+
 
   // Weather centralized at trip level
   const cityStorageKey = `mystyl_trip_city_${trip.id}`;
