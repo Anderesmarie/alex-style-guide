@@ -30,11 +30,16 @@ interface Props {
 const ROSE_GOLD = '#C9956C';
 
 export default function OutfitDailyFeed({
-  results,
+  results: allResults,
   pseudo,
   wardrobe,
   onResultsChange,
 }: Props) {
+  // N'afficher que les tenues swipées positivement (likées)
+  const likedIndices = allResults
+    .map((r, i) => (r.liked === true ? i : -1))
+    .filter(i => i >= 0);
+  const results = likedIndices.map(i => allResults[i]);
   
   const [savedIdxs, setSavedIdxs] = useState<Set<number>>(new Set());
   const [wornIdx, setWornIdx] = useState<number | null>(null);
