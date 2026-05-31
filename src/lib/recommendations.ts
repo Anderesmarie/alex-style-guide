@@ -553,6 +553,42 @@ export function isValidOutfit(outfit: ClothingItem[]): boolean {
   return hasTop && hasBottom;
 }
 
+/**
+ * Compute layering coherence score for an outfit given the day's temperature range.
+ * Same rules used both for daily auto-suggestions and "Crée ta tenue du moment".
+ */
+export function computeAmpScore(
+  outfit: ClothingItem[],
+  tempMin?: number,
+  tempMax?: number,
+  amplitude = 0,
+): number {
+  const hasCouche = outfit.some(p => {
+    const c = (p.category || '').toLowerCase();
+    return c.includes('manteaux') || c.includes('vestes');
+  });
+  const hasPull = outfit.some(p => {
+    const t = (p.type || '').toLowerCase();
+    return t.includes('pull') || t.includes('sweat') || t.includes('gilet');
+  });
+  const hasTshirt = outfit.some(p => {
+    const t = (p.type || '').toLowerCase();
+    return t.includes('t-shirt') || t.includes('crop') || t.includes('débardeur') || t.includes('body');
+  });
+
+  let s = 0;
+  if (amplitude >= 15 && hasCouche) s += 3;
+  if (amplitude >= 10 && hasCouche) s += 2;
+  if (amplitude >= 10 && !hasCouche) s -= 2;
+  if (hasTshirt && hasPull && tempMin !== undefined && tempMin < 15) s += 3;
+  if (hasTshirt && hasCouche && tempMin !== undefined && tempMin < 15 && tempMax !== undefined && tempMax >= 17) s += 3;
+  if (hasTshirt && hasPull && hasCouche && amplitude >= 10) s += 4;
+  if (hasPull && !hasTshirt && !hasCouche && tempMin !== undefined && tempMin < 15) s -= 3;
+  if (hasTshirt && !hasPull && !hasCouche && tempMin !== undefined && tempMin < 12) s -= 3;
+  if (!hasCouche && !hasPull && tempMin !== undefined && tempMin < 13) s -= 2;
+  return s;
+}
+
 function collectOutfits(
   pool: ClothingItem[],
   targetCount: number,
@@ -576,31 +612,7 @@ function collectOutfits(
     const key = outfit.map(i => i.id).sort().join(',');
     if (blockedKeys.has(key) || seenKeys.has(key)) continue;
 
-    const hasCouche = outfit.some(p => {
-      const c = (p.category || '').toLowerCase();
-      return c.includes('manteaux') || c.includes('vestes');
-    });
-    const hasPull = outfit.some(p => {
-      const t = (p.type || '').toLowerCase();
-      return t.includes('pull') || t.includes('sweat') || t.includes('gilet');
-    });
-    const hasTshirt = outfit.some(p => {
-      const t = (p.type || '').toLowerCase();
-      return t.includes('t-shirt') || t.includes('crop') || t.includes('débardeur') || t.includes('body');
-    });
-
-    let ampScore = 0;
-    if (amplitude >= 15 && hasCouche) ampScore += 3;
-    if (amplitude >= 10 && hasCouche) ampScore += 2;
-    if (amplitude >= 10 && !hasCouche) ampScore -= 2;
-    if (hasTshirt && hasPull && tempMin !== undefined && tempMin < 15) ampScore += 3;
-    if (hasTshirt && hasCouche && tempMin !== undefined && tempMin < 15 && tempMax !== undefined && tempMax >= 17) ampScore += 3;
-    if (hasTshirt && hasPull && hasCouche && amplitude >= 10) ampScore += 4;
-    if (hasPull && !hasTshirt && !hasCouche && tempMin !== undefined && tempMin < 15) ampScore -= 3;
-    if (hasTshirt && !hasPull && !hasCouche && tempMin !== undefined && tempMin < 12) ampScore -= 3;
-    if (!hasCouche && !hasPull && tempMin !== undefined && tempMin < 13) ampScore -= 2;
-
-    if (ampScore < -3) continue;
+    if (computeAmpScore(outfit, tempMin, tempMax, amplitude) < -3) continue;
 
     seenKeys.add(key);
     results.push(outfit);
@@ -845,14 +857,22 @@ export function buildCustomOutfit(
   centralPiece: ClothingItem,
   occasion: string,
   style: string,
-  excludeIds: Set<string>
+  excludeIds: Set<string>,
+  temperature: number | null = null,
 ): ClothingItem[] {
-  const available = wardrobe.filter(i => i.id !== centralPiece.id && !excludeIds.has(i.id));
+  const compatibleSeasons = getCompatibleSeasons(temperature);
+  const isSeasonOk = (i: ClothingItem) =>
+    !i.season || i.season.length === 0 || i.season.some(s => compatibleSeasons.includes(s));
+
+  // Keep the central piece even if its season is off; filter the rest.
+  let available = wardrobe.filter(i => i.id !== centralPiece.id && !excludeIds.has(i.id));
+  const seasonFiltered = available.filter(isSeasonOk);
+  if (seasonFiltered.length >= 3) available = seasonFiltered;
 
   const scored = available.map(i => {
     let score = 0;
-    if (i.occasion.some(o => o.toLowerCase().includes(occasion.toLowerCase()))) score += 2;
-    if (i.style.some(s => s.toLowerCase().includes(style.toLowerCase()))) score += 2;
+    if (occasion && i.occasion.some(o => o.toLowerCase().includes(occasion.toLowerCase()))) score += 2;
+    if (style && i.style.some(s => s.toLowerCase().includes(style.toLowerCase()))) score += 2;
     score += Math.random();
     return { item: i, score };
   }).sort((a, b) => b.score - a.score);
@@ -902,7 +922,11 @@ export function buildValidCustomOutfit(
   occasion: string,
   style: string,
   excludeIds: Set<string>,
-  maxAttempts = 5,
+  maxAttempts = 12,
+  temperature: number | null = null,
+  tempMin?: number,
+  tempMax?: number,
+  amplitude = 0,
 ): ClothingItem[] | null {
   const pickCentral = (): ClothingItem | null => {
     if (centralPiece) return centralPiece;
@@ -920,11 +944,15 @@ export function buildValidCustomOutfit(
     return candidates[Math.floor(Math.random() * candidates.length)];
   };
 
+  let fallback: ClothingItem[] | null = null;
   for (let i = 0; i < maxAttempts; i++) {
     const central = pickCentral();
     if (!central) return null;
-    const outfit = buildCustomOutfit(wardrobe, central, occasion, style, excludeIds);
-    if (isValidOutfit(outfit)) return outfit;
+    const outfit = buildCustomOutfit(wardrobe, central, occasion, style, excludeIds, temperature);
+    if (!isValidOutfit(outfit)) continue;
+    if (!fallback) fallback = outfit;
+    if (computeAmpScore(outfit, tempMin, tempMax, amplitude) >= -3) return outfit;
   }
-  return null;
+  // No outfit passed the layering check — return the last valid one rather than null.
+  return fallback;
 }

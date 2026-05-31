@@ -658,6 +658,9 @@ export default function Today() {
               wardrobe={wardrobe}
               temperature={weatherTemp}
               weatherCode={ws.status === 'done' ? ws.data.weathercode : null}
+              tempMin={ws.status === 'done' ? ws.data.tempMin : undefined}
+              tempMax={ws.status === 'done' ? ws.data.tempMax : undefined}
+              amplitude={ws.status === 'done' ? (ws.data.amplitude ?? 0) : 0}
               userProfile={userProfile}
             />
           </div>
