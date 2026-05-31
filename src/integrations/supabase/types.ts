@@ -265,6 +265,7 @@ export type Database = {
           date: string
           event_name: string | null
           id: string
+          occasion: string
           outfit_id: string | null
           trip_id: string
         }
@@ -273,6 +274,7 @@ export type Database = {
           date: string
           event_name?: string | null
           id?: string
+          occasion?: string
           outfit_id?: string | null
           trip_id: string
         }
@@ -281,6 +283,7 @@ export type Database = {
           date?: string
           event_name?: string | null
           id?: string
+          occasion?: string
           outfit_id?: string | null
           trip_id?: string
         }

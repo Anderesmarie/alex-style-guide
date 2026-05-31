@@ -60,6 +60,46 @@ function hashStr(s: string): number {
   return Math.abs(h);
 }
 
+const SPORT_STYLES = ['Sportswear', 'Sport'];
+const BEACHWEAR_TYPES = ['Maillot', 'Maillot de bain', 'Bikini', 'Paréo', 'Short de bain', 'Short de plage', 'Sandales', 'Tongs', 'Robe de plage'];
+const LOUNGEWEAR_KEYWORDS = ['pyjama', 'jogging', 'sweat', 'survêtement', 'survetement', 'loungewear', 'homewear'];
+
+function itemMatchesOccasion(item: ClothingItem, occasion: string): boolean {
+  const occs = (item.occasion ?? []).map(o => o.toLowerCase());
+  const styles = (item.style ?? []).map(s => s.toLowerCase());
+  const type = (item.type ?? '').toLowerCase();
+  const category = (item.category ?? '').toLowerCase();
+  const subcat = (item.subcategory ?? '').toLowerCase();
+  const o = occasion.toLowerCase();
+
+  // "Quotidien" = pas de filtre strict, tout est OK
+  if (o === 'quotidien') return true;
+
+  // Sport : uniquement pièces taguées Sport
+  if (o === 'sport') {
+    return occs.includes('sport') || styles.some(s => SPORT_STYLES.map(x => x.toLowerCase()).includes(s));
+  }
+
+  // Plage : maillot, short de plage, robe légère, sandales/tongs uniquement
+  if (o === 'plage') {
+    const isBeach = BEACHWEAR_TYPES.some(t => type.includes(t.toLowerCase()) || subcat.includes(t.toLowerCase()));
+    const isLightDress = category.includes('robe') && (styles.includes('bohème') || styles.includes('boheme') || type.includes('légère') || type.includes('legere') || occs.includes('plage'));
+    return isBeach || isLightDress || occs.includes('plage');
+  }
+
+  // Événement, Cérémonie, Soirée : exclure sport / loungewear / beachwear
+  if (o === 'événement' || o === 'evenement' || o === 'cérémonie' || o === 'ceremonie' || o === 'soirée' || o === 'soiree') {
+    const isSport = occs.includes('sport') || styles.some(s => SPORT_STYLES.map(x => x.toLowerCase()).includes(s));
+    const isBeach = BEACHWEAR_TYPES.some(t => type.includes(t.toLowerCase()) || subcat.includes(t.toLowerCase())) || occs.includes('plage');
+    const isLounge = LOUNGEWEAR_KEYWORDS.some(k => type.includes(k) || subcat.includes(k));
+    if (isSport || isBeach || isLounge) return false;
+    return occs.includes(o) || occs.includes('quotidien');
+  }
+
+  // Cas général : la pièce doit contenir l'occasion OU "Quotidien" comme fallback universel
+  return occs.includes(o) || occs.includes('quotidien');
+}
+
 export default function AIGenerateSection({ dateKey, occasion, weather, avoidItemIds, onUseOutfit }: Props) {
   const [showPaywall, setShowPaywall] = useState(false);
   const [generating, setGenerating] = useState(false);
@@ -112,8 +152,15 @@ export default function AIGenerateSection({ dateKey, occasion, weather, avoidIte
       const amplitude = dayWeather?.amplitude ?? 0;
       const finalOccasion = occasion?.trim() || 'Quotidien';
 
+      // Pré-filtre du dressing selon l'occasion (les pièces non compatibles
+      // sont exclues avant scoring afin d'éviter qu'une tenue Plage = Événement).
+      const filteredWardrobe = wardrobe.filter(it => itemMatchesOccasion(it, finalOccasion));
+      // Garde-fou : si le filtre est trop strict (ex : pas de maillot), on
+      // retombe sur la garde-robe complète pour ne pas renvoyer 0 candidat.
+      const wardrobeForEngine = filteredWardrobe.length >= 3 ? filteredWardrobe : wardrobe;
+
       const candidates = generateOutfits({
-        wardrobe,
+        wardrobe: wardrobeForEngine,
         tempMin,
         tempMax,
         amplitude,
