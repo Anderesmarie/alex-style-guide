@@ -49,12 +49,21 @@ interface Props {
   occasion?: string;
   /** If provided, skips internal weather fetch and uses this directly. */
   weather?: DayWeather | null;
+  /** Item IDs to avoid reusing (e.g. items already worn other days of the trip) */
+  avoidItemIds?: string[];
   onUseOutfit: (itemIds: string[]) => Promise<void> | void;
 }
 
-export default function AIGenerateSection({ dateKey, occasion, weather, onUseOutfit }: Props) {
+function hashStr(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
+export default function AIGenerateSection({ dateKey, occasion, weather, avoidItemIds, onUseOutfit }: Props) {
   const [showPaywall, setShowPaywall] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [regenIndex, setRegenIndex] = useState(0);
   const [generated, setGenerated] = useState<ClothingItem[] | null>(null);
   const [applying, setApplying] = useState(false);
 
@@ -115,12 +124,17 @@ export default function AIGenerateSection({ dateKey, occasion, weather, onUseOut
         colorimetry: userSeason,
         favStyles: fullProfile?.styles ?? [],
         favoriteColors: fullProfile?.favorite_colors,
-        wornItemIds: [],
+        wornItemIds: avoidItemIds ?? [],
       });
 
-      const first = candidates.find(c => c.items.length > 0);
-      if (first) {
-        setGenerated(first.items);
+      const valid = candidates.filter(c => c.items.length > 0);
+      if (valid.length > 0) {
+        // Deterministic per (date + occasion) so a same occasion on different
+        // days yields different outfits, and regenerate cycles through options.
+        const seed = hashStr(`${dateKey}|${(occasion || 'Quotidien').toLowerCase()}`);
+        const idx = (seed + regenIndex) % valid.length;
+        setGenerated(valid[idx].items);
+        setRegenIndex(r => r + 1);
         return;
       }
 
@@ -131,6 +145,7 @@ export default function AIGenerateSection({ dateKey, occasion, weather, onUseOut
       } else {
         setGenerated(fallback[0]);
       }
+
     } catch {
       toast.error('Erreur lors de la génération');
     } finally {
