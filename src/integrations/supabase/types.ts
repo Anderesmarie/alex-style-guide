@@ -118,6 +118,45 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_outfits: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          layout_data: Json | null
+          outfit_data: Json
+          outfit_index: number
+          saved_outfit_id: string | null
+          swipe_result: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          layout_data?: Json | null
+          outfit_data?: Json
+          outfit_index: number
+          saved_outfit_id?: string | null
+          swipe_result?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          layout_data?: Json | null
+          outfit_data?: Json
+          outfit_index?: number
+          saved_outfit_id?: string | null
+          swipe_result?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       last_outfit: {
         Row: {
           item_ids: Json | null

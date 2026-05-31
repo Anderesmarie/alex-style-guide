@@ -80,6 +80,70 @@ function clearStoredToday() {
   try { localStorage.removeItem(TODAY_STORAGE_KEY); } catch {}
 }
 
+// --- Supabase sync (multi-device) ---
+interface DailyOutfitRow {
+  outfit_index: number;
+  outfit_data: string[]; // item ids
+  swipe_result: string | null;
+  layout_data: OutfitLayoutData | null;
+  saved_outfit_id: string | null;
+}
+
+async function fetchDailyOutfitsFromSupabase(date: string): Promise<DailyOutfitRow[]> {
+  try {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return [];
+    const { data } = await supabase
+      .from('daily_outfits')
+      .select('outfit_index, outfit_data, swipe_result, layout_data, saved_outfit_id')
+      .eq('user_id', userData.user.id)
+      .eq('date', date)
+      .order('outfit_index', { ascending: true });
+    return (data as DailyOutfitRow[]) || [];
+  } catch { return []; }
+}
+
+async function insertDailyOutfitsToSupabase(date: string, outfits: ClothingItem[][]) {
+  try {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return;
+    const rows = outfits.map((o, i) => ({
+      user_id: userData.user!.id,
+      date,
+      outfit_index: i,
+      outfit_data: o.map(item => item.id),
+    }));
+    await supabase.from('daily_outfits').upsert(rows, { onConflict: 'user_id,date,outfit_index', ignoreDuplicates: true });
+  } catch {}
+}
+
+async function updateSwipeResultInSupabase(date: string, index: number, result: 'like' | 'dislike') {
+  try {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return;
+    await supabase
+      .from('daily_outfits')
+      .update({ swipe_result: result })
+      .eq('user_id', userData.user.id)
+      .eq('date', date)
+      .eq('outfit_index', index);
+  } catch {}
+}
+
+async function updateOutfitMetaInSupabase(date: string, index: number, meta: { layout_data?: OutfitLayoutData | null; saved_outfit_id?: string | null }) {
+  try {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return;
+    await supabase
+      .from('daily_outfits')
+      .update(meta)
+      .eq('user_id', userData.user.id)
+      .eq('date', date)
+      .eq('outfit_index', index);
+  } catch {}
+}
+
+
 function getAvatarFromStorage(): AvatarData {
   try {
     const raw = localStorage.getItem('alex_avatar');
@@ -304,7 +368,7 @@ export default function Today() {
     let restoredResults: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[] | null = null;
     let restoredComplete = false;
 
-    // Try to restore today's outfits from localStorage (toujours, même si quota épuisé)
+    // 1. Try localStorage cache first (fast path)
     const stored = readStoredToday();
     if (stored && stored.date === today) {
       recs = stored.outfits
@@ -313,7 +377,6 @@ export default function Today() {
           .filter((it): it is ClothingItem => !!it))
         .filter(o => o.length > 0);
 
-      // Also restore swipe phase if completed earlier today
       if (stored.swipeComplete && stored.swipeResults && stored.swipeResults.length > 0) {
         restoredResults = stored.swipeResults.map(r => ({
           outfit: r.outfitIds
@@ -327,12 +390,51 @@ export default function Today() {
       }
     }
 
-    // Pas de cache valide → générer seulement si on a encore du quota
+    // 2. If no local cache, try Supabase (multi-device sync)
+    if (recs.length === 0) {
+      const remote = await fetchDailyOutfitsFromSupabase(today);
+      if (remote.length > 0) {
+        recs = remote
+          .map(r => (r.outfit_data || [])
+            .map(id => wardrobe.find(w => w.id === id))
+            .filter((it): it is ClothingItem => !!it))
+          .filter(o => o.length > 0);
+
+        // If any swipe has been recorded, hydrate swipe phase
+        const anySwiped = remote.some(r => r.swipe_result === 'like' || r.swipe_result === 'dislike');
+        if (anySwiped && recs.length > 0) {
+          restoredResults = remote.map(r => ({
+            outfit: (r.outfit_data || [])
+              .map(id => wardrobe.find(w => w.id === id))
+              .filter((it): it is ClothingItem => !!it),
+            liked: r.swipe_result === 'like' ? true : r.swipe_result === 'dislike' ? false : null,
+            layoutData: r.layout_data ?? null,
+            savedOutfitId: r.saved_outfit_id ?? null,
+          })).filter(r => r.outfit.length > 0);
+          restoredComplete = restoredResults.length > 0;
+        }
+
+        if (recs.length > 0) {
+          writeStoredToday(today, recs, restoredComplete && restoredResults ? {
+            swipeComplete: true,
+            swipeResults: restoredResults.map(r => ({
+              outfitIds: r.outfit.map(i => i.id),
+              liked: r.liked,
+              savedOutfitId: r.savedOutfitId ?? null,
+              layoutData: r.layoutData ?? null,
+            })),
+          } : undefined);
+        }
+      }
+    }
+
+    // 3. Still nothing → generate fresh if quota allows
     if (recs.length === 0) {
       if (!canSuggest) return;
       recs = await generateFreshOutfits();
       if (recs.length > 0) {
         writeStoredToday(today, recs);
+        insertDailyOutfitsToSupabase(today, recs);
       }
     }
 
@@ -346,6 +448,7 @@ export default function Today() {
     }
 
   }, [enough, swipeComplete, pendingSwipe, canSuggest, wardrobe, today, generateFreshOutfits]);
+
 
 
 
@@ -368,10 +471,17 @@ export default function Today() {
         savedOutfitId: null,
       })),
     });
+    // Sync each swipe result to Supabase (multi-device)
+    results.forEach((r, i) => {
+      if (r.liked === true || r.liked === false) {
+        updateSwipeResultInSupabase(today, i, r.liked ? 'like' : 'dislike');
+      }
+    });
     const newCount = dailyCount + 1;
     setDailyCount(newCount);
     await saveDailyCounter({ date: today, count: newCount });
   }, [pendingSwipe, today, dailyCount]);
+
 
   // Auto-generate only if no saved results for today and has quota
   // Auto-generate / auto-restore : tente toujours, generate() décide s'il y a quota
@@ -393,7 +503,15 @@ export default function Today() {
         layoutData: r.layoutData ?? null,
       })),
     });
+    // Sync layout/saved-outfit changes to Supabase
+    next.forEach((r, i) => {
+      updateOutfitMetaInSupabase(today, i, {
+        layout_data: r.layoutData ?? null,
+        saved_outfit_id: r.savedOutfitId ?? null,
+      });
+    });
   };
+
 
 
   const avatarData = getAvatarFromStorage();
