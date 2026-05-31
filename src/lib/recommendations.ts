@@ -857,14 +857,22 @@ export function buildCustomOutfit(
   centralPiece: ClothingItem,
   occasion: string,
   style: string,
-  excludeIds: Set<string>
+  excludeIds: Set<string>,
+  temperature: number | null = null,
 ): ClothingItem[] {
-  const available = wardrobe.filter(i => i.id !== centralPiece.id && !excludeIds.has(i.id));
+  const compatibleSeasons = getCompatibleSeasons(temperature);
+  const isSeasonOk = (i: ClothingItem) =>
+    !i.season || i.season.length === 0 || i.season.some(s => compatibleSeasons.includes(s));
+
+  // Keep the central piece even if its season is off; filter the rest.
+  let available = wardrobe.filter(i => i.id !== centralPiece.id && !excludeIds.has(i.id));
+  const seasonFiltered = available.filter(isSeasonOk);
+  if (seasonFiltered.length >= 3) available = seasonFiltered;
 
   const scored = available.map(i => {
     let score = 0;
-    if (i.occasion.some(o => o.toLowerCase().includes(occasion.toLowerCase()))) score += 2;
-    if (i.style.some(s => s.toLowerCase().includes(style.toLowerCase()))) score += 2;
+    if (occasion && i.occasion.some(o => o.toLowerCase().includes(occasion.toLowerCase()))) score += 2;
+    if (style && i.style.some(s => s.toLowerCase().includes(style.toLowerCase()))) score += 2;
     score += Math.random();
     return { item: i, score };
   }).sort((a, b) => b.score - a.score);
