@@ -503,7 +503,15 @@ export default function Today() {
         layoutData: r.layoutData ?? null,
       })),
     });
+    // Sync layout/saved-outfit changes to Supabase
+    next.forEach((r, i) => {
+      updateOutfitMetaInSupabase(today, i, {
+        layout_data: r.layoutData ?? null,
+        saved_outfit_id: r.savedOutfitId ?? null,
+      });
+    });
   };
+
 
 
   const avatarData = getAvatarFromStorage();
