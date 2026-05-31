@@ -166,12 +166,6 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode, t
 
           <div className="flex gap-2">
             <button
-              onClick={handleRetry}
-              className="flex-1 py-2.5 rounded-lg bg-secondary text-secondary-foreground font-medium text-sm active:scale-[0.98] transition-transform"
-            >
-              Réessayer 🔄
-            </button>
-            <button
               onClick={() => setEditingItems(generatedOutfit)}
               className="flex-1 py-2.5 rounded-lg font-medium text-sm text-white active:scale-[0.98] transition-transform"
               style={{ backgroundColor: ROSE_GOLD }}
