@@ -299,13 +299,12 @@ export default function Today() {
 
   const generate = useCallback(async () => {
     if (!enough || swipeComplete || pendingSwipe) return;
-    if (!canSuggest) return;
 
     let recs: ClothingItem[][] = [];
     let restoredResults: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[] | null = null;
     let restoredComplete = false;
 
-    // Try to restore today's outfits from localStorage
+    // Try to restore today's outfits from localStorage (toujours, même si quota épuisé)
     const stored = readStoredToday();
     if (stored && stored.date === today) {
       recs = stored.outfits
@@ -328,10 +327,10 @@ export default function Today() {
       }
     }
 
-    // No valid cache for today → generate fresh
+    // Pas de cache valide → générer seulement si on a encore du quota
     if (recs.length === 0) {
+      if (!canSuggest) return;
       recs = await generateFreshOutfits();
-      // Only persist if we actually produced outfits — never cache an empty result
       if (recs.length > 0) {
         writeStoredToday(today, recs);
       }
