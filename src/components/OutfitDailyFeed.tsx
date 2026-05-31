@@ -123,10 +123,9 @@ export default function OutfitDailyFeed({
         createdAt: new Date().toISOString(),
         layoutData,
       });
-      const next = [...allResults];
-      const realIdx = likedIndices[editingIdx];
-      next[realIdx] = {
-        ...next[realIdx],
+      const next = [...results];
+      next[editingIdx] = {
+        ...next[editingIdx],
         outfit: newItems,
         layoutData,
         savedOutfitId: outfitId,
