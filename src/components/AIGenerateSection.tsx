@@ -51,8 +51,11 @@ interface Props {
   weather?: DayWeather | null;
   /** Item IDs to avoid reusing (e.g. items already worn other days of the trip) */
   avoidItemIds?: string[];
+  /** Called whenever a draft outfit is generated/cleared, so parent can share it across days */
+  onDraftChange?: (itemIds: string[] | null) => void;
   onUseOutfit: (itemIds: string[]) => Promise<void> | void;
 }
+
 
 function hashStr(s: string): number {
   let h = 0;
