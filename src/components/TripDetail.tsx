@@ -240,6 +240,51 @@ export default function TripDetail({ trip, onBack }: Props) {
         </div>
       </div>
 
+      {/* Ville météo — centralisée pour tout le voyage */}
+      <div className="bg-card rounded-xl p-3 card-shadow mb-4">
+        {cityEditing ? (
+          <div>
+            <p className="text-xs text-muted-foreground mb-1.5">Ville pour la météo du voyage</p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={cityDraft}
+                onChange={e => setCityDraft(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleCityValidate()}
+                placeholder="Ex : Rome"
+                className="flex-1 h-10 rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+              <button
+                onClick={handleCityValidate}
+                className="px-4 rounded-lg text-primary-foreground text-sm font-semibold active:scale-[0.98]"
+                style={{ backgroundColor: '#C9956C' }}
+              >OK</button>
+              <button
+                onClick={() => { setCityDraft(weatherCity); setCityEditing(false); }}
+                className="px-3 rounded-lg border border-border text-xs text-muted-foreground"
+              >Annuler</button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Météo du voyage</p>
+              <p className="text-sm font-medium truncate">
+                📍 {weatherCity}
+                {weatherStatus === 'loading' && <span className="text-muted-foreground"> · chargement…</span>}
+                {weatherStatus === 'error' && <span className="text-destructive"> · {weatherError}</span>}
+              </p>
+            </div>
+            <button
+              onClick={() => { setCityDraft(weatherCity); setCityEditing(true); }}
+              className="text-xs font-medium"
+              style={{ color: '#C9956C' }}
+            >✏️ Modifier</button>
+          </div>
+        )}
+      </div>
+
+
       <div className="space-y-3">
         {allDates.map(d => {
           const key = formatDateKey(d);
