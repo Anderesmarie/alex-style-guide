@@ -471,10 +471,17 @@ export default function Today() {
         savedOutfitId: null,
       })),
     });
+    // Sync each swipe result to Supabase (multi-device)
+    results.forEach((r, i) => {
+      if (r.liked === true || r.liked === false) {
+        updateSwipeResultInSupabase(today, i, r.liked ? 'like' : 'dislike');
+      }
+    });
     const newCount = dailyCount + 1;
     setDailyCount(newCount);
     await saveDailyCounter({ date: today, count: newCount });
   }, [pendingSwipe, today, dailyCount]);
+
 
   // Auto-generate only if no saved results for today and has quota
   // Auto-generate / auto-restore : tente toujours, generate() décide s'il y a quota
