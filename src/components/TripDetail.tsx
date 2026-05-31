@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getThumb } from '@/lib/wardrobeImages';
 import { toast } from 'sonner';
-import { ClothingItem, Outfit, Trip, TripDay } from '@/lib/types';
+import { ClothingItem, Outfit, Trip, TripDay, OCCASIONS } from '@/lib/types';
 import { getTripDays, getOutfits, getWardrobe, upsertTripDay, addOutfit, genId } from '@/lib/storage';
 import AIGenerateSection from './AIGenerateSection';
 
@@ -52,6 +52,7 @@ export default function TripDetail({ trip, onBack }: Props) {
   const [loading, setLoading] = useState(true);
   const [pickerForDate, setPickerForDate] = useState<string | null>(null);
   const [activityDrafts, setActivityDrafts] = useState<Record<string, string>>({});
+  const [occasionDrafts, setOccasionDrafts] = useState<Record<string, string>>({});
 
   const load = async () => {
     const [d, o, w] = await Promise.all([getTripDays(trip.id), getOutfits(), getWardrobe()]);
