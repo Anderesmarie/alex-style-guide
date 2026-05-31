@@ -128,8 +128,7 @@ export default function Today() {
 
   const today = new Date().toISOString().split('T')[0];
   const enough = wardrobe.length >= 8;
-  // TEMP: limite augmentée à 99 pour les tests (remettre à 3 ensuite)
-  const canSuggest = dailyCount < 99;
+  const canSuggest = dailyCount < 3;
   const weatherTemp = ws.status === 'done' ? ws.data.temperature : null;
 
   // Load data
@@ -228,14 +227,15 @@ export default function Today() {
     }
   };
 
-  const buildEngineInput = useCallback(() => {
+  const buildEngineInput = useCallback((occasionOverride?: string) => {
     const tempMin = ws.status === 'done' ? ws.data.tempMin : (weatherTemp ?? 18);
     const tempMax = ws.status === 'done' ? ws.data.tempMax : (weatherTemp ?? 18);
     const amplitude = ws.status === 'done' ? (ws.data.amplitude ?? Math.max(0, tempMax - tempMin)) : 0;
     const day = new Date().getDay(); // 0=Sun, 6=Sat
     const isWeekday = day >= 1 && day <= 5;
     const worksLifestyle = lifestyle === 'Premier job' || lifestyle === 'Je travaille';
-    const occasion = isWeekday && worksLifestyle ? 'Travail' : 'Quotidien';
+    const defaultOccasion = isWeekday && worksLifestyle ? 'Travail' : 'Quotidien';
+    const occasion = occasionOverride?.trim() || defaultOccasion;
     return {
       wardrobe,
       tempMin,
@@ -252,8 +252,8 @@ export default function Today() {
     };
   }, [ws, weatherTemp, wardrobe, userProfile, userSeason, lifestyle]);
 
-  const generateFreshOutfits = useCallback(async () => {
-    const engineCandidates = generateOutfits(buildEngineInput());
+  const generateFreshOutfits = useCallback(async (occasionOverride?: string) => {
+    const engineCandidates = generateOutfits(buildEngineInput(occasionOverride));
     const engineOutfits = engineCandidates.map(candidate => candidate.items).filter(outfit => outfit.length > 0);
 
     if (engineOutfits.length > 0) {
@@ -418,53 +418,9 @@ export default function Today() {
     );
   }
 
-  const resetDailyForTest = async () => {
-    try {
-      const { data: userData } = await supabase.auth.getUser();
-      if (userData.user) {
-        await supabase
-          .from('daily_counter')
-          .upsert({ user_id: userData.user.id, date: today, count: 0 }, { onConflict: 'user_id,date' });
-      }
-
-      await saveDailyCounter({ date: today, count: 0 });
-      setDailyCount(0);
-      setSwipeResults(null);
-      setSwipeComplete(false);
-
-      // Clear today's localStorage cache so outfits are regenerated fresh
-      clearStoredToday();
-
-      // Regenerate fresh outfits immediately and re-store them
-      if (enough) {
-        const recs = await generateFreshOutfits();
-        if (recs.length > 0) {
-          writeStoredToday(today, recs);
-        }
-        setRecommendations(recs);
-        setPendingSwipe(recs.length > 0 ? recs : null);
-      } else {
-        setRecommendations([]);
-        setPendingSwipe(null);
-      }
-
-
-    } catch (e) {
-      console.error('Reset error:', e);
-    }
-  };
 
   return (
     <div className="fade-enter pb-4">
-      {/* TEMP test button — remove before prod */}
-      <div className="flex justify-end mb-2">
-        <button
-          onClick={resetDailyForTest}
-          className="text-xs text-muted-foreground underline active:opacity-60"
-        >
-          🔄 Reset tenues (test)
-        </button>
-      </div>
       {(() => {
         const hour = new Date().getHours();
         const name = pseudo || 'toi';
@@ -609,14 +565,15 @@ export default function Today() {
         )}
       </div>
 
-      <EventBanner onViewOutfits={async () => {
+      <EventBanner onViewOutfits={async (occasion) => {
         if (!enough) return;
-        const recs = await generateFreshOutfits();
+        const recs = await generateFreshOutfits(occasion);
         setRecommendations(recs);
         setSwipeComplete(false);
         setSwipeResults(null);
         setPendingSwipe(recs);
       }} />
+
 
       {!enough && (
         <div className="bg-card rounded-xl p-6 card-shadow text-center">

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getThumb } from '@/lib/wardrobeImages';
 import { toast } from 'sonner';
-import { CalendarEvent, ClothingItem, Outfit, Trip } from '@/lib/types';
+import { CalendarEvent, ClothingItem, Outfit, Trip, OCCASIONS } from '@/lib/types';
 import {
   getCalendarEvents,
   upsertCalendarEvent,
@@ -42,6 +42,7 @@ export default function CalendarView() {
   // Bottom sheet state
   const [openDate, setOpenDate] = useState<Date | null>(null);
   const [draftEventName, setDraftEventName] = useState('');
+  const [draftOccasion, setDraftOccasion] = useState<string>('Quotidien');
   const [draftOutfitId, setDraftOutfitId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -92,6 +93,7 @@ export default function CalendarView() {
   const openDayEditor = (d: Date) => {
     const ev = getEventForDate(d);
     setDraftEventName(ev?.eventName ?? '');
+    setDraftOccasion('Quotidien');
     setDraftOutfitId(ev?.outfitId ?? null);
     setOpenDate(d);
   };
@@ -99,6 +101,7 @@ export default function CalendarView() {
   const closeDayEditor = () => {
     setOpenDate(null);
     setDraftEventName('');
+    setDraftOccasion('Quotidien');
     setDraftOutfitId(null);
   };
 
@@ -396,8 +399,19 @@ export default function CalendarView() {
               value={draftEventName}
               onChange={e => setDraftEventName(e.target.value)}
               placeholder="Anniversaire, soirée, cours..."
-              className="w-full px-4 py-3 rounded-lg bg-background border border-border outline-none focus:ring-2 focus:ring-primary/30 mb-5"
+              className="w-full px-4 py-3 rounded-lg bg-background border border-border outline-none focus:ring-2 focus:ring-primary/30 mb-3"
             />
+
+            <label className="block text-sm font-medium mb-1.5">Type d'occasion</label>
+            <select
+              value={draftOccasion}
+              onChange={e => setDraftOccasion(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg bg-background border border-border outline-none focus:ring-2 focus:ring-primary/30 mb-5"
+            >
+              {OCCASIONS.map(o => (
+                <option key={o} value={o}>{o}</option>
+              ))}
+            </select>
 
             <p className="text-sm font-medium mb-2">Choisir une tenue</p>
             {outfits.length === 0 ? (
@@ -455,6 +469,7 @@ export default function CalendarView() {
             {openDate >= today && (
               <AIGenerateSection
                 dateKey={formatDateKey(openDate)}
+                occasion={draftOccasion}
                 onUseOutfit={async (itemIds) => {
                   if (!openDate) return;
                   try {

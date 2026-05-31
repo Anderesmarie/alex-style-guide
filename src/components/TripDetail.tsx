@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getThumb } from '@/lib/wardrobeImages';
 import { toast } from 'sonner';
-import { ClothingItem, Outfit, Trip, TripDay } from '@/lib/types';
+import { ClothingItem, Outfit, Trip, TripDay, OCCASIONS } from '@/lib/types';
 import { getTripDays, getOutfits, getWardrobe, upsertTripDay, addOutfit, genId } from '@/lib/storage';
 import AIGenerateSection from './AIGenerateSection';
 
@@ -52,6 +52,7 @@ export default function TripDetail({ trip, onBack }: Props) {
   const [loading, setLoading] = useState(true);
   const [pickerForDate, setPickerForDate] = useState<string | null>(null);
   const [activityDrafts, setActivityDrafts] = useState<Record<string, string>>({});
+  const [occasionDrafts, setOccasionDrafts] = useState<Record<string, string>>({});
 
   const load = async () => {
     const [d, o, w] = await Promise.all([getTripDays(trip.id), getOutfits(), getWardrobe()]);
@@ -188,8 +189,18 @@ export default function TripDetail({ trip, onBack }: Props) {
                 onChange={e => setActivityDrafts(prev => ({ ...prev, [key]: e.target.value }))}
                 onBlur={() => handleSaveActivity(key)}
                 placeholder="Visite musée, plage, soirée..."
-                className="w-full px-3 py-2 rounded-lg bg-background border border-border outline-none focus:ring-2 focus:ring-primary/30 text-sm mb-3"
+                className="w-full px-3 py-2 rounded-lg bg-background border border-border outline-none focus:ring-2 focus:ring-primary/30 text-sm mb-2"
               />
+
+              <select
+                value={occasionDrafts[key] ?? 'Quotidien'}
+                onChange={e => setOccasionDrafts(prev => ({ ...prev, [key]: e.target.value }))}
+                className="w-full px-3 py-2 rounded-lg bg-background border border-border outline-none focus:ring-2 focus:ring-primary/30 text-sm mb-3"
+              >
+                {OCCASIONS.map(o => (
+                  <option key={o} value={o}>{o}</option>
+                ))}
+              </select>
 
               {outfit ? (
                 <div>
@@ -229,6 +240,7 @@ export default function TripDetail({ trip, onBack }: Props) {
 
               <AIGenerateSection
                 dateKey={key}
+                occasion={occasionDrafts[key] ?? 'Quotidien'}
                 onUseOutfit={async (itemIds) => {
                   try {
                     const newOutfitId = genId();

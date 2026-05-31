@@ -25,7 +25,7 @@ function lastFridayOfNovember(year: number): Date {
   return d;
 }
 
-export const OCCASIONS: CalendarEvent[] = [
+export const SEASONAL_EVENTS: CalendarEvent[] = [
   {
     id: 'valentines', emoji: '💝', name: 'Saint-Valentin',
     message7days: '💝 Saint-Valentin dans {days} jours — Alex a des idées de tenues pour toi !',
@@ -144,7 +144,7 @@ export function getActiveBanner(now: Date = new Date()): ActiveBanner | null {
   // Check occasions first (closest wins)
   let bestOccasion: { event: CalendarEvent; days: number } | null = null;
 
-  for (const ev of OCCASIONS) {
+  for (const ev of SEASONAL_EVENTS) {
     let eventDate = ev.getDate(year);
     // If event already passed this year, check next year
     if (daysBetween(now, eventDate) < 0) {
