@@ -30,16 +30,11 @@ interface Props {
 const ROSE_GOLD = '#C9956C';
 
 export default function OutfitDailyFeed({
-  results: allResults,
+  results,
   pseudo,
   wardrobe,
   onResultsChange,
 }: Props) {
-  // N'afficher que les tenues swipées positivement (likées)
-  const likedIndices = allResults
-    .map((r, i) => (r.liked === true ? i : -1))
-    .filter(i => i >= 0);
-  const results = likedIndices.map(i => allResults[i]);
   
   const [savedIdxs, setSavedIdxs] = useState<Set<number>>(new Set());
   const [wornIdx, setWornIdx] = useState<number | null>(null);
@@ -128,10 +123,9 @@ export default function OutfitDailyFeed({
         createdAt: new Date().toISOString(),
         layoutData,
       });
-      const next = [...allResults];
-      const realIdx = likedIndices[editingIdx];
-      next[realIdx] = {
-        ...next[realIdx],
+      const next = [...results];
+      next[editingIdx] = {
+        ...next[editingIdx],
         outfit: newItems,
         layoutData,
         savedOutfitId: outfitId,
@@ -149,16 +143,7 @@ export default function OutfitDailyFeed({
 
   return (
     <div className="space-y-2 fade-enter">
-      <h2 className="text-lg font-serif font-semibold text-center mb-2">Tes tenues likées du jour ✨</h2>
-
-      {results.length === 0 && (
-        <div className="bg-card rounded-xl p-6 card-shadow text-center">
-          <p className="text-muted-foreground text-sm">
-            Tu n'as liké aucune tenue aujourd'hui 💭<br />
-            Reviens demain pour de nouvelles idées !
-          </p>
-        </div>
-      )}
+      <h2 className="text-lg font-serif font-semibold text-center mb-2">Tes tenues du jour</h2>
 
       <div className="space-y-4">
         {results.map((r, idx) => {
