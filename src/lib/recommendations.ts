@@ -251,7 +251,16 @@ function pickRandom(items: ClothingItem[], excludeIds: Set<string>): ClothingIte
 }
 
 function buildOneOutfit(pool: ClothingItem[], globalUsedIds: Set<string>, temperature: number | null): ClothingItem[] | null {
-  const available = pool.filter(i => !globalUsedIds.has(i.id));
+  const cleanPool = pool.filter(i => {
+    const cat = (i.category || '').toLowerCase();
+    return !cat.includes('loungewear')
+        && !cat.includes('nuit')
+        && !cat.includes('lingerie')
+        && !cat.includes('maillot')
+        && !cat.includes('beachwear');
+  });
+
+  const available = cleanPool.filter(i => !globalUsedIds.has(i.id));
 
   const hauts = available.filter(i => getGroup(i) === 'HAUTS');
   const bas = available.filter(i => getGroup(i) === 'BAS');
