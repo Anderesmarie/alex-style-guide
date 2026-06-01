@@ -716,6 +716,34 @@ export function computeAmpScore(
   return s;
 }
 
+function computePatternScore(outfit: ClothingItem[]): number {
+  const FORTS = ['leopard', 'fleuri', 'tie-dye', 'zebre', 'graphique'];
+  const LEGERS = ['raye', 'carreaux', 'geometrique', 'pied-de-poule'];
+  const NEUTRES = ['blanc', 'noir', 'gris', 'beige', 'camel', 'marine'];
+  const patterns = outfit
+    .filter(i => getGroup(i) !== 'ACCESSOIRES' && getGroup(i) !== 'CHAUSSURES')
+    .map(i => (i.pattern || 'uni').toLowerCase());
+  const forts = patterns.filter(p => FORTS.includes(p));
+  const legers = patterns.filter(p => LEGERS.includes(p));
+  if (forts.length >= 2) return -5;
+  if (legers.length >= 2) return -2;
+  if (forts.length === 1 && legers.length === 0) {
+    const autresPieces = outfit.filter(i =>
+      getGroup(i) !== 'ACCESSOIRES' && getGroup(i) !== 'CHAUSSURES'
+    );
+    const toutesNeutresOuUnis = autresPieces.every(i => {
+      const p = (i.pattern || 'uni').toLowerCase();
+      return p === 'uni' || NEUTRES.some(n =>
+        (i.color || []).some(c => c.toLowerCase().includes(n))
+      );
+    });
+    if (toutesNeutresOuUnis) return 1;
+  }
+  return 0;
+}
+
+
+
 function collectOutfits(
   pool: ClothingItem[],
   targetCount: number,
@@ -740,6 +768,7 @@ function collectOutfits(
     if (blockedKeys.has(key) || seenKeys.has(key)) continue;
 
     if (computeAmpScore(outfit, tempMin, tempMax, amplitude) < -3) continue;
+    if (computePatternScore(outfit) <= -5) continue;
 
     seenKeys.add(key);
     // Diversité : pièce principale et bas différents dans chaque tenue
@@ -966,8 +995,10 @@ export async function generateRecommendations(
   const rankPool = (pool: ClothingItem[]) => {
     if (!userProfile) return pool;
     return [...pool].sort((a, b) => {
-      const sa = scoreByProfile(a, userProfile, ctx, currentOccasion) + getWeatherScore(a, tempMin, tempMax, tAvg, isRainy, isWindy);
-      const sb = scoreByProfile(b, userProfile, ctx, currentOccasion) + getWeatherScore(b, tempMin, tempMax, tAvg, isRainy, isWindy);
+      const outfitA = [a];
+      const outfitB = [b];
+      const sa = scoreByProfile(a, userProfile, ctx, currentOccasion) + getWeatherScore(a, tempMin, tempMax, tAvg, isRainy, isWindy) + computePatternScore(outfitA);
+      const sb = scoreByProfile(b, userProfile, ctx, currentOccasion) + getWeatherScore(b, tempMin, tempMax, tAvg, isRainy, isWindy) + computePatternScore(outfitB);
       if (sb !== sa) return sb - sa;
       return Math.random() - 0.5;
     });

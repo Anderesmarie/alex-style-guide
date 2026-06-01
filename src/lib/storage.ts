@@ -130,6 +130,7 @@ export async function getWardrobe(): Promise<ClothingItem[]> {
       occasion: row.occasion as string[],
       brand: row.brand || undefined,
       price: row.price || undefined,
+      pattern: (row as any).pattern || 'uni',
     };
   });
 }
