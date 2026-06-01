@@ -742,6 +742,28 @@ function computePatternScore(outfit: ClothingItem[]): number {
   return 0;
 }
 
+function computeStyleCompatScore(outfit: ClothingItem[]): number {
+  const stylesInOutfit = [...new Set(
+    outfit.flatMap(i => (i.style || []).map(s => s.toLowerCase()))
+  )];
+  const has = (s: string) => stylesInOutfit.includes(s.toLowerCase());
+  let score = 0;
+  // Combinaisons positives
+  if (has('casual chic') && has('old money')) score += 1;
+  if (has('casual chic') && has('streetwear')) score += 1;
+  if (has('casual chic') && has('bohème')) score += 1;
+  if (has('y2k') && has('streetwear')) score += 1;
+  if (has('bohème') && has('vintage')) score += 1;
+  if (has('old money') && has('preppy')) score += 1;
+  if (has('romantique') && has('y2k')) score += 1;
+  if (has('chic') && has('bureau')) score += 2;
+  // Combinaisons négatives
+  if (has('sportswear') && has('old money')) score -= 2;
+  if (has('grunge') && has('old money')) score -= 2;
+  if (has('dark') && has('romantique')) score -= 1;
+  if (has('minimaliste') && has('y2k')) score -= 1;
+  return score;
+}
 
 
 function collectOutfits(
