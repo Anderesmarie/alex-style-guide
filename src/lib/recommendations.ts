@@ -74,7 +74,7 @@ export async function getRecentOutfitItemIds(): Promise<{ itemIds: string[]; cre
     .eq('user_id', uid)
     .eq('reaction', 'proposee')
     .order('created_at', { ascending: false })
-    .limit(7);
+    .limit(28);
   return (data || []).map(r => ({ itemIds: r.item_ids as string[], createdAt: r.created_at }));
 }
 
@@ -88,15 +88,15 @@ export async function saveRecentOutfit(itemIds: string[]): Promise<void> {
     nb_fois_portee: 0,
     derniere_utilisation: new Date().toISOString(),
   });
-  // Keep only last 7
+  // Keep only last 28
   const { data } = await supabase
     .from('user_preferences')
     .select('id')
     .eq('user_id', uid)
     .eq('reaction', 'proposee')
     .order('created_at', { ascending: false });
-  if (data && data.length > 7) {
-    const toDelete = data.slice(7).map(r => r.id);
+  if (data && data.length > 28) {
+    const toDelete = data.slice(28).map(r => r.id);
     await supabase.from('user_preferences').delete().in('id', toDelete);
   }
 }
