@@ -115,6 +115,30 @@ export async function getDislikedItemIds(): Promise<string[]> {
   return data.flatMap(r => r.item_ids as string[]);
 }
 
+async function getWornItemIds(): Promise<string[]> {
+  const uid = await getUserIdSafe();
+  if (!uid) return [];
+  const { data } = await supabase
+    .from('user_preferences')
+    .select('item_ids')
+    .eq('user_id', uid)
+    .eq('reaction', 'portee');
+  if (!data) return [];
+  return data.flatMap(r => r.item_ids as string[]);
+}
+
+async function getLikedOutfitItemIds(): Promise<string[]> {
+  const uid = await getUserIdSafe();
+  if (!uid) return [];
+  const { data } = await supabase
+    .from('outfits')
+    .select('item_ids')
+    .eq('user_id', uid)
+    .eq('liked', true);
+  if (!data) return [];
+  return data.flatMap(r => r.item_ids as string[]);
+}
+
 export async function saveDislikedOutfit(itemIds: string[]): Promise<void> {
   const uid = await getUserIdSafe();
   if (!uid) return;
@@ -458,6 +482,8 @@ interface ScoringContext {
   allProposedIds: Set<string>; // all item IDs proposed in last 14 days
   lastProposedIds: Set<string>; // item IDs from yesterday
   recent3Ids: Set<string>; // item IDs from last 3 suggestions
+  wornItemIds: Set<string>;
+  likedItemIds: Set<string>;
 }
 
 function scoreByProfile(
@@ -574,6 +600,10 @@ function scoreByProfile(
 
     // 6. Fraîcheur (+1 if not proposed in 14+ days)
     if (!ctx.allProposedIds.has(item.id)) score += 1;
+
+    // 7. Tenues portées (+2) / likées (+3)
+    if (ctx.wornItemIds.has(item.id)) score += 2;
+    if (ctx.likedItemIds.has(item.id)) score += 3;
   }
 
   // Scoring spécifique soirée étudiante
@@ -685,9 +715,11 @@ function collectOutfits(
 }
 
 export async function loadScoringContext(wardrobe: ClothingItem[]): Promise<ScoringContext> {
-  const [recentOutfits, dislikedIds] = await Promise.all([
+  const [recentOutfits, dislikedIds, wornIds, likedIds] = await Promise.all([
     getRecentOutfitItemIds(),
     getDislikedItemIds(),
+    getWornItemIds(),
+    getLikedOutfitItemIds(),
   ]);
 
   // Build wardrobeCreatedAt from supabase (wardrobe items have created_at)
@@ -718,6 +750,8 @@ export async function loadScoringContext(wardrobe: ClothingItem[]): Promise<Scor
     allProposedIds,
     lastProposedIds,
     recent3Ids,
+    wornItemIds: new Set(wornIds),
+    likedItemIds: new Set(likedIds),
   };
 }
 
