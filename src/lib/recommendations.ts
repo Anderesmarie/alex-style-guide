@@ -896,7 +896,7 @@ export async function generateRecommendations(
   const today = new Date();
   const dayOfWeek = today.getDay();
   const currentOccasion = getOccasionFromLifestyle(
-    (userProfile as unknown as { lifestyle?: string | null })?.lifestyle,
+    userProfile?.lifestyle,
     dayOfWeek
   );
   const occasionTagMap: Record<string, string[]> = {
