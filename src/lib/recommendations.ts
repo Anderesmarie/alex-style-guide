@@ -316,8 +316,33 @@ function buildOneOutfit(pool: ClothingItem[], globalUsedIds: Set<string>, temper
     if (c) { outfit.push(c); usedIds.add(c.id); }
   }
 
-  // Optional: 1 chaussures
-  const ch = pickRandom(chaussures, usedIds);
+  // Chaussures : sélection avec cohérence de style
+  const outfitStyles = outfit.flatMap(i => i.style || []).map(s => s.toLowerCase());
+  const outfitCats = outfit.map(i => (i.category || '').toLowerCase());
+  const isSevenStyle = outfitStyles.some(s =>
+    ['soirée', 'evenement', 'cérémonie', 'chic', 'old money', 'romantique'].includes(s)
+  );
+  const isSportStyle = outfitCats.some(c =>
+    c.includes('sport') || c.includes('activewear')
+  );
+
+  // Exclure chaussures incompatibles
+  const compatibleShoes = chaussures.filter(ch => {
+    const t = (ch.type || '').toLowerCase();
+    const isSportShoe = t.includes('chaussure de sport') || t.includes('running');
+    const isHeels = t.includes('talon') || t.includes('escarpin');
+    const isFormalShoe = t.includes('escarpin') || t.includes('talon');
+
+    // Chaussures de sport uniquement avec tenue sport
+    if (isSportShoe && !isSportStyle) return false;
+    // Talons/escarpins incompatibles avec sport
+    if (isHeels && isSportStyle) return false;
+    // Chaussures habillées non recommandées avec tenue casual
+    return true;
+  });
+
+  const shoePool = compatibleShoes.length > 0 ? compatibleShoes : chaussures;
+  const ch = pickRandom(shoePool, usedIds);
   if (ch) { outfit.push(ch); usedIds.add(ch.id); }
 
   // Optional: 1 accessoire
