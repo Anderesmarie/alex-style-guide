@@ -791,6 +791,7 @@ function collectOutfits(
 
     if (computeAmpScore(outfit, tempMin, tempMax, amplitude) < -3) continue;
     if (computePatternScore(outfit) <= -5) continue;
+    // Pas de rejet sur styleCompat — scoring uniquement
 
     seenKeys.add(key);
     // Diversité : pièce principale et bas différents dans chaque tenue
