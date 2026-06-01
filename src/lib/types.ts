@@ -67,6 +67,7 @@ export interface UserProfile {
   corpulence: 'fine' | 'medium' | 'ronde' | null;
   morphologie: 'A' | 'H' | 'X' | 'V' | 'O' | '8' | null;
   favorite_colors: string[];
+  lifestyle?: 'Lycée' | 'Études sup' | 'Premier job' | 'Je travaille' | 'Autre' | null;
 }
 
 export interface AvatarConfig {
