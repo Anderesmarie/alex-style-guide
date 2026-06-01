@@ -835,6 +835,54 @@ function computeColorCompatScore(outfit: ClothingItem[]): number {
   return score;
 }
 
+function scoreBijou(
+  item: ClothingItem,
+  outfitStyles: string[],
+  userSeason: string | null
+): number {
+  if (item.category !== 'Bijoux' && !(item.category || '').toLowerCase().includes('bijou')) return 0;
+  let score = 0;
+  const t = (item.type || '').toLowerCase();
+  const styles = outfitStyles.map(s => s.toLowerCase());
+  const hasStyle = (s: string) => styles.includes(s.toLowerCase());
+
+  if (t.includes('collier')) {
+    if (hasStyle('romantique') || hasStyle('old money') ||
+        hasStyle('bohème') || hasStyle('y2k')) score += 1;
+  }
+  if (t.includes('boucle') || t.includes('earring')) {
+    if (hasStyle('romantique') || hasStyle('old money') ||
+        hasStyle('y2k') || hasStyle('casual chic')) score += 1;
+  }
+  if (t.includes('bracelet')) {
+    if (hasStyle('bohème') || hasStyle('y2k') ||
+        hasStyle('streetwear')) score += 1;
+  }
+  if (t.includes('bague')) {
+    if (hasStyle('grunge') || hasStyle('dark') ||
+        hasStyle('bohème') || hasStyle('y2k')) score += 1;
+  }
+  if (t.includes('montre')) {
+    if (hasStyle('old money')) score += 2;
+    if (hasStyle('preppy') || hasStyle('casual chic')) score += 1;
+  }
+
+  const isGold = t.includes('doré') || t.includes('dore') ||
+                 t.includes('or ') || t.includes('gold');
+  if (isGold && (userSeason === 'printemps' || userSeason === 'automne')) {
+    score += 1;
+  }
+  const isSilver = t.includes('argenté') || t.includes('argente') ||
+                   t.includes('argent') || t.includes('silver');
+  if (isSilver && (userSeason === 'ete' || userSeason === 'hiver')) {
+    score += 1;
+  }
+
+  return score;
+}
+
+
+
 
 function collectOutfits(
   pool: ClothingItem[],
