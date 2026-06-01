@@ -345,9 +345,20 @@ function buildOneOutfit(pool: ClothingItem[], globalUsedIds: Set<string>, temper
   const ch = pickRandom(shoePool, usedIds);
   if (ch) { outfit.push(ch); usedIds.add(ch.id); }
 
-  // Optional: 1 accessoire
-  const acc = pickRandom(accessoires, usedIds);
+  // Optional: 1 accessoire — collier max 1 par tenue
+  const colliers = accessoires.filter(i =>
+    (i.type || '').toLowerCase().includes('collier')
+  );
+  const autresAcc = accessoires.filter(i =>
+    !(i.type || '').toLowerCase().includes('collier')
+  );
+  const colliersDejaPresents = outfit.filter(i =>
+    (i.type || '').toLowerCase().includes('collier')
+  ).length;
+  const accPool = colliersDejaPresents >= 1 ? autresAcc : accessoires;
+  const acc = pickRandom(accPool, usedIds);
   if (acc) { outfit.push(acc); usedIds.add(acc.id); }
+
 
   return outfit;
 }
