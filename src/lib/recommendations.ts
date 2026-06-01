@@ -485,8 +485,18 @@ function scoreByProfile(
   }
 
   // 2. Occasion du jour (+2)
-  const occasionFilter = isWeekday() ? ['Travail', 'Quotidien'] : ['Sortie', 'Quotidien'];
-  if (item.occasion?.some(o => occasionFilter.includes(o))) score += 2;
+  const occasionTagMap: Record<string, string[]> = {
+    cours_lycee:      ['Quotidien', 'Sortie', 'Cours lycée'],
+    campus:           ['Quotidien', 'Sortie', 'Campus'],
+    travail:          ['Travail', 'Quotidien'],
+    sortie:           ['Sortie', 'Quotidien'],
+    soiree_etudiante: ['Sortie', 'Soirée', 'Événement', 'Quotidien'],
+    quotidien:        ['Quotidien', 'Sortie'],
+  };
+  const scoringOccasionTags = currentOccasion
+    ? (occasionTagMap[currentOccasion] ?? ['Quotidien'])
+    : (isWeekday() ? ['Travail', 'Quotidien'] : ['Sortie', 'Quotidien']);
+  if (item.occasion?.some(o => scoringOccasionTags.includes(o))) score += 2;
 
   // Silhouette, morphology, favorite color scores
   score += getSilhouetteScore(item, profile.taille, profile.corpulence);
