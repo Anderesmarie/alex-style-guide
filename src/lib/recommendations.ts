@@ -470,18 +470,71 @@ function scoreByProfile(
   let score = 0;
   const styles = profile.styles.map(s => s.toLowerCase());
 
-  // 1. Style profil (+3)
-  if (styles.includes('élégant') || styles.includes('casual chic')) {
-    if (item.style.some(s => ['Chic', 'Bureau'].includes(s))) score += 3;
-  }
-  if (styles.includes('sportswear')) {
-    if (item.style.some(s => s === 'Sport')) score += 3;
-  }
-  if (styles.includes('bohème')) {
-    if (item.style.some(s => s === 'Boho')) score += 3;
-  }
-  if (styles.includes('minimaliste')) {
-    if ((item.color || []).some(c => ['blanc', 'noir', 'gris', 'beige'].includes(c.toLowerCase()))) score += 2;
+  // 1. Style profil — 12 styles
+  const styleScoreMap: Record<string, { good: string[]; bad: string[] }> = {
+    'casual chic': {
+      good: ['Blazer', 'Jean droit', 'Chemise', 'Blouse', 'Robe casual', 'Robe midi', 'Mocassins', 'Loafers', 'Baskets', 'Sac à main', 'Sac baguette'],
+      bad: ['Jogging', 'Hoodie'],
+    },
+    'old money': {
+      good: ['Blazer', 'Manteau', 'Trench', 'Pantalon droit', 'Pantalon large', 'Cardigan', 'Pull col roulé', 'Chemise', 'Robe midi', 'Robe longue', 'Mocassins', 'Loafers', 'Jupe crayon', 'Montre'],
+      bad: ['Jogging', 'Hoodie', 'Baskets'],
+    },
+    'streetwear': {
+      good: ['Hoodie', 'Sweat', 'Bomber', 'Jogging', 'Pantalon cargo', 'Short cargo', 'Baskets', 'Veste en cuir'],
+      bad: ['Escarpins', 'Robe habillée'],
+    },
+    'y2k': {
+      good: ['Crop top', 'Top corset', 'Bralette', 'Mini-jupe', 'Robe mini', 'Combishort', 'Top dos nu', 'Sac banane', 'Mini sac', 'Jean court'],
+      bad: ['Manteau long', 'Pantalon droit'],
+    },
+    'romantique': {
+      good: ['Robe midi', 'Robe longue', 'Robe sans bretelles', 'Jupe plissée', 'Jupe évasée', 'Blouse', 'Top dos nu', 'Sac à main', 'Collier', "Boucles d'oreilles"],
+      bad: ['Jogging', 'Veste militaire'],
+    },
+    'bohème': {
+      good: ['Jupe longue', 'Robe longue', 'Blouse', 'Cardigan', 'Veste en jean', 'Sandales plates', 'Tote bag', 'Cape', 'Poncho', 'Tunique'],
+      bad: ['Escarpins', 'Blazer structuré'],
+    },
+    'minimaliste': {
+      good: ['T-shirt', 'Pantalon droit', 'Robe casual', 'Manteau court', 'Jean droit', 'Tote bag', 'Combinaison'],
+      bad: ['Top corset', 'Bralette', 'Jupe plissée'],
+    },
+    'grunge': {
+      good: ['Veste en jean', 'Perfecto', 'Veste en cuir', 'Chemise', 'Boots', 'Bottines', 'Mini-jupe', 'Jean boyfriend', 'Bague', 'Collier'],
+      bad: ['Robe habillée', 'Escarpins'],
+    },
+    'dark': {
+      good: ['Perfecto', 'Veste en cuir', 'Manteau long', 'Robe habillée', 'Boots', 'Bottines', 'Bottes hautes', 'Jean skinny', 'Pantalon en cuir'],
+      bad: ['Robe sans bretelles colorée'],
+    },
+    'vintage': {
+      good: ['Jean évasé', 'Jean boyfriend', 'Chemise', 'Veste en jean', 'Robe midi', 'Cardigan', 'Mocassins', 'Loafers', 'Salopette', 'Robe en jean'],
+      bad: ['Jogging', 'Baskets chunky'],
+    },
+    'preppy': {
+      good: ['Blazer', 'Chemise', 'Jupe plissée', 'Pantalon droit', 'Pull col V', 'Pull col rond', 'Mocassins', 'Loafers', 'Robe midi', 'Polo', 'Tote bag'],
+      bad: ['Jogging', 'Crop top'],
+    },
+    'sportswear': {
+      good: ['Legging', 'Sweat', 'Hoodie', 'Short taille haute', 'Baskets', 'Jogging', 'Veste coupe-vent'],
+      bad: ['Escarpins', 'Robe habillée', 'Blazer'],
+    },
+  };
+  for (const profileStyle of styles) {
+    const key = profileStyle.toLowerCase();
+    const mapping = styleScoreMap[key];
+    if (!mapping) continue;
+    const itemType = (item.type || '').toLowerCase();
+    const itemStyle = (item.style || []).map((s: string) => s.toLowerCase());
+    const matchGood = mapping.good.some(g =>
+      itemType.includes(g.toLowerCase()) || itemStyle.includes(g.toLowerCase())
+    );
+    const matchBad = mapping.bad.some(b =>
+      itemType.includes(b.toLowerCase()) || itemStyle.includes(b.toLowerCase())
+    );
+    if (matchGood) score += 2;
+    if (matchBad) score -= 2;
   }
 
   // 2. Occasion du jour (+2)
