@@ -708,6 +708,17 @@ function collectOutfits(
     if (computeAmpScore(outfit, tempMin, tempMax, amplitude) < -3) continue;
 
     seenKeys.add(key);
+    // Diversité : pièce principale et bas différents dans chaque tenue
+    const mainGroups = ['HAUTS', 'ROBES'];
+    const outfitMain = outfit.find(i => mainGroups.includes(getGroup(i)));
+    const outfitBottom = outfit.find(i => getGroup(i) === 'BAS');
+    const mainAlreadyUsed = outfitMain && results.some(existing =>
+      existing.some(i => i.id === outfitMain.id)
+    );
+    const bottomAlreadyUsed = outfitBottom && results.some(existing =>
+      existing.some(i => i.id === outfitBottom.id)
+    );
+    if (mainAlreadyUsed || bottomAlreadyUsed) continue;
     results.push(outfit);
   }
 
