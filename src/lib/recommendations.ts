@@ -742,6 +742,28 @@ function computePatternScore(outfit: ClothingItem[]): number {
   return 0;
 }
 
+function computeStyleCompatScore(outfit: ClothingItem[]): number {
+  const stylesInOutfit = [...new Set(
+    outfit.flatMap(i => (i.style || []).map(s => s.toLowerCase()))
+  )];
+  const has = (s: string) => stylesInOutfit.includes(s.toLowerCase());
+  let score = 0;
+  // Combinaisons positives
+  if (has('casual chic') && has('old money')) score += 1;
+  if (has('casual chic') && has('streetwear')) score += 1;
+  if (has('casual chic') && has('bohème')) score += 1;
+  if (has('y2k') && has('streetwear')) score += 1;
+  if (has('bohème') && has('vintage')) score += 1;
+  if (has('old money') && has('preppy')) score += 1;
+  if (has('romantique') && has('y2k')) score += 1;
+  if (has('chic') && has('bureau')) score += 2;
+  // Combinaisons négatives
+  if (has('sportswear') && has('old money')) score -= 2;
+  if (has('grunge') && has('old money')) score -= 2;
+  if (has('dark') && has('romantique')) score -= 1;
+  if (has('minimaliste') && has('y2k')) score -= 1;
+  return score;
+}
 
 
 function collectOutfits(
@@ -769,6 +791,7 @@ function collectOutfits(
 
     if (computeAmpScore(outfit, tempMin, tempMax, amplitude) < -3) continue;
     if (computePatternScore(outfit) <= -5) continue;
+    // Pas de rejet sur styleCompat — scoring uniquement
 
     seenKeys.add(key);
     // Diversité : pièce principale et bas différents dans chaque tenue
@@ -994,11 +1017,12 @@ export async function generateRecommendations(
 
   const rankPool = (pool: ClothingItem[]) => {
     if (!userProfile) return pool;
+    const styleCompatBonus = computeStyleCompatScore(pool) / Math.max(pool.length, 1);
     return [...pool].sort((a, b) => {
       const outfitA = [a];
       const outfitB = [b];
-      const sa = scoreByProfile(a, userProfile, ctx, currentOccasion) + getWeatherScore(a, tempMin, tempMax, tAvg, isRainy, isWindy) + computePatternScore(outfitA);
-      const sb = scoreByProfile(b, userProfile, ctx, currentOccasion) + getWeatherScore(b, tempMin, tempMax, tAvg, isRainy, isWindy) + computePatternScore(outfitB);
+      const sa = scoreByProfile(a, userProfile, ctx, currentOccasion) + getWeatherScore(a, tempMin, tempMax, tAvg, isRainy, isWindy) + computePatternScore(outfitA) + styleCompatBonus;
+      const sb = scoreByProfile(b, userProfile, ctx, currentOccasion) + getWeatherScore(b, tempMin, tempMax, tAvg, isRainy, isWindy) + computePatternScore(outfitB) + styleCompatBonus;
       if (sb !== sa) return sb - sa;
       return Math.random() - 0.5;
     });
