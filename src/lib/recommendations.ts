@@ -1084,6 +1084,53 @@ function getWeatherScore(
     if (item.season.includes(active)) score += 1;
   }
 
+  // Accessoires météo
+  const isBonnet = type.includes('bonnet');
+  const isEcharpe = type.includes('écharpe') || type.includes('echarpe') || type.includes('foulard');
+  const isCasquette = type.includes('casquette') || type.includes('bob');
+  const isLunettes = type.includes('lunettes');
+  const isCollant = type.includes('collant');
+
+  if (isBonnet) {
+    if (tempMin !== undefined && tempMin < 5) score += 3;
+    else if (tempMin !== undefined && tempMin < 8) score += 2;
+    if (tAvg !== null && tAvg > 18) score -= 2;
+    const itemStyles = (item.style || []).map(s => s.toLowerCase());
+    if (itemStyles.some(s => ['streetwear','casual chic','grunge'].includes(s))) score += 1;
+    if (itemStyles.includes('old money')) score -= 1;
+  }
+
+  if (isEcharpe) {
+    if (tempMin !== undefined && tempMin < 10) score += 2;
+    if (tAvg !== null && tAvg > 22) score -= 1;
+    const itemStyles = (item.style || []).map(s => s.toLowerCase());
+    if (itemStyles.some(s => ['old money','bohème','preppy','vintage'].includes(s))) score += 1;
+  }
+
+  if (isCasquette) {
+    const itemStyles = (item.style || []).map(s => s.toLowerCase());
+    if (itemStyles.includes('streetwear')) score += 2;
+    if (itemStyles.some(s => ['y2k','casual chic'].includes(s))) score += 1;
+    if (itemStyles.includes('old money')) score -= 2;
+  }
+
+  if (isLunettes) {
+    const isClearSky = [0, 1].includes(item.season?.length ?? -1);
+    if (tAvg !== null && tAvg > 18) score += 1;
+    if (isRainy) score -= 2;
+    const itemStyles = (item.style || []).map(s => s.toLowerCase());
+    if (itemStyles.some(s => ['y2k','casual chic'].includes(s))) score += 1;
+  }
+
+  if (isCollant) {
+    const wornWithSkirtOrDress = category.includes('bas') || category.includes('robes');
+    if (tempMin !== undefined && tempMin < 8) score += 3;
+    else if (tempMin !== undefined && tempMin < 12) score += 2;
+    if (tAvg !== null && tAvg > 22) score -= 2;
+    const itemStyles = (item.style || []).map(s => s.toLowerCase());
+    if (itemStyles.includes('preppy')) score += 1;
+  }
+
   return score;
 }
 
