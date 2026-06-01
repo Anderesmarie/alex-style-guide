@@ -1089,11 +1089,12 @@ export async function generateRecommendations(
   const rankPool = (pool: ClothingItem[]) => {
     if (!userProfile) return pool;
     const styleCompatBonus = computeStyleCompatScore(pool) / Math.max(pool.length, 1);
+    const colorCompatBonus = computeColorCompatScore(pool) / Math.max(pool.length, 1);
     return [...pool].sort((a, b) => {
       const outfitA = [a];
       const outfitB = [b];
-      const sa = scoreByProfile(a, userProfile, ctx, currentOccasion) + getWeatherScore(a, tempMin, tempMax, tAvg, isRainy, isWindy) + computePatternScore(outfitA) + styleCompatBonus;
-      const sb = scoreByProfile(b, userProfile, ctx, currentOccasion) + getWeatherScore(b, tempMin, tempMax, tAvg, isRainy, isWindy) + computePatternScore(outfitB) + styleCompatBonus;
+      const sa = scoreByProfile(a, userProfile, ctx, currentOccasion) + getWeatherScore(a, tempMin, tempMax, tAvg, isRainy, isWindy) + computePatternScore(outfitA) + styleCompatBonus + colorCompatBonus;
+      const sb = scoreByProfile(b, userProfile, ctx, currentOccasion) + getWeatherScore(b, tempMin, tempMax, tAvg, isRainy, isWindy) + computePatternScore(outfitB) + styleCompatBonus + colorCompatBonus;
       if (sb !== sa) return sb - sa;
       return Math.random() - 0.5;
     });
