@@ -345,9 +345,20 @@ function buildOneOutfit(pool: ClothingItem[], globalUsedIds: Set<string>, temper
   const ch = pickRandom(shoePool, usedIds);
   if (ch) { outfit.push(ch); usedIds.add(ch.id); }
 
-  // Optional: 1 accessoire
-  const acc = pickRandom(accessoires, usedIds);
+  // Optional: 1 accessoire — collier max 1 par tenue
+  const colliers = accessoires.filter(i =>
+    (i.type || '').toLowerCase().includes('collier')
+  );
+  const autresAcc = accessoires.filter(i =>
+    !(i.type || '').toLowerCase().includes('collier')
+  );
+  const colliersDejaPresents = outfit.filter(i =>
+    (i.type || '').toLowerCase().includes('collier')
+  ).length;
+  const accPool = colliersDejaPresents >= 1 ? autresAcc : accessoires;
+  const acc = pickRandom(accPool, usedIds);
   if (acc) { outfit.push(acc); usedIds.add(acc.id); }
+
 
   return outfit;
 }
@@ -640,6 +651,12 @@ function scoreByProfile(
     if (ctx.likedItemIds.has(item.id)) score += 3;
   }
 
+  // 9. Bijou — scoring par type et colorimétrie
+  const outfitStyles = profile.styles ?? [];
+  const userSeason = (profile as any).colorimetry_season ?? null;
+  score += scoreBijou(item, outfitStyles, userSeason);
+
+
   // Scoring spécifique soirée étudiante
   if (currentOccasion === 'soiree_etudiante') {
     if (item.style?.some((s: string) =>
@@ -834,6 +851,54 @@ function computeColorCompatScore(outfit: ClothingItem[]): number {
 
   return score;
 }
+
+function scoreBijou(
+  item: ClothingItem,
+  outfitStyles: string[],
+  userSeason: string | null
+): number {
+  if (item.category !== 'Bijoux' && !(item.category || '').toLowerCase().includes('bijou')) return 0;
+  let score = 0;
+  const t = (item.type || '').toLowerCase();
+  const styles = outfitStyles.map(s => s.toLowerCase());
+  const hasStyle = (s: string) => styles.includes(s.toLowerCase());
+
+  if (t.includes('collier')) {
+    if (hasStyle('romantique') || hasStyle('old money') ||
+        hasStyle('bohème') || hasStyle('y2k')) score += 1;
+  }
+  if (t.includes('boucle') || t.includes('earring')) {
+    if (hasStyle('romantique') || hasStyle('old money') ||
+        hasStyle('y2k') || hasStyle('casual chic')) score += 1;
+  }
+  if (t.includes('bracelet')) {
+    if (hasStyle('bohème') || hasStyle('y2k') ||
+        hasStyle('streetwear')) score += 1;
+  }
+  if (t.includes('bague')) {
+    if (hasStyle('grunge') || hasStyle('dark') ||
+        hasStyle('bohème') || hasStyle('y2k')) score += 1;
+  }
+  if (t.includes('montre')) {
+    if (hasStyle('old money')) score += 2;
+    if (hasStyle('preppy') || hasStyle('casual chic')) score += 1;
+  }
+
+  const isGold = t.includes('doré') || t.includes('dore') ||
+                 t.includes('or ') || t.includes('gold');
+  if (isGold && (userSeason === 'printemps' || userSeason === 'automne')) {
+    score += 1;
+  }
+  const isSilver = t.includes('argenté') || t.includes('argente') ||
+                   t.includes('argent') || t.includes('silver');
+  if (isSilver && (userSeason === 'ete' || userSeason === 'hiver')) {
+    score += 1;
+  }
+
+  return score;
+}
+
+
 
 
 function collectOutfits(
