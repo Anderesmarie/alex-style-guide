@@ -669,12 +669,12 @@ function getCompatibleSeasons(temperature: number | null): string[] {
 function getOccasionFromLifestyle(lifestyle: string | null | undefined, dayOfWeek: number): string {
   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
   switch (lifestyle) {
-    case 'lycee':
+    case 'Lycée':
       return isWeekend ? 'sortie' : 'cours_lycee';
-    case 'etudes_sup':
+    case 'Études sup':
       return isWeekend ? 'soiree_etudiante' : 'campus';
-    case 'premier_job':
-    case 'travail':
+    case 'Premier job':
+    case 'Je travaille':
       return isWeekend ? 'sortie' : 'travail';
     default:
       return isWeekend ? 'sortie' : 'quotidien';
