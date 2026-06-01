@@ -765,6 +765,76 @@ function computeStyleCompatScore(outfit: ClothingItem[]): number {
   return score;
 }
 
+function computeColorCompatScore(outfit: ClothingItem[]): number {
+  const NEUTRES = ['blanc', 'noir', 'gris', 'beige', 'camel', 'marine', 'ivoire', 'écru'];
+
+  const mainPieces = outfit.filter(i =>
+    ['HAUTS', 'BAS', 'ROBES'].includes(getGroup(i))
+  );
+  if (mainPieces.length < 2) return 0;
+
+  const allColors = mainPieces.flatMap(i =>
+    (i.color || []).map(c => c.toLowerCase().trim())
+  );
+
+  const isNeutre = (c: string) => NEUTRES.some(n => c.includes(n));
+
+  const neutres = allColors.filter(isNeutre);
+  const vives = allColors.filter(c => !isNeutre(c));
+
+  // Bloquant : rouge vif + orange vif
+  const hasRouge = vives.some(c => c.includes('rouge'));
+  const hasOrange = vives.some(c => c.includes('orange'));
+  const hasCorail = vives.some(c => c.includes('corail'));
+
+  if (hasRouge && (hasOrange || hasCorail)) return -5;
+
+  // -3 : rose vif + rouge vif
+  const hasRose = vives.some(c => c.includes('rose'));
+  if (hasRose && hasRouge) return -3;
+
+  // -3 : vert fluo + jaune fluo
+  const hasVertFluo = vives.some(c => c.includes('vert') && c.includes('fluo'));
+  const hasJauneFluo = vives.some(c => c.includes('jaune') && c.includes('fluo'));
+  if (hasVertFluo && hasJauneFluo) return -3;
+
+  // -1 : marron + noir
+  const hasMarron = allColors.some(c => c.includes('marron'));
+  const hasNoir = allColors.some(c => c.includes('noir'));
+  if (hasMarron && hasNoir) return -1;
+
+  // -2 : 3 couleurs vives sans neutre
+  if (vives.length >= 3 && neutres.length === 0) return -2;
+
+  let score = 0;
+
+  // +2 : neutre + neutre (tenue capsule)
+  const uniqueNeutres = [...new Set(neutres)];
+  if (uniqueNeutres.length >= 2) score += 2;
+
+  // +1 : couleur vive + neutre
+  if (vives.length >= 1 && neutres.length >= 1) score += 1;
+
+  // +2 : monochrome (même couleur, tons différents)
+  const baseColors = allColors.map(c => c.split(' ')[0]);
+  const uniqueBases = [...new Set(baseColors)];
+  if (uniqueBases.length === 1 && allColors.length >= 2) score += 2;
+
+  // +1 : couleurs analogues
+  const analogues = [
+    ['bleu', 'vert'], ['rose', 'mauve'], ['rouge', 'bordeaux'],
+    ['jaune', 'orange'], ['bleu', 'violet'], ['vert', 'jaune'],
+  ];
+  for (const [a, b] of analogues) {
+    if (allColors.some(c => c.includes(a)) && allColors.some(c => c.includes(b))) {
+      score += 1;
+      break;
+    }
+  }
+
+  return score;
+}
+
 
 function collectOutfits(
   pool: ClothingItem[],
