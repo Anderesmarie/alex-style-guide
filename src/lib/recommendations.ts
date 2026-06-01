@@ -929,6 +929,32 @@ function collectOutfits(
     // Pas de rejet sur styleCompat — scoring uniquement
     if (computeColorCompatScore(outfit) <= -4) continue;
 
+    // Layering structurel — règles bloquantes V3 section 1.2
+    const couches = outfit.filter(i => getGroup(i) === 'COUCHES');
+    const hauts = outfit.filter(i => getGroup(i) === 'HAUTS');
+
+    // Cardigan + veste courte → bloquant
+    const hasCardigan = couches.some(i =>
+      (i.type || '').toLowerCase().includes('cardigan')
+    );
+    const hasVesteCourte = couches.some(i => {
+      const t = (i.type || '').toLowerCase();
+      return t.includes('blazer') || t.includes('bomber') ||
+             t.includes('veste en jean') || t.includes('perfecto') ||
+             t.includes('veste militaire');
+    });
+    if (hasCardigan && hasVesteCourte) continue;
+
+    // Trench + autre couche extérieure → bloquant
+    const hasTrench = couches.some(i =>
+      (i.type || '').toLowerCase().includes('trench')
+    );
+    if (hasTrench && couches.length > 1) continue;
+
+    // Cardigan sans haut dessous → bloquant
+    const cardiganSeul = hasCardigan && hauts.length === 0;
+    if (cardiganSeul) continue;
+
     seenKeys.add(key);
     // Diversité : pièce principale et bas différents dans chaque tenue
     const mainGroups = ['HAUTS', 'ROBES'];
