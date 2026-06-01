@@ -768,6 +768,7 @@ function collectOutfits(
     if (blockedKeys.has(key) || seenKeys.has(key)) continue;
 
     if (computeAmpScore(outfit, tempMin, tempMax, amplitude) < -3) continue;
+    if (computePatternScore(outfit) <= -5) continue;
 
     seenKeys.add(key);
     // Diversité : pièce principale et bas différents dans chaque tenue
