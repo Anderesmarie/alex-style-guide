@@ -640,6 +640,12 @@ function scoreByProfile(
     if (ctx.likedItemIds.has(item.id)) score += 3;
   }
 
+  // 9. Bijou — scoring par type et colorimétrie
+  const outfitStyles = profile.styles ?? [];
+  const userSeason = (profile as any).colorimetry_season ?? null;
+  score += scoreBijou(item, outfitStyles, userSeason);
+
+
   // Scoring spécifique soirée étudiante
   if (currentOccasion === 'soiree_etudiante') {
     if (item.style?.some((s: string) =>
