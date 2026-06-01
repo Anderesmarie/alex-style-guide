@@ -1015,10 +1015,35 @@ export async function loadScoringContext(wardrobe: ClothingItem[]): Promise<Scor
 }
 
 function getCompatibleSeasons(temperature: number | null): string[] {
-  if (temperature === null) return ['Printemps', 'Été', 'Automne', 'Hiver', 'Toutes saisons'];
-  if (temperature >= 25) return ['Été', 'Toutes saisons'];
-  if (temperature >= 15 && temperature < 25) return ['Printemps', 'Été', 'Automne', 'Toutes saisons'];
-  if (temperature >= 5 && temperature < 15) return ['Automne', 'Hiver', 'Printemps', 'Toutes saisons'];
+  if (temperature === null) {
+    return ['Printemps', 'Été', 'Automne', 'Hiver', 'Toutes saisons'];
+  }
+
+  const month = new Date().getMonth(); // 0=jan, 11=dec
+
+  const isPrintempsEte = month >= 2 && month <= 7;   // mars-août
+  const isAutomneHiver = month >= 8 || month <= 1;   // sept-fév
+
+  if (temperature >= 25) {
+    return ['Été', 'Toutes saisons'];
+  }
+
+  if (temperature >= 15) {
+    if (isPrintempsEte) {
+      return ['Printemps', 'Été', 'Toutes saisons'];
+    } else {
+      return ['Automne', 'Hiver', 'Toutes saisons'];
+    }
+  }
+
+  if (temperature >= 5) {
+    if (isPrintempsEte) {
+      return ['Printemps', 'Automne', 'Hiver', 'Toutes saisons'];
+    } else {
+      return ['Automne', 'Hiver', 'Toutes saisons'];
+    }
+  }
+
   return ['Hiver', 'Toutes saisons'];
 }
 
