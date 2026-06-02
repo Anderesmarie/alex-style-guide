@@ -71,6 +71,7 @@ export type Database = {
           date: string
           event_name: string | null
           id: string
+          occasion: string | null
           outfit_id: string | null
           user_id: string
         }
@@ -79,6 +80,7 @@ export type Database = {
           date: string
           event_name?: string | null
           id?: string
+          occasion?: string | null
           outfit_id?: string | null
           user_id: string
         }
@@ -87,6 +89,7 @@ export type Database = {
           date?: string
           event_name?: string | null
           id?: string
+          occasion?: string | null
           outfit_id?: string | null
           user_id?: string
         }
