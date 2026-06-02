@@ -213,10 +213,10 @@ export default function AIGenerateSection({ dateKey, occasion, weather, avoidIte
         colorimetry: userSeason,
         favStyles: fullProfile?.styles ?? [],
         favoriteColors: fullProfile?.favorite_colors,
-        recentOutfitIds: recentIds,
+        recentOutfitIds: recentIds.map(r => r.itemIds),
         dislikedItemIds: dislikedIds,
         savedOutfitItemIds: likedIds,
-        recentItemIds: recentIds.flat(),
+        recentItemIds: recentIds.flatMap(r => r.itemIds),
         wornItemIds: useStrict ? [] : (avoidItemIds ?? []),
       });
 
