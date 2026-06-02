@@ -4,7 +4,13 @@ import { toast } from 'sonner';
 import { ClothingItem, UserProfile } from '@/lib/types';
 import { getWardrobe, getProfile } from '@/lib/storage';
 import { generateOutfits } from '@/lib/outfitEngine';
-import { generateRecommendations } from '@/lib/recommendations';
+import {
+  generateRecommendations,
+  getRecentOutfitItemIds,
+  getDislikedItemIds,
+  getWornItemIds,
+  getLikedOutfitItemIds,
+} from '@/lib/recommendations';
 import { geocodeCity, getSavedCity } from '@/lib/weather';
 import { supabase } from '@/lib/supabase';
 
