@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { getThumb } from '@/lib/wardrobeImages';
-import { ClothingItem, Outfit } from '@/lib/types';
-import { getWardrobe, getOutfits, addOutfit, deleteOutfit, setOutfitLiked, genId } from '@/lib/storage';
-import { generateRecommendations } from '@/lib/recommendations';
+import { ClothingItem, Outfit, UserProfile } from '@/lib/types';
+import { getWardrobe, getOutfits, addOutfit, deleteOutfit, setOutfitLiked, genId, getProfile } from '@/lib/storage';
+import { generateOutfits } from '@/lib/outfitEngine';
 import { updateStreak } from '@/lib/streak';
 import { getCategoryForType, getSubcategoryForType } from '@/lib/dressingTaxonomy';
 import { supabase } from '@/integrations/supabase/client';
+import type { Season } from '@/lib/colorimetry';
 import CalendarView from '@/components/CalendarView';
 import OutfitVisualLayout, { SlotKey, SlotMap, SLOT_CONFIG } from '@/components/OutfitVisualLayout';
 import OutfitLayout from '@/components/OutfitLayout';
