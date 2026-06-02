@@ -27,6 +27,14 @@ const MAKEUP_OPTIONS = [
   { label: "J'adore varier", emoji: '✨' },
 ];
 
+const LIFESTYLES = [
+  { label: 'Lycée', emoji: '🎒' },
+  { label: 'Études sup', emoji: '📚' },
+  { label: 'Premier job', emoji: '💼' },
+  { label: 'Je travaille', emoji: '✨' },
+  { label: 'Autre', emoji: '🌍' },
+] as const;
+
 const SILHOUETTE_TO_MORPHO: Record<string, 'A' | 'H' | 'X' | 'V' | 'O' | '8'> = {
   'Sablier': 'X', 'Rectangle': 'H', 'Triangle': 'A',
   'Triangle inversé': 'V', 'Ovale': 'O', 'Autre': '8',
