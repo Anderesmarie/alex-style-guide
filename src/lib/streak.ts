@@ -1,6 +1,20 @@
 import { supabase } from './supabase';
 
-const STREAK_KEY = 'closify_streak';
+const OLD_KEY = 'closify_streak';
+const STREAK_KEY = 'mystyl_streak';
+
+// Migration silencieuse : déplacer les données de l'ancienne clé
+const migrate = () => {
+  try {
+    const old = localStorage.getItem(OLD_KEY);
+    if (old && !localStorage.getItem(STREAK_KEY)) {
+      localStorage.setItem(STREAK_KEY, old);
+      localStorage.removeItem(OLD_KEY);
+    }
+  } catch {}
+};
+
+migrate();
 
 export interface StreakData {
   current: number;
