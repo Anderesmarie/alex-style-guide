@@ -1010,7 +1010,7 @@ export async function loadScoringContext(wardrobe: ClothingItem[]): Promise<Scor
     lastProposedIds,
     recent3Ids,
     wornItemIds: new Set(wornIds),
-    likedItemIds: new Set(likedIds),
+    likedItemIds: new Set(likedIds.flat()),
   };
 }
 
