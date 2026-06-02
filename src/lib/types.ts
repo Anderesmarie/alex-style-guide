@@ -96,6 +96,7 @@ export interface CalendarEvent {
   date: string;
   outfitId: string | null;
   eventName: string | null;
+  occasion?: string | null;
   createdAt: string;
 }
 
