@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { WeatherData, fetchWeatherByGeolocation, fetchWeatherByCity, getSavedCity, saveCity } from '@/lib/weather';
 import { getWardrobe, getDailyCounter, saveDailyCounter, getProfile, migrerTagCours } from '@/lib/storage';
-import { buildValidCustomOutfit, generateRecommendations } from '@/lib/recommendations';
+import { buildValidCustomOutfit, generateRecommendations, getRecentOutfitItemIds, getDislikedItemIds, getWornItemIds, getLikedOutfitItemIds } from '@/lib/recommendations';
+
 import { generateOutfits } from '@/lib/outfitEngine';
 import { ClothingItem, OutfitLayoutData, UserProfile } from '@/lib/types';
 import { loadBeautyProfile } from '@/lib/stylingTips';
@@ -218,6 +219,11 @@ export default function Today() {
   const [userSeason, setUserSeason] = useState<Season | null>(null);
   const [pseudo, setPseudo] = useState<string | null>(null);
   const [lifestyle, setLifestyle] = useState<string | null>(null);
+  const [recentOutfitIds, setRecentOutfitIds] = useState<string[][]>([]);
+  const [dislikedItemIds, setDislikedItemIds] = useState<string[]>([]);
+  const [savedOutfitItemIds, setSavedOutfitItemIds] = useState<string[][]>([]);
+  const [recentItemIds, setRecentItemIds] = useState<string[]>([]);
+
   
 
   const today = new Date().toISOString().split('T')[0];
@@ -343,9 +349,14 @@ export default function Today() {
       colorimetry: userSeason ?? undefined,
       favStyles: userProfile?.styles ?? [],
       favoriteColors: userProfile?.favorite_colors,
+      recentOutfitIds,
+      dislikedItemIds,
+      savedOutfitItemIds,
+      recentItemIds,
       wornItemIds: [],
     };
-  }, [ws, weatherTemp, wardrobe, userProfile, userSeason, lifestyle]);
+  }, [ws, weatherTemp, wardrobe, userProfile, userSeason, lifestyle, recentOutfitIds, dislikedItemIds, savedOutfitItemIds, recentItemIds]);
+
 
   const generateFreshOutfits = useCallback(async (occasionOverride?: string) => {
     const engineCandidates = generateOutfits(buildEngineInput(occasionOverride));
