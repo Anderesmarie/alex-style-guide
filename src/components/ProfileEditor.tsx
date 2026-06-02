@@ -27,12 +27,20 @@ const MAKEUP_OPTIONS = [
   { label: "J'adore varier", emoji: '✨' },
 ];
 
+const LIFESTYLES = [
+  { label: 'Lycée', emoji: '🎒' },
+  { label: 'Études sup', emoji: '📚' },
+  { label: 'Premier job', emoji: '💼' },
+  { label: 'Je travaille', emoji: '✨' },
+  { label: 'Autre', emoji: '🌍' },
+] as const;
+
 const SILHOUETTE_TO_MORPHO: Record<string, 'A' | 'H' | 'X' | 'V' | 'O' | '8'> = {
   'Sablier': 'X', 'Rectangle': 'H', 'Triangle': 'A',
   'Triangle inversé': 'V', 'Ovale': 'O', 'Autre': '8',
 };
 
-type Section = 'pseudo' | 'silhouette' | 'taille' | 'colors' | 'styles' | 'budget' | 'brands' | 'makeup' | 'avatar' | null;
+type Section = 'pseudo' | 'silhouette' | 'taille' | 'colors' | 'styles' | 'lifestyle' | 'budget' | 'brands' | 'makeup' | 'avatar' | null;
 
 interface Props {
   onComplete: () => void;
@@ -52,6 +60,7 @@ export default function ProfileEditor({ onComplete }: Props) {
   const [brands, setBrands] = useState<string[]>([]);
   const [brandInput, setBrandInput] = useState('');
   const [makeup, setMakeup] = useState('');
+  const [lifestyle, setLifestyle] = useState<string>('');
   const [avatar, setAvatar] = useState<AvatarData>(DEFAULT_AVATAR);
 
   useEffect(() => {
@@ -70,6 +79,7 @@ export default function ProfileEditor({ onComplete }: Props) {
           setStyles(profile.styles || []);
           setBudget(profile.budget || 80);
           setBrands(profile.brands || []);
+          setLifestyle(profile.lifestyle || '');
         }
         if (userData.user) {
           const { data } = await supabase.from('profiles').select('pseudo, makeup').eq('id', userData.user.id).single();
@@ -90,6 +100,7 @@ export default function ProfileEditor({ onComplete }: Props) {
   }, []);
 
   const profileObj = (): UserProfile => ({
+    lifestyle: lifestyle as UserProfile['lifestyle'],
     silhouette,
     styles,
     budget,
@@ -291,6 +302,32 @@ export default function ProfileEditor({ onComplete }: Props) {
             ))}
           </div>
           <SaveCancelRow onSave={() => saveSection('Style')} />
+        </SectionCard>
+
+        {/* Lifestyle */}
+        <SectionCard id="lifestyle" icon="🌍" title="Mon quotidien"
+          summary={lifestyle || 'Non défini'}>
+          <div>
+            <label className="text-sm font-medium">Mon quotidien</label>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              {LIFESTYLES.map(l => (
+                <button
+                  key={l.label}
+                  type="button"
+                  onClick={() => setLifestyle(l.label)}
+                  className={`p-3 rounded-xl text-left transition-all flex items-center gap-3 ${
+                    lifestyle === l.label
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-card hover:shadow-md'
+                  }`}
+                >
+                  <span>{l.emoji}</span>
+                  <span className="text-sm font-medium">{l.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <SaveCancelRow onSave={() => saveSection('Mon quotidien')} />
         </SectionCard>
 
         {/* Budget */}
