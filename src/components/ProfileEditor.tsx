@@ -304,6 +304,32 @@ export default function ProfileEditor({ onComplete }: Props) {
           <SaveCancelRow onSave={() => saveSection('Style')} />
         </SectionCard>
 
+        {/* Lifestyle */}
+        <SectionCard id="lifestyle" icon="🌍" title="Mon quotidien"
+          summary={lifestyle || 'Non défini'}>
+          <div>
+            <label className="text-sm font-medium">Mon quotidien</label>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              {LIFESTYLES.map(l => (
+                <button
+                  key={l.label}
+                  type="button"
+                  onClick={() => setLifestyle(l.label)}
+                  className={`p-3 rounded-xl text-left transition-all flex items-center gap-3 ${
+                    lifestyle === l.label
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-card hover:shadow-md'
+                  }`}
+                >
+                  <span>{l.emoji}</span>
+                  <span className="text-sm font-medium">{l.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <SaveCancelRow onSave={() => saveSection('Mon quotidien')} />
+        </SectionCard>
+
         {/* Budget */}
         <SectionCard id="budget" icon="💰" title="Budget" summary={`${budget}€ par vêtement`}>
           <div className="text-center mb-4">
