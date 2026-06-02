@@ -60,6 +60,7 @@ export default function ProfileEditor({ onComplete }: Props) {
   const [brands, setBrands] = useState<string[]>([]);
   const [brandInput, setBrandInput] = useState('');
   const [makeup, setMakeup] = useState('');
+  const [lifestyle, setLifestyle] = useState<string>('');
   const [avatar, setAvatar] = useState<AvatarData>(DEFAULT_AVATAR);
 
   useEffect(() => {
