@@ -84,14 +84,16 @@ export default function Outfits() {
         if (prof?.pseudo) setPseudo(prof.pseudo);
         if (prof?.colorimetry_season) setUserSeason(prof.colorimetry_season as Season);
         if (prof) {
-          setUserProfile(prev => ({
-            ...prev,
-            morphologie: prof.morphologie ?? undefined,
-            taille: prof.taille ?? undefined,
-            corpulence: prof.corpulence ?? undefined,
-            styles: prof.styles ?? [],
-            favorite_colors: prof.favorite_colors ?? [],
-          }));
+          setUserProfile({
+            silhouette: '',
+            styles: (prof.styles as string[]) ?? [],
+            budget: 0,
+            brands: [],
+            taille: prof.taille ?? null,
+            corpulence: prof.corpulence ?? null,
+            morphologie: prof.morphologie ?? null,
+            favorite_colors: (prof.favorite_colors as string[]) ?? [],
+          });
         }
       }
     })();
