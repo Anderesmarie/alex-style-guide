@@ -21,15 +21,16 @@ const BASICS = [
 const SEASONS_LIST = ['Été', 'Automne', 'Hiver', 'Printemps'] as const;
 
 const OCCASION_SEARCH: Record<string, string> = {
-  'Travail': 'tenue travail bureau',
-  'Sortie': 'tenue sortie soirée',
+  'Travail': 'tenue travail bureau femme',
+  'Sortie': 'tenue sortie soirée femme',
   'Sport': 'tenue sport femme',
   'Événement': 'tenue événement femme',
   'Quotidien': 'tenue quotidien femme',
-  'Plage': 'tenue plage été',
+  'Plage': 'tenue plage été femme',
   'Cérémonie': 'tenue cérémonie femme',
-  'Soirée': 'tenue soirée chic femme',
-  'Cours/Campus': 'tenue cours campus étudiante',
+  'Soirée étudiante': 'tenue soirée étudiante femme',
+  'Cours lycée': 'tenue lycée quotidien ado',
+  'Campus': 'tenue campus étudiante chic',
 };
 
 const SEASON_SEARCH: Record<string, string> = {
