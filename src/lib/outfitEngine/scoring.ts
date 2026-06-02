@@ -11,7 +11,7 @@ const REMOVABLE_LAYERS = [
   'Veste coupe-vent', 'Veste en cuir', 'Perfecto',
 ];
 
-const NEUTRALS = ['blanc', 'noir', 'gris', 'beige', 'camel', 'marine', 'creme', 'crème', 'nude'];
+const NEUTRALS = ['blanc', 'noir', 'gris', 'beige', 'camel', 'marine', 'creme', 'crème', 'nude', 'rose-gold', 'rosegold', 'rose gold'];
 
 const norm = (s?: string) => (s || '').toLowerCase().trim();
 
@@ -321,7 +321,7 @@ export function applyScoring(
   // ---- Colorimétrie ----
   const colorimetryMap: Record<string, { good: string[]; bad: string[] }> = {
     'Printemps': {
-      good: ['corail', 'rose', 'turquoise', 'bleu-ciel', 'bleu ciel', 'camel'],
+      good: ['corail', 'rose', 'turquoise', 'bleu-ciel', 'bleu ciel', 'camel', 'rose-gold', 'rosegold', 'rose gold'],
       bad: ['noir', 'bordeaux', 'violet'],
     },
     'Été': {
@@ -329,7 +329,7 @@ export function applyScoring(
       bad: ['orange', 'rouge', 'marron'],
     },
     'Automne': {
-      good: ['camel', 'terracotta', 'kaki', 'bordeaux', 'marron'],
+      good: ['camel', 'terracotta', 'kaki', 'bordeaux', 'marron', 'rose-gold', 'rosegold', 'rose gold'],
       bad: ['rose', 'blanc'],
     },
     'Hiver': {
