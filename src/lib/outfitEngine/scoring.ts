@@ -670,7 +670,7 @@ export function applyScoring(
       if (hasO('Cérémonie', 'Ceremonie')) ({ score, reasons } = add(score, reasons, -2, 'Bonnet hors cérémonie'));
     }
 
-    if (t === 'Écharpe / Foulard' || t === 'Echarpe / Foulard' || t === 'Écharpe' || t === 'Foulard') {
+    if (t === 'Écharpe / Foulard' || t === 'Écharpe' || t === 'Foulard') {
       if (tempMin < 10) ({ score, reasons } = add(score, reasons, 2, 'Écharpe adaptée au froid'));
       if (tempMax > 22) ({ score, reasons } = add(score, reasons, -1, 'Écharpe trop chaude'));
       for (const style of favStyles) {
