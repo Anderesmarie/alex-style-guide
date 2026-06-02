@@ -371,6 +371,7 @@ export async function getCalendarEvents(): Promise<CalendarEvent[]> {
     outfitId: row.outfit_id,
     eventName: row.event_name,
     createdAt: row.created_at,
+    occasion: (row as any).occasion ?? null,
   }));
 }
 
@@ -381,6 +382,7 @@ export async function upsertCalendarEvent(event: Partial<CalendarEvent> & { date
     date: event.date,
     outfit_id: event.outfitId ?? null,
     event_name: event.eventName ?? null,
+    occasion: event.occasion ?? null,
   };
   if (event.id) payload.id = event.id;
   const { data, error } = await supabase.from('calendar_events').upsert(payload).select().single();
@@ -392,6 +394,7 @@ export async function upsertCalendarEvent(event: Partial<CalendarEvent> & { date
     outfitId: data.outfit_id,
     eventName: data.event_name,
     createdAt: data.created_at,
+    occasion: (data as any).occasion ?? null,
   };
 }
 

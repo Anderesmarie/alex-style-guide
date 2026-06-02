@@ -115,6 +115,7 @@ export default function CalendarView() {
         date: formatDateKey(openDate),
         outfitId: draftOutfitId,
         eventName: draftEventName.trim() || null,
+        occasion: draftOccasion,
       });
       const ev = await getCalendarEvents();
       setEvents(ev);
