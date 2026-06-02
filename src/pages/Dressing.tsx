@@ -1471,7 +1471,7 @@ export default function Dressing() {
           </div>
 
           {/* Ligne 4 : Occasion */}
-          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+          <div className="flex gap-2 overflow-x-auto flex-nowrap whitespace-nowrap no-scrollbar pb-1">
             {['', 'Quotidien', 'Travail', 'Sortie', 'Sport', 'Cours lycée', 'Campus', 'Soirée étudiante', 'Cérémonie', 'Plage', 'Événement'].map(occ => (
               <button
                 key={occ}
