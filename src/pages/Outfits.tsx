@@ -80,8 +80,19 @@ export default function Outfits() {
     (async () => {
       const { data: u } = await supabase.auth.getUser();
       if (u.user) {
-        const { data: prof } = await supabase.from('profiles').select('pseudo').eq('id', u.user.id).maybeSingle();
+        const { data: prof } = await supabase.from('profiles').select('pseudo,colorimetry_season,morphologie,taille,corpulence,styles,favorite_colors').eq('id', u.user.id).maybeSingle();
         if (prof?.pseudo) setPseudo(prof.pseudo);
+        if (prof?.colorimetry_season) setUserSeason(prof.colorimetry_season as Season);
+        if (prof) {
+          setUserProfile(prev => ({
+            ...prev,
+            morphologie: prof.morphologie ?? undefined,
+            taille: prof.taille ?? undefined,
+            corpulence: prof.corpulence ?? undefined,
+            styles: prof.styles ?? [],
+            favorite_colors: prof.favorite_colors ?? [],
+          }));
+        }
       }
     })();
   }, []);
