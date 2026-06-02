@@ -350,6 +350,39 @@ export function applyScoring(
     }
   }
 
+  // Scoring imprimés (pattern)
+  const FORTS = ['leopard', 'léopard', 'fleuri', 'tie-dye',
+                 'tie dye', 'zebre', 'zébré', 'graphique'];
+  const LEGERS = ['raye', 'rayé', 'carreaux', 'geometrique',
+                  'géométrique', 'pied-de-poule'];
+  const mainPieces = items.filter(i =>
+    !['Accessoires', 'Bijoux', 'Chaussures', 'Sacs']
+      .includes(i.category || '')
+  );
+  const patterns = mainPieces.map(i =>
+    (i.pattern || 'uni').toLowerCase()
+  );
+  const fortsCount = patterns.filter(p => FORTS.includes(p)).length;
+  const legersCount = patterns.filter(p => LEGERS.includes(p)).length;
+
+  // 2 imprimés légers ensemble → -2
+  if (legersCount >= 2) {
+    score -= 2;
+    reasons.push('-2 Deux imprimés légers ensemble');
+  }
+
+  // 1 imprimé fort + reste uni → +1
+  if (fortsCount === 1 && legersCount === 0) {
+    const autresUnis = mainPieces
+      .filter(i => !FORTS.includes((i.pattern || 'uni').toLowerCase()))
+      .every(i => (i.pattern || 'uni').toLowerCase() === 'uni');
+    if (autresUnis) {
+      score += 1;
+      reasons.push('+1 Imprimé fort avec pièces unies');
+    }
+  }
+
+
   // ---- Pièces par style favori ----
   const styleMap: Record<string, { plus: string[]; minus: string[]; minusDelta?: number }> = {
     'Old Money': {
