@@ -89,9 +89,9 @@ export default function Outfits() {
             styles: (prof.styles as string[]) ?? [],
             budget: 0,
             brands: [],
-            taille: prof.taille ?? null,
-            corpulence: prof.corpulence ?? null,
-            morphologie: prof.morphologie ?? null,
+            taille: (prof.taille as UserProfile['taille']) ?? null,
+            corpulence: (prof.corpulence as UserProfile['corpulence']) ?? null,
+            morphologie: (prof.morphologie as UserProfile['morphologie']) ?? null,
             favorite_colors: (prof.favorite_colors as string[]) ?? [],
           });
         }
