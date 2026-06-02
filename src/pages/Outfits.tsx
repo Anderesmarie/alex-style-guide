@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { getThumb } from '@/lib/wardrobeImages';
-import { ClothingItem, Outfit } from '@/lib/types';
-import { getWardrobe, getOutfits, addOutfit, deleteOutfit, setOutfitLiked, genId } from '@/lib/storage';
-import { generateRecommendations } from '@/lib/recommendations';
+import { ClothingItem, Outfit, UserProfile } from '@/lib/types';
+import { getWardrobe, getOutfits, addOutfit, deleteOutfit, setOutfitLiked, genId, getProfile } from '@/lib/storage';
+import { generateOutfits } from '@/lib/outfitEngine';
 import { updateStreak } from '@/lib/streak';
 import { getCategoryForType, getSubcategoryForType } from '@/lib/dressingTaxonomy';
 import { supabase } from '@/integrations/supabase/client';
+import type { Season } from '@/lib/colorimetry';
 import CalendarView from '@/components/CalendarView';
 import OutfitVisualLayout, { SlotKey, SlotMap, SLOT_CONFIG } from '@/components/OutfitVisualLayout';
 import OutfitLayout from '@/components/OutfitLayout';
@@ -47,6 +48,8 @@ export default function Outfits() {
   const [outfitName, setOutfitName] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<Outfit | null>(null);
   const [pseudo, setPseudo] = useState<string | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [userSeason, setUserSeason] = useState<Season | null>(null);
 
 
 
@@ -77,8 +80,21 @@ export default function Outfits() {
     (async () => {
       const { data: u } = await supabase.auth.getUser();
       if (u.user) {
-        const { data: prof } = await supabase.from('profiles').select('pseudo').eq('id', u.user.id).maybeSingle();
+        const { data: prof } = await supabase.from('profiles').select('pseudo,colorimetry_season,morphologie,taille,corpulence,styles,favorite_colors').eq('id', u.user.id).maybeSingle();
         if (prof?.pseudo) setPseudo(prof.pseudo);
+        if (prof?.colorimetry_season) setUserSeason(prof.colorimetry_season as Season);
+        if (prof) {
+          setUserProfile({
+            silhouette: '',
+            styles: (prof.styles as string[]) ?? [],
+            budget: 0,
+            brands: [],
+            taille: (prof.taille as UserProfile['taille']) ?? null,
+            corpulence: (prof.corpulence as UserProfile['corpulence']) ?? null,
+            morphologie: (prof.morphologie as UserProfile['morphologie']) ?? null,
+            favorite_colors: (prof.favorite_colors as string[]) ?? [],
+          });
+        }
       }
     })();
   }, []);
@@ -143,10 +159,23 @@ export default function Outfits() {
     }
   };
 
-  const handleGenerate = async () => {
-    const recs = await generateRecommendations(wardrobe, null, 1);
-    if (recs.length > 0) {
-      setSelectedIds(new Set(recs[0].map(i => i.id)));
+  const handleGenerate = () => {
+    const candidates = generateOutfits({
+      wardrobe,
+      tempMin: 18,
+      tempMax: 24,
+      amplitude: 6,
+      occasion: 'Quotidien',
+      morphologie: userProfile?.morphologie ?? null,
+      taille: userProfile?.taille ?? null,
+      corpulence: userProfile?.corpulence ?? null,
+      colorimetry: userSeason ?? undefined,
+      favStyles: userProfile?.styles ?? [],
+      favoriteColors: userProfile?.favorite_colors ?? [],
+    });
+    const generated = candidates[0]?.items ?? [];
+    if (generated.length > 0) {
+      setSelectedIds(new Set(generated.map(i => i.id)));
     }
   };
 
