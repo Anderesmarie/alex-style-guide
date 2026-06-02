@@ -115,7 +115,7 @@ export async function getDislikedItemIds(): Promise<string[]> {
   return data.flatMap(r => r.item_ids as string[]);
 }
 
-async function getWornItemIds(): Promise<string[]> {
+export async function getWornItemIds(): Promise<string[]> {
   const uid = await getUserIdSafe();
   if (!uid) return [];
   const { data } = await supabase
@@ -127,7 +127,7 @@ async function getWornItemIds(): Promise<string[]> {
   return data.flatMap(r => r.item_ids as string[]);
 }
 
-async function getLikedOutfitItemIds(): Promise<string[]> {
+export async function getLikedOutfitItemIds(): Promise<string[]> {
   const uid = await getUserIdSafe();
   if (!uid) return [];
   const { data } = await supabase

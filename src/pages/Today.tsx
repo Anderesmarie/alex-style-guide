@@ -304,6 +304,23 @@ export default function Today() {
     }
   }, []);
 
+  // Load outfit history for anti-redundancy
+  useEffect(() => {
+    const loadHistory = async () => {
+      const [recent, disliked, worn, liked] = await Promise.all([
+        getRecentOutfitItemIds(),
+        getDislikedItemIds(),
+        getWornItemIds(),
+        getLikedOutfitItemIds(),
+      ]);
+      setRecentOutfitIds(recent.map(r => r.itemIds));
+      setDislikedItemIds(disliked);
+      setSavedOutfitItemIds(liked);
+      setRecentItemIds(recent.map(r => r.itemIds).flat());
+    };
+    loadHistory();
+  }, []);
+
   const retryGeo = () => {
     setWs({ status: 'loading' });
     fetchWeatherByGeolocation()
