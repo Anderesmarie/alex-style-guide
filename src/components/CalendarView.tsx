@@ -400,7 +400,7 @@ export default function CalendarView() {
         >
           <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
           <div
-            className="relative w-full max-w-md bg-card rounded-t-3xl p-5 pb-8 animate-in slide-in-from-bottom duration-300 max-h-[85vh] overflow-y-auto no-scrollbar"
+            className="relative w-full max-w-md bg-card rounded-t-3xl p-5 pb-8 animate-in slide-in-from-bottom duration-300 max-h-[92vh] overflow-y-auto no-scrollbar"
             onClick={e => e.stopPropagation()}
           >
             <div className="w-12 h-1.5 rounded-full bg-muted mx-auto mb-4" />
