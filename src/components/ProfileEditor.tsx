@@ -40,7 +40,7 @@ const SILHOUETTE_TO_MORPHO: Record<string, 'A' | 'H' | 'X' | 'V' | 'O' | '8'> = 
   'Triangle inversé': 'V', 'Ovale': 'O', 'Autre': '8',
 };
 
-type Section = 'pseudo' | 'silhouette' | 'taille' | 'colors' | 'styles' | 'budget' | 'brands' | 'makeup' | 'avatar' | null;
+type Section = 'pseudo' | 'silhouette' | 'taille' | 'colors' | 'styles' | 'lifestyle' | 'budget' | 'brands' | 'makeup' | 'avatar' | null;
 
 interface Props {
   onComplete: () => void;
