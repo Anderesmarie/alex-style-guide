@@ -127,7 +127,7 @@ export async function getWornItemIds(): Promise<string[]> {
   return data.flatMap(r => r.item_ids as string[]);
 }
 
-export async function getLikedOutfitItemIds(): Promise<string[]> {
+export async function getLikedOutfitItemIds(): Promise<string[][]> {
   const uid = await getUserIdSafe();
   if (!uid) return [];
   const { data } = await supabase
@@ -136,7 +136,7 @@ export async function getLikedOutfitItemIds(): Promise<string[]> {
     .eq('user_id', uid)
     .eq('liked', true);
   if (!data) return [];
-  return data.flatMap(r => r.item_ids as string[]);
+  return data.map(r => r.item_ids as string[]);
 }
 
 export async function saveDislikedOutfit(itemIds: string[]): Promise<void> {
