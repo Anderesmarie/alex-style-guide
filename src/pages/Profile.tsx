@@ -84,6 +84,7 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
             corpulence: profileData.corpulence || null,
             morphologie: profileData.morphologie || null,
             favorite_colors: (profileData.favorite_colors as string[]) || [],
+            lifestyle: profileData.lifestyle || null,
           });
         }
       }
@@ -404,6 +405,15 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
             {profile.corpulence && (
               <span className="px-3 py-1.5 rounded-full text-xs font-semibold capitalize" style={{ backgroundColor: '#F5F0EB', color: '#2C2C2C' }}>
                 {profile.corpulence}
+              </span>
+            )}
+            {profile.lifestyle && (
+              <span className="px-3 py-1.5 rounded-full text-xs font-semibold"
+                style={{ backgroundColor: '#EEF2FF', color: '#4338CA' }}>
+                {profile.lifestyle === 'Lycée' ? '🎒' :
+                 profile.lifestyle === 'Études sup' ? '📚' :
+                 profile.lifestyle === 'Premier job' ? '💼' :
+                 profile.lifestyle === 'Je travaille' ? '✨' : '🌍'} {profile.lifestyle}
               </span>
             )}
             {profile.styles.map(s => {
