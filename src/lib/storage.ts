@@ -53,6 +53,7 @@ export async function saveProfile(profile: UserProfile): Promise<void> {
     corpulence: profile.corpulence,
     morphologie: profile.morphologie,
     favorite_colors: profile.favorite_colors,
+    lifestyle: profile.lifestyle ?? null,
   });
 }
 
