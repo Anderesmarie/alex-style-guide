@@ -159,10 +159,23 @@ export default function Outfits() {
     }
   };
 
-  const handleGenerate = async () => {
-    const recs = await generateRecommendations(wardrobe, null, 1);
-    if (recs.length > 0) {
-      setSelectedIds(new Set(recs[0].map(i => i.id)));
+  const handleGenerate = () => {
+    const candidates = generateOutfits({
+      wardrobe,
+      tempMin: 18,
+      tempMax: 24,
+      amplitude: 6,
+      occasion: 'Quotidien',
+      morphologie: userProfile?.morphologie ?? null,
+      taille: userProfile?.taille ?? null,
+      corpulence: userProfile?.corpulence ?? null,
+      colorimetry: userSeason ?? undefined,
+      favStyles: userProfile?.styles ?? [],
+      favoriteColors: userProfile?.favorite_colors ?? [],
+    });
+    const generated = candidates[0]?.items ?? [];
+    if (generated.length > 0) {
+      setSelectedIds(new Set(generated.map(i => i.id)));
     }
   };
 
