@@ -93,7 +93,7 @@ export default function CalendarView() {
   const openDayEditor = (d: Date) => {
     const ev = getEventForDate(d);
     setDraftEventName(ev?.eventName ?? '');
-    setDraftOccasion('Quotidien');
+    setDraftOccasion(ev?.occasion ?? 'Quotidien');
     setDraftOutfitId(ev?.outfitId ?? null);
     setOpenDate(d);
   };
