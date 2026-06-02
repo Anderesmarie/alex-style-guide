@@ -329,6 +329,7 @@ export default function Dressing() {
   const [filterType, setFilterType] = useState('');
   const [filterColor, setFilterColor] = useState('');
   const [filterSeason, setFilterSeason] = useState('');
+  const [filterOccasion, setFilterOccasion] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
   const [previewBase64, setPreviewBase64] = useState('');
   const [previewFile, setPreviewFile] = useState<File | null>(null);
@@ -786,6 +787,9 @@ export default function Dressing() {
     if (filterType && i.type !== filterType) return false;
     if (filterColor && !(i.color || []).includes(filterColor)) return false;
     if (filterSeason && !i.season.includes(filterSeason)) return false;
+    if (filterOccasion && i.occasion) {
+      if (!i.occasion.includes(filterOccasion)) return false;
+    }
     return true;
   });
 
@@ -1464,6 +1468,23 @@ export default function Dressing() {
               <option value="">Saison</option>
               {SEASONS.map(s => <option key={s}>{s}</option>)}
             </select>
+          </div>
+
+          {/* Ligne 4 : Occasion */}
+          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+            {['', 'Quotidien', 'Travail', 'Sortie', 'Sport', 'Cours lycée', 'Campus', 'Soirée étudiante', 'Cérémonie', 'Plage', 'Événement'].map(occ => (
+              <button
+                key={occ}
+                onClick={() => setFilterOccasion(occ)}
+                className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                  filterOccasion === occ
+                    ? 'bg-[#C9956C] text-white border-[#C9956C]'
+                    : 'bg-card text-muted-foreground border-border'
+                }`}
+              >
+                {occ === '' ? 'Toutes' : occ}
+              </button>
+            ))}
           </div>
         </div>
       )}
