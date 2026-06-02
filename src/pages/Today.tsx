@@ -379,6 +379,11 @@ export default function Today() {
     const engineCandidates = generateOutfits(buildEngineInput(occasionOverride));
     const engineOutfits = engineCandidates.map(candidate => candidate.items).filter(outfit => outfit.length > 0);
 
+    // Sauvegarder les tenues générées dans l'historique
+    for (const outfit of engineOutfits) {
+      await saveRecentOutfit(outfit.map(i => i.id));
+    }
+
     if (engineOutfits.length > 0) {
       return engineOutfits;
     }
