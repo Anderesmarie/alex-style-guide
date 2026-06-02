@@ -194,6 +194,13 @@ export default function AIGenerateSection({ dateKey, occasion, weather, avoidIte
       const useStrict = strictWardrobe.length >= 4;
       const finalWardrobe = useStrict ? strictWardrobe : wardrobeForEngine;
 
+      const [recentIds, dislikedIds, wornIds, likedIds] = await Promise.all([
+        getRecentOutfitItemIds(),
+        getDislikedItemIds(),
+        getWornItemIds(),
+        getLikedOutfitItemIds(),
+      ]);
+
       const candidates = generateOutfits({
         wardrobe: finalWardrobe,
         tempMin,
@@ -206,6 +213,10 @@ export default function AIGenerateSection({ dateKey, occasion, weather, avoidIte
         colorimetry: userSeason,
         favStyles: fullProfile?.styles ?? [],
         favoriteColors: fullProfile?.favorite_colors,
+        recentOutfitIds: recentIds,
+        dislikedItemIds: dislikedIds,
+        savedOutfitItemIds: likedIds,
+        recentItemIds: recentIds.flat(),
         wornItemIds: useStrict ? [] : (avoidItemIds ?? []),
       });
 
