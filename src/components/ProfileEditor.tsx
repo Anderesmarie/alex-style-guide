@@ -79,6 +79,7 @@ export default function ProfileEditor({ onComplete }: Props) {
           setStyles(profile.styles || []);
           setBudget(profile.budget || 80);
           setBrands(profile.brands || []);
+          setLifestyle(profile.lifestyle || '');
         }
         if (userData.user) {
           const { data } = await supabase.from('profiles').select('pseudo, makeup').eq('id', userData.user.id).single();
