@@ -351,8 +351,24 @@ export default function Today() {
     const amplitude = ws.status === 'done' ? (ws.data.amplitude ?? Math.max(0, tempMax - tempMin)) : 0;
     const day = new Date().getDay(); // 0=Sun, 6=Sat
     const isWeekday = day >= 1 && day <= 5;
-    const worksLifestyle = lifestyle === 'Premier job' || lifestyle === 'Je travaille';
-    const defaultOccasion = isWeekday && worksLifestyle ? 'Travail' : 'Quotidien';
+    const isWeekend = !isWeekday;
+
+    let defaultOccasion: string;
+
+    switch (lifestyle) {
+      case 'Lycée':
+        defaultOccasion = isWeekday ? 'Cours lycée' : 'Sortie';
+        break;
+      case 'Études sup':
+        defaultOccasion = isWeekday ? 'Campus' : 'Soirée étudiante';
+        break;
+      case 'Premier job':
+      case 'Je travaille':
+        defaultOccasion = isWeekday ? 'Travail' : 'Sortie';
+        break;
+      default:
+        defaultOccasion = isWeekday ? 'Quotidien' : 'Sortie';
+    }
     const occasion = occasionOverride?.trim() || defaultOccasion;
     return {
       wardrobe,
