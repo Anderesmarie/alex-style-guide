@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { WeatherData, fetchWeatherByGeolocation, fetchWeatherByCity, getSavedCity, saveCity } from '@/lib/weather';
 import { getWardrobe, getDailyCounter, saveDailyCounter, getProfile, migrerTagCours } from '@/lib/storage';
-import { buildValidCustomOutfit, generateRecommendations, getRecentOutfitItemIds, getDislikedItemIds, getWornItemIds, getLikedOutfitItemIds } from '@/lib/recommendations';
+import { buildValidCustomOutfit, generateRecommendations, getRecentOutfitItemIds, getDislikedItemIds, getWornItemIds, getLikedOutfitItemIds, saveRecentOutfit } from '@/lib/recommendations';
 
 import { generateOutfits } from '@/lib/outfitEngine';
 import { ClothingItem, OutfitLayoutData, UserProfile } from '@/lib/types';
@@ -378,6 +378,11 @@ export default function Today() {
   const generateFreshOutfits = useCallback(async (occasionOverride?: string) => {
     const engineCandidates = generateOutfits(buildEngineInput(occasionOverride));
     const engineOutfits = engineCandidates.map(candidate => candidate.items).filter(outfit => outfit.length > 0);
+
+    // Sauvegarder les tenues générées dans l'historique
+    for (const outfit of engineOutfits) {
+      await saveRecentOutfit(outfit.map(i => i.id));
+    }
 
     if (engineOutfits.length > 0) {
       return engineOutfits;
