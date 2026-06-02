@@ -149,6 +149,32 @@ function pickDiverse(sorted: OutfitCandidate[], input: EngineInput): OutfitCandi
     if (swap) picked[2] = swap;
   }
 
+  // Garantir au moins 1 robe si le dressing en contient
+  const wardrobeHasRobes = input.wardrobe.some(i =>
+    i.category === 'Robes'
+  );
+  const selectedHasRobe = picked.some(outfit =>
+    outfit.items.some(i => i.category === 'Robes')
+  );
+  if (wardrobeHasRobes && !selectedHasRobe) {
+    // Trouver la meilleure tenue avec robe parmi les candidats
+    const robeOutfits = sorted.filter(o =>
+      !o.blocked &&
+      o.items.some(i => i.category === 'Robes') &&
+      !picked.includes(o)
+    );
+    if (robeOutfits.length > 0) {
+      // Prendre la meilleure robe dans le top 30% des scores
+      const topScore = sorted[0]?.score ?? 0;
+      const threshold = topScore * 0.7;
+      const validRobeOutfit = robeOutfits.find(o =>
+        o.score >= threshold
+      ) ?? robeOutfits[0];
+      // Remplacer la tenue 3 (la moins bien scorée des 3)
+      picked[2] = validRobeOutfit;
+    }
+  }
+
   return picked;
 }
 
