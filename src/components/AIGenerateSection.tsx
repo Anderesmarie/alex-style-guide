@@ -4,7 +4,13 @@ import { toast } from 'sonner';
 import { ClothingItem, UserProfile } from '@/lib/types';
 import { getWardrobe, getProfile } from '@/lib/storage';
 import { generateOutfits } from '@/lib/outfitEngine';
-import { generateRecommendations } from '@/lib/recommendations';
+import {
+  generateRecommendations,
+  getRecentOutfitItemIds,
+  getDislikedItemIds,
+  getWornItemIds,
+  getLikedOutfitItemIds,
+} from '@/lib/recommendations';
 import { geocodeCity, getSavedCity } from '@/lib/weather';
 import { supabase } from '@/lib/supabase';
 
@@ -188,6 +194,13 @@ export default function AIGenerateSection({ dateKey, occasion, weather, avoidIte
       const useStrict = strictWardrobe.length >= 4;
       const finalWardrobe = useStrict ? strictWardrobe : wardrobeForEngine;
 
+      const [recentIds, dislikedIds, wornIds, likedIds] = await Promise.all([
+        getRecentOutfitItemIds(),
+        getDislikedItemIds(),
+        getWornItemIds(),
+        getLikedOutfitItemIds(),
+      ]);
+
       const candidates = generateOutfits({
         wardrobe: finalWardrobe,
         tempMin,
@@ -200,6 +213,10 @@ export default function AIGenerateSection({ dateKey, occasion, weather, avoidIte
         colorimetry: userSeason,
         favStyles: fullProfile?.styles ?? [],
         favoriteColors: fullProfile?.favorite_colors,
+        recentOutfitIds: recentIds.map(r => r.itemIds),
+        dislikedItemIds: dislikedIds,
+        savedOutfitItemIds: likedIds,
+        recentItemIds: recentIds.flatMap(r => r.itemIds),
         wornItemIds: useStrict ? [] : (avoidItemIds ?? []),
       });
 
