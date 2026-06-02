@@ -100,6 +100,7 @@ export default function ProfileEditor({ onComplete }: Props) {
   }, []);
 
   const profileObj = (): UserProfile => ({
+    lifestyle,
     silhouette,
     styles,
     budget,
