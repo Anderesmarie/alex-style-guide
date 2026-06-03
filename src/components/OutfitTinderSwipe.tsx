@@ -6,11 +6,12 @@ interface Props {
   outfits: ClothingItem[][];
   pseudo?: string | null;
   onComplete: (likes: boolean[]) => void;
+  aiIndex?: number | null;
 }
 
 const ROSE_GOLD = '#C9956C';
 
-export default function OutfitTinderSwipe({ outfits, pseudo, onComplete }: Props) {
+export default function OutfitTinderSwipe({ outfits, pseudo, onComplete, aiIndex = null }: Props) {
   const [index, setIndex] = useState(0);
   const [likes, setLikes] = useState<boolean[]>([]);
   const [dragX, setDragX] = useState(0);
