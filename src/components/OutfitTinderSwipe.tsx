@@ -113,6 +113,21 @@ export default function OutfitTinderSwipe({ outfits, pseudo, onComplete, aiIndex
             style={{ opacity: nopeOpacity }}
           >NOPE ✗</div>
 
+          {aiIndex === index && (
+            <div
+              className="absolute top-4 left-1/2 -translate-x-1/2 z-20 px-3 py-1 rounded-full text-xs font-semibold pointer-events-none"
+              style={{
+                background: 'linear-gradient(135deg, #C9956C, #E8C39E)',
+                color: '#fff',
+                boxShadow: '0 2px 8px rgba(201,149,108,0.45)',
+                fontFamily: 'Inter, sans-serif',
+                letterSpacing: 0.4,
+              }}
+            >
+              ✦ IA
+            </div>
+          )}
+
           <OutfitLayout items={current} readOnly />
 
           {/* Badge bas */}
