@@ -565,15 +565,26 @@ export default function Today() {
     }
 
     // 3. Still nothing → generate fresh if quota allows
+    let aiIdx: number | null = null;
     if (recs.length === 0) {
       if (!canSuggest) return;
       recs = await generateFreshOutfits();
       if (recs.length > 0) {
+        // Keep up to 2 engine outfits, then append an AI-generated one as 3rd
+        const baseRecs = recs.slice(0, 2);
+        const aiItems = await fetchAiOutfit();
+        if (aiItems && aiItems.length > 0) {
+          recs = [...baseRecs, aiItems];
+          aiIdx = recs.length - 1;
+        } else {
+          recs = baseRecs;
+        }
         writeStoredToday(today, recs);
         insertDailyOutfitsToSupabase(today, recs);
       }
     }
 
+    setAiOutfitIndex(aiIdx);
     setRecommendations(recs);
     if (restoredComplete && restoredResults) {
       setSwipeResults(restoredResults);
@@ -583,7 +594,7 @@ export default function Today() {
       setPendingSwipe(recs);
     }
 
-  }, [enough, swipeComplete, pendingSwipe, canSuggest, wardrobe, today, generateFreshOutfits]);
+  }, [enough, swipeComplete, pendingSwipe, canSuggest, wardrobe, today, generateFreshOutfits, fetchAiOutfit]);
 
 
 
