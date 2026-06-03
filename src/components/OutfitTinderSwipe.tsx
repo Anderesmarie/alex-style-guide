@@ -6,11 +6,12 @@ interface Props {
   outfits: ClothingItem[][];
   pseudo?: string | null;
   onComplete: (likes: boolean[]) => void;
+  aiIndex?: number | null;
 }
 
 const ROSE_GOLD = '#C9956C';
 
-export default function OutfitTinderSwipe({ outfits, pseudo, onComplete }: Props) {
+export default function OutfitTinderSwipe({ outfits, pseudo, onComplete, aiIndex = null }: Props) {
   const [index, setIndex] = useState(0);
   const [likes, setLikes] = useState<boolean[]>([]);
   const [dragX, setDragX] = useState(0);
@@ -111,6 +112,21 @@ export default function OutfitTinderSwipe({ outfits, pseudo, onComplete }: Props
             className="absolute top-4 right-4 z-30 border-4 border-red-500 rounded-xl px-3 py-1 font-bold text-red-500 text-xl rotate-12 pointer-events-none"
             style={{ opacity: nopeOpacity }}
           >NOPE ✗</div>
+
+          {aiIndex === index && (
+            <div
+              className="absolute top-4 left-1/2 -translate-x-1/2 z-20 px-3 py-1 rounded-full text-xs font-semibold pointer-events-none"
+              style={{
+                background: 'linear-gradient(135deg, #C9956C, #E8C39E)',
+                color: '#fff',
+                boxShadow: '0 2px 8px rgba(201,149,108,0.45)',
+                fontFamily: 'Inter, sans-serif',
+                letterSpacing: 0.4,
+              }}
+            >
+              ✦ IA
+            </div>
+          )}
 
           <OutfitLayout items={current} readOnly />
 

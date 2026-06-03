@@ -224,6 +224,7 @@ export default function Today() {
   const [savedOutfitItemIds, setSavedOutfitItemIds] = useState<string[][]>([]);
   const [recentItemIds, setRecentItemIds] = useState<string[]>([]);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [aiOutfitIndex, setAiOutfitIndex] = useState<number | null>(null);
 
 
 
@@ -395,6 +396,48 @@ export default function Today() {
   }, [ws, weatherTemp, wardrobe, userProfile, userSeason, lifestyle, recentOutfitIds, dislikedItemIds, savedOutfitItemIds, recentItemIds]);
 
 
+  const fetchAiOutfit = useCallback(async (): Promise<ClothingItem[] | null> => {
+    try {
+      const day = new Date().getDay();
+      const isWeekday = day >= 1 && day <= 5;
+      const dayType = isWeekday ? 'Semaine' : 'Weekend';
+      let socialContext = 'Quotidien';
+      switch (lifestyle) {
+        case 'Lycée': socialContext = isWeekday ? 'Lycée' : 'Sortie'; break;
+        case 'Études sup': socialContext = isWeekday ? 'Campus' : 'Sortie'; break;
+        case 'Premier job':
+        case 'Je travaille': socialContext = isWeekday ? 'Travail' : 'Sortie'; break;
+      }
+      const userStyle = userProfile?.styles?.[0] ?? 'Casual chic';
+      const tempMin = ws.status === 'done' ? ws.data.tempMin : (weatherTemp ?? 18);
+      const tempMax = ws.status === 'done' ? ws.data.tempMax : (weatherTemp ?? 22);
+
+      const { data, error } = await supabase.functions.invoke('generate-ai-outfit', {
+        body: {
+          wardrobe: wardrobe.map(w => ({
+            id: w.id, category: w.category, type: w.type, color: w.color,
+            style: w.style, occasion: w.occasion, season: w.season,
+          })),
+          weather: { tempMin, tempMax },
+          userStyle,
+          socialContext,
+          dayType,
+        },
+      });
+      if (error || !data) return null;
+      const ids: string[] = Array.isArray(data?.tenue)
+        ? data.tenue.map((t: any) => t?.id).filter((id: any) => typeof id === 'string')
+        : [];
+      const items = ids
+        .map(id => wardrobe.find(w => w.id === id))
+        .filter((it): it is ClothingItem => !!it);
+      return items.length > 0 ? items : null;
+    } catch (e) {
+      console.error('AI outfit error', e);
+      return null;
+    }
+  }, [wardrobe, userProfile, lifestyle, ws, weatherTemp]);
+
   const generateFreshOutfits = useCallback(async (occasionOverride?: string) => {
     const engineCandidates = generateOutfits(buildEngineInput(occasionOverride));
     const engineOutfits = engineCandidates.map(candidate => candidate.items).filter(outfit => outfit.length > 0);
@@ -522,15 +565,26 @@ export default function Today() {
     }
 
     // 3. Still nothing → generate fresh if quota allows
+    let aiIdx: number | null = null;
     if (recs.length === 0) {
       if (!canSuggest) return;
       recs = await generateFreshOutfits();
       if (recs.length > 0) {
+        // Keep up to 2 engine outfits, then append an AI-generated one as 3rd
+        const baseRecs = recs.slice(0, 2);
+        const aiItems = await fetchAiOutfit();
+        if (aiItems && aiItems.length > 0) {
+          recs = [...baseRecs, aiItems];
+          aiIdx = recs.length - 1;
+        } else {
+          recs = baseRecs;
+        }
         writeStoredToday(today, recs);
         insertDailyOutfitsToSupabase(today, recs);
       }
     }
 
+    setAiOutfitIndex(aiIdx);
     setRecommendations(recs);
     if (restoredComplete && restoredResults) {
       setSwipeResults(restoredResults);
@@ -540,7 +594,7 @@ export default function Today() {
       setPendingSwipe(recs);
     }
 
-  }, [enough, swipeComplete, pendingSwipe, canSuggest, wardrobe, today, generateFreshOutfits]);
+  }, [enough, swipeComplete, pendingSwipe, canSuggest, wardrobe, today, generateFreshOutfits, fetchAiOutfit]);
 
 
 
@@ -814,6 +868,7 @@ export default function Today() {
           outfits={pendingSwipe}
           pseudo={pseudo}
           onComplete={handleSwipeComplete}
+          aiIndex={aiOutfitIndex}
         />
       )}
 
