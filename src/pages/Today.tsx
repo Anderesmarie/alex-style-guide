@@ -223,6 +223,9 @@ export default function Today() {
   const [dislikedItemIds, setDislikedItemIds] = useState<string[]>([]);
   const [savedOutfitItemIds, setSavedOutfitItemIds] = useState<string[][]>([]);
   const [recentItemIds, setRecentItemIds] = useState<string[]>([]);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+
+
 
   
 
@@ -279,6 +282,7 @@ export default function Today() {
                 corpulence: prof.corpulence ?? undefined,
                 favorite_colors: prof.favorite_colors ?? [],
               } as UserProfile));
+              setProfileLoaded(true);
             }
           }
         } catch {}
@@ -575,10 +579,10 @@ export default function Today() {
   // Auto-generate only if no saved results for today and has quota
   // Auto-generate / auto-restore : tente toujours, generate() décide s'il y a quota
   useEffect(() => {
-    if (!loading && ws.status !== 'loading' && enough && !swipeComplete && recommendations.length === 0) {
+    if (!loading && profileLoaded && ws.status !== 'loading' && enough && !swipeComplete && recommendations.length === 0) {
       generate();
     }
-  }, [loading, ws.status, enough, swipeComplete, recommendations.length, generate]); // eslint-disable-line
+  }, [loading, profileLoaded, ws.status, enough, swipeComplete, recommendations.length, generate]); // eslint-disable-line
 
 
   const handleResultsChange = (next: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[]) => {
@@ -796,6 +800,15 @@ export default function Today() {
       )}
 
       {/* Phase 1 — swipe Tinder */}
+      {!profileLoaded && recommendations.length === 0 && (
+        <div className="flex flex-col items-center justify-center h-64 gap-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">
+            Préparation de tes tenues...
+          </p>
+        </div>
+      )}
+
       {pendingSwipe && !swipeComplete && (
         <OutfitTinderSwipe
           outfits={pendingSwipe}
