@@ -223,6 +223,9 @@ export default function Today() {
   const [dislikedItemIds, setDislikedItemIds] = useState<string[]>([]);
   const [savedOutfitItemIds, setSavedOutfitItemIds] = useState<string[][]>([]);
   const [recentItemIds, setRecentItemIds] = useState<string[]>([]);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+
+
 
   
 
