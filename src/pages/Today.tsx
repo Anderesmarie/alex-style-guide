@@ -224,6 +224,7 @@ export default function Today() {
   const [savedOutfitItemIds, setSavedOutfitItemIds] = useState<string[][]>([]);
   const [recentItemIds, setRecentItemIds] = useState<string[]>([]);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [aiOutfitIndex, setAiOutfitIndex] = useState<number | null>(null);
 
 
 
