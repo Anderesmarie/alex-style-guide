@@ -800,6 +800,15 @@ export default function Today() {
       )}
 
       {/* Phase 1 — swipe Tinder */}
+      {!profileLoaded && recommendations.length === 0 && (
+        <div className="flex flex-col items-center justify-center h-64 gap-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">
+            Préparation de tes tenues...
+          </p>
+        </div>
+      )}
+
       {pendingSwipe && !swipeComplete && (
         <OutfitTinderSwipe
           outfits={pendingSwipe}
