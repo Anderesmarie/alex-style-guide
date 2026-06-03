@@ -868,6 +868,7 @@ export default function Today() {
           outfits={pendingSwipe}
           pseudo={pseudo}
           onComplete={handleSwipeComplete}
+          aiIndex={aiOutfitIndex}
         />
       )}
 
