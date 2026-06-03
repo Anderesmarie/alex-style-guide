@@ -579,10 +579,10 @@ export default function Today() {
   // Auto-generate only if no saved results for today and has quota
   // Auto-generate / auto-restore : tente toujours, generate() décide s'il y a quota
   useEffect(() => {
-    if (!loading && ws.status !== 'loading' && enough && !swipeComplete && recommendations.length === 0) {
+    if (!loading && profileLoaded && ws.status !== 'loading' && enough && !swipeComplete && recommendations.length === 0) {
       generate();
     }
-  }, [loading, ws.status, enough, swipeComplete, recommendations.length, generate]); // eslint-disable-line
+  }, [loading, profileLoaded, ws.status, enough, swipeComplete, recommendations.length, generate]); // eslint-disable-line
 
 
   const handleResultsChange = (next: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[]) => {
