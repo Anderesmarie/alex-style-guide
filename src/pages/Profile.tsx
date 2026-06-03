@@ -444,9 +444,33 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
         {/* Streak */}
         <ProfileStreakCard />
 
+        <button
+          onClick={async () => {
+            try {
+              const { data: { user } } = await supabase.auth.getUser();
+              if (!user) { toast.error('Non connecté'); return; }
+              const { data, error } = await supabase
+                .from('wardrobe')
+                .select('id,category,subcategory,type,color,season,style,occasion,brand,price,pattern')
+                .eq('user_id', user.id);
+              if (error) throw error;
+              const json = JSON.stringify(data, null, 2);
+              await navigator.clipboard.writeText(json);
+              toast.success(`${data?.length || 0} vêtements copiés ✨`, { duration: 2000 });
+            } catch (e: any) {
+              toast.error('Erreur copie : ' + (e?.message || 'inconnue'));
+            }
+          }}
+          className="w-full py-3 mb-2 text-xs font-medium underline"
+          style={{ color: '#6B6B6B' }}
+        >
+          📋 Copier ma garde-robe (JSON)
+        </button>
+
         <button onClick={onLogout} className="w-full py-3 mt-2 text-sm font-medium" style={{ color: '#D32F2F' }}>
           Se déconnecter
         </button>
+
         <button
           onClick={async () => {
             if (!confirm('Réinitialiser la preview ? Tes données locales seront effacées et tu reverras l\'onboarding.')) return;
