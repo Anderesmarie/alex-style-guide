@@ -282,6 +282,7 @@ export default function Today() {
                 corpulence: prof.corpulence ?? undefined,
                 favorite_colors: prof.favorite_colors ?? [],
               } as UserProfile));
+              setProfileLoaded(true);
             }
           }
         } catch {}
