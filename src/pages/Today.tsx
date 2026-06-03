@@ -396,6 +396,48 @@ export default function Today() {
   }, [ws, weatherTemp, wardrobe, userProfile, userSeason, lifestyle, recentOutfitIds, dislikedItemIds, savedOutfitItemIds, recentItemIds]);
 
 
+  const fetchAiOutfit = useCallback(async (): Promise<ClothingItem[] | null> => {
+    try {
+      const day = new Date().getDay();
+      const isWeekday = day >= 1 && day <= 5;
+      const dayType = isWeekday ? 'Semaine' : 'Weekend';
+      let socialContext = 'Quotidien';
+      switch (lifestyle) {
+        case 'Lycée': socialContext = isWeekday ? 'Lycée' : 'Sortie'; break;
+        case 'Études sup': socialContext = isWeekday ? 'Campus' : 'Sortie'; break;
+        case 'Premier job':
+        case 'Je travaille': socialContext = isWeekday ? 'Travail' : 'Sortie'; break;
+      }
+      const userStyle = userProfile?.styles?.[0] ?? 'Casual chic';
+      const tempMin = ws.status === 'done' ? ws.data.tempMin : (weatherTemp ?? 18);
+      const tempMax = ws.status === 'done' ? ws.data.tempMax : (weatherTemp ?? 22);
+
+      const { data, error } = await supabase.functions.invoke('generate-ai-outfit', {
+        body: {
+          wardrobe: wardrobe.map(w => ({
+            id: w.id, category: w.category, type: w.type, color: w.color,
+            style: w.style, occasion: w.occasion, season: w.season,
+          })),
+          weather: { tempMin, tempMax },
+          userStyle,
+          socialContext,
+          dayType,
+        },
+      });
+      if (error || !data) return null;
+      const ids: string[] = Array.isArray(data?.tenue)
+        ? data.tenue.map((t: any) => t?.id).filter((id: any) => typeof id === 'string')
+        : [];
+      const items = ids
+        .map(id => wardrobe.find(w => w.id === id))
+        .filter((it): it is ClothingItem => !!it);
+      return items.length > 0 ? items : null;
+    } catch (e) {
+      console.error('AI outfit error', e);
+      return null;
+    }
+  }, [wardrobe, userProfile, lifestyle, ws, weatherTemp]);
+
   const generateFreshOutfits = useCallback(async (occasionOverride?: string) => {
     const engineCandidates = generateOutfits(buildEngineInput(occasionOverride));
     const engineOutfits = engineCandidates.map(candidate => candidate.items).filter(outfit => outfit.length > 0);
