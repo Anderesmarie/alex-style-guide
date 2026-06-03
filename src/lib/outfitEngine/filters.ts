@@ -144,6 +144,16 @@ export function applyFilters(
     }
   }
 
+  if (tempMin < 14) {
+    const hasShortOrMini = items.some(it => {
+      const type = (it.type || '').toLowerCase();
+      return type === 'short' || type.includes('short') || type.includes('mini');
+    });
+    if (hasShortOrMini) {
+      return block(candidate, '🚫 Trop frais pour short/mini-jupe le matin');
+    }
+  }
+
   if (amplitude >= 15) {
     const hasRemovable = items.some(it => REMOVABLE_LAYERS.includes(it.type));
     if (!hasRemovable) {
