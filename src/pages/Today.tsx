@@ -236,7 +236,7 @@ export default function Today() {
     supabase.auth.getUser().then(({ data }) => setUserEmail(data.user?.email ?? null));
   }, []);
 
-  const isDevAccount = userEmail === 'anderes.richez@gmail.com';
+  const isDevAccount = userEmail === 'anderes.richez@gmail.com' || userEmail === 'alexandra.richez2021@gmail.com';
 
   const today = new Date().toISOString().split('T')[0];
   const enough = wardrobe.length >= 8;
