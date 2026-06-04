@@ -228,6 +228,24 @@ export default function Today() {
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [aiOutfitIndex, setAiOutfitIndex] = useState<number | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [dailyMood, setDailyMood] = useState<string | null | undefined>(undefined);
+
+  // 8s fallback: si l'utilisatrice ne choisit pas, on génère normalement
+  useEffect(() => {
+    if (dailyMood !== undefined) return;
+    if (!enough || swipeComplete || pendingSwipe) return;
+    const t = setTimeout(() => setDailyMood(null), 8000);
+    return () => clearTimeout(t);
+  }, [dailyMood, enough, swipeComplete, pendingSwipe]);
+
+  const handleMoodSelect = useCallback((mood: string) => {
+    const moodNorm = mood.toLowerCase();
+    const hasMatch = wardrobe.some(it =>
+      (it.style || []).some(s => (s || '').toLowerCase() === moodNorm)
+    );
+    setDailyMood(hasMatch ? mood : null);
+  }, [wardrobe]);
+
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserEmail(data.user?.email ?? null));
