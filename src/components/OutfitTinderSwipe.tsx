@@ -115,7 +115,7 @@ export default function OutfitTinderSwipe({ outfits, pseudo, onComplete, aiIndex
 
           {aiIndex === index && (
             <div
-              className="absolute top-3 right-3 z-[60] px-3.5 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider pointer-events-none border-2 border-white"
+              className="absolute top-3 right-5 z-[60] px-3.5 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider pointer-events-none border-2 border-white"
               style={{
                 background: 'linear-gradient(135deg, #C9956C, #E8C39E)',
                 color: '#fff',
