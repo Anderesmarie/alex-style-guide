@@ -24,6 +24,7 @@ type WeatherState =
   | { status: 'city_input'; error?: string; searching?: boolean }
   | { status: 'error'; message: string };
 
+const TODAY_STORAGE_KEY = 'mystyl_today';
 const DAILY_MOOD_STORAGE_KEY = 'mystyl_daily_mood';
 
 interface StoredSwipeResult {
@@ -230,6 +231,16 @@ export default function Today() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [dailyMood, setDailyMood] = useState<string | null | undefined>(undefined);
 
+
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUserEmail(data.user?.email ?? null));
+  }, []);
+
+  const isDevAccount = userEmail === 'anderes.richez@gmail.com' || userEmail === 'alexandra.richez2021@gmail.com';
+
+  const today = new Date().toISOString().split('T')[0];
+
   // Load saved daily mood from localStorage (once per day)
   useEffect(() => {
     try {
@@ -243,15 +254,6 @@ export default function Today() {
     } catch {}
   }, [today]);
 
-
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUserEmail(data.user?.email ?? null));
-  }, []);
-
-  const isDevAccount = userEmail === 'anderes.richez@gmail.com' || userEmail === 'alexandra.richez2021@gmail.com';
-
-  const today = new Date().toISOString().split('T')[0];
   const enough = wardrobe.length >= 8;
   // 1 session de swipe par jour = 3 tenues (limite freemium)
   const canSuggest = dailyCount < 1;
