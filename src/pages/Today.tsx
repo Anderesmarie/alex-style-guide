@@ -906,15 +906,54 @@ export default function Today() {
         </div>
       )}
 
-      {/* Phase 1 — swipe Tinder */}
-      {!profileLoaded && recommendations.length === 0 && (
-        <div className="flex flex-col items-center justify-center h-64 gap-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
-          <p className="text-sm text-muted-foreground">
-            Préparation de tes tenues...
-          </p>
-        </div>
+      {/* Phase 0 — sélection mood OU loader */}
+      {enough && !swipeComplete && !pendingSwipe && recommendations.length === 0 && (
+        dailyMood === undefined ? (
+          <div className="bg-card rounded-2xl p-5 card-shadow mb-4 fade-enter">
+            <h2 className="text-lg font-serif font-semibold text-center">
+              Comment tu te sens ce matin ?
+            </h2>
+            <p className="text-xs text-muted-foreground text-center mt-1 mb-4">
+              Ça m'aide à choisir tes tenues du jour
+            </p>
+            <div className="-mx-5 px-5 overflow-x-auto no-scrollbar">
+              <div className="flex gap-2 pb-1 w-max">
+                {[
+                  { label: 'Romantique', emoji: '🌸' },
+                  { label: 'Casual chic', emoji: '✨' },
+                  { label: 'Dark', emoji: '🖤' },
+                  { label: 'Y2K', emoji: '💫' },
+                  { label: 'Bohème', emoji: '🌊' },
+                  { label: 'Streetwear', emoji: '⚡' },
+                  { label: 'Minimaliste', emoji: '🤍' },
+                  { label: 'Grunge', emoji: '🎸' },
+                  { label: 'Old Money', emoji: '👑' },
+                  { label: 'Preppy', emoji: '🎓' },
+                  { label: 'Sportswear', emoji: '🏃' },
+                  { label: 'Vintage', emoji: '🌿' },
+                ].map(m => (
+                  <button
+                    key={m.label}
+                    type="button"
+                    onClick={() => handleMoodSelect(m.label)}
+                    className="shrink-0 px-4 py-2 rounded-full bg-secondary text-secondary-foreground text-sm font-medium whitespace-nowrap active:bg-primary active:text-primary-foreground active:scale-95 transition-all border border-border"
+                  >
+                    <span className="mr-1.5">{m.emoji}</span>{m.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-64 gap-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+            <p className="text-sm text-muted-foreground">
+              Préparation de tes tenues{dailyMood ? ` ${dailyMood.toLowerCase()}` : ''}...
+            </p>
+          </div>
+        )
       )}
+
 
       {isDevAccount && (
         <button
