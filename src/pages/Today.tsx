@@ -258,6 +258,7 @@ export default function Today() {
       setSwipeComplete(false);
       setPendingSwipe(null);
       setAiOutfitIndex(null);
+      setDailyMood(undefined);
     } catch (e) {
       console.error('reset day failed', e);
     }
