@@ -455,7 +455,7 @@ export default function Today() {
         case 'Premier job':
         case 'Je travaille': socialContext = isWeekday ? 'Travail' : 'Sortie'; break;
       }
-      const userStyle = userProfile?.styles?.[0] ?? 'Casual chic';
+      const userStyle = dailyMood || userProfile?.styles?.[0] || 'Casual chic';
       const tempMin = ws.status === 'done' ? ws.data.tempMin : (weatherTemp ?? 18);
       const tempMax = ws.status === 'done' ? ws.data.tempMax : (weatherTemp ?? 22);
 
