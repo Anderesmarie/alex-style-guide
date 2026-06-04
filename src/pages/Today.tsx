@@ -263,6 +263,24 @@ export default function Today() {
     }
   }, [today]);
 
+  // 8s fallback: si l'utilisatrice ne choisit pas un mood, on génère normalement
+  useEffect(() => {
+    if (dailyMood !== undefined) return;
+    if (!enough || swipeComplete || pendingSwipe) return;
+    const t = setTimeout(() => setDailyMood(null), 8000);
+    return () => clearTimeout(t);
+  }, [dailyMood, enough, swipeComplete, pendingSwipe]);
+
+  const handleMoodSelect = useCallback((mood: string) => {
+    const moodNorm = mood.toLowerCase();
+    const hasMatch = wardrobe.some(it =>
+      (it.style || []).some(s => (s || '').toLowerCase() === moodNorm)
+    );
+    setDailyMood(hasMatch ? mood : null);
+  }, [wardrobe]);
+
+
+
   // Load data
   useEffect(() => {
     const loadData = async () => {
