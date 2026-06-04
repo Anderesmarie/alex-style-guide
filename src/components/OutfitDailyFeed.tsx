@@ -25,6 +25,7 @@ interface Props {
   pseudo?: string | null;
   wardrobe: ClothingItem[];
   onResultsChange?: (next: OutfitResult[]) => void;
+  aiIndex?: number | null;
 }
 
 const ROSE_GOLD = '#C9956C';
@@ -34,6 +35,7 @@ export default function OutfitDailyFeed({
   pseudo,
   wardrobe,
   onResultsChange,
+  aiIndex = null,
 }: Props) {
   
   const [savedIdxs, setSavedIdxs] = useState<Set<number>>(new Set());
