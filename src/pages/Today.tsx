@@ -518,6 +518,8 @@ export default function Today() {
     let restoredResults: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[] | null = null;
     let restoredComplete = false;
     let shouldBackfillStoredCache = false;
+    let restoredAiIdx: number | null = null;
+
 
     // 1. Try localStorage cache first (fast path)
     const stored = readStoredToday();
