@@ -24,7 +24,7 @@ type WeatherState =
   | { status: 'city_input'; error?: string; searching?: boolean }
   | { status: 'error'; message: string };
 
-const TODAY_STORAGE_KEY = 'mystyl_today';
+const DAILY_MOOD_STORAGE_KEY = 'mystyl_daily_mood';
 
 interface StoredSwipeResult {
   outfitIds: string[];
@@ -230,6 +230,19 @@ export default function Today() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [dailyMood, setDailyMood] = useState<string | null | undefined>(undefined);
 
+  // Load saved daily mood from localStorage (once per day)
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DAILY_MOOD_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.date === today && parsed.mood !== undefined) {
+          setDailyMood(parsed.mood ?? null);
+        }
+      }
+    } catch {}
+  }, [today]);
+
 
 
   useEffect(() => {
@@ -248,6 +261,7 @@ export default function Today() {
     try {
       await saveDailyCounter({ date: today, count: 0 });
       try { localStorage.removeItem(TODAY_STORAGE_KEY); } catch {}
+      try { localStorage.removeItem(DAILY_MOOD_STORAGE_KEY); } catch {}
       const { data: userData } = await supabase.auth.getUser();
       if (userData.user) {
         await supabase.from('daily_outfits').delete().eq('user_id', userData.user.id).eq('date', today);
@@ -277,8 +291,12 @@ export default function Today() {
     const hasMatch = wardrobe.some(it =>
       (it.style || []).some(s => (s || '').toLowerCase() === moodNorm)
     );
-    setDailyMood(hasMatch ? mood : null);
-  }, [wardrobe]);
+    const finalMood = hasMatch ? mood : null;
+    setDailyMood(finalMood);
+    try {
+      localStorage.setItem(DAILY_MOOD_STORAGE_KEY, JSON.stringify({ mood: finalMood, date: today }));
+    } catch {}
+  }, [wardrobe, today]);
 
 
 
@@ -912,7 +930,7 @@ export default function Today() {
         dailyMood === undefined ? (
           <div className="bg-card rounded-2xl p-5 card-shadow mb-4 fade-enter">
             <h2 className="text-lg font-serif font-semibold text-center">
-              Comment tu te sens ce matin ?
+              Comment tu te sens aujourd'hui ?
             </h2>
             <p className="text-xs text-muted-foreground text-center mt-1 mb-4">
               Ça m'aide à choisir tes tenues du jour
