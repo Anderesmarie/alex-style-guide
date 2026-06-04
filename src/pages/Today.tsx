@@ -923,6 +923,7 @@ export default function Today() {
             pseudo={pseudo}
             wardrobe={wardrobe}
             onResultsChange={handleResultsChange}
+            aiIndex={aiOutfitIndex}
           />
           {/* Custom outfit card — always after auto results */}
           <div className="mt-4">
