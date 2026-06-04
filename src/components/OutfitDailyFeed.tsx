@@ -25,6 +25,7 @@ interface Props {
   pseudo?: string | null;
   wardrobe: ClothingItem[];
   onResultsChange?: (next: OutfitResult[]) => void;
+  aiIndex?: number | null;
 }
 
 const ROSE_GOLD = '#C9956C';
@@ -34,6 +35,7 @@ export default function OutfitDailyFeed({
   pseudo,
   wardrobe,
   onResultsChange,
+  aiIndex = null,
 }: Props) {
   
   const [savedIdxs, setSavedIdxs] = useState<Set<number>>(new Set());
@@ -159,6 +161,21 @@ export default function OutfitDailyFeed({
               style={!isDisliked && isGreyedOut ? { opacity: 0.4, pointerEvents: 'none' } : undefined}
             >
               <div className="relative">
+                {aiIndex === idx && (
+                  <div
+                    className="absolute top-3 right-3 z-[60] px-3.5 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider pointer-events-none border-2 border-white"
+                    style={{
+                      background: 'linear-gradient(135deg, #C9956C, #E8C39E)',
+                      color: '#fff',
+                      textShadow: '0 1px 2px rgba(0,0,0,0.15)',
+                      boxShadow: '0 4px 14px rgba(0,0,0,0.25), 0 0 0 2px rgba(255,255,255,0.9)',
+                      fontFamily: 'Inter, sans-serif',
+                      letterSpacing: '0.08em',
+                    }}
+                  >
+                    ✦ IA
+                  </div>
+                )}
                 <OutfitLayout
                   items={r.outfit}
                   layoutData={r.layoutData ?? null}
