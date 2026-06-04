@@ -38,6 +38,7 @@ interface StoredToday {
   outfits: string[][]; // arrays of clothing item ids
   swipeComplete?: boolean;
   swipeResults?: StoredSwipeResult[];
+  aiOutfitIndex?: number | null;
 }
 
 function readStoredToday(): StoredToday | null {
@@ -55,7 +56,7 @@ function readStoredToday(): StoredToday | null {
 function writeStoredToday(
   date: string,
   outfits: ClothingItem[][],
-  extra?: { swipeComplete?: boolean; swipeResults?: StoredSwipeResult[] }
+  extra?: { swipeComplete?: boolean; swipeResults?: StoredSwipeResult[]; aiOutfitIndex?: number | null }
 ) {
   try {
     const data: StoredToday = {
@@ -66,6 +67,7 @@ function writeStoredToday(
     localStorage.setItem(TODAY_STORAGE_KEY, JSON.stringify(data));
   } catch {}
 }
+
 
 function updateStoredTodaySwipe(extra: { swipeComplete?: boolean; swipeResults?: StoredSwipeResult[] }) {
   try {
