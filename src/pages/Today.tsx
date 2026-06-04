@@ -38,6 +38,7 @@ interface StoredToday {
   outfits: string[][]; // arrays of clothing item ids
   swipeComplete?: boolean;
   swipeResults?: StoredSwipeResult[];
+  aiOutfitIndex?: number | null;
 }
 
 function readStoredToday(): StoredToday | null {
@@ -55,7 +56,7 @@ function readStoredToday(): StoredToday | null {
 function writeStoredToday(
   date: string,
   outfits: ClothingItem[][],
-  extra?: { swipeComplete?: boolean; swipeResults?: StoredSwipeResult[] }
+  extra?: { swipeComplete?: boolean; swipeResults?: StoredSwipeResult[]; aiOutfitIndex?: number | null }
 ) {
   try {
     const data: StoredToday = {
@@ -66,6 +67,7 @@ function writeStoredToday(
     localStorage.setItem(TODAY_STORAGE_KEY, JSON.stringify(data));
   } catch {}
 }
+
 
 function updateStoredTodaySwipe(extra: { swipeComplete?: boolean; swipeResults?: StoredSwipeResult[] }) {
   try {
@@ -516,6 +518,8 @@ export default function Today() {
     let restoredResults: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[] | null = null;
     let restoredComplete = false;
     let shouldBackfillStoredCache = false;
+    let restoredAiIdx: number | null = null;
+
 
     // 1. Try localStorage cache first (fast path)
     const stored = readStoredToday();
@@ -541,8 +545,11 @@ export default function Today() {
 
       if (recs.length === 0) {
         shouldBackfillStoredCache = false;
+      } else if (typeof stored.aiOutfitIndex === 'number') {
+        restoredAiIdx = stored.aiOutfitIndex;
       }
     }
+
 
     if (shouldBackfillStoredCache && recs.length > 0) {
       backfillStoredTodayToSupabase(today, recs, restoredResults);
@@ -601,13 +608,14 @@ export default function Today() {
         } else {
           recs = baseRecs;
         }
-        writeStoredToday(today, recs);
+        writeStoredToday(today, recs, { aiOutfitIndex: aiIdx });
         insertDailyOutfitsToSupabase(today, recs);
       }
     }
 
-    setAiOutfitIndex(aiIdx);
+    setAiOutfitIndex(aiIdx ?? restoredAiIdx);
     setRecommendations(recs);
+
     if (restoredComplete && restoredResults) {
       setSwipeResults(restoredResults);
       setSwipeComplete(true);
