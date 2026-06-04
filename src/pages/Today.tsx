@@ -885,6 +885,15 @@ export default function Today() {
         </div>
       )}
 
+      {isDevAccount && (
+        <button
+          onClick={handleResetDay}
+          className="mb-3 text-xs px-3 py-1.5 rounded-md border border-primary/40 text-primary hover:bg-primary/10 transition-colors"
+        >
+          🔄 Reset journée (dev)
+        </button>
+      )}
+
       {pendingSwipe && !swipeComplete && (
         <OutfitTinderSwipe
           outfits={pendingSwipe}
