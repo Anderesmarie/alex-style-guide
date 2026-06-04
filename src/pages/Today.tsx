@@ -225,6 +225,32 @@ export default function Today() {
   const [recentItemIds, setRecentItemIds] = useState<string[]>([]);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [aiOutfitIndex, setAiOutfitIndex] = useState<number | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUserEmail(data.user?.email ?? null));
+  }, []);
+
+  const isDevAccount = userEmail === 'anderes.richez@gmail.com';
+
+  const handleResetDay = useCallback(async () => {
+    try {
+      await saveDailyCounter({ date: today, count: 0 });
+      try { localStorage.removeItem(TODAY_STORAGE_KEY); } catch {}
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData.user) {
+        await supabase.from('daily_outfits').delete().eq('user_id', userData.user.id).eq('date', today);
+      }
+      setDailyCount(0);
+      setRecommendations([]);
+      setSwipeResults(null);
+      setSwipeComplete(false);
+      setPendingSwipe(null);
+      setAiOutfitIndex(null);
+    } catch (e) {
+      console.error('reset day failed', e);
+    }
+  }, [today]);
 
 
 
