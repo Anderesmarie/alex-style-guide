@@ -228,6 +228,9 @@ export default function Today() {
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [aiOutfitIndex, setAiOutfitIndex] = useState<number | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [dailyMood, setDailyMood] = useState<string | null | undefined>(undefined);
+
+
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserEmail(data.user?.email ?? null));
@@ -255,10 +258,29 @@ export default function Today() {
       setSwipeComplete(false);
       setPendingSwipe(null);
       setAiOutfitIndex(null);
+      setDailyMood(undefined);
     } catch (e) {
       console.error('reset day failed', e);
     }
   }, [today]);
+
+  // 8s fallback: si l'utilisatrice ne choisit pas un mood, on génère normalement
+  useEffect(() => {
+    if (dailyMood !== undefined) return;
+    if (!enough || swipeComplete || pendingSwipe) return;
+    const t = setTimeout(() => setDailyMood(null), 8000);
+    return () => clearTimeout(t);
+  }, [dailyMood, enough, swipeComplete, pendingSwipe]);
+
+  const handleMoodSelect = useCallback((mood: string) => {
+    const moodNorm = mood.toLowerCase();
+    const hasMatch = wardrobe.some(it =>
+      (it.style || []).some(s => (s || '').toLowerCase() === moodNorm)
+    );
+    setDailyMood(hasMatch ? mood : null);
+  }, [wardrobe]);
+
+
 
   // Load data
   useEffect(() => {
@@ -405,6 +427,7 @@ export default function Today() {
       tempMax,
       amplitude,
       occasion,
+      moodOverride: dailyMood ?? null,
       morphologie: userProfile?.morphologie ?? null,
       taille: userProfile?.taille ?? null,
       corpulence: userProfile?.corpulence ?? null,
@@ -417,7 +440,8 @@ export default function Today() {
       recentItemIds,
       wornItemIds: [],
     };
-  }, [ws, weatherTemp, wardrobe, userProfile, userSeason, lifestyle, recentOutfitIds, dislikedItemIds, savedOutfitItemIds, recentItemIds]);
+  }, [ws, weatherTemp, wardrobe, userProfile, userSeason, lifestyle, recentOutfitIds, dislikedItemIds, savedOutfitItemIds, recentItemIds, dailyMood]);
+
 
 
   const fetchAiOutfit = useCallback(async (): Promise<ClothingItem[] | null> => {
@@ -432,7 +456,7 @@ export default function Today() {
         case 'Premier job':
         case 'Je travaille': socialContext = isWeekday ? 'Travail' : 'Sortie'; break;
       }
-      const userStyle = userProfile?.styles?.[0] ?? 'Casual chic';
+      const userStyle = dailyMood || userProfile?.styles?.[0] || 'Casual chic';
       const tempMin = ws.status === 'done' ? ws.data.tempMin : (weatherTemp ?? 18);
       const tempMax = ws.status === 'done' ? ws.data.tempMax : (weatherTemp ?? 22);
 
@@ -460,7 +484,7 @@ export default function Today() {
       console.error('AI outfit error', e);
       return null;
     }
-  }, [wardrobe, userProfile, lifestyle, ws, weatherTemp]);
+  }, [wardrobe, userProfile, lifestyle, ws, weatherTemp, dailyMood]);
 
   const generateFreshOutfits = useCallback(async (occasionOverride?: string) => {
     const engineCandidates = generateOutfits(buildEngineInput(occasionOverride));
@@ -663,10 +687,10 @@ export default function Today() {
   // Auto-generate only if no saved results for today and has quota
   // Auto-generate / auto-restore : tente toujours, generate() décide s'il y a quota
   useEffect(() => {
-    if (!loading && profileLoaded && ws.status !== 'loading' && enough && !swipeComplete && recommendations.length === 0) {
+    if (!loading && profileLoaded && ws.status !== 'loading' && enough && !swipeComplete && recommendations.length === 0 && dailyMood !== undefined) {
       generate();
     }
-  }, [loading, profileLoaded, ws.status, enough, swipeComplete, recommendations.length, generate]); // eslint-disable-line
+  }, [loading, profileLoaded, ws.status, enough, swipeComplete, recommendations.length, generate, dailyMood]); // eslint-disable-line
 
 
   const handleResultsChange = (next: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[]) => {
@@ -883,15 +907,54 @@ export default function Today() {
         </div>
       )}
 
-      {/* Phase 1 — swipe Tinder */}
-      {!profileLoaded && recommendations.length === 0 && (
-        <div className="flex flex-col items-center justify-center h-64 gap-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
-          <p className="text-sm text-muted-foreground">
-            Préparation de tes tenues...
-          </p>
-        </div>
+      {/* Phase 0 — sélection mood OU loader */}
+      {enough && !swipeComplete && !pendingSwipe && recommendations.length === 0 && (
+        dailyMood === undefined ? (
+          <div className="bg-card rounded-2xl p-5 card-shadow mb-4 fade-enter">
+            <h2 className="text-lg font-serif font-semibold text-center">
+              Comment tu te sens ce matin ?
+            </h2>
+            <p className="text-xs text-muted-foreground text-center mt-1 mb-4">
+              Ça m'aide à choisir tes tenues du jour
+            </p>
+            <div className="-mx-5 px-5 overflow-x-auto no-scrollbar">
+              <div className="flex gap-2 pb-1 w-max">
+                {[
+                  { label: 'Romantique', emoji: '🌸' },
+                  { label: 'Casual chic', emoji: '✨' },
+                  { label: 'Dark', emoji: '🖤' },
+                  { label: 'Y2K', emoji: '💫' },
+                  { label: 'Bohème', emoji: '🌊' },
+                  { label: 'Streetwear', emoji: '⚡' },
+                  { label: 'Minimaliste', emoji: '🤍' },
+                  { label: 'Grunge', emoji: '🎸' },
+                  { label: 'Old Money', emoji: '👑' },
+                  { label: 'Preppy', emoji: '🎓' },
+                  { label: 'Sportswear', emoji: '🏃' },
+                  { label: 'Vintage', emoji: '🌿' },
+                ].map(m => (
+                  <button
+                    key={m.label}
+                    type="button"
+                    onClick={() => handleMoodSelect(m.label)}
+                    className="shrink-0 px-4 py-2 rounded-full bg-secondary text-secondary-foreground text-sm font-medium whitespace-nowrap active:bg-primary active:text-primary-foreground active:scale-95 transition-all border border-border"
+                  >
+                    <span className="mr-1.5">{m.emoji}</span>{m.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-64 gap-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+            <p className="text-sm text-muted-foreground">
+              Préparation de tes tenues{dailyMood ? ` ${dailyMood.toLowerCase()}` : ''}...
+            </p>
+          </div>
+        )
       )}
+
 
       {isDevAccount && (
         <button

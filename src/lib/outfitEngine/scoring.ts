@@ -231,6 +231,18 @@ export function applyScoring(
     ({ score, reasons } = add(score, reasons, -2, 'Tenue trop monochrome'));
   }
 
+  // ---- Mood du jour (moodOverride) ----
+  if (input.moodOverride) {
+    const moodNorm = norm(input.moodOverride);
+    for (const it of items) {
+      const styles = (it.style || []).map(s => norm(s));
+      if (styles.includes(moodNorm)) {
+        ({ score, reasons } = add(score, reasons, 2, `Style ${input.moodOverride} (mood du jour)`));
+      }
+    }
+  }
+
+
   // ---- Morphologie ----
   const fit = (it: ClothingItem) => norm(it.fit);
   const tex = (it: ClothingItem) => norm(it.texture);
