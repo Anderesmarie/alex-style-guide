@@ -545,8 +545,11 @@ export default function Today() {
 
       if (recs.length === 0) {
         shouldBackfillStoredCache = false;
+      } else if (typeof stored.aiOutfitIndex === 'number') {
+        restoredAiIdx = stored.aiOutfitIndex;
       }
     }
+
 
     if (shouldBackfillStoredCache && recs.length > 0) {
       backfillStoredTodayToSupabase(today, recs, restoredResults);
