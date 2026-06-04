@@ -225,16 +225,38 @@ export default function Today() {
   const [recentItemIds, setRecentItemIds] = useState<string[]>([]);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [aiOutfitIndex, setAiOutfitIndex] = useState<number | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUserEmail(data.user?.email ?? null));
+  }, []);
 
-
-  
+  const isDevAccount = userEmail === 'anderes.richez@gmail.com';
 
   const today = new Date().toISOString().split('T')[0];
   const enough = wardrobe.length >= 8;
   // 1 session de swipe par jour = 3 tenues (limite freemium)
   const canSuggest = dailyCount < 1;
   const weatherTemp = ws.status === 'done' ? ws.data.temperature : null;
+
+  const handleResetDay = useCallback(async () => {
+    try {
+      await saveDailyCounter({ date: today, count: 0 });
+      try { localStorage.removeItem(TODAY_STORAGE_KEY); } catch {}
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData.user) {
+        await supabase.from('daily_outfits').delete().eq('user_id', userData.user.id).eq('date', today);
+      }
+      setDailyCount(0);
+      setRecommendations([]);
+      setSwipeResults(null);
+      setSwipeComplete(false);
+      setPendingSwipe(null);
+      setAiOutfitIndex(null);
+    } catch (e) {
+      console.error('reset day failed', e);
+    }
+  }, [today]);
 
   // Load data
   useEffect(() => {
@@ -861,6 +883,15 @@ export default function Today() {
             Préparation de tes tenues...
           </p>
         </div>
+      )}
+
+      {isDevAccount && (
+        <button
+          onClick={handleResetDay}
+          className="mb-3 text-xs px-3 py-1.5 rounded-md border border-primary/40 text-primary hover:bg-primary/10 transition-colors"
+        >
+          🔄 Reset journée (dev)
+        </button>
       )}
 
       {pendingSwipe && !swipeComplete && (
