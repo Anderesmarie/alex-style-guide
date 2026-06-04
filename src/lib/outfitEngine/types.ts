@@ -14,6 +14,7 @@ export interface EngineInput {
   tempMax: number;
   amplitude: number;
   occasion: string;
+  moodOverride?: string | null;
   morphologie?: 'A' | 'H' | 'X' | 'V' | 'O' | '8' | null;
   taille?: 'petite' | 'moyenne' | 'grande' | null;
   corpulence?: 'fine' | 'medium' | 'ronde' | null;
