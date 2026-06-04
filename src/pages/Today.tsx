@@ -426,6 +426,7 @@ export default function Today() {
       tempMax,
       amplitude,
       occasion,
+      moodOverride: dailyMood ?? null,
       morphologie: userProfile?.morphologie ?? null,
       taille: userProfile?.taille ?? null,
       corpulence: userProfile?.corpulence ?? null,
@@ -438,7 +439,8 @@ export default function Today() {
       recentItemIds,
       wornItemIds: [],
     };
-  }, [ws, weatherTemp, wardrobe, userProfile, userSeason, lifestyle, recentOutfitIds, dislikedItemIds, savedOutfitItemIds, recentItemIds]);
+  }, [ws, weatherTemp, wardrobe, userProfile, userSeason, lifestyle, recentOutfitIds, dislikedItemIds, savedOutfitItemIds, recentItemIds, dailyMood]);
+
 
 
   const fetchAiOutfit = useCallback(async (): Promise<ClothingItem[] | null> => {
