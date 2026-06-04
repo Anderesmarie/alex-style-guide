@@ -483,7 +483,7 @@ export default function Today() {
       console.error('AI outfit error', e);
       return null;
     }
-  }, [wardrobe, userProfile, lifestyle, ws, weatherTemp]);
+  }, [wardrobe, userProfile, lifestyle, ws, weatherTemp, dailyMood]);
 
   const generateFreshOutfits = useCallback(async (occasionOverride?: string) => {
     const engineCandidates = generateOutfits(buildEngineInput(occasionOverride));
