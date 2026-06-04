@@ -213,6 +213,24 @@ export function applyScoring(
     }
   }
 
+  // ---- Couleurs : pénalité tenue trop monochrome ----
+  const stripAccents = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const mainPieceColors = items
+    .filter(it => !['Accessoires', 'Bijoux', 'Chaussures', 'Sacs'].includes(it.category || ''))
+    .map(it => {
+      const colors = colorTokens(it);
+      return colors.length > 0 ? stripAccents(colors[0]) : '';
+    })
+    .filter(Boolean);
+
+  const colorCounts: Record<string, number> = {};
+  for (const c of mainPieceColors) {
+    colorCounts[c] = (colorCounts[c] || 0) + 1;
+  }
+  if (Object.values(colorCounts).some(count => count >= 2)) {
+    ({ score, reasons } = add(score, reasons, -2, 'Tenue trop monochrome'));
+  }
+
   // ---- Morphologie ----
   const fit = (it: ClothingItem) => norm(it.fit);
   const tex = (it: ClothingItem) => norm(it.texture);
