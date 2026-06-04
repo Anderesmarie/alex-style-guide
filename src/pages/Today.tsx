@@ -233,6 +233,12 @@ export default function Today() {
 
   const isDevAccount = userEmail === 'anderes.richez@gmail.com';
 
+  const today = new Date().toISOString().split('T')[0];
+  const enough = wardrobe.length >= 8;
+  // 1 session de swipe par jour = 3 tenues (limite freemium)
+  const canSuggest = dailyCount < 1;
+  const weatherTemp = ws.status === 'done' ? ws.data.temperature : null;
+
   const handleResetDay = useCallback(async () => {
     try {
       await saveDailyCounter({ date: today, count: 0 });
@@ -251,16 +257,6 @@ export default function Today() {
       console.error('reset day failed', e);
     }
   }, [today]);
-
-
-
-  
-
-  const today = new Date().toISOString().split('T')[0];
-  const enough = wardrobe.length >= 8;
-  // 1 session de swipe par jour = 3 tenues (limite freemium)
-  const canSuggest = dailyCount < 1;
-  const weatherTemp = ws.status === 'done' ? ws.data.temperature : null;
 
   // Load data
   useEffect(() => {
