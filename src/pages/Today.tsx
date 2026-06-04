@@ -608,13 +608,14 @@ export default function Today() {
         } else {
           recs = baseRecs;
         }
-        writeStoredToday(today, recs);
+        writeStoredToday(today, recs, { aiOutfitIndex: aiIdx });
         insertDailyOutfitsToSupabase(today, recs);
       }
     }
 
-    setAiOutfitIndex(aiIdx);
+    setAiOutfitIndex(aiIdx ?? restoredAiIdx);
     setRecommendations(recs);
+
     if (restoredComplete && restoredResults) {
       setSwipeResults(restoredResults);
       setSwipeComplete(true);
