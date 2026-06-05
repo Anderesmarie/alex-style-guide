@@ -21,9 +21,10 @@ Deno.serve(async (req) => {
     const {
       wardrobe = [],
       weather = {},
-      userStyle = '',
-      socialContext = '',
-      dayType = '',
+      mood = '',
+      socialContext = 'Quotidien',
+      dayType = 'Semaine',
+      currentSeason = '',
     } = body || {};
 
     if (!Array.isArray(wardrobe) || wardrobe.length === 0) {
@@ -35,11 +36,13 @@ Deno.serve(async (req) => {
 
     const tempMin = typeof weather.tempMin === 'number' ? weather.tempMin : 18;
     const tempMax = typeof weather.tempMax === 'number' ? weather.tempMax : 22;
+    const isRaining = !!weather.isRaining;
 
     // Slim wardrobe payload
     const slim = wardrobe.map((w: any) => ({
       id: w.id,
       category: w.category,
+      subcategory: w.subcategory,
       type: w.type,
       color: w.color,
       style: w.style,
@@ -47,12 +50,32 @@ Deno.serve(async (req) => {
       season: w.season,
     }));
 
+    const rainRule = isRaining
+      ? `Il pleut : évite les matières fragiles (soie, daim, lin), favorise des chaussures fermées. `
+      : '';
+    const coldRule = tempMin < 14
+      ? `Il fait froid (< 14°C) : PAS de shorts, ni de mini-jupes. `
+      : '';
+    const jacketRule = tempMin < 18
+      ? `Ajoute 1 veste ou blazer (tempMin < 18°C). `
+      : '';
+
     const prompt =
-      `Tu es un assistant styliste créatif pour l'app MyStyl. Compose UNE tenue cohérente et originale à partir des vêtements disponibles. ` +
-      `Le style préféré de l'utilisatrice est ${userStyle}, mais tu peux t'en écarter si tu trouves une association plus intéressante. ` +
-      `Contexte : ${socialContext}, ${dayType}, température ${tempMin}°C à ${tempMax}°C. ` +
-      `Règles : 1 haut OU 1 robe, si haut alors 1 bas obligatoire, 1 paire de chaussures si disponible, 1 veste/blazer si tempMin < 18°C, 1 accessoire max. ` +
-      `Retourne UNIQUEMENT un JSON : { tenue: [ { id: 'id exact du vêtement', categorie: '...', nom: '...' } ], mood: '3 mots', raisonnement: '2-3 phrases' }`;
+      `Tu es un styliste créatif pour l'app MyStyl. Compose 3 TENUES DISTINCTES (associations visuellement différentes les unes des autres) à partir des vêtements disponibles. ` +
+      `Contexte social : ${socialContext}. Jour : ${dayType}. Saison actuelle : ${currentSeason}. ` +
+      `Température : ${tempMin}°C à ${tempMax}°C. ${rainRule}${coldRule}` +
+      `Mood d'inspiration (pas une contrainte stricte) : ${mood || 'libre'}. ` +
+      `Règles strictes par tenue : ` +
+      `1 haut OU 1 robe ; si haut alors 1 bas obligatoire ; ` +
+      `1 paire de chaussures si disponible ; ` +
+      `${jacketRule}` +
+      `1 accessoire maximum ; ` +
+      `pièces adaptées à la saison ${currentSeason} ; ` +
+      `pièces adaptées au contexte ${socialContext}. ` +
+      `Les 3 tenues doivent être visuellement distinctes entre elles (couleurs, silhouettes, ou associations différentes). ` +
+      `Utilise uniquement des id présents dans la liste fournie. ` +
+      `Retourne UNIQUEMENT un JSON strict de la forme : ` +
+      `{ "tenues": [ { "tenue": [ { "id": "<id exact>", "categorie": "...", "nom": "..." } ], "mood": "3 mots", "raisonnement": "1-2 phrases" }, { ... }, { ... } ] }`;
 
     const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -67,7 +90,7 @@ Deno.serve(async (req) => {
           { role: 'system', content: prompt },
           { role: 'user', content: `Vêtements disponibles (JSON):\n${JSON.stringify(slim)}` },
         ],
-        temperature: 0.8,
+        temperature: 0.9,
       }),
     });
 
