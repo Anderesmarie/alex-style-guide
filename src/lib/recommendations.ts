@@ -539,7 +539,12 @@ function scoreByProfile(
 ): number {
   if (!profile) return 0;
   let score = 0;
-  const styles = profile.styles.map(s => s.toLowerCase());
+  const day = new Date().getDay(); // 0=Dim, 6=Sam
+  const isWeekend = day === 0 || day === 6;
+  const activeStylesRaw = isWeekend
+    ? (profile.styles_weekend ?? [])
+    : (profile.styles_semaine ?? []);
+  const styles = activeStylesRaw.map(s => s.toLowerCase());
 
   // 1. Style profil — 12 styles
   const styleScoreMap: Record<string, { good: string[]; bad: string[] }> = {
@@ -652,7 +657,7 @@ function scoreByProfile(
   }
 
   // 9. Bijou — scoring par type et colorimétrie
-  const outfitStyles = profile.styles ?? [];
+  const outfitStyles = activeStylesRaw;
   const userSeason = (profile as any).colorimetry_season ?? null;
   score += scoreBijou(item, outfitStyles, userSeason);
 
