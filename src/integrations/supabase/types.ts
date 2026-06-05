@@ -232,6 +232,8 @@ export type Database = {
           streak_last_date: string | null
           streak_longest: number | null
           styles: Json | null
+          styles_semaine: Json
+          styles_weekend: Json
           taille: string | null
         }
         Insert: {
@@ -254,6 +256,8 @@ export type Database = {
           streak_last_date?: string | null
           streak_longest?: number | null
           styles?: Json | null
+          styles_semaine?: Json
+          styles_weekend?: Json
           taille?: string | null
         }
         Update: {
@@ -276,6 +280,8 @@ export type Database = {
           streak_last_date?: string | null
           streak_longest?: number | null
           styles?: Json | null
+          styles_semaine?: Json
+          styles_weekend?: Json
           taille?: string | null
         }
         Relationships: []

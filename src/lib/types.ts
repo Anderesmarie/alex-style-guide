@@ -68,6 +68,8 @@ export interface UserProfile {
   morphologie: 'A' | 'H' | 'X' | 'V' | 'O' | '8' | null;
   favorite_colors: string[];
   lifestyle?: 'Lycée' | 'Études sup' | 'Premier job' | 'Je travaille' | 'Autre' | null;
+  styles_semaine?: string[];
+  styles_weekend?: string[];
 }
 
 export interface AvatarConfig {

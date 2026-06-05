@@ -28,6 +28,7 @@ export async function getProfile(): Promise<UserProfile | null> {
   const uid = await getUserId();
   const { data } = await supabase.from('profiles').select('*').eq('id', uid).single();
   if (!data) return null;
+  const d = data as any;
   return {
     silhouette: data.silhouette || '',
     styles: (data.styles as string[]) || [],
@@ -38,6 +39,8 @@ export async function getProfile(): Promise<UserProfile | null> {
     morphologie: data.morphologie || null,
     favorite_colors: (data.favorite_colors as string[]) || [],
     lifestyle: data.lifestyle || null,
+    styles_semaine: (d.styles_semaine as string[]) || [],
+    styles_weekend: (d.styles_weekend as string[]) || [],
   };
 }
 
@@ -54,7 +57,9 @@ export async function saveProfile(profile: UserProfile): Promise<void> {
     morphologie: profile.morphologie,
     favorite_colors: profile.favorite_colors,
     lifestyle: profile.lifestyle ?? null,
-  });
+    styles_semaine: profile.styles_semaine ?? [],
+    styles_weekend: profile.styles_weekend ?? [],
+  } as any);
 }
 
 // ---------- Avatar ----------
