@@ -302,56 +302,51 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
 
         {step === 4 && (
           <>
-            <h1 className="text-2xl font-serif font-bold mb-6">Ton style, c'est plutôt ?</h1>
-            <div className="flex flex-wrap gap-2.5">
-              {STYLE_OPTIONS.map(s => (
-                <button key={s.label} onClick={() => toggleStyle(s.label)}
-                  className="px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-1.5"
-                  style={styles.includes(s.label)
-                    ? { backgroundColor: '#C9956C', color: '#FFFFFF', border: '1.5px solid #C9956C' }
-                    : { backgroundColor: '#FFFFFF', color: '#2C2C2C', border: '1.5px solid #E0D5C8' }
-                  }>
-                  <span>{s.emoji}</span> {s.label}
-                </button>
-              ))}
-            </div>
-            <div className="mt-8">
-              <h2 className="text-lg font-serif font-semibold mb-1">Montre-moi des looks qui t'inspirent ✨</h2>
-              <p className="text-sm text-muted-foreground mb-4">Ajoute 2 à 5 photos depuis ta galerie</p>
-              <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden"
-                onChange={async (e) => {
-                  const files = Array.from(e.target.files || []);
-                  const remaining = 5 - stylePhotos.length;
-                  const toProcess = files.slice(0, remaining);
-                  const compressed = await Promise.all(toProcess.map(f => compressImage(f, 400)));
-                  const updated = [...stylePhotos, ...compressed].slice(0, 5);
-                  setStylePhotos(updated);
-                  localStorage.setItem('mystyl_style_photos', JSON.stringify(updated));
-                  e.target.value = '';
-                }} />
-              {stylePhotos.length < 5 && (
-                <button onClick={() => fileInputRef.current?.click()}
-                  className="w-full h-24 rounded-xl border-2 border-dashed border-primary/40 flex items-center justify-center text-primary/60 hover:border-primary hover:text-primary transition-colors mb-4">
-                  <span className="text-3xl">+</span>
-                </button>
-              )}
-              {stylePhotos.length > 0 && (
-                <div className="grid grid-cols-3 gap-2">
-                  {stylePhotos.map((photo, i) => (
-                    <div key={i} className="relative aspect-square rounded-lg overflow-hidden">
-                      <img src={photo} alt={`Inspo ${i + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-                      <button onClick={() => {
-                        const updated = stylePhotos.filter((_, idx) => idx !== i);
-                        setStylePhotos(updated);
-                        localStorage.setItem('mystyl_style_photos', JSON.stringify(updated));
-                      }} className="absolute top-1 right-1 w-6 h-6 rounded-full bg-foreground/70 text-background text-xs flex items-center justify-center">✕</button>
-                    </div>
-                  ))}
+            <h1 className="text-2xl font-serif font-bold mb-2">Ton style change selon les jours ?</h1>
+            <p className="text-sm text-muted-foreground mb-6">Choisis 1 ou 2 styles pour chaque période</p>
+
+            {(['semaine', 'weekend'] as const).map(period => {
+              const isSemaine = period === 'semaine';
+              const selected = isSemaine ? stylesSemaine : stylesWeekend;
+              return (
+                <div
+                  key={period}
+                  className="rounded-2xl p-4 mb-4"
+                  style={{ backgroundColor: isSemaine ? '#FAF5F0' : '#F3EDE5' }}
+                >
+                  <h2 className="text-base font-serif font-semibold mb-3">
+                    {isSemaine ? '🗓 Semaine' : '🌸 Week-end'}
+                    <span className="text-xs text-muted-foreground font-sans font-normal ml-2">
+                      {isSemaine ? '(Lun–Ven)' : '(Sam–Dim)'} · {selected.length}/2
+                    </span>
+                  </h2>
+                  <div className="flex flex-wrap gap-2">
+                    {STYLE_OPTIONS.map(s => {
+                      const isSelected = selected.includes(s.label);
+                      return (
+                        <button
+                          key={s.label}
+                          onClick={() => togglePeriodStyle(period, s.label)}
+                          className="px-3.5 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-1.5"
+                          style={isSelected
+                            ? { backgroundColor: '#C9956C', color: '#FFFFFF', border: '1.5px solid #C9956C' }
+                            : { backgroundColor: '#FFFFFF', color: '#2C2C2C', border: '1.5px solid #E0D5C8' }
+                          }
+                        >
+                          <span>{s.emoji}</span> {s.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {maxWarn === period && (
+                    <p className="text-xs text-primary mt-2 animate-pulse">2 styles max pour cette période ✨</p>
+                  )}
                 </div>
-              )}
-            </div>
+              );
+            })}
           </>
         )}
+
 
         {step === 5 && (
           <>
