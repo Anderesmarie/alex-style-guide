@@ -415,51 +415,8 @@ export default function Today() {
     }
   };
 
-  const buildEngineInput = useCallback((occasionOverride?: string) => {
-    const tempMin = ws.status === 'done' ? ws.data.tempMin : (weatherTemp ?? 18);
-    const tempMax = ws.status === 'done' ? ws.data.tempMax : (weatherTemp ?? 18);
-    const amplitude = ws.status === 'done' ? (ws.data.amplitude ?? Math.max(0, tempMax - tempMin)) : 0;
-    const day = new Date().getDay(); // 0=Sun, 6=Sat
-    const isWeekday = day >= 1 && day <= 5;
-    const isWeekend = !isWeekday;
 
-    let defaultOccasion: string;
 
-    switch (lifestyle) {
-      case 'Lycée':
-        defaultOccasion = isWeekday ? 'Cours lycée' : 'Sortie';
-        break;
-      case 'Études sup':
-        defaultOccasion = isWeekday ? 'Campus' : 'Soirée étudiante';
-        break;
-      case 'Premier job':
-      case 'Je travaille':
-        defaultOccasion = isWeekday ? 'Travail' : 'Sortie';
-        break;
-      default:
-        defaultOccasion = isWeekday ? 'Quotidien' : 'Sortie';
-    }
-    const occasion = occasionOverride?.trim() || defaultOccasion;
-    return {
-      wardrobe,
-      tempMin,
-      tempMax,
-      amplitude,
-      occasion,
-      moodOverride: dailyMood ?? null,
-      morphologie: userProfile?.morphologie ?? null,
-      taille: userProfile?.taille ?? null,
-      corpulence: userProfile?.corpulence ?? null,
-      colorimetry: userSeason ?? undefined,
-      favStyles: userProfile?.styles ?? [],
-      favoriteColors: userProfile?.favorite_colors,
-      recentOutfitIds,
-      dislikedItemIds,
-      savedOutfitItemIds,
-      recentItemIds,
-      wornItemIds: [],
-    };
-  }, [ws, weatherTemp, wardrobe, userProfile, userSeason, lifestyle, recentOutfitIds, dislikedItemIds, savedOutfitItemIds, recentItemIds, dailyMood]);
 
 
 
