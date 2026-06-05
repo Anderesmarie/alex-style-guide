@@ -71,7 +71,9 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
   const [silhouette, setSilhouette] = useState('');
   const [taille, setTaille] = useState<'petite' | 'moyenne' | 'grande' | ''>('');
   const [corpulence, setCorpulence] = useState<'fine' | 'medium' | 'ronde' | ''>('');
-  const [styles, setStyles] = useState<string[]>([]);
+  const [stylesSemaine, setStylesSemaine] = useState<string[]>([]);
+  const [stylesWeekend, setStylesWeekend] = useState<string[]>([]);
+  const [maxWarn, setMaxWarn] = useState<'semaine' | 'weekend' | null>(null);
   const [budget, setBudget] = useState(80);
   const [brands, setBrands] = useState<string[]>([]);
   const [brandInput, setBrandInput] = useState('');
@@ -106,7 +108,7 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
       'Triangle inversé': 'V', 'Ovale': 'O', '8': '8',
     };
     const morphoCode = SILHOUETTE_TO_MORPHO[silhouette] || null;
-    await saveProfile({ silhouette, styles, budget, brands, taille: taille || null, corpulence: corpulence || null, morphologie: morphoCode, favorite_colors: favoriteColors });
+    await saveProfile({ silhouette, styles: stylesSemaine, budget, brands, taille: taille || null, corpulence: corpulence || null, morphologie: morphoCode, favorite_colors: favoriteColors, styles_semaine: stylesSemaine, styles_weekend: stylesWeekend });
     // Save pseudo, favorite_colors and morphologie to Supabase
     try {
       const { data: userData } = await supabase.auth.getUser();
@@ -130,8 +132,19 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
     }, 1200);
   };
 
-  const toggleStyle = (s: string) => {
-    setStyles(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
+  const togglePeriodStyle = (period: 'semaine' | 'weekend', s: string) => {
+    const current = period === 'semaine' ? stylesSemaine : stylesWeekend;
+    const setter = period === 'semaine' ? setStylesSemaine : setStylesWeekend;
+    if (current.includes(s)) {
+      setter(current.filter(x => x !== s));
+      return;
+    }
+    if (current.length >= 2) {
+      setMaxWarn(period);
+      setTimeout(() => setMaxWarn(null), 1800);
+      return;
+    }
+    setter([...current, s]);
   };
 
   const toggleFavoriteColor = (color: string) => {
@@ -152,7 +165,7 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
     silhouette !== '',       // 1
     taille !== '' && corpulence !== '', // 2
     true,                    // 3 — favorite colors (optional)
-    styles.length > 0,       // 4
+    stylesSemaine.length > 0 && stylesWeekend.length > 0, // 4
     lifestyle !== '',        // 5
     true,                    // 6 — budget
     true,                    // 7 — brands
