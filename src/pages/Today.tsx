@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { WeatherData, fetchWeatherByGeolocation, fetchWeatherByCity, getSavedCity, saveCity } from '@/lib/weather';
+import { WeatherData, fetchWeatherByGeolocation, fetchWeatherByCity, getSavedCity, saveCity, getCurrentSeason } from '@/lib/weather';
 import { getWardrobe, getDailyCounter, saveDailyCounter, getProfile, migrerTagCours } from '@/lib/storage';
-import { buildValidCustomOutfit, generateRecommendations, getRecentOutfitItemIds, getDislikedItemIds, getWornItemIds, getLikedOutfitItemIds, saveRecentOutfit } from '@/lib/recommendations';
+import { getRecentOutfitItemIds, getDislikedItemIds, getWornItemIds, getLikedOutfitItemIds, saveRecentOutfit } from '@/lib/recommendations';
 
-import { generateOutfits } from '@/lib/outfitEngine';
 import { ClothingItem, OutfitLayoutData, UserProfile } from '@/lib/types';
 import { loadBeautyProfile } from '@/lib/stylingTips';
 import OutfitDailyFeed from '@/components/OutfitDailyFeed';
@@ -416,144 +415,77 @@ export default function Today() {
     }
   };
 
-  const buildEngineInput = useCallback((occasionOverride?: string) => {
-    const tempMin = ws.status === 'done' ? ws.data.tempMin : (weatherTemp ?? 18);
-    const tempMax = ws.status === 'done' ? ws.data.tempMax : (weatherTemp ?? 18);
-    const amplitude = ws.status === 'done' ? (ws.data.amplitude ?? Math.max(0, tempMax - tempMin)) : 0;
-    const day = new Date().getDay(); // 0=Sun, 6=Sat
-    const isWeekday = day >= 1 && day <= 5;
-    const isWeekend = !isWeekday;
-
-    let defaultOccasion: string;
-
-    switch (lifestyle) {
-      case 'Lycée':
-        defaultOccasion = isWeekday ? 'Cours lycée' : 'Sortie';
-        break;
-      case 'Études sup':
-        defaultOccasion = isWeekday ? 'Campus' : 'Soirée étudiante';
-        break;
-      case 'Premier job':
-      case 'Je travaille':
-        defaultOccasion = isWeekday ? 'Travail' : 'Sortie';
-        break;
-      default:
-        defaultOccasion = isWeekday ? 'Quotidien' : 'Sortie';
-    }
-    const occasion = occasionOverride?.trim() || defaultOccasion;
-    return {
-      wardrobe,
-      tempMin,
-      tempMax,
-      amplitude,
-      occasion,
-      moodOverride: dailyMood ?? null,
-      morphologie: userProfile?.morphologie ?? null,
-      taille: userProfile?.taille ?? null,
-      corpulence: userProfile?.corpulence ?? null,
-      colorimetry: userSeason ?? undefined,
-      favStyles: userProfile?.styles ?? [],
-      favoriteColors: userProfile?.favorite_colors,
-      recentOutfitIds,
-      dislikedItemIds,
-      savedOutfitItemIds,
-      recentItemIds,
-      wornItemIds: [],
-    };
-  }, [ws, weatherTemp, wardrobe, userProfile, userSeason, lifestyle, recentOutfitIds, dislikedItemIds, savedOutfitItemIds, recentItemIds, dailyMood]);
 
 
 
-  const fetchAiOutfit = useCallback(async (): Promise<ClothingItem[] | null> => {
+
+
+  const generateFreshOutfits = useCallback(async (_occasionOverride?: string): Promise<ClothingItem[][]> => {
     try {
       const day = new Date().getDay();
       const isWeekday = day >= 1 && day <= 5;
       const dayType = isWeekday ? 'Semaine' : 'Weekend';
       let socialContext = 'Quotidien';
       switch (lifestyle) {
-        case 'Lycée': socialContext = isWeekday ? 'Lycée' : 'Sortie'; break;
-        case 'Études sup': socialContext = isWeekday ? 'Campus' : 'Sortie'; break;
+        case 'Lycée': socialContext = isWeekday ? 'Lycée' : 'Quotidien'; break;
+        case 'Études sup': socialContext = isWeekday ? 'Études supérieures' : 'Quotidien'; break;
         case 'Premier job':
-        case 'Je travaille': socialContext = isWeekday ? 'Travail' : 'Sortie'; break;
+        case 'Je travaille': socialContext = isWeekday ? 'Travail' : 'Quotidien'; break;
       }
-      const userStyle = dailyMood || userProfile?.styles?.[0] || 'Casual chic';
-      const tempMin = ws.status === 'done' ? ws.data.tempMin : (weatherTemp ?? 18);
-      const tempMax = ws.status === 'done' ? ws.data.tempMax : (weatherTemp ?? 22);
+      const mood = dailyMood || userProfile?.styles?.[0] || '';
+      const tempMin = ws.status === 'done' ? (ws.data.tempMin ?? weatherTemp ?? 18) : (weatherTemp ?? 18);
+      const tempMax = ws.status === 'done' ? (ws.data.tempMax ?? weatherTemp ?? 22) : (weatherTemp ?? 22);
+      const isRaining = ws.status === 'done' ? !!ws.data.isRainy : false;
+      const currentSeason = getCurrentSeason();
 
       const { data, error } = await supabase.functions.invoke('generate-ai-outfit', {
         body: {
           wardrobe: wardrobe.map(w => ({
-            id: w.id, category: w.category, type: w.type, color: w.color,
-            style: w.style, occasion: w.occasion, season: w.season,
+            id: w.id,
+            category: w.category,
+            subcategory: w.subcategory,
+            type: w.type,
+            color: w.color,
+            style: w.style,
+            occasion: w.occasion,
+            season: w.season,
           })),
-          weather: { tempMin, tempMax },
-          userStyle,
+          weather: { tempMin, tempMax, isRaining },
+          mood,
           socialContext,
           dayType,
+          currentSeason,
         },
       });
-      if (error || !data) return null;
-      const ids: string[] = Array.isArray(data?.tenue)
-        ? data.tenue.map((t: any) => t?.id).filter((id: any) => typeof id === 'string')
-        : [];
-      const items = ids
-        .map(id => wardrobe.find(w => w.id === id))
-        .filter((it): it is ClothingItem => !!it);
-      return items.length > 0 ? items : null;
+
+      if (error || !data) {
+        console.error('AI outfit error', error);
+        return [];
+      }
+
+      const tenues: any[] = Array.isArray(data?.tenues) ? data.tenues : [];
+      const outfits: ClothingItem[][] = tenues
+        .map(t => {
+          const ids: string[] = Array.isArray(t?.tenue)
+            ? t.tenue.map((p: any) => p?.id).filter((id: any) => typeof id === 'string')
+            : [];
+          return ids
+            .map(id => wardrobe.find(w => w.id === id))
+            .filter((it): it is ClothingItem => !!it);
+        })
+        .filter(o => o.length > 0);
+
+      // Sauvegarder dans l'historique
+      for (const outfit of outfits) {
+        await saveRecentOutfit(outfit.map(i => i.id));
+      }
+
+      return outfits;
     } catch (e) {
-      console.error('AI outfit error', e);
-      return null;
+      console.error('generateFreshOutfits error', e);
+      return [];
     }
   }, [wardrobe, userProfile, lifestyle, ws, weatherTemp, dailyMood]);
-
-  const generateFreshOutfits = useCallback(async (occasionOverride?: string) => {
-    const engineCandidates = generateOutfits(buildEngineInput(occasionOverride));
-    const engineOutfits = engineCandidates.map(candidate => candidate.items).filter(outfit => outfit.length > 0);
-
-    // Sauvegarder les tenues générées dans l'historique
-    for (const outfit of engineOutfits) {
-      await saveRecentOutfit(outfit.map(i => i.id));
-    }
-
-    if (engineOutfits.length > 0) {
-      return engineOutfits;
-    }
-
-    const fallbackOutfits = await generateRecommendations(
-      wardrobe,
-      weatherTemp,
-      3,
-      userProfile,
-      ws.status === 'done' ? ws.data.tempMin : undefined,
-      ws.status === 'done' ? ws.data.tempMax : undefined,
-      ws.status === 'done' ? ws.data.isRainy : false,
-      ws.status === 'done' ? ws.data.isWindy : false
-    );
-
-    const validFallbackOutfits = fallbackOutfits.filter(outfit => outfit.length > 0);
-    if (validFallbackOutfits.length > 0) {
-      return validFallbackOutfits;
-    }
-
-    const emergencyOutfits: ClothingItem[][] = [];
-    const globallyUsedIds = new Set<string>();
-    const occasion = buildEngineInput().occasion;
-    const style = userProfile?.styles?.[0] ?? '';
-
-    for (let i = 0; i < 3; i += 1) {
-      const outfit = buildValidCustomOutfit(wardrobe, null, occasion, style, globallyUsedIds, 8);
-      if (!outfit || outfit.length === 0) continue;
-
-      const key = outfit.map(item => item.id).sort().join(',');
-      const alreadyExists = emergencyOutfits.some(existing => existing.map(item => item.id).sort().join(',') === key);
-      if (alreadyExists) continue;
-
-      emergencyOutfits.push(outfit);
-      outfit.forEach(item => globallyUsedIds.add(item.id));
-    }
-
-    return emergencyOutfits;
-  }, [buildEngineInput, wardrobe, weatherTemp, userProfile, lifestyle]);
 
   const generate = useCallback(async () => {
     if (!enough || swipeComplete || pendingSwipe) return;
@@ -562,7 +494,6 @@ export default function Today() {
     let restoredResults: { outfit: ClothingItem[]; liked: boolean | null; layoutData?: OutfitLayoutData | null; savedOutfitId?: string | null }[] | null = null;
     let restoredComplete = false;
     let shouldBackfillStoredCache = false;
-    let restoredAiIdx: number | null = null;
 
 
     // 1. Try localStorage cache first (fast path)
@@ -589,8 +520,6 @@ export default function Today() {
 
       if (recs.length === 0) {
         shouldBackfillStoredCache = false;
-      } else if (typeof stored.aiOutfitIndex === 'number') {
-        restoredAiIdx = stored.aiOutfitIndex;
       }
     }
 
@@ -609,7 +538,6 @@ export default function Today() {
             .filter((it): it is ClothingItem => !!it))
           .filter(o => o.length > 0);
 
-        // If any swipe has been recorded, hydrate swipe phase
         const anySwiped = remote.some(r => r.swipe_result === 'like' || r.swipe_result === 'dislike');
         if (anySwiped && recs.length > 0) {
           restoredResults = remote.map(r => ({
@@ -637,27 +565,17 @@ export default function Today() {
       }
     }
 
-    // 3. Still nothing → generate fresh if quota allows
-    let aiIdx: number | null = null;
+    // 3. Still nothing → generate fresh via GPT if quota allows
     if (recs.length === 0) {
       if (!canSuggest) return;
       recs = await generateFreshOutfits();
       if (recs.length > 0) {
-        // Keep up to 2 engine outfits, then append an AI-generated one as 3rd
-        const baseRecs = recs.slice(0, 2);
-        const aiItems = await fetchAiOutfit();
-        if (aiItems && aiItems.length > 0) {
-          recs = [...baseRecs, aiItems];
-          aiIdx = recs.length - 1;
-        } else {
-          recs = baseRecs;
-        }
-        writeStoredToday(today, recs, { aiOutfitIndex: aiIdx });
+        writeStoredToday(today, recs, { aiOutfitIndex: null });
         insertDailyOutfitsToSupabase(today, recs);
       }
     }
 
-    setAiOutfitIndex(aiIdx ?? restoredAiIdx);
+    setAiOutfitIndex(null);
     setRecommendations(recs);
 
     if (restoredComplete && restoredResults) {
@@ -668,7 +586,7 @@ export default function Today() {
       setPendingSwipe(recs);
     }
 
-  }, [enough, swipeComplete, pendingSwipe, canSuggest, wardrobe, today, generateFreshOutfits, fetchAiOutfit]);
+  }, [enough, swipeComplete, pendingSwipe, canSuggest, wardrobe, today, generateFreshOutfits]);
 
 
 
