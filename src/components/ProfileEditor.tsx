@@ -56,6 +56,9 @@ export default function ProfileEditor({ onComplete }: Props) {
   const [corpulence, setCorpulence] = useState<'fine' | 'medium' | 'ronde' | ''>('');
   const [favoriteColors, setFavoriteColors] = useState<string[]>([]);
   const [styles, setStyles] = useState<string[]>([]);
+  const [stylesSemaine, setStylesSemaine] = useState<string[]>([]);
+  const [stylesWeekend, setStylesWeekend] = useState<string[]>([]);
+  const [maxWarn, setMaxWarn] = useState<'semaine' | 'weekend' | null>(null);
   const [budget, setBudget] = useState(80);
   const [brands, setBrands] = useState<string[]>([]);
   const [brandInput, setBrandInput] = useState('');
@@ -77,6 +80,8 @@ export default function ProfileEditor({ onComplete }: Props) {
           setCorpulence(profile.corpulence || '');
           setFavoriteColors(profile.favorite_colors || []);
           setStyles(profile.styles || []);
+          setStylesSemaine(profile.styles_semaine || []);
+          setStylesWeekend(profile.styles_weekend || []);
           setBudget(profile.budget || 80);
           setBrands(profile.brands || []);
           setLifestyle(profile.lifestyle || '');
@@ -109,6 +114,8 @@ export default function ProfileEditor({ onComplete }: Props) {
     corpulence: corpulence || null,
     morphologie: silhouette ? (SILHOUETTE_TO_MORPHO[silhouette] || null) : null,
     favorite_colors: favoriteColors,
+    styles_semaine: stylesSemaine,
+    styles_weekend: stylesWeekend,
   });
 
   const saveSection = async (label: string, extra?: () => Promise<void>) => {
@@ -287,21 +294,58 @@ export default function ProfileEditor({ onComplete }: Props) {
           <SaveCancelRow onSave={() => saveSection('Couleurs')} />
         </SectionCard>
 
-        {/* Styles */}
-        <SectionCard id="styles" icon="✨" title="Style dominant"
-          summary={styles.length ? styles.join(', ') : 'Non défini'}>
-          <div className="flex flex-wrap gap-2">
-            {STYLE_OPTIONS.map(s => (
-              <button key={s.label} onClick={() => toggleArr(s.label, styles, setStyles)}
-                className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
-                style={styles.includes(s.label)
-                  ? { backgroundColor: '#C9956C', color: '#FFFFFF', border: '1.5px solid #C9956C' }
-                  : { backgroundColor: '#FFFFFF', color: '#2C2C2C', border: '1.5px solid #E0D5C8' }}>
-                {s.label}
-              </button>
-            ))}
-          </div>
-          <SaveCancelRow onSave={() => saveSection('Style')} />
+        {/* Styles par période */}
+        <SectionCard id="styles" icon="✨" title="Tes styles par période"
+          summary={
+            stylesSemaine.length || stylesWeekend.length
+              ? `Semaine : ${stylesSemaine.join(', ') || '—'} · Week-end : ${stylesWeekend.join(', ') || '—'}`
+              : 'Non défini'
+          }>
+          {(['semaine', 'weekend'] as const).map(period => {
+            const list = period === 'semaine' ? stylesSemaine : stylesWeekend;
+            const setList = period === 'semaine' ? setStylesSemaine : setStylesWeekend;
+            const toggle = (label: string) => {
+              if (list.includes(label)) {
+                setList(list.filter(l => l !== label));
+              } else if (list.length >= 2) {
+                setMaxWarn(period);
+                setTimeout(() => setMaxWarn(w => (w === period ? null : w)), 2000);
+              } else {
+                setList([...list, label]);
+              }
+            };
+            return (
+              <div key={period} className="mb-4">
+                <div className="text-sm font-medium mb-2" style={{ color: '#2C2C2C' }}>
+                  {period === 'semaine' ? 'En semaine' : 'Le week-end'}
+                  <span className="text-xs ml-2" style={{ color: '#9A9A9A' }}>(1 à 2)</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {STYLE_OPTIONS.map(s => (
+                    <button key={s.label} onClick={() => toggle(s.label)}
+                      className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                      style={list.includes(s.label)
+                        ? { backgroundColor: '#C9956C', color: '#FFFFFF', border: '1.5px solid #C9956C' }
+                        : { backgroundColor: '#FFFFFF', color: '#2C2C2C', border: '1.5px solid #E0D5C8' }}>
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+                {maxWarn === period && (
+                  <div className="text-xs mt-2" style={{ color: '#C9956C' }}>2 styles max par période ✨</div>
+                )}
+              </div>
+            );
+          })}
+          <SaveCancelRow
+            onSave={() => {
+              if (stylesSemaine.length < 1 || stylesWeekend.length < 1) {
+                toast.error('Choisis au moins 1 style par période');
+                return;
+              }
+              saveSection('Styles');
+            }}
+          />
         </SectionCard>
 
         {/* Lifestyle */}
