@@ -1,0 +1,2 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS styles_semaine jsonb NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS styles_weekend jsonb NOT NULL DEFAULT '[]'::jsonb;
