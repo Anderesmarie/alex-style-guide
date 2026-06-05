@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { WeatherData, fetchWeatherByGeolocation, fetchWeatherByCity, getSavedCity, saveCity } from '@/lib/weather';
+import { WeatherData, fetchWeatherByGeolocation, fetchWeatherByCity, getSavedCity, saveCity, getCurrentSeason } from '@/lib/weather';
 import { getWardrobe, getDailyCounter, saveDailyCounter, getProfile, migrerTagCours } from '@/lib/storage';
-import { buildValidCustomOutfit, generateRecommendations, getRecentOutfitItemIds, getDislikedItemIds, getWornItemIds, getLikedOutfitItemIds, saveRecentOutfit } from '@/lib/recommendations';
+import { getRecentOutfitItemIds, getDislikedItemIds, getWornItemIds, getLikedOutfitItemIds, saveRecentOutfit } from '@/lib/recommendations';
 
-import { generateOutfits } from '@/lib/outfitEngine';
 import { ClothingItem, OutfitLayoutData, UserProfile } from '@/lib/types';
 import { loadBeautyProfile } from '@/lib/stylingTips';
 import OutfitDailyFeed from '@/components/OutfitDailyFeed';
