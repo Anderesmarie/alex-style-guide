@@ -317,6 +317,17 @@ const DELETE_REASONS = [
   { emoji: '🗑️', label: 'Autre' },
 ];
 
+function tempLabel(t: string): string {
+  const map: Record<string, string> = {
+    'Très froid': '❄️ Très froid (< 0°C)',
+    'Froid': '🧣 Froid (0 – 10°C)',
+    'Frais': '🍃 Frais (10 – 18°C)',
+    'Doux': '🌤️ Doux (18 – 25°C)',
+    'Chaud': '☀️ Chaud (25°C +)',
+  };
+  return map[t] || t;
+}
+
 export default function Dressing() {
   const [tab, setTab] = useState<Tab>('dressing');
   const [view, setView] = useState<View>('grid');
@@ -1181,7 +1192,7 @@ export default function Dressing() {
             {TEMPERATURES.map(t => (
               <button key={t} type="button" onClick={() => toggle(temperatures, t, setTemperatures)}
                 className={`px-3 py-1.5 rounded-full border text-xs transition-all ${temperatures.includes(t) ? 'border-[#C9956C] bg-[#C9956C]/10 text-[#C9956C]' : 'border-gray-200 bg-white text-gray-600'}`}>
-                {t}
+                {tempLabel(t)}
               </button>
             ))}
           </div>
@@ -1413,7 +1424,7 @@ export default function Dressing() {
             <select value={filterTemperature} onChange={e => setFilterTemperature(e.target.value)}
               className="px-3 py-1.5 rounded-full bg-card card-shadow text-sm outline-none">
               <option value="">Température</option>
-              {TEMPERATURES.map(t => <option key={t}>{t}</option>)}
+              {TEMPERATURES.map(t => <option key={t} value={t}>{tempLabel(t)}</option>)}
             </select>
           </div>
 
