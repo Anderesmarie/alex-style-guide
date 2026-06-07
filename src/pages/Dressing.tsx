@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { ClothingItem, COLORS, SEASONS, OCCASIONS, STYLE_OPTIONS } from '@/lib/types';
+import { ClothingItem, COLORS, TEMPERATURES, OCCASIONS, STYLE_OPTIONS } from '@/lib/types';
 import { getWardrobe, addClothing, updateClothing, deleteClothing, getOutfits, saveOutfits, genId, setClothingImageUrl } from '@/lib/storage';
 import { getThumb, uploadWardrobeImage } from '@/lib/wardrobeImages';
 import { supabase } from '@/lib/supabase';
@@ -328,7 +328,7 @@ export default function Dressing() {
   const [filterSubcategory, setFilterSubcategory] = useState('');
   const [filterType, setFilterType] = useState('');
   const [filterColor, setFilterColor] = useState('');
-  const [filterSeason, setFilterSeason] = useState('');
+  const [filterTemperature, setFilterTemperature] = useState('');
   const [filterOccasion, setFilterOccasion] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
   const [previewBase64, setPreviewBase64] = useState('');
@@ -351,7 +351,7 @@ export default function Dressing() {
   const [texture, setTexture] = useState<string>('');
   const [length, setLength] = useState<string>('');
   const [customColor, setCustomColor] = useState('');
-  const [season, setSeason] = useState<string[]>([]);
+  const [temperatures, setTemperatures] = useState<string[]>([]);
   const [style, setStyle] = useState<string[]>([]);
   const [occasion, setOccasion] = useState<string[]>([]);
   const [brand, setBrand] = useState('');
@@ -437,7 +437,7 @@ export default function Dressing() {
   const resetForm = () => {
     setDisplayImage(null); setImageBase64(''); setBgRemoved(false);
     setCategory(''); setSubcategory(''); setType(''); setColors([]); setPattern('uni'); setTexture(''); setLength(''); setCustomColor('');
-    setSeason([]); setStyle([]); setOccasion([]); setBrand(''); setPrice('');
+    setTemperatures([]); setStyle([]); setOccasion([]); setBrand(''); setPrice('');
     setPreviewBase64(''); setPreviewFile(null); setPreviewOrigSrc(''); setManualRotation(0);
     setLayer(1);
     setShowPhotoTips(true);
@@ -518,7 +518,7 @@ export default function Dressing() {
           const aiColors = String(result.color).split(',').map(s => s.trim()).filter(Boolean).slice(0, 3);
           if (aiColors.length) setColors(aiColors);
         }
-        if (result.season?.length) setSeason(result.season);
+        if (result.season?.length) setTemperatures(result.season);
         if (result.style?.length) setStyle(result.style);
         if (result.occasion?.length) setOccasion(result.occasion);
       }
@@ -613,7 +613,7 @@ export default function Dressing() {
         imageBase64: imageUrl ?? finalImage,
         imageUrl: imageUrl,
         category, subcategory, layer, type, color: finalColor,
-        season: season.length ? season : ['Toutes saisons'],
+        temperatures: temperatures.length ? temperatures : ['Doux'],
         style: style,
         occasion: occasion.length ? occasion : ['Quotidien'],
         brand: brand || undefined,
@@ -668,7 +668,7 @@ export default function Dressing() {
       ...selectedItem, category: category || selectedItem.category,
       subcategory: effSubcategory,
       type: effType, color: finalColor,
-      season: season.length ? season : selectedItem.season,
+      temperatures: temperatures.length ? temperatures : selectedItem.temperatures,
       style: style.length ? style : selectedItem.style,
       occasion: occasion.length ? occasion : selectedItem.occasion,
       brand: brand || selectedItem.brand,
@@ -755,7 +755,7 @@ export default function Dressing() {
     setPattern(item.pattern && PATTERN_PALETTE.some(p => p.value === item.pattern) ? item.pattern : 'uni');
     setTexture(item.texture && TEXTURE_PALETTE.some(t => t.value === item.texture) ? item.texture : '');
     setLength(item.length || '');
-    setSeason([...item.season]);
+    setTemperatures([...item.temperatures]);
     setStyle([...item.style]);
     setOccasion([...item.occasion]);
     setBrand(item.brand || '');
@@ -779,7 +779,7 @@ export default function Dressing() {
     if (allowedTypes && !allowedTypes.includes(i.type)) return false;
     if (filterType && i.type !== filterType) return false;
     if (filterColor && !(i.color || []).includes(filterColor)) return false;
-    if (filterSeason && !i.season.includes(filterSeason)) return false;
+    if (filterTemperature && !i.temperatures.includes(filterTemperature)) return false;
     if (filterOccasion && i.occasion) {
       if (!i.occasion.includes(filterOccasion)) return false;
     }
@@ -1176,23 +1176,12 @@ export default function Dressing() {
 
 
         <div>
-          <label className="block text-sm font-medium mb-3">Saison</label>
+          <label className="block text-sm font-medium mb-3">Température</label>
           <div className="flex flex-wrap gap-2">
-            {SEASONS.map(s => (
-              <button key={s} type="button" onClick={() => {
-                const ALL = 'Toutes saisons';
-                const FOUR = ['Été', 'Automne', 'Hiver', 'Printemps'];
-                if (s === ALL) {
-                  setSeason(season.includes(ALL) ? [] : [ALL]);
-                  return;
-                }
-                let next = season.includes(ALL) ? [] : [...season];
-                next = next.includes(s) ? next.filter(x => x !== s) : [...next, s];
-                if (FOUR.every(f => next.includes(f))) next = [ALL];
-                setSeason(next);
-              }}
-                className={`px-3 py-1.5 rounded-full border text-xs transition-all ${season.includes(s) ? 'border-[#C9956C] bg-[#C9956C]/10 text-[#C9956C]' : 'border-gray-200 bg-white text-gray-600'}`}>
-                {s}
+            {TEMPERATURES.map(t => (
+              <button key={t} type="button" onClick={() => toggle(temperatures, t, setTemperatures)}
+                className={`px-3 py-1.5 rounded-full border text-xs transition-all ${temperatures.includes(t) ? 'border-[#C9956C] bg-[#C9956C]/10 text-[#C9956C]' : 'border-gray-200 bg-white text-gray-600'}`}>
+                {t}
               </button>
             ))}
           </div>
@@ -1302,7 +1291,7 @@ export default function Dressing() {
       <img src={getThumb(selectedItem.imageBase64, 300)} alt="" className="w-full aspect-square object-contain bg-white rounded-xl card-shadow mb-4" loading="lazy" decoding="async" />
       <div className="space-y-3">
         <div><span className="text-sm text-muted-foreground">Couleur :</span> <span className="font-medium">{(selectedItem.color || []).join(', ')}</span></div>
-        <div><span className="text-sm text-muted-foreground">Saison :</span> <span className="font-medium">{selectedItem.season.join(', ')}</span></div>
+        <div><span className="text-sm text-muted-foreground">Température :</span> <span className="font-medium">{selectedItem.temperatures.join(', ')}</span></div>
         <div><span className="text-sm text-muted-foreground">Style :</span> <span className="font-medium">{selectedItem.style.join(', ')}</span></div>
         <div><span className="text-sm text-muted-foreground">Occasion :</span> <span className="font-medium">{selectedItem.occasion.join(', ')}</span></div>
         {selectedItem.brand && <div><span className="text-sm text-muted-foreground">Marque :</span> <span className="font-medium">{selectedItem.brand}</span></div>}
@@ -1414,17 +1403,17 @@ export default function Dressing() {
             </div>
           )}
 
-          {/* Ligne 3 : Couleur & Saison */}
+          {/* Ligne 3 : Couleur & Température */}
           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
             <select value={filterColor} onChange={e => setFilterColor(e.target.value)}
               className="px-3 py-1.5 rounded-full bg-card card-shadow text-sm outline-none">
               <option value="">Couleur</option>
               {COLORS.map(c => <option key={c}>{c}</option>)}
             </select>
-            <select value={filterSeason} onChange={e => setFilterSeason(e.target.value)}
+            <select value={filterTemperature} onChange={e => setFilterTemperature(e.target.value)}
               className="px-3 py-1.5 rounded-full bg-card card-shadow text-sm outline-none">
-              <option value="">Saison</option>
-              {SEASONS.map(s => <option key={s}>{s}</option>)}
+              <option value="">Température</option>
+              {TEMPERATURES.map(t => <option key={t}>{t}</option>)}
             </select>
           </div>
 
