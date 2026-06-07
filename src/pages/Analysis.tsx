@@ -117,7 +117,7 @@ export default function Analysis() {
   });
 
   const seasonStats = SEASONS_LIST.map(s => {
-    const count = wardrobe.filter(i => i.season?.includes(s) || i.season?.includes('Toutes saisons')).length;
+    const count = wardrobe.filter(i => i.temperatures?.includes(s)).length;
     return { name: s, count, isCurrent: s === currentSeason };
   });
 
