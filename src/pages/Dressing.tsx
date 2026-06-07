@@ -328,7 +328,7 @@ export default function Dressing() {
   const [filterSubcategory, setFilterSubcategory] = useState('');
   const [filterType, setFilterType] = useState('');
   const [filterColor, setFilterColor] = useState('');
-  const [filterSeason, setFilterSeason] = useState('');
+  const [filterTemperature, setFilterTemperature] = useState('');
   const [filterOccasion, setFilterOccasion] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
   const [previewBase64, setPreviewBase64] = useState('');
