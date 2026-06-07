@@ -448,7 +448,7 @@ export default function Today() {
             color: w.color,
             style: w.style,
             occasion: w.occasion,
-            season: w.season,
+            temperatures: w.temperatures,
           })),
           weather: { tempMin, tempMax, isRaining },
           mood,
