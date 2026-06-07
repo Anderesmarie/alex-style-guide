@@ -1176,23 +1176,12 @@ export default function Dressing() {
 
 
         <div>
-          <label className="block text-sm font-medium mb-3">Saison</label>
+          <label className="block text-sm font-medium mb-3">Température</label>
           <div className="flex flex-wrap gap-2">
-            {SEASONS.map(s => (
-              <button key={s} type="button" onClick={() => {
-                const ALL = 'Toutes saisons';
-                const FOUR = ['Été', 'Automne', 'Hiver', 'Printemps'];
-                if (s === ALL) {
-                  setSeason(season.includes(ALL) ? [] : [ALL]);
-                  return;
-                }
-                let next = season.includes(ALL) ? [] : [...season];
-                next = next.includes(s) ? next.filter(x => x !== s) : [...next, s];
-                if (FOUR.every(f => next.includes(f))) next = [ALL];
-                setSeason(next);
-              }}
-                className={`px-3 py-1.5 rounded-full border text-xs transition-all ${season.includes(s) ? 'border-[#C9956C] bg-[#C9956C]/10 text-[#C9956C]' : 'border-gray-200 bg-white text-gray-600'}`}>
-                {s}
+            {TEMPERATURES.map(t => (
+              <button key={t} type="button" onClick={() => toggle(temperatures, t, setTemperatures)}
+                className={`px-3 py-1.5 rounded-full border text-xs transition-all ${temperatures.includes(t) ? 'border-[#C9956C] bg-[#C9956C]/10 text-[#C9956C]' : 'border-gray-200 bg-white text-gray-600'}`}>
+                {t}
               </button>
             ))}
           </div>
@@ -1302,7 +1291,7 @@ export default function Dressing() {
       <img src={getThumb(selectedItem.imageBase64, 300)} alt="" className="w-full aspect-square object-contain bg-white rounded-xl card-shadow mb-4" loading="lazy" decoding="async" />
       <div className="space-y-3">
         <div><span className="text-sm text-muted-foreground">Couleur :</span> <span className="font-medium">{(selectedItem.color || []).join(', ')}</span></div>
-        <div><span className="text-sm text-muted-foreground">Saison :</span> <span className="font-medium">{selectedItem.season.join(', ')}</span></div>
+        <div><span className="text-sm text-muted-foreground">Température :</span> <span className="font-medium">{selectedItem.temperatures.join(', ')}</span></div>
         <div><span className="text-sm text-muted-foreground">Style :</span> <span className="font-medium">{selectedItem.style.join(', ')}</span></div>
         <div><span className="text-sm text-muted-foreground">Occasion :</span> <span className="font-medium">{selectedItem.occasion.join(', ')}</span></div>
         {selectedItem.brand && <div><span className="text-sm text-muted-foreground">Marque :</span> <span className="font-medium">{selectedItem.brand}</span></div>}
@@ -1414,17 +1403,17 @@ export default function Dressing() {
             </div>
           )}
 
-          {/* Ligne 3 : Couleur & Saison */}
+          {/* Ligne 3 : Couleur & Température */}
           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
             <select value={filterColor} onChange={e => setFilterColor(e.target.value)}
               className="px-3 py-1.5 rounded-full bg-card card-shadow text-sm outline-none">
               <option value="">Couleur</option>
               {COLORS.map(c => <option key={c}>{c}</option>)}
             </select>
-            <select value={filterSeason} onChange={e => setFilterSeason(e.target.value)}
+            <select value={filterTemperature} onChange={e => setFilterTemperature(e.target.value)}
               className="px-3 py-1.5 rounded-full bg-card card-shadow text-sm outline-none">
-              <option value="">Saison</option>
-              {SEASONS.map(s => <option key={s}>{s}</option>)}
+              <option value="">Température</option>
+              {TEMPERATURES.map(t => <option key={t}>{t}</option>)}
             </select>
           </div>
 
