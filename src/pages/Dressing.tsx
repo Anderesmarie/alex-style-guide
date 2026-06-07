@@ -164,6 +164,46 @@ function PatternSwatch({ value }: { value: string }) {
         }
         return <>{cells}</>;
       }
+      case 'ecossais':
+        return (
+          <>
+            <rect width={size} height={size} fill="#1B4B8A" />
+            <rect x={0} y={11} width={size} height={6} fill="#FFFFFF" opacity={0.5} />
+            <rect x={11} y={0} width={6} height={size} fill="#FFFFFF" opacity={0.5} />
+            <rect x={0} y={13} width={size} height={2} fill="#CC0000" />
+            <rect x={13} y={0} width={2} height={size} fill="#CC0000" />
+          </>
+        );
+      case 'camouflage':
+        return (
+          <>
+            <rect width={size} height={size} fill="#6B7C4B" />
+            <ellipse cx={7} cy={7} rx={5} ry={4} fill="#3D4A2A" />
+            <ellipse cx={20} cy={12} rx={4} ry={5} fill="#3D4A2A" />
+            <ellipse cx={10} cy={22} rx={5} ry={3} fill="#8A9A6A" />
+            <ellipse cx={22} cy={22} rx={4} ry={4} fill="#3D4A2A" />
+          </>
+        );
+      case 'logo':
+        return (
+          <>
+            <rect width={size} height={size} fill="#FFFFFF" />
+            <rect x={4} y={10} width={20} height={3} fill="#000000" />
+            <rect x={4} y={16} width={14} height={3} fill="#000000" />
+          </>
+        );
+      case 'brode':
+        return (
+          <>
+            <rect width={size} height={size} fill="#FFF8F0" />
+            <circle cx={14} cy={14} r={5} fill="none" stroke="#C8956C" strokeWidth={1.5} />
+            <circle cx={14} cy={14} r={2} fill="#C8956C" />
+            <line x1={9} y1={9} x2={6} y2={6} stroke="#C8956C" strokeWidth={1} />
+            <line x1={19} y1={9} x2={22} y2={6} stroke="#C8956C" strokeWidth={1} />
+            <line x1={9} y1={19} x2={6} y2={22} stroke="#C8956C" strokeWidth={1} />
+            <line x1={19} y1={19} x2={22} y2={22} stroke="#C8956C" strokeWidth={1} />
+          </>
+        );
       default:
         return <rect width={size} height={size} fill="#E8E8E8" />;
     }
