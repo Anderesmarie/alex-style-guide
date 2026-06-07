@@ -350,7 +350,6 @@ export default function Dressing() {
   const [pattern, setPattern] = useState<string>('uni');
   const [texture, setTexture] = useState<string>('');
   const [length, setLength] = useState<string>('');
-  const [fit, setFit] = useState<string>('');
   const [customColor, setCustomColor] = useState('');
   const [season, setSeason] = useState<string[]>([]);
   const [style, setStyle] = useState<string[]>([]);
@@ -417,17 +416,14 @@ export default function Dressing() {
     return DEFAULT_LENGTH_OPTIONS;
   };
   const lengthOptions = getLengthOptions(category, subcategory);
-  const lengthDisabled = category === 'Bas' && subcategory === 'Shorts';
 
-  // Réinitialiser length quand la sous-catégorie change
+  // Réinitialiser length quand la sous-catégorie n'est plus Jeans ou Pantalons
   useEffect(() => {
-    if (lengthDisabled) {
-      setLength('Court');
-      return;
+    if (!(subcategory === 'Jeans' || subcategory === 'Pantalons')) {
+      setLength('');
     }
-    if (length && !lengthOptions.includes(length)) setLength('');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category, subcategory]);
+  }, [subcategory]);
 
   // Quand l'IA renvoie une image détourée valide, on l'utilise comme aperçu
   useEffect(() => {
@@ -440,7 +436,7 @@ export default function Dressing() {
 
   const resetForm = () => {
     setDisplayImage(null); setImageBase64(''); setBgRemoved(false);
-    setCategory(''); setSubcategory(''); setType(''); setColors([]); setPattern('uni'); setTexture(''); setLength(''); setFit(''); setCustomColor('');
+    setCategory(''); setSubcategory(''); setType(''); setColors([]); setPattern('uni'); setTexture(''); setLength(''); setCustomColor('');
     setSeason([]); setStyle([]); setOccasion([]); setBrand(''); setPrice('');
     setPreviewBase64(''); setPreviewFile(null); setPreviewOrigSrc(''); setManualRotation(0);
     setLayer(1);
@@ -625,7 +621,6 @@ export default function Dressing() {
         pattern: pattern || 'uni',
         texture: texture || undefined,
         length: length || undefined,
-        fit: fit || undefined,
       };
       await addClothing(item);
       updateStreak();
@@ -683,7 +678,6 @@ export default function Dressing() {
       pattern: pattern || selectedItem.pattern || 'uni',
       texture: texture || selectedItem.texture,
       length: length || selectedItem.length,
-      fit: fit || selectedItem.fit,
     };
     await updateClothing(updated);
     await loadWardrobe();
@@ -761,7 +755,6 @@ export default function Dressing() {
     setPattern(item.pattern && PATTERN_PALETTE.some(p => p.value === item.pattern) ? item.pattern : 'uni');
     setTexture(item.texture && TEXTURE_PALETTE.some(t => t.value === item.texture) ? item.texture : '');
     setLength(item.length || '');
-    setFit(item.fit || '');
     setSeason([...item.season]);
     setStyle([...item.style]);
     setOccasion([...item.occasion]);
@@ -1148,7 +1141,7 @@ export default function Dressing() {
         </>
         )}
 
-        {!['Chaussures', 'Sacs', 'Accessoires', 'Bijoux'].includes(category) && (
+        {(subcategory === 'Jeans' || subcategory === 'Pantalons') && (
         <>
         <hr className="border-t border-gray-200" />
 
@@ -1156,13 +1149,12 @@ export default function Dressing() {
           <label className="block text-sm font-medium mb-3">Longueur</label>
           <div className="flex flex-wrap gap-2">
             {lengthOptions.map(l => {
-              const selected = length === l || (lengthDisabled && l === 'Court');
+              const selected = length === l;
               return (
                 <button
                   key={l}
                   type="button"
-                  disabled={lengthDisabled}
-                  onClick={() => !lengthDisabled && setLength(selected ? '' : l)}
+                  onClick={() => setLength(selected ? '' : l)}
                   aria-pressed={selected}
                   style={{
                     padding: '6px 14px',
@@ -1171,8 +1163,6 @@ export default function Dressing() {
                     backgroundColor: selected ? '#FDF5F0' : '#FFFFFF',
                     border: selected ? '2px solid #C9956C' : '0.5px solid #DDDDDD',
                     color: selected ? '#C9956C' : '#2C2C2C',
-                    opacity: lengthDisabled ? 0.6 : 1,
-                    cursor: lengthDisabled ? 'not-allowed' : 'pointer',
                   }}
                 >
                   {l}
@@ -1184,38 +1174,6 @@ export default function Dressing() {
         </>
         )}
 
-        {!['Chaussures', 'Sacs', 'Accessoires', 'Bijoux', 'Maillots'].includes(category) && (
-        <>
-        <hr className="border-t border-gray-200" />
-
-        <div>
-          <label className="block text-sm font-medium mb-3">Coupe</label>
-          <div className="flex flex-wrap gap-2">
-            {['Ajusté', 'Standard', 'Oversize'].map(f => {
-              const selected = fit === f;
-              return (
-                <button
-                  key={f}
-                  type="button"
-                  onClick={() => setFit(selected ? '' : f)}
-                  aria-pressed={selected}
-                  style={{
-                    padding: '6px 14px',
-                    borderRadius: 20,
-                    fontSize: 13,
-                    backgroundColor: selected ? '#FDF5F0' : '#FFFFFF',
-                    border: selected ? '2px solid #C9956C' : '0.5px solid #DDDDDD',
-                    color: selected ? '#C9956C' : '#2C2C2C',
-                  }}
-                >
-                  {f}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-        </>
-        )}
 
         <div>
           <label className="block text-sm font-medium mb-3">Saison</label>
