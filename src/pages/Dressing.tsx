@@ -518,7 +518,7 @@ export default function Dressing() {
           const aiColors = String(result.color).split(',').map(s => s.trim()).filter(Boolean).slice(0, 3);
           if (aiColors.length) setColors(aiColors);
         }
-        if (result.season?.length) setSeason(result.season);
+        if (result.season?.length) setTemperatures(result.season);
         if (result.style?.length) setStyle(result.style);
         if (result.occasion?.length) setOccasion(result.occasion);
       }
@@ -613,7 +613,7 @@ export default function Dressing() {
         imageBase64: imageUrl ?? finalImage,
         imageUrl: imageUrl,
         category, subcategory, layer, type, color: finalColor,
-        season: season.length ? season : ['Toutes saisons'],
+        temperatures: temperatures.length ? temperatures : ['Doux'],
         style: style,
         occasion: occasion.length ? occasion : ['Quotidien'],
         brand: brand || undefined,
@@ -668,7 +668,7 @@ export default function Dressing() {
       ...selectedItem, category: category || selectedItem.category,
       subcategory: effSubcategory,
       type: effType, color: finalColor,
-      season: season.length ? season : selectedItem.season,
+      temperatures: temperatures.length ? temperatures : selectedItem.temperatures,
       style: style.length ? style : selectedItem.style,
       occasion: occasion.length ? occasion : selectedItem.occasion,
       brand: brand || selectedItem.brand,
@@ -755,7 +755,7 @@ export default function Dressing() {
     setPattern(item.pattern && PATTERN_PALETTE.some(p => p.value === item.pattern) ? item.pattern : 'uni');
     setTexture(item.texture && TEXTURE_PALETTE.some(t => t.value === item.texture) ? item.texture : '');
     setLength(item.length || '');
-    setSeason([...item.season]);
+    setTemperatures([...item.temperatures]);
     setStyle([...item.style]);
     setOccasion([...item.occasion]);
     setBrand(item.brand || '');
@@ -779,7 +779,7 @@ export default function Dressing() {
     if (allowedTypes && !allowedTypes.includes(i.type)) return false;
     if (filterType && i.type !== filterType) return false;
     if (filterColor && !(i.color || []).includes(filterColor)) return false;
-    if (filterSeason && !i.season.includes(filterSeason)) return false;
+    if (filterTemperature && !i.temperatures.includes(filterTemperature)) return false;
     if (filterOccasion && i.occasion) {
       if (!i.occasion.includes(filterOccasion)) return false;
     }
