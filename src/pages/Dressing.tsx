@@ -437,7 +437,7 @@ export default function Dressing() {
   const resetForm = () => {
     setDisplayImage(null); setImageBase64(''); setBgRemoved(false);
     setCategory(''); setSubcategory(''); setType(''); setColors([]); setPattern('uni'); setTexture(''); setLength(''); setCustomColor('');
-    setSeason([]); setStyle([]); setOccasion([]); setBrand(''); setPrice('');
+    setTemperatures([]); setStyle([]); setOccasion([]); setBrand(''); setPrice('');
     setPreviewBase64(''); setPreviewFile(null); setPreviewOrigSrc(''); setManualRotation(0);
     setLayer(1);
     setShowPhotoTips(true);
