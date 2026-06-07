@@ -1131,13 +1131,13 @@ function getWeatherScore(
   }
 
   // Season bonus
-  if (tAvg !== null && item.season && item.season.length > 0) {
+  if (tAvg !== null && item.temperatures && item.temperatures.length > 0) {
     const month = new Date().getMonth();
     let active = 'Hiver';
     if (tAvg >= 25) active = 'Été';
     else if (tAvg >= 15 && month >= 8) active = 'Automne';
     else if (tAvg >= 15 && month < 8) active = 'Printemps';
-    if (item.season.includes(active)) score += 1;
+    if (item.temperatures.includes(active)) score += 1;
   }
 
   // Accessoires météo
@@ -1171,7 +1171,7 @@ function getWeatherScore(
   }
 
   if (isLunettes) {
-    const isClearSky = [0, 1].includes(item.season?.length ?? -1);
+    const isClearSky = [0, 1].includes(item.temperatures?.length ?? -1);
     if (tAvg !== null && tAvg > 18) score += 1;
     if (isRainy) score -= 2;
     const itemStyles = (item.style || []).map(s => s.toLowerCase());
@@ -1214,7 +1214,7 @@ export async function generateRecommendations(
 
   const compatibleSeasons = getCompatibleSeasons(temperature);
   const seasonPool = wardrobe.filter(
-    i => i.season.length === 0 || i.season.some(s => compatibleSeasons.includes(s))
+    i => i.temperatures.length === 0 || i.temperatures.some(s => compatibleSeasons.includes(s))
   );
   const effectivePool = seasonPool.length >= 4 ? seasonPool : wardrobe;
 
@@ -1299,7 +1299,7 @@ export function buildCustomOutfit(
 ): ClothingItem[] {
   const compatibleSeasons = getCompatibleSeasons(temperature);
   const isSeasonOk = (i: ClothingItem) =>
-    !i.season || i.season.length === 0 || i.season.some(s => compatibleSeasons.includes(s));
+    !i.temperatures || i.temperatures.length === 0 || i.temperatures.some(s => compatibleSeasons.includes(s));
 
   // Keep the central piece even if its season is off; filter the rest.
   let available = wardrobe.filter(i => i.id !== centralPiece.id && !excludeIds.has(i.id));
