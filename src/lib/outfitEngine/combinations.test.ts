@@ -12,7 +12,7 @@ function item(category: string, type: string, subcategory = ''): ClothingItem {
     layer: 0,
     type,
     color: ['noir'],
-    season: ['Toutes saisons'],
+    temperatures: ['Doux'],
     style: [],
     occasion: [],
   };

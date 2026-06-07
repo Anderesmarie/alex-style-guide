@@ -165,10 +165,10 @@ export function applyFilters(
   if (tempMax >= 25) {
     const offSeason = items.find(
       it =>
-        Array.isArray(it.season) &&
-        it.season.length > 0 &&
-        !it.season.includes('Été') &&
-        !it.season.includes('Toutes saisons')
+        Array.isArray(it.temperatures) &&
+        it.temperatures.length > 0 &&
+        !it.temperatures.includes('Été') &&
+        !it.temperatures.includes('Toutes saisons')
     );
     if (offSeason) {
       return block(candidate, `🚫 ${offSeason.type} hors saison (chaud)`);
@@ -177,10 +177,10 @@ export function applyFilters(
   if (tempMax < 5) {
     const offSeason = items.find(
       it =>
-        Array.isArray(it.season) &&
-        it.season.length > 0 &&
-        !it.season.includes('Hiver') &&
-        !it.season.includes('Toutes saisons')
+        Array.isArray(it.temperatures) &&
+        it.temperatures.length > 0 &&
+        !it.temperatures.includes('Hiver') &&
+        !it.temperatures.includes('Toutes saisons')
     );
     if (offSeason) {
       return block(candidate, `🚫 ${offSeason.type} hors saison (froid)`);
