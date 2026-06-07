@@ -351,7 +351,7 @@ export default function Dressing() {
   const [texture, setTexture] = useState<string>('');
   const [length, setLength] = useState<string>('');
   const [customColor, setCustomColor] = useState('');
-  const [season, setSeason] = useState<string[]>([]);
+  const [temperatures, setTemperatures] = useState<string[]>([]);
   const [style, setStyle] = useState<string[]>([]);
   const [occasion, setOccasion] = useState<string[]>([]);
   const [brand, setBrand] = useState('');
