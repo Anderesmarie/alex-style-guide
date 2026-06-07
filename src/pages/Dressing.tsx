@@ -439,7 +439,7 @@ export default function Dressing() {
 
   const resetForm = () => {
     setDisplayImage(null); setImageBase64(''); setBgRemoved(false);
-    setCategory(''); setSubcategory(''); setType(''); setColors([]); setPattern('uni'); setTexture(''); setLength(''); setFit(''); setCustomColor('');
+    setCategory(''); setSubcategory(''); setType(''); setColors([]); setPattern('uni'); setTexture(''); setLength(''); setCustomColor('');
     setSeason([]); setStyle([]); setOccasion([]); setBrand(''); setPrice('');
     setPreviewBase64(''); setPreviewFile(null); setPreviewOrigSrc(''); setManualRotation(0);
     setLayer(1);
@@ -624,7 +624,6 @@ export default function Dressing() {
         pattern: pattern || 'uni',
         texture: texture || undefined,
         length: length || undefined,
-        fit: fit || undefined,
       };
       await addClothing(item);
       updateStreak();
@@ -682,7 +681,6 @@ export default function Dressing() {
       pattern: pattern || selectedItem.pattern || 'uni',
       texture: texture || selectedItem.texture,
       length: length || selectedItem.length,
-      fit: fit || selectedItem.fit,
     };
     await updateClothing(updated);
     await loadWardrobe();
@@ -760,7 +758,6 @@ export default function Dressing() {
     setPattern(item.pattern && PATTERN_PALETTE.some(p => p.value === item.pattern) ? item.pattern : 'uni');
     setTexture(item.texture && TEXTURE_PALETTE.some(t => t.value === item.texture) ? item.texture : '');
     setLength(item.length || '');
-    setFit(item.fit || '');
     setSeason([...item.season]);
     setStyle([...item.style]);
     setOccasion([...item.occasion]);
