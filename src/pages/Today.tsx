@@ -229,6 +229,7 @@ export default function Today() {
   const [aiOutfitIndex, setAiOutfitIndex] = useState<number | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [dailyMood, setDailyMood] = useState<string | null | undefined>(undefined);
+  const [showHelp, setShowHelp] = useState(false);
 
 
 
