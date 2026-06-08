@@ -82,7 +82,7 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
   const [makeup, setMakeup] = useState('');
   const [favoriteColors, setFavoriteColors] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const totalSteps = 10;
+  const totalSteps = 14;
 
   if (editMode) {
     return <ProfileEditor onComplete={onComplete} />;
@@ -128,7 +128,11 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
     setShowMessage(true);
     setTimeout(() => {
       setShowMessage(false);
-      onComplete();
+      if (editMode) {
+        onComplete();
+      } else {
+        setStep(10);
+      }
     }, 1200);
   };
 
@@ -171,6 +175,10 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
     true,                    // 7 — brands
     makeup !== '',           // 8
     false,                   // 9 — avatar
+    true,                    // 10 — customize thumbnail
+    true,                    // 11 — save outfit
+    true,                    // 12 — wear outfit
+    true,                    // 13 — share outfit
   ][step];
 
   return (
@@ -425,14 +433,125 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
         {step === 9 && (
           <AvatarCreator onSave={handleAvatarSave} />
         )}
+
+        {step === 10 && (
+          <>
+            <div className="text-center mb-2">
+              <span className="text-5xl">🖼️</span>
+            </div>
+            <h1 className="text-2xl font-serif font-bold mb-3 text-center">Personnalise la vignette</h1>
+            <p className="text-sm text-muted-foreground mb-8 text-center leading-relaxed">
+              Déplace les vêtements et ajuste leur taille pour composer le visuel parfait. C'est aussi ici que tu peux modifier la tenue avant de la porter.
+            </p>
+            <div className="rounded-2xl p-5 card-shadow" style={{ backgroundColor: '#FAF5F0' }}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg" style={{ backgroundColor: '#C9956C20' }}>✋</div>
+                <p className="text-sm font-medium">Glisse-dépose les pièces</p>
+              </div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg" style={{ backgroundColor: '#C9956C20' }}>↔️</div>
+                <p className="text-sm font-medium">Ajuste leur taille</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg" style={{ backgroundColor: '#C9956C20' }}>🔄</div>
+                <p className="text-sm font-medium">Remplace une pièce si tu veux</p>
+              </div>
+            </div>
+          </>
+        )}
+
+        {step === 11 && (
+          <>
+            <div className="text-center mb-2">
+              <span className="text-5xl">💾</span>
+            </div>
+            <h1 className="text-2xl font-serif font-bold mb-3 text-center">Enregistre ta tenue</h1>
+            <p className="text-sm text-muted-foreground mb-8 text-center leading-relaxed">
+              Enregistre la tenue pour la retrouver dans l'onglet Tenues. Chaque tenue sauvegardée aide MyStyl à mieux te connaître — tes goûts, ton style, ce qui te correspond vraiment.
+            </p>
+            <div className="rounded-2xl p-5 card-shadow" style={{ backgroundColor: '#FAF5F0' }}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg" style={{ backgroundColor: '#C9956C20' }}>📁</div>
+                <p className="text-sm font-medium">Retrouve toutes tes tenues dans l'onglet Tenues</p>
+              </div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg" style={{ backgroundColor: '#C9956C20' }}>🧠</div>
+                <p className="text-sm font-medium">MyStyl apprend de tes préférences</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg" style={{ backgroundColor: '#C9956C20' }}>✨</div>
+                <p className="text-sm font-medium">Les suggestions s'améliorent à chaque tenue</p>
+              </div>
+            </div>
+          </>
+        )}
+
+        {step === 12 && (
+          <>
+            <div className="text-center mb-2">
+              <span className="text-5xl">🙋</span>
+            </div>
+            <h1 className="text-2xl font-serif font-bold mb-3 text-center">Je la porte !</h1>
+            <p className="text-sm text-muted-foreground mb-8 text-center leading-relaxed">
+              Pour indiquer que tu portes une tenue aujourd'hui, ouvre-la dans Tenues, modifie-la si besoin, puis clique 'Je la porte !'. MyStyl s'en souvient et affine ses suggestions.
+            </p>
+            <div className="rounded-2xl p-5 card-shadow" style={{ backgroundColor: '#FAF5F0' }}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg" style={{ backgroundColor: '#C9956C20' }}>👗</div>
+                <p className="text-sm font-medium">Ouvre une tenue enregistrée</p>
+              </div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg" style={{ backgroundColor: '#C9956C20' }}>👆</div>
+                <p className="text-sm font-medium">Appuie sur 'Je la porte !'</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg" style={{ backgroundColor: '#C9956C20' }}>📈</div>
+                <p className="text-sm font-medium">Ton style évolue avec toi</p>
+              </div>
+            </div>
+          </>
+        )}
+
+        {step === 13 && (
+          <>
+            <div className="text-center mb-2">
+              <span className="text-5xl">🔗</span>
+            </div>
+            <h1 className="text-2xl font-serif font-bold mb-3 text-center">Partage ton look</h1>
+            <p className="text-sm text-muted-foreground mb-8 text-center leading-relaxed">
+              Depuis l'onglet Tenues, partage n'importe quelle tenue enregistrée avec tes amies. Montre ton style, inspire et sois inspirée !
+            </p>
+            <div className="rounded-2xl p-5 card-shadow" style={{ backgroundColor: '#FAF5F0' }}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg" style={{ backgroundColor: '#C9956C20' }}>📤</div>
+                <p className="text-sm font-medium">Partage en un clic depuis Tenues</p>
+              </div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg" style={{ backgroundColor: '#C9956C20' }}>💬</div>
+                <p className="text-sm font-medium">Montre ton style à tes amies</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg" style={{ backgroundColor: '#C9956C20' }}>💡</div>
+                <p className="text-sm font-medium">Inspire et sois inspirée</p>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
-      {step < 9 && (
+      {step < 13 && (
         <button onClick={nextStep} disabled={!canProceed}
           className={`w-full py-4 rounded-xl text-lg font-semibold transition-all duration-200 mt-6 ${
             canProceed ? 'bg-primary text-primary-foreground shadow-lg active:scale-[0.98]' : 'bg-muted text-muted-foreground'
           }`}>
           Continuer
+        </button>
+      )}
+
+      {step === 13 && (
+        <button onClick={onComplete}
+          className="w-full py-4 rounded-xl text-lg font-semibold transition-all duration-200 mt-6 bg-primary text-primary-foreground shadow-lg active:scale-[0.98]">
+          C'est parti ! 🚀
         </button>
       )}
     </div>
