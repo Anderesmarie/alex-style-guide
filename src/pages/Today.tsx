@@ -229,6 +229,7 @@ export default function Today() {
   const [aiOutfitIndex, setAiOutfitIndex] = useState<number | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [dailyMood, setDailyMood] = useState<string | null | undefined>(undefined);
+  const [showHelp, setShowHelp] = useState(false);
 
 
 
@@ -959,6 +960,100 @@ export default function Today() {
             className="mt-3 py-2 px-6 rounded-lg bg-primary text-primary-foreground font-medium text-sm">
             Générer des suggestions
           </button>
+        </div>
+      )}
+
+      {/* Floating help button */}
+      <button
+        onClick={() => setShowHelp(true)}
+        className="fixed top-4 right-4 z-50 w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md active:scale-90 transition-transform"
+        style={{ backgroundColor: '#C9956C' }}
+        aria-label="Aide"
+      >
+        ?
+      </button>
+
+      {/* Help modal */}
+      {showHelp && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+          style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+          onClick={() => setShowHelp(false)}
+        >
+          <div
+            className="bg-background rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[85vh] overflow-y-auto p-6 shadow-xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <h2 className="text-xl font-serif font-bold text-center mb-1">Comment utiliser MyStyl ? 👗</h2>
+            <p className="text-sm text-muted-foreground text-center mb-6">Les bases pour bien démarrer</p>
+
+            {/* Step 1 */}
+            <div className="text-center mb-2">
+              <span className="text-4xl">👗</span>
+            </div>
+            <h3 className="text-base font-bold text-center mb-2">Ajoute tes vêtements</h3>
+            <p className="text-sm text-muted-foreground text-center leading-relaxed mb-4">
+              Va dans l'onglet Dressing et prends en photo chaque pièce. Plus tu en ajoutes, plus tes suggestions seront personnalisées !
+            </p>
+            <div className="border-b border-border mb-4" />
+
+            {/* Step 2 */}
+            <div className="text-center mb-2">
+              <span className="text-4xl">✨</span>
+            </div>
+            <h3 className="text-base font-bold text-center mb-2">Ta tenue du jour</h3>
+            <p className="text-sm text-muted-foreground text-center leading-relaxed mb-4">
+              Chaque matin, MyStyl te propose des tenues adaptées à la météo et à ton style. Swipe pour voir les suggestions du jour.
+            </p>
+            <div className="border-b border-border mb-4" />
+
+            {/* Step 3 */}
+            <div className="text-center mb-2">
+              <span className="text-4xl">🖼️</span>
+            </div>
+            <h3 className="text-base font-bold text-center mb-2">Personnalise la vignette</h3>
+            <p className="text-sm text-muted-foreground text-center leading-relaxed mb-4">
+              Déplace les vêtements et ajuste leur taille pour composer le visuel parfait. C'est aussi ici que tu peux modifier la tenue avant de la porter.
+            </p>
+            <div className="border-b border-border mb-4" />
+
+            {/* Step 4 */}
+            <div className="text-center mb-2">
+              <span className="text-4xl">💾</span>
+            </div>
+            <h3 className="text-base font-bold text-center mb-2">Enregistre ta tenue</h3>
+            <p className="text-sm text-muted-foreground text-center leading-relaxed mb-4">
+              Enregistre la tenue pour la retrouver dans l'onglet Tenues. Chaque tenue sauvegardée aide MyStyl à mieux te connaître.
+            </p>
+            <div className="border-b border-border mb-4" />
+
+            {/* Step 5 */}
+            <div className="text-center mb-2">
+              <span className="text-4xl">🙋</span>
+            </div>
+            <h3 className="text-base font-bold text-center mb-2">Je la porte !</h3>
+            <p className="text-sm text-muted-foreground text-center leading-relaxed mb-4">
+              Pour indiquer que tu portes une tenue, ouvre-la dans Tenues, modifie-la si besoin, puis clique 'Je la porte !'. MyStyl s'en souvient et affine ses prochaines suggestions.
+            </p>
+            <div className="border-b border-border mb-4" />
+
+            {/* Step 6 */}
+            <div className="text-center mb-2">
+              <span className="text-4xl">🔗</span>
+            </div>
+            <h3 className="text-base font-bold text-center mb-2">Partage ton look</h3>
+            <p className="text-sm text-muted-foreground text-center leading-relaxed mb-6">
+              Depuis l'onglet Tenues, partage n'importe quelle tenue enregistrée avec tes amies !
+            </p>
+
+            <button
+              onClick={() => setShowHelp(false)}
+              className="w-full py-3.5 rounded-xl font-semibold text-sm text-white active:scale-[0.98] transition-transform"
+              style={{ backgroundColor: '#C9956C' }}
+            >
+              C'est parti ! 🎉
+            </button>
+          </div>
         </div>
       )}
     </div>
