@@ -966,11 +966,11 @@ export default function Today() {
       {/* Floating help button */}
       <button
         onClick={() => setShowHelp(true)}
-        className="fixed top-4 right-4 z-50 w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md active:scale-90 transition-transform"
+        className="fixed top-20 right-4 z-50 rounded-full px-4 py-2 flex items-center justify-center text-white font-bold text-sm shadow-md active:scale-90 transition-transform"
         style={{ backgroundColor: '#C9956C' }}
         aria-label="Aide"
       >
-        ?
+        Guide ✨
       </button>
 
       {/* Help modal */}
