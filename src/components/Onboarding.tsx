@@ -82,7 +82,7 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
   const [makeup, setMakeup] = useState('');
   const [favoriteColors, setFavoriteColors] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const totalSteps = 10;
+  const totalSteps = 14;
 
   if (editMode) {
     return <ProfileEditor onComplete={onComplete} />;
@@ -128,7 +128,11 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
     setShowMessage(true);
     setTimeout(() => {
       setShowMessage(false);
-      onComplete();
+      if (editMode) {
+        onComplete();
+      } else {
+        setStep(10);
+      }
     }, 1200);
   };
 
@@ -171,6 +175,10 @@ export default function Onboarding({ onComplete, editMode = false }: Props) {
     true,                    // 7 — brands
     makeup !== '',           // 8
     false,                   // 9 — avatar
+    true,                    // 10 — customize thumbnail
+    true,                    // 11 — save outfit
+    true,                    // 12 — wear outfit
+    true,                    // 13 — share outfit
   ][step];
 
   return (
