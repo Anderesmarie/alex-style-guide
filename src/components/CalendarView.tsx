@@ -81,13 +81,15 @@ export default function CalendarView() {
   const getOutfit = (id: string | null | undefined): Outfit | undefined =>
     id ? outfits.find(o => o.id === id) : undefined;
 
-  const getFirstItem = (outfit: Outfit | undefined): ClothingItem | undefined => {
-    if (!outfit) return undefined;
+  const getFirstItems = (outfit: Outfit | undefined): ClothingItem[] => {
+    if (!outfit) return [];
+    const result: ClothingItem[] = [];
     for (const id of outfit.itemIds) {
       const item = wardrobe.find(i => i.id === id);
-      if (item) return item;
+      if (item) result.push(item);
+      if (result.length === 3) break;
     }
-    return undefined;
+    return result;
   };
 
   const openDayEditor = (d: Date) => {
@@ -250,7 +252,7 @@ export default function CalendarView() {
         {days.map(d => {
           const ev = getEventForDate(d);
           const outfit = getOutfit(ev?.outfitId);
-          const firstItem = getFirstItem(outfit);
+          const items = getFirstItems(outfit);
           const isToday = isSameDay(d, today);
           return (
             <button
@@ -263,12 +265,18 @@ export default function CalendarView() {
             >
               <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{DAYS_FR[d.getDay()]}</p>
               <p className="font-serif text-2xl leading-tight mt-0.5">{d.getDate()}</p>
-              <div className="mt-2 flex items-center justify-center">
-                {firstItem ? (
-                  <img
- src={getThumb(firstItem.imageBase64, 200)}
- alt={firstItem.type}
- className="w-14 h-14 rounded-lg object-cover" loading="lazy" decoding="async" />
+              <div className="mt-2 flex items-center justify-center gap-0.5">
+                {items.length > 0 ? (
+                  items.map(item => (
+                    <img
+                      key={item.id}
+                      src={getThumb(item.imageBase64, 100)}
+                      alt={item.type}
+                      className="w-4 h-4 rounded-sm object-cover flex-shrink-0"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ))
                 ) : (
                   <div className="w-14 h-14 rounded-lg bg-muted flex items-center justify-center text-2xl text-muted-foreground/60">
                     +
