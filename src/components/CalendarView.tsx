@@ -437,43 +437,78 @@ export default function CalendarView() {
               ))}
             </select>
 
-            <p className="text-sm font-medium mb-2">Choisir une tenue</p>
-            {outfits.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">
-                Aucune tenue sauvegardée pour l'instant
-              </p>
-            ) : (
-              <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-2 -mx-5 px-5 mb-5">
-                {outfits.map(o => {
-                  const items = getFirstItems(o).slice(0, 2);
-                  const selected = draftOutfitId === o.id;
-                  return (
+            {(() => {
+              const assignedOutfit = getOutfit(draftOutfitId);
+              const assignedItems = getFirstItems(assignedOutfit);
+              if (draftOutfitId && assignedOutfit) {
+                return (
+                  <div className="mb-5">
+                    <p className="text-sm font-medium mb-2">Ta tenue</p>
+                    <div className="flex gap-1 mb-3">
+                      {assignedItems.map(item => (
+                        <img
+                          key={item.id}
+                          src={getThumb(item.imageBase64, 200)}
+                          alt={item.type}
+                          className="w-16 h-16 rounded-lg object-cover"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-3">{assignedOutfit.name}</p>
                     <button
-                      key={o.id}
-                      onClick={() => setDraftOutfitId(selected ? null : o.id)}
-                      className={`flex-shrink-0 w-24 rounded-xl overflow-hidden border-2 transition-all ${
-                        selected ? '' : 'border-transparent'
-                      }`}
-                      style={selected ? { borderColor: '#C9956C' } : undefined}
+                      onClick={() => setDraftOutfitId(null)}
+                      className="text-sm font-medium"
+                      style={{ color: '#C9956C' }}
                     >
-                      {items.length === 2 ? (
-                        <div className="grid grid-cols-2 gap-0.5">
-                          <img src={getThumb(items[0].imageBase64, 200)} alt={items[0].type} className="w-full h-12 object-cover rounded-sm" loading="lazy" decoding="async" />
-                          <img src={getThumb(items[1].imageBase64, 200)} alt={items[1].type} className="w-full h-12 object-cover rounded-sm" loading="lazy" decoding="async" />
-                        </div>
-                      ) : items.length === 1 ? (
-                        <img src={getThumb(items[0].imageBase64, 200)} alt={items[0].type} className="w-full h-24 object-cover rounded-lg" loading="lazy" decoding="async" />
-                      ) : (
-                        <div className="w-full h-24 bg-muted rounded-lg" />
-                      )}
-                      <p className="text-[11px] font-medium px-1 py-1.5 truncate text-left bg-card">
-                        {o.name}
-                      </p>
+                      Changer de tenue
                     </button>
-                  );
-                })}
-              </div>
-            )}
+                  </div>
+                );
+              }
+              return (
+                <>
+                  <p className="text-sm font-medium mb-2">Choisir une tenue</p>
+                  {outfits.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-4 text-center">
+                      Aucune tenue sauvegardée pour l'instant
+                    </p>
+                  ) : (
+                    <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-2 -mx-5 px-5 mb-5">
+                      {outfits.map(o => {
+                        const items = getFirstItems(o).slice(0, 2);
+                        const selected = draftOutfitId === o.id;
+                        return (
+                          <button
+                            key={o.id}
+                            onClick={() => setDraftOutfitId(selected ? null : o.id)}
+                            className={`flex-shrink-0 w-24 rounded-xl overflow-hidden border-2 transition-all ${
+                              selected ? '' : 'border-transparent'
+                            }`}
+                            style={selected ? { borderColor: '#C9956C' } : undefined}
+                          >
+                            {items.length === 2 ? (
+                              <div className="grid grid-cols-2 gap-0.5">
+                                <img src={getThumb(items[0].imageBase64, 200)} alt={items[0].type} className="w-full h-12 object-cover rounded-sm" loading="lazy" decoding="async" />
+                                <img src={getThumb(items[1].imageBase64, 200)} alt={items[1].type} className="w-full h-12 object-cover rounded-sm" loading="lazy" decoding="async" />
+                              </div>
+                            ) : items.length === 1 ? (
+                              <img src={getThumb(items[0].imageBase64, 200)} alt={items[0].type} className="w-full h-24 object-cover rounded-lg" loading="lazy" decoding="async" />
+                            ) : (
+                              <div className="w-full h-24 bg-muted rounded-lg" />
+                            )}
+                            <p className="text-[11px] font-medium px-1 py-1.5 truncate text-left bg-card">
+                              {o.name}
+                            </p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
 
             <button
               onClick={handleSave}
