@@ -664,6 +664,14 @@ export default function Today() {
         layout_data: r.layoutData ?? null,
         saved_outfit_id: r.savedOutfitId ?? null,
       });
+      // Mark the saved outfit as manually modified
+      if (r.savedOutfitId && r.layoutData) {
+        supabase
+          .from('outfits')
+          .update({ is_modified: true })
+          .eq('id', r.savedOutfitId)
+          .then(() => {}, () => {});
+      }
     });
   };
 
