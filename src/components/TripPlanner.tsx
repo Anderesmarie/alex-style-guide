@@ -136,12 +136,8 @@ export default function TripPlanner({ onBack }: Props) {
     });
   };
 
-  useEffect(() => {
-    if (step === 'loading') {
-      const t = setTimeout(() => setStep('result'), 1000);
-      return () => clearTimeout(t);
-    }
-  }, [step]);
+
+
 
   if (step === 'loading') {
     return (
