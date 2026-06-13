@@ -456,9 +456,9 @@ export default function CalendarView() {
                       }`}
                       style={selected ? { borderColor: '#C9956C' } : undefined}
                     >
-                      {item ? (
-                        <img src={getThumb(item.imageBase64, 200)} alt={o.name} className="w-24 h-24 object-cover" loading="lazy" decoding="async" />
-                      ) : (
+                {const items = getFirstItems(o); items[0] ? (
+                  <img src={getThumb(items[0].imageBase64, 200)} alt={o.name} className="w-24 h-24 object-cover" loading="lazy" decoding="async" />
+                ) : (
                         <div className="w-24 h-24 bg-muted" />
                       )}
                       <p className="text-[11px] font-medium px-1 py-1.5 truncate text-left bg-card">
