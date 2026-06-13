@@ -143,7 +143,7 @@ export async function saveDislikedOutfit(itemIds: string[]): Promise<void> {
   const uid = await getUserIdSafe();
   if (!uid) return;
   const bloquee = new Date();
-  bloquee.setDate(bloquee.getDate() + 30);
+  bloquee.setDate(bloquee.getDate() + 14);
   await supabase.from('user_preferences').insert({
     user_id: uid,
     item_ids: itemIds,
