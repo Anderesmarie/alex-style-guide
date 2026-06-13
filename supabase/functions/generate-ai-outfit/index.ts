@@ -98,8 +98,11 @@ Deno.serve(async (req) => {
     const colorRule = colorimetrie
       ? `Colorimétrie ${colorimetrie} : favorise les couleurs flatteuses pour ce type. `
       : "";
-    const styleRule =
-      stylesActifs.length > 0 ? `Styles à privilégier aujourd'hui (${dayType}) : ${stylesActifs.join(", ")}. ` : "";
+    const styleRule = stylesActifs.length > 0
+      ? `Ambiance générale souhaitée (${dayType}) : ${stylesActifs.join(', ')}. Cette ambiance est une inspiration, pas un filtre strict. `
+      : '';
+
+    const occasionRule = `PRIORITÉ : une pièce taguée pour l'occasion "${socialContext}" dans son champ "occasion" DOIT être considérée comme adaptée, même si son style ne correspond pas à l'ambiance générale. La fille sait ce qu'elle porte dans ce contexte. `;
 
     // Règles anti-répétition
     let antiRepRule = "";
@@ -140,7 +143,7 @@ Deno.serve(async (req) => {
       `Compose 3 TENUES DISTINCTES et visuellement différentes à partir des vêtements disponibles dans la garde-robe. ` +
       `\n\nCONTEXTE : Occasion : ${socialContext}. Jour : ${dayType}. Saison : ${currentSeason}. ` +
       `Température : ${tempMin}°C à ${tempMax}°C. ` +
-      `\n\nPROFIL : ${morphoRule}${colorRule}${styleRule}` +
+      `\n\nPROFIL : ${morphoRule}${colorRule}${styleRule}${occasionRule}` +
       `\n\nMÉTÉO : ${tempRule}${rainRule}${windRule}${coldRule}${jacketRule}` +
       `\n\nRÈGLES STRICTES PAR TENUE : ` +
       `1 haut OU 1 robe OU 1 ensemble 2 pièces (jamais les deux) ; ` +
