@@ -347,6 +347,9 @@ export default function TripPlanner({ onBack }: Props) {
       >
         Générer ma valise ✨
       </button>
+      <p className="text-[11px] text-muted-foreground text-center mt-2">
+        Version gratuite : {FREE_LIMIT - getUsageCount()} génération(s) ce mois
+      </p>
     </div>
   );
 }
