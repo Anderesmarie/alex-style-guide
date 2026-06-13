@@ -297,7 +297,7 @@ export default function TripPlanner({ onBack }: Props) {
 
       {/* CTA */}
       <button
-        onClick={() => setStep('loading')}
+        onClick={handleGenerate}
         disabled={!canGenerate}
         className="w-full py-3 rounded-xl text-white font-semibold text-sm transition-all active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none"
         style={{ backgroundColor: '#C9956C' }}
