@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
+import { getWardrobe, getOutfits } from '@/lib/storage';
+import { geocodeCity } from '@/lib/weather';
+import { supabase } from '@/lib/supabase';
 
 const BAG_TYPES: { id: 'cabine-legere' | 'valise-cabine' | 'valise-soute'; label: string; emoji: string }[] = [
   { id: 'cabine-legere', label: 'Cabine légère', emoji: '👜' },
