@@ -152,16 +152,59 @@ export default function TripPlanner({ onBack }: Props) {
     return (
       <div className="fade-enter pb-6">
         <div className="flex items-center gap-3 mb-4">
-          <button onClick={onBack} className="text-2xl">←</button>
-          <h1 className="text-2xl font-serif font-bold leading-tight">Ton voyage 🧳</h1>
+          <button onClick={() => setStep('form')} className="text-2xl">←</button>
+          <h1 className="text-2xl font-serif font-bold leading-tight">Ma valise 🧳</h1>
         </div>
-        <p className="text-muted-foreground">Résultat à venir</p>
+
+        {packingResult?.conseil && (
+          <div className="bg-card rounded-xl p-3 mb-4">
+            <p className="text-xs italic text-muted-foreground">✨ {packingResult.conseil}</p>
+          </div>
+        )}
+
+        {packingResult?.valise && Object.entries(packingResult.valise).map(([cat, items]: [string, any]) => {
+          if (!items || !items.length) return null;
+          return (
+            <div key={cat} className="mb-4">
+              <h2 className="font-serif font-semibold text-sm mb-2">{cat}</h2>
+              <div className="grid grid-cols-3 gap-2">
+                {items.map((item: any) => {
+                  const piece = wardrobe.find((w) => w.id === item.id);
+                  const hasImage = piece?.imageBase64;
+                  return (
+                    <div key={item.id} className="bg-card rounded-lg overflow-hidden">
+                      {hasImage ? (
+                        <img
+                          src={piece.imageBase64}
+                          alt={item.type}
+                          className="w-full aspect-square object-cover"
+                        />
+                      ) : (
+                        <div className="w-full aspect-square bg-muted flex items-center justify-center text-xs text-muted-foreground">
+                          {item.type}
+                        </div>
+                      )}
+                      <p className="text-[10px] px-1.5 py-1 truncate">
+                        {item.type} · {item.color}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+
+        <p className="text-[11px] text-muted-foreground text-center mt-4">
+          {FREE_LIMIT - getUsageCount()} génération(s) gratuite(s) restante(s) ce mois
+        </p>
+
         <button
           onClick={() => setStep('form')}
-          className="mt-6 text-sm font-medium"
-          style={{ color: '#C9956C' }}
+          className="w-full mt-4 py-3 rounded-xl text-sm font-semibold border"
+          style={{ borderColor: '#C9956C', color: '#C9956C' }}
         >
-          ← Modifier
+          ← Modifier mon voyage
         </button>
       </div>
     );
