@@ -68,16 +68,26 @@ export default function TripPlanner({ onBack }: Props) {
     }
     setStep('loading');
     try {
-      const geo = await geocodeCity(destination);
-      const res = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${geo.latitude}&longitude=${geo.longitude}&daily=temperature_2m_min,temperature_2m_max&start_date=${startDate}&end_date=${endDate}&timezone=auto`
-      );
-      if (!res.ok) throw new Error('Météo indisponible');
-      const wx = await res.json();
-      const mins: number[] = wx.daily?.temperature_2m_min ?? [];
-      const maxs: number[] = wx.daily?.temperature_2m_max ?? [];
-      const tempMin = mins.length ? Math.round(Math.min(...mins)) : 15;
-      const tempMax = maxs.length ? Math.round(Math.max(...maxs)) : 25;
+      console.log('destination:', destination);
+      console.log('startDate:', startDate);
+      console.log('endDate:', endDate);
+
+      let tempMin = 15;
+      let tempMax = 22;
+      try {
+        const geo = await geocodeCity(destination);
+        const res = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${geo.latitude}&longitude=${geo.longitude}&daily=temperature_2m_min,temperature_2m_max&start_date=${startDate}&end_date=${endDate}&timezone=auto`
+        );
+        if (!res.ok) throw new Error('Météo indisponible');
+        const wx = await res.json();
+        const mins: number[] = wx.daily?.temperature_2m_min ?? [];
+        const maxs: number[] = wx.daily?.temperature_2m_max ?? [];
+        tempMin = mins.length ? Math.round(Math.min(...mins)) : 15;
+        tempMax = maxs.length ? Math.round(Math.max(...maxs)) : 22;
+      } catch (weatherErr) {
+        console.warn('Météo indisponible, valeurs par défaut utilisées', weatherErr);
+      }
 
       const [wrd, savedOutfits] = await Promise.all([getWardrobe(), getOutfits()]);
       const nbDays = Math.max(1, daysBetween(startDate, endDate) + 1);
