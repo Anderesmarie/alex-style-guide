@@ -445,7 +445,7 @@ export default function CalendarView() {
             ) : (
               <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-2 -mx-5 px-5 mb-5">
                 {outfits.map(o => {
-                  const items = getFirstItems(o);
+                  const items = getFirstItems(o).slice(0, 2);
                   const selected = draftOutfitId === o.id;
                   return (
                     <button
@@ -456,10 +456,15 @@ export default function CalendarView() {
                       }`}
                       style={selected ? { borderColor: '#C9956C' } : undefined}
                     >
-                      {items[0] ? (
-                        <img src={getThumb(items[0].imageBase64, 200)} alt={o.name} className="w-24 h-24 object-cover" loading="lazy" decoding="async" />
+                      {items.length === 2 ? (
+                        <div className="grid grid-cols-2 gap-0.5">
+                          <img src={getThumb(items[0].imageBase64, 200)} alt={items[0].type} className="w-full h-12 object-cover rounded-sm" loading="lazy" decoding="async" />
+                          <img src={getThumb(items[1].imageBase64, 200)} alt={items[1].type} className="w-full h-12 object-cover rounded-sm" loading="lazy" decoding="async" />
+                        </div>
+                      ) : items.length === 1 ? (
+                        <img src={getThumb(items[0].imageBase64, 200)} alt={items[0].type} className="w-full h-24 object-cover rounded-lg" loading="lazy" decoding="async" />
                       ) : (
-                        <div className="w-24 h-24 bg-muted" />
+                        <div className="w-full h-24 bg-muted rounded-lg" />
                       )}
                       <p className="text-[11px] font-medium px-1 py-1.5 truncate text-left bg-card">
                         {o.name}
