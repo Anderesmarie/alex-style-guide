@@ -450,12 +450,27 @@ export default function Today() {
             style: w.style,
             occasion: w.occasion,
             temperatures: w.temperatures,
+            pattern: w.pattern || null,
           })),
           weather: { tempMin, tempMax, isRaining },
           mood,
           socialContext,
           dayType,
           currentSeason,
+          profil: {
+            morphologie: userProfile?.morphologie || null,
+            colorimetrie: userSeason || null,
+            styles: userProfile?.styles || [],
+            styles_semaine: userProfile?.styles_semaine || [],
+            styles_weekend: userProfile?.styles_weekend || [],
+            lifestyle: lifestyle || null,
+          },
+          anti_repetition: {
+            combos_rejetees: recentOutfitIds.slice(0, wardrobe.length > 20 ? 5 : 3),
+            ids_bloques: dislikedItemIds,
+            ids_portes: recentItemIds,
+            tenues_aimees: savedOutfitItemIds,
+          },
         },
       });
 
