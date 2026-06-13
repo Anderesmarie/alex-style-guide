@@ -445,7 +445,7 @@ export default function CalendarView() {
             ) : (
               <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-2 -mx-5 px-5 mb-5">
                 {outfits.map(o => {
-                  const item = getFirstItem(o);
+                  const items = getFirstItems(o);
                   const selected = draftOutfitId === o.id;
                   return (
                     <button
@@ -456,9 +456,9 @@ export default function CalendarView() {
                       }`}
                       style={selected ? { borderColor: '#C9956C' } : undefined}
                     >
-                {const items = getFirstItems(o); items[0] ? (
-                  <img src={getThumb(items[0].imageBase64, 200)} alt={o.name} className="w-24 h-24 object-cover" loading="lazy" decoding="async" />
-                ) : (
+                      {items[0] ? (
+                        <img src={getThumb(items[0].imageBase64, 200)} alt={o.name} className="w-24 h-24 object-cover" loading="lazy" decoding="async" />
+                      ) : (
                         <div className="w-24 h-24 bg-muted" />
                       )}
                       <p className="text-[11px] font-medium px-1 py-1.5 truncate text-left bg-card">
