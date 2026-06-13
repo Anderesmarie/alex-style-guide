@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
+import { getWardrobe, getOutfits } from '@/lib/storage';
+import { geocodeCity } from '@/lib/weather';
+import { supabase } from '@/lib/supabase';
 
 const BAG_TYPES: { id: 'cabine-legere' | 'valise-cabine' | 'valise-soute'; label: string; emoji: string }[] = [
   { id: 'cabine-legere', label: 'Cabine légère', emoji: '👜' },
@@ -50,6 +53,60 @@ export default function TripPlanner({ onBack }: Props) {
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
   const [step, setStep] = useState<'form' | 'loading' | 'result'>('form');
+  const [packingResult, setPackingResult] = useState<any>(null);
+  const [wardrobe, setWardrobe] = useState<any[]>([]);
+
+  const STORAGE_KEY = `mystyl_trip_gen_${new Date().getFullYear()}-${new Date().getMonth()}`;
+  const FREE_LIMIT = 2;
+  const getUsageCount = () => parseInt(localStorage.getItem(STORAGE_KEY) ?? '0');
+  const incrementUsage = () => localStorage.setItem(STORAGE_KEY, String(getUsageCount() + 1));
+
+  const handleGenerate = async () => {
+    if (getUsageCount() >= FREE_LIMIT) {
+      alert('Limite gratuite atteinte ce mois-ci ✨ Passe en Premium pour générer plus de valises.');
+      return;
+    }
+    setStep('loading');
+    try {
+      const geo = await geocodeCity(destination);
+      const res = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${geo.latitude}&longitude=${geo.longitude}&daily=temperature_2m_min,temperature_2m_max&start_date=${startDate}&end_date=${endDate}&timezone=auto`
+      );
+      if (!res.ok) throw new Error('Météo indisponible');
+      const wx = await res.json();
+      const mins: number[] = wx.daily?.temperature_2m_min ?? [];
+      const maxs: number[] = wx.daily?.temperature_2m_max ?? [];
+      const tempMin = mins.length ? Math.round(Math.min(...mins)) : 15;
+      const tempMax = maxs.length ? Math.round(Math.max(...maxs)) : 25;
+
+      const [wrd, savedOutfits] = await Promise.all([getWardrobe(), getOutfits()]);
+      const nbDays = Math.max(1, daysBetween(startDate, endDate) + 1);
+
+      const { data, error } = await supabase.functions.invoke('generate-trip-packing', {
+        body: {
+          wardrobe: wrd,
+          savedOutfits,
+          destination,
+          nbDays,
+          tempMin,
+          tempMax,
+          styles: selectedStyles,
+          occasions: selectedOccasions,
+          bagType,
+        },
+      });
+      if (error) throw error;
+
+      setPackingResult(data);
+      setWardrobe(wrd);
+      incrementUsage();
+      setStep('result');
+    } catch (e: any) {
+      console.error(e);
+      alert(`Erreur : ${e?.message ?? 'génération impossible'}`);
+      setStep('form');
+    }
+  };
 
   const today = todayISO();
   const dateDiff = daysBetween(startDate, endDate);
@@ -79,12 +136,8 @@ export default function TripPlanner({ onBack }: Props) {
     });
   };
 
-  useEffect(() => {
-    if (step === 'loading') {
-      const t = setTimeout(() => setStep('result'), 1000);
-      return () => clearTimeout(t);
-    }
-  }, [step]);
+
+
 
   if (step === 'loading') {
     return (
@@ -244,7 +297,7 @@ export default function TripPlanner({ onBack }: Props) {
 
       {/* CTA */}
       <button
-        onClick={() => setStep('loading')}
+        onClick={handleGenerate}
         disabled={!canGenerate}
         className="w-full py-3 rounded-xl text-white font-semibold text-sm transition-all active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none"
         style={{ backgroundColor: '#C9956C' }}
