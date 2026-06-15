@@ -103,6 +103,30 @@ export type Database = {
           },
         ]
       }
+      chat_styliste: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_counter: {
         Row: {
           count: number | null
@@ -220,6 +244,8 @@ export type Database = {
           beauty_makeup_level: string | null
           brands: Json | null
           budget: number | null
+          chat_messages_today: number | null
+          chat_reset_date: string | null
           colorimetry: Json | null
           colorimetry_season: string | null
           corpulence: string | null
@@ -244,6 +270,8 @@ export type Database = {
           beauty_makeup_level?: string | null
           brands?: Json | null
           budget?: number | null
+          chat_messages_today?: number | null
+          chat_reset_date?: string | null
           colorimetry?: Json | null
           colorimetry_season?: string | null
           corpulence?: string | null
@@ -268,6 +296,8 @@ export type Database = {
           beauty_makeup_level?: string | null
           brands?: Json | null
           budget?: number | null
+          chat_messages_today?: number | null
+          chat_reset_date?: string | null
           colorimetry?: Json | null
           colorimetry_season?: string | null
           corpulence?: string | null
