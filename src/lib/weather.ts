@@ -60,14 +60,14 @@ async function fetchWeatherByCoords(lat: number, lon: number, city?: string): Pr
   let tempMin: number | null = null;
   let tempMax: number | null = null;
   if (data.hourly?.time && data.hourly?.temperature_2m) {
+    const currentHour = new Date().getHours();
+    const currentTemp = data.current_weather?.temperature ?? null;
     const dayTemps = data.hourly.time
       .map((t: string, i: number) => ({ hour: new Date(t).getHours(), temp: data.hourly.temperature_2m[i] }))
-      .filter((x: { hour: number; temp: number }) => x.hour >= 7 && x.hour <= 22)
+      .filter((x: { hour: number; temp: number }) => x.hour >= currentHour && x.hour <= 21)
       .map((x: { hour: number; temp: number }) => x.temp);
-    if (dayTemps.length > 0) {
-      tempMin = Math.round(Math.min(...dayTemps));
-      tempMax = Math.round(Math.max(...dayTemps));
-    }
+    tempMin = currentTemp !== null ? Math.round(currentTemp) : (dayTemps.length > 0 ? Math.round(Math.min(...dayTemps)) : null);
+    tempMax = dayTemps.length > 0 ? Math.round(Math.max(...dayTemps)) : tempMin;
   }
   const weather = parseWeather(data, city);
   if (tempMin !== null) weather.tempMin = tempMin;
