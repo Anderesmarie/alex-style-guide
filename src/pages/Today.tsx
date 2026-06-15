@@ -434,9 +434,19 @@ export default function Today() {
         case 'Je travaille': socialContext = isWeekday ? 'Travail' : 'Quotidien'; break;
       }
       const mood = dailyMood || userProfile?.styles?.[0] || '';
-      const tempMin = ws.status === 'done' ? (ws.data.tempMin ?? weatherTemp ?? 18) : (weatherTemp ?? 18);
-      const tempMax = ws.status === 'done' ? (ws.data.tempMax ?? weatherTemp ?? 22) : (weatherTemp ?? 22);
-      const isRaining = ws.status === 'done' ? !!ws.data.isRainy : false;
+      const getSeasonalDefaults = () => {
+        const month = new Date().getMonth();
+        if (month >= 5 && month <= 8) return { tempMin: 22, tempMax: 28 }; // Été
+        if (month >= 3 && month <= 4) return { tempMin: 14, tempMax: 20 }; // Printemps
+        if (month >= 9 && month <= 10) return { tempMin: 10, tempMax: 16 }; // Automne
+        return { tempMin: 3, tempMax: 9 }; // Hiver
+      };
+
+      const weatherOk = ws.status === 'done';
+      const seasonal = getSeasonalDefaults();
+      const tempMin = weatherOk ? (ws.data.tempMin ?? seasonal.tempMin) : seasonal.tempMin;
+      const tempMax = weatherOk ? (ws.data.tempMax ?? seasonal.tempMax) : seasonal.tempMax;
+      const isRaining = weatherOk ? !!ws.data.isRainy : false;
       const currentSeason = getCurrentSeason();
 
       const { data, error } = await supabase.functions.invoke('generate-ai-outfit', {
@@ -641,7 +651,7 @@ export default function Today() {
   // Auto-generate only if no saved results for today and has quota
   // Auto-generate / auto-restore : tente toujours, generate() décide s'il y a quota
   useEffect(() => {
-    if (!loading && profileLoaded && ws.status !== 'loading' && enough && !swipeComplete && recommendations.length === 0 && dailyMood !== undefined) {
+    if (!loading && profileLoaded && (ws.status === 'done' || ws.status === 'geo_denied' || ws.status === 'city_input') && enough && !swipeComplete && recommendations.length === 0 && dailyMood !== undefined) {
       generate();
     }
   }, [loading, profileLoaded, ws.status, enough, swipeComplete, recommendations.length, generate, dailyMood]); // eslint-disable-line
