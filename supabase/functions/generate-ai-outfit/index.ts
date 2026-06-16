@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
       ? `Ambiance générale souhaitée (${dayType}) : ${stylesActifs.join(', ')}. Cette ambiance est une inspiration, pas un filtre strict. `
       : '';
 
-    const occasionRule = `PRIORITÉ : une pièce taguée pour l'occasion "${socialContext}" dans son champ "occasion" DOIT être considérée comme adaptée, même si son style ne correspond pas à l'ambiance générale. La fille sait ce qu'elle porte dans ce contexte. `;
+    const occasionRule = `RÈGLE ABSOLUE — priorité maximale : toute pièce ayant "${socialContext}" dans son champ "occasion" EST adaptée à la situation, quel que soit son style, sa couleur ou son ambiance. L'utilisatrice a elle-même décidé que cette pièce convient à ce contexte — cette décision est INVIOLABLE et écrase toute autre considération stylistique. Le style général (${stylesActifs.join(', ')}) est une inspiration secondaire, jamais un filtre bloquant. `;
 
     // Règles anti-répétition
     let antiRepRule = "";
@@ -143,7 +143,7 @@ Deno.serve(async (req) => {
       `Compose 3 TENUES DISTINCTES et visuellement différentes à partir des vêtements disponibles dans la garde-robe. ` +
       `\n\nCONTEXTE : Occasion : ${socialContext}. Jour : ${dayType}. Saison : ${currentSeason}. ` +
       `Température : ${tempMin}°C à ${tempMax}°C. ` +
-      `\n\nPROFIL : ${morphoRule}${colorRule}${styleRule}${occasionRule}` +
+      `\n\nPROFIL : ${morphoRule}${colorRule}${styleRule}` +
       `\n\nMÉTÉO : ${tempRule}${rainRule}${windRule}${coldRule}${jacketRule}` +
       `\n\nRÈGLES STRICTES PAR TENUE : ` +
       `1 haut OU 1 robe OU 1 ensemble 2 pièces (jamais les deux) ; ` +
@@ -151,6 +151,7 @@ Deno.serve(async (req) => {
       `1 paire de chaussures si disponible dans le dressing ; ` +
       `max 2 accessoires par tenue, uniquement si disponibles ; ` +
       `utilise UNIQUEMENT des id présents dans la liste fournie. ` +
+      `\n\n${occasionRule}` +
       `\n\n${ensembleRule}` +
       `${sportRule}` +
       `\n\nANTI-RÉPÉTITION : ${antiRepRule}${tenuesAimeesRule}` +
