@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
       ? `Ambiance générale souhaitée (${dayType}) : ${stylesActifs.join(', ')}. Cette ambiance est une inspiration, pas un filtre strict. `
       : '';
 
-    const occasionRule = `PRIORITÉ : une pièce taguée pour l'occasion "${socialContext}" dans son champ "occasion" DOIT être considérée comme adaptée, même si son style ne correspond pas à l'ambiance générale. La fille sait ce qu'elle porte dans ce contexte. `;
+    const occasionRule = `RÈGLE ABSOLUE — priorité maximale : toute pièce ayant "${socialContext}" dans son champ "occasion" EST adaptée à la situation, quel que soit son style, sa couleur ou son ambiance. L'utilisatrice a elle-même décidé que cette pièce convient à ce contexte — cette décision est INVIOLABLE et écrase toute autre considération stylistique. Le style général (${stylesActifs.join(', ')}) est une inspiration secondaire, jamais un filtre bloquant. `;
 
     // Règles anti-répétition
     let antiRepRule = "";
