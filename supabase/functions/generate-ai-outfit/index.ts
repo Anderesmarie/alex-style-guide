@@ -151,6 +151,7 @@ Deno.serve(async (req) => {
       `1 paire de chaussures si disponible dans le dressing ; ` +
       `max 2 accessoires par tenue, uniquement si disponibles ; ` +
       `utilise UNIQUEMENT des id présents dans la liste fournie. ` +
+      `\n\n${occasionRule}` +
       `\n\n${ensembleRule}` +
       `${sportRule}` +
       `\n\nANTI-RÉPÉTITION : ${antiRepRule}${tenuesAimeesRule}` +
