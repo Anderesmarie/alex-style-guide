@@ -143,7 +143,7 @@ Deno.serve(async (req) => {
       `Compose 3 TENUES DISTINCTES et visuellement différentes à partir des vêtements disponibles dans la garde-robe. ` +
       `\n\nCONTEXTE : Occasion : ${socialContext}. Jour : ${dayType}. Saison : ${currentSeason}. ` +
       `Température : ${tempMin}°C à ${tempMax}°C. ` +
-      `\n\nPROFIL : ${morphoRule}${colorRule}${styleRule}${occasionRule}` +
+      `\n\nPROFIL : ${morphoRule}${colorRule}${styleRule}` +
       `\n\nMÉTÉO : ${tempRule}${rainRule}${windRule}${coldRule}${jacketRule}` +
       `\n\nRÈGLES STRICTES PAR TENUE : ` +
       `1 haut OU 1 robe OU 1 ensemble 2 pièces (jamais les deux) ; ` +
