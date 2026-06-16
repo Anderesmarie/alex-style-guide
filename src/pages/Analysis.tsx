@@ -40,6 +40,14 @@ const SEASON_SEARCH: Record<string, string> = {
   'Printemps': 'tenue printemps femme',
 };
 
+const OCCASIONS_BY_LIFESTYLE: Record<string, string[]> = {
+  'Lycée':        ['Quotidien', 'Cours lycée', 'Sortie', 'Soirée étudiante', 'Soirée', 'Cérémonie / Événement', 'Sport', 'Plage', 'Voyage'],
+  'Études sup':   ['Quotidien', 'Campus', 'Sortie', 'Soirée étudiante', 'Soirée', 'Cérémonie / Événement', 'Sport', 'Plage', 'Voyage'],
+  'Premier job':  ['Quotidien', 'Travail', 'Sortie', 'Soirée étudiante', 'Soirée', 'Cérémonie / Événement', 'Sport', 'Plage', 'Voyage'],
+  'Je travaille': ['Quotidien', 'Travail', 'Sortie', 'Soirée', 'Cérémonie / Événement', 'Sport', 'Plage', 'Voyage'],
+  'Autre':        ['Quotidien', 'Sortie', 'Soirée', 'Cérémonie / Événement', 'Sport', 'Plage', 'Voyage'],
+};
+
 function getCurrentSeason(): string {
   const m = new Date().getMonth();
   if (m >= 2 && m <= 4) return 'Printemps';
@@ -53,6 +61,7 @@ export default function Analysis() {
   const [outfits, setOutfits] = useState<Outfit[]>([]);
   const [profileStyles, setProfileStyles] = useState<string[]>([]);
   const [userBrands, setUserBrands] = useState<string[]>([]);
+  const [userLifestyle, setUserLifestyle] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const BRAND_URLS: Record<string, string> = {
@@ -87,9 +96,10 @@ export default function Analysis() {
       try {
         const { data: userData } = await supabase.auth.getUser();
         if (userData.user) {
-          const { data: p } = await supabase.from('profiles').select('styles, brands').eq('id', userData.user.id).single();
+          const { data: p } = await supabase.from('profiles').select('styles, brands, lifestyle').eq('id', userData.user.id).single();
           if (p?.styles) setProfileStyles(p.styles as string[]);
           if (p?.brands) setUserBrands(p.brands as string[]);
+          if (p?.lifestyle) setUserLifestyle(p.lifestyle as string);
         }
       } catch {}
       setLoading(false);
@@ -111,7 +121,9 @@ export default function Analysis() {
   const missingCount = basicsStatus.filter(b => !b.owned).length;
   const allPresent = missingCount === 0;
 
-  const occasionStats = OCCASIONS.map(occ => {
+  const filteredOccasions = OCCASIONS_BY_LIFESTYLE[userLifestyle ?? ''] ?? OCCASIONS;
+
+  const occasionStats = filteredOccasions.map(occ => {
     const count = wardrobe.filter(i => i.occasion?.includes(occ)).length;
     return { name: occ, count };
   });
