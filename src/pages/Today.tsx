@@ -193,6 +193,9 @@ export default function Today() {
   const [editCityValue, setEditCityValue] = useState('');
   const [editCityError, setEditCityError] = useState<string | null>(null);
   const [editCityLoading, setEditCityLoading] = useState(false);
+  // TODO: bouton de test temporaire, à remplacer par la bulle flottante définitive
+  const [chatOpen, setChatOpen] = useState(false);
+
 
   const submitEditCity = async () => {
     const name = editCityValue.trim();
