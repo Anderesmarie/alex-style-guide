@@ -164,9 +164,14 @@ export default function ChatStyliste({ isOpen, onClose }: ChatStylisteProps) {
               <Send className="w-4 h-4" />
             </button>
           </div>
-          {remaining !== null && (
+          {remaining !== null && remaining !== -1 && (
             <p className="text-xs text-gray-400 text-center mt-2">
               {remaining} message{remaining > 1 ? 's' : ''} gratuit{remaining > 1 ? 's' : ''} restant{remaining > 1 ? 's' : ''} aujourd'hui
+            </p>
+          )}
+          {remaining === -1 && (
+            <p className="text-xs text-center mt-2" style={{ color: '#C9956C' }}>
+              Accès illimité ✨
             </p>
           )}
         </div>

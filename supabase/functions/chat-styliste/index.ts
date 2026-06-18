@@ -7,6 +7,7 @@ const corsHeaders = {
 };
 
 const DAILY_LIMIT = 3;
+const TESTER_EMAILS = ["anderes.richez@gmail.com", "alexandra.richez2021@gmail.com"];
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -29,11 +30,12 @@ Deno.serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
     const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsErr } = await authClient.auth.getClaims(token);
-    if (claimsErr || !claimsData?.claims?.sub) {
+    const { data: userData, error: userErr } = await authClient.auth.getUser(token);
+    if (userErr || !userData?.user?.id) {
       return json({ error: "Unauthorized" }, 401);
     }
-    const userId = claimsData.claims.sub as string;
+    const userId = userData.user.id as string;
+    const userEmail = userData.user.email ?? "";
 
     const body = await req.json().catch(() => ({}));
     const message = typeof body?.message === "string" ? body.message.trim() : "";
@@ -57,23 +59,28 @@ Deno.serve(async (req) => {
       return json({ error: "profile_error" }, 500);
     }
 
-    const today = new Date().toISOString().slice(0, 10);
-    let messagesToday = profile?.chat_messages_today ?? 0;
-    const resetDate = profile?.chat_reset_date ?? null;
+    const isWhitelisted = TESTER_EMAILS.includes(userEmail);
+    let newCount = profile?.chat_messages_today ?? 0;
 
-    if (resetDate !== today) {
-      messagesToday = 0;
+    if (!isWhitelisted) {
+      const today = new Date().toISOString().slice(0, 10);
+      let messagesToday = profile?.chat_messages_today ?? 0;
+      const resetDate = profile?.chat_reset_date ?? null;
+
+      if (resetDate !== today) {
+        messagesToday = 0;
+      }
+
+      if (messagesToday >= DAILY_LIMIT) {
+        return json({ error: "quota_exceeded", messages_remaining: 0 }, 403);
+      }
+
+      newCount = messagesToday + 1;
+      await supabase
+        .from("profiles")
+        .update({ chat_messages_today: newCount, chat_reset_date: today })
+        .eq("id", userId);
     }
-
-    if (messagesToday >= DAILY_LIMIT) {
-      return json({ error: "quota_exceeded", messages_remaining: 0 }, 403);
-    }
-
-    const newCount = messagesToday + 1;
-    await supabase
-      .from("profiles")
-      .update({ chat_messages_today: newCount, chat_reset_date: today })
-      .eq("id", userId);
 
     // --- Wardrobe ---
     const { data: wardrobeAll } = await supabase
@@ -268,7 +275,7 @@ CE QUE TU NE FAIS PAS :
       { user_id: userId, role: "assistant", content: reply },
     ]);
 
-    return json({ reply, messages_remaining: Math.max(0, DAILY_LIMIT - newCount) }, 200);
+    return json({ reply, messages_remaining: isWhitelisted ? -1 : Math.max(0, DAILY_LIMIT - newCount) }, 200);
   } catch (e) {
     console.error("chat-styliste error", e);
     return json({ error: "internal_error" }, 500);
