@@ -87,9 +87,9 @@ export default function ChatStyliste({ isOpen, onClose }: ChatStylisteProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-white rounded-t-2xl shadow-2xl flex flex-col animate-in slide-in-from-bottom duration-300">
+      <div className="relative w-full max-w-md bg-white rounded-t-2xl shadow-2xl flex flex-col h-[80vh] animate-in slide-in-from-bottom duration-300">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0">
           <h2 className="text-lg font-serif font-bold text-gray-900">✨ Ta styliste</h2>
           <button
             onClick={onClose}
@@ -103,8 +103,7 @@ export default function ChatStyliste({ isOpen, onClose }: ChatStylisteProps) {
         {/* Messages */}
         <div
           ref={scrollRef}
-          className="flex flex-col gap-3 p-4 overflow-y-auto"
-          style={{ height: '60vh' }}
+          className="flex-1 overflow-y-auto flex flex-col gap-3 p-4"
         >
           {messages.map((m, i) => (
             <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -143,7 +142,7 @@ export default function ChatStyliste({ isOpen, onClose }: ChatStylisteProps) {
         </div>
 
         {/* Input */}
-        <div className="border-t border-gray-100 p-3 pb-5">
+        <div className="border-t border-gray-100 p-3 pb-5 shrink-0">
           <div className="flex items-center gap-2">
             <input
               type="text"
