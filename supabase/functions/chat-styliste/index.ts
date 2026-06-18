@@ -39,7 +39,12 @@ Deno.serve(async (req) => {
     const message = typeof body?.message === "string" ? body.message.trim() : "";
     if (!message) return json({ error: "message is required" }, 400);
 
+    const lat = typeof body?.lat === "number" ? body.lat : null;
+    const lon = typeof body?.lon === "number" ? body.lon : null;
+    const weatherFromBody = body?.weather && typeof body.weather === "object" ? body.weather : null;
+
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
+
 
     // --- Quota ---
     const { data: profile, error: profileErr } = await supabase
@@ -137,12 +142,55 @@ Deno.serve(async (req) => {
       .limit(5);
     const history = (historyDesc ?? []).slice().reverse();
 
+    // --- Weather (toujours en contexte) ---
+    const seasonalDefault = () => {
+      const m = new Date().getMonth(); // 0=jan
+      if (m === 11 || m <= 1) return { tempMin: 3, tempMax: 8 };   // hiver
+      if (m >= 2 && m <= 4) return { tempMin: 10, tempMax: 17 };   // printemps
+      if (m >= 5 && m <= 7) return { tempMin: 18, tempMax: 28 };   // été
+      return { tempMin: 11, tempMax: 18 };                          // automne
+    };
+
+    let weather: { tempMin: number; tempMax: number } | null = null;
+    if (weatherFromBody && typeof weatherFromBody.tempMin === "number" && typeof weatherFromBody.tempMax === "number") {
+      weather = { tempMin: weatherFromBody.tempMin, tempMax: weatherFromBody.tempMax };
+    } else if (lat != null && lon != null) {
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m&timezone=auto&forecast_days=1`;
+        const r = await fetch(url);
+        if (r.ok) {
+          const d = await r.json();
+          const times: string[] = d?.hourly?.time ?? [];
+          const temps: number[] = d?.hourly?.temperature_2m ?? [];
+          const nowH = new Date().getHours();
+          const todayStr = new Date().toISOString().slice(0, 10);
+          const futureTemps: number[] = [];
+          for (let i = 0; i < times.length; i++) {
+            const t = new Date(times[i]);
+            if (times[i].slice(0, 10) !== todayStr) continue;
+            const h = t.getHours();
+            if (h >= nowH && h <= 21) futureTemps.push(temps[i]);
+          }
+          if (futureTemps.length > 0) {
+            weather = {
+              tempMin: Math.round(Math.min(...futureTemps)),
+              tempMax: Math.round(Math.max(...futureTemps)),
+            };
+          }
+        }
+      } catch (e) {
+        console.error("weather fetch failed", e);
+      }
+    }
+    if (!weather) weather = seasonalDefault();
+
     // --- System prompt ---
     const pseudo = profile?.pseudo ?? "toi";
     const silhouette = profile?.silhouette ?? "non renseignée";
     const colorimetry_season = profile?.colorimetry_season ?? "non renseignée";
     const styles = fmtList(profile?.styles) || "non renseignés";
     const budget = profile?.budget ?? "non renseigné";
+
 
     const systemPrompt = `Tu es la styliste IA personnelle de l'app MyStyl.
 
@@ -166,7 +214,14 @@ ${liste_vetements}
 SES TENUES SAUVEGARDÉES :
 ${tenues_sauvegardees}
 
+RÈGLE MÉTÉO :
+- Tu connais la météo d'AUJOURD'HUI : ${weather.tempMin}°C à ${weather.tempMax}°C
+- Si l'utilisatrice parle d'aujourd'hui, ce soir, ou ne précise pas de date : base-toi sur cette météo
+- Si l'utilisatrice demande une tenue pour une date précise dans le futur (demain, vendredi, dans une semaine...) : précise que tu ne connais que la météo du jour présent, et propose une tenue adaptable plutôt qu'une météo que tu ne connais pas. Exemple : "Je ne connais pas encore la météo de vendredi, mais voici une tenue facile à ajuster : ajoute une veste légère si besoin, ou reste en léger s'il fait chaud."
+- Ne propose JAMAIS de pièce épaisse (trench, manteau, veste doublée) si la température du jour dépasse 25°C et que la demande concerne aujourd'hui/ce soir
+
 CE QUE TU PEUX FAIRE :
+
 - Donner des conseils mode généraux (tendances, associations)
 - Conseiller selon sa morphologie et colorimétrie
 - Aider à préparer une tenue pour un événement précis
