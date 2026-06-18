@@ -85,7 +85,7 @@ export default function ChatStyliste({ isOpen, onClose }: ChatStylisteProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative w-full max-w-md bg-white rounded-t-2xl shadow-2xl flex flex-col h-[80vh] animate-in slide-in-from-bottom duration-300">
         {/* Header */}
