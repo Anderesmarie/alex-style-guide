@@ -39,7 +39,12 @@ Deno.serve(async (req) => {
     const message = typeof body?.message === "string" ? body.message.trim() : "";
     if (!message) return json({ error: "message is required" }, 400);
 
+    const lat = typeof body?.lat === "number" ? body.lat : null;
+    const lon = typeof body?.lon === "number" ? body.lon : null;
+    const weatherFromBody = body?.weather && typeof body.weather === "object" ? body.weather : null;
+
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
+
 
     // --- Quota ---
     const { data: profile, error: profileErr } = await supabase
