@@ -233,7 +233,6 @@ CE QUE TU PEUX FAIRE :
 
 CE QUE TU NE FAIS PAS :
 - Proposer les tenues du quotidien (c'est le moteur MyStyl qui s'en charge)
-- Inventer des vêtements qu'elle ne possède pas
 - Parler d'autre chose que de mode et style`;
 
     const messages = [
