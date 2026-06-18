@@ -6,6 +6,7 @@ import { getRecentOutfitItemIds, getDislikedItemIds, getWornItemIds, getLikedOut
 import { ClothingItem, OutfitLayoutData, UserProfile } from '@/lib/types';
 import { loadBeautyProfile } from '@/lib/stylingTips';
 import OutfitDailyFeed from '@/components/OutfitDailyFeed';
+import ChatStyliste from '@/components/ChatStyliste';
 import OutfitTinderSwipe from '@/components/OutfitTinderSwipe';
 import CustomOutfitCard from '@/components/CustomOutfitCard';
 import ProgressMilestones from '@/components/ProgressMilestones';
@@ -192,6 +193,9 @@ export default function Today() {
   const [editCityValue, setEditCityValue] = useState('');
   const [editCityError, setEditCityError] = useState<string | null>(null);
   const [editCityLoading, setEditCityLoading] = useState(false);
+  // TODO: bouton de test temporaire, à remplacer par la bulle flottante définitive
+  const [chatOpen, setChatOpen] = useState(false);
+
 
   const submitEditCity = async () => {
     const name = editCityValue.trim();
@@ -1089,6 +1093,17 @@ export default function Today() {
           </div>
         </div>
       )}
+
+      {/* TODO: bouton de test temporaire, à remplacer par la bulle flottante définitive */}
+      <button
+        onClick={() => setChatOpen(true)}
+        className="fixed bottom-20 right-4 w-14 h-14 rounded-full flex items-center justify-center text-white text-2xl shadow-lg active:scale-95 transition-transform z-40"
+        style={{ backgroundColor: '#C9956C' }}
+        aria-label="Ouvrir le chat styliste"
+      >
+        ✨
+      </button>
+      <ChatStyliste isOpen={chatOpen} onClose={() => setChatOpen(false)} />
     </div>
   );
 }
