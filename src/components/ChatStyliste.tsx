@@ -142,7 +142,7 @@ export default function ChatStyliste({ isOpen, onClose }: ChatStylisteProps) {
         </div>
 
         {/* Input */}
-        <div className="border-t border-gray-100 p-3 pb-5">
+        <div className="border-t border-gray-100 p-3 pb-5 shrink-0">
           <div className="flex items-center gap-2">
             <input
               type="text"
