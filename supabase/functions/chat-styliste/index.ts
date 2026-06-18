@@ -158,12 +158,15 @@ Deno.serve(async (req) => {
       return { tempMin: 11, tempMax: 18 };                          // automne
     };
 
+    type DayWeather = { date: string; tempMin: number; tempMax: number };
     let weather: { tempMin: number; tempMax: number } | null = null;
+    const forecast3: DayWeather[] = [];
+
     if (weatherFromBody && typeof weatherFromBody.tempMin === "number" && typeof weatherFromBody.tempMax === "number") {
       weather = { tempMin: weatherFromBody.tempMin, tempMax: weatherFromBody.tempMax };
     } else if (lat != null && lon != null) {
       try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m&timezone=auto&forecast_days=1`;
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m&daily=temperature_2m_min,temperature_2m_max&timezone=auto&forecast_days=3`;
         const r = await fetch(url);
         if (r.ok) {
           const d = await r.json();
@@ -184,12 +187,37 @@ Deno.serve(async (req) => {
               tempMax: Math.round(Math.max(...futureTemps)),
             };
           }
+          const dDates: string[] = d?.daily?.time ?? [];
+          const dMin: number[] = d?.daily?.temperature_2m_min ?? [];
+          const dMax: number[] = d?.daily?.temperature_2m_max ?? [];
+          for (let i = 0; i < Math.min(3, dDates.length); i++) {
+            if (typeof dMin[i] === "number" && typeof dMax[i] === "number") {
+              forecast3.push({
+                date: dDates[i],
+                tempMin: Math.round(dMin[i]),
+                tempMax: Math.round(dMax[i]),
+              });
+            }
+          }
         }
       } catch (e) {
         console.error("weather fetch failed", e);
       }
     }
     if (!weather) weather = seasonalDefault();
+
+    const dayLabels = ["Aujourd'hui", "Demain", "Après-demain"];
+    let meteoBlock: string;
+    if (forecast3.length > 0) {
+      const lines = forecast3.map((f, i) => `- ${dayLabels[i] ?? f.date} (${f.date}) : ${f.tempMin}°C à ${f.tempMax}°C`);
+      if (forecast3.length < 3) {
+        lines.push("- (Données indisponibles pour les jours suivants)");
+      }
+      meteoBlock = `MÉTÉO DES 3 PROCHAINS JOURS :\n${lines.join("\n")}`;
+    } else {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      meteoBlock = `MÉTÉO DES 3 PROCHAINS JOURS :\n- Aujourd'hui (${todayStr}) : ${weather.tempMin}°C à ${weather.tempMax}°C\n- (Données indisponibles pour les jours suivants)`;
+    }
 
     // --- System prompt ---
     const pseudo = profile?.pseudo ?? "toi";
