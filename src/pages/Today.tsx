@@ -1093,6 +1093,17 @@ export default function Today() {
           </div>
         </div>
       )}
+
+      {/* TODO: bouton de test temporaire, à remplacer par la bulle flottante définitive */}
+      <button
+        onClick={() => setChatOpen(true)}
+        className="fixed bottom-20 right-4 w-14 h-14 rounded-full flex items-center justify-center text-white text-2xl shadow-lg active:scale-95 transition-transform z-40"
+        style={{ backgroundColor: '#C9956C' }}
+        aria-label="Ouvrir le chat styliste"
+      >
+        ✨
+      </button>
+      <ChatStyliste isOpen={chatOpen} onClose={() => setChatOpen(false)} />
     </div>
   );
 }
