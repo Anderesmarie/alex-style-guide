@@ -7,6 +7,7 @@ const corsHeaders = {
 };
 
 const DAILY_LIMIT = 3;
+const TESTER_EMAILS = ["anderes.richez@gmail.com", "alexandra.richez2021@gmail.com"];
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
