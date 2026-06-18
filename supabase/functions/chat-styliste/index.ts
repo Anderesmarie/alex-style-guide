@@ -275,7 +275,7 @@ CE QUE TU NE FAIS PAS :
       { user_id: userId, role: "assistant", content: reply },
     ]);
 
-    return json({ reply, messages_remaining: Math.max(0, DAILY_LIMIT - newCount) }, 200);
+    return json({ reply, messages_remaining: isWhitelisted ? -1 : Math.max(0, DAILY_LIMIT - newCount) }, 200);
   } catch (e) {
     console.error("chat-styliste error", e);
     return json({ error: "internal_error" }, 500);
