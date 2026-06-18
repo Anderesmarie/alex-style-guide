@@ -251,6 +251,7 @@ export type Database = {
           corpulence: string | null
           favorite_colors: Json | null
           id: string
+          last_dressing_reminder_sent_at: string | null
           lifestyle: string | null
           makeup: string | null
           milestones_celebrated: Json | null
@@ -277,6 +278,7 @@ export type Database = {
           corpulence?: string | null
           favorite_colors?: Json | null
           id: string
+          last_dressing_reminder_sent_at?: string | null
           lifestyle?: string | null
           makeup?: string | null
           milestones_celebrated?: Json | null
@@ -303,6 +305,7 @@ export type Database = {
           corpulence?: string | null
           favorite_colors?: Json | null
           id?: string
+          last_dressing_reminder_sent_at?: string | null
           lifestyle?: string | null
           makeup?: string | null
           milestones_celebrated?: Json | null
