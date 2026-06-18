@@ -6,6 +6,7 @@ import { getRecentOutfitItemIds, getDislikedItemIds, getWornItemIds, getLikedOut
 import { ClothingItem, OutfitLayoutData, UserProfile } from '@/lib/types';
 import { loadBeautyProfile } from '@/lib/stylingTips';
 import OutfitDailyFeed from '@/components/OutfitDailyFeed';
+import ChatStyliste from '@/components/ChatStyliste';
 import OutfitTinderSwipe from '@/components/OutfitTinderSwipe';
 import CustomOutfitCard from '@/components/CustomOutfitCard';
 import ProgressMilestones from '@/components/ProgressMilestones';
