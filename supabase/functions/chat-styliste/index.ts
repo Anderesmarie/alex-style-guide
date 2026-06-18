@@ -59,23 +59,28 @@ Deno.serve(async (req) => {
       return json({ error: "profile_error" }, 500);
     }
 
-    const today = new Date().toISOString().slice(0, 10);
-    let messagesToday = profile?.chat_messages_today ?? 0;
-    const resetDate = profile?.chat_reset_date ?? null;
+    const isWhitelisted = TESTER_EMAILS.includes(userEmail);
+    let newCount = profile?.chat_messages_today ?? 0;
 
-    if (resetDate !== today) {
-      messagesToday = 0;
+    if (!isWhitelisted) {
+      const today = new Date().toISOString().slice(0, 10);
+      let messagesToday = profile?.chat_messages_today ?? 0;
+      const resetDate = profile?.chat_reset_date ?? null;
+
+      if (resetDate !== today) {
+        messagesToday = 0;
+      }
+
+      if (messagesToday >= DAILY_LIMIT) {
+        return json({ error: "quota_exceeded", messages_remaining: 0 }, 403);
+      }
+
+      newCount = messagesToday + 1;
+      await supabase
+        .from("profiles")
+        .update({ chat_messages_today: newCount, chat_reset_date: today })
+        .eq("id", userId);
     }
-
-    if (messagesToday >= DAILY_LIMIT) {
-      return json({ error: "quota_exceeded", messages_remaining: 0 }, 403);
-    }
-
-    const newCount = messagesToday + 1;
-    await supabase
-      .from("profiles")
-      .update({ chat_messages_today: newCount, chat_reset_date: today })
-      .eq("id", userId);
 
     // --- Wardrobe ---
     const { data: wardrobeAll } = await supabase
