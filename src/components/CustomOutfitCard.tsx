@@ -164,6 +164,12 @@ export default function CustomOutfitCard({ wardrobe, temperature, weatherCode, t
             </div>
           )}
 
+          {generatedOutfit && !generatedOutfit.some(i => i.category === 'Chaussures') && (
+            <p className="text-xs text-center font-medium mb-3" style={{ color: ROSE_GOLD }}>
+              Ajoute une paire de chaussures 👟 pour compléter cette tenue !
+            </p>
+          )}
+
           <div className="flex gap-2">
             <button
               onClick={() => setEditingItems(generatedOutfit)}
