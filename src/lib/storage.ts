@@ -185,6 +185,10 @@ export async function updateClothing(item: ClothingItem): Promise<void> {
     occasion: item.occasion,
     brand: item.brand || null,
     price: item.price || null,
+    pattern: item.pattern || 'uni',
+    texture: item.texture || null,
+    fit: item.fit || null,
+    length: item.length || null,
   };
   if (item.imageUrl) {
     patch.image_url = item.imageUrl;
