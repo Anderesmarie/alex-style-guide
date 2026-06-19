@@ -137,6 +137,9 @@ export async function getWardrobe(): Promise<ClothingItem[]> {
       brand: row.brand || undefined,
       price: row.price || undefined,
       pattern: (row as any).pattern || 'uni',
+      texture: (row as any).texture || undefined,
+      fit: (row as any).fit || undefined,
+      length: (row as any).length || undefined,
     };
   });
 }
