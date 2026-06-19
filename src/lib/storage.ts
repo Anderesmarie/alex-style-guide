@@ -137,6 +137,9 @@ export async function getWardrobe(): Promise<ClothingItem[]> {
       brand: row.brand || undefined,
       price: row.price || undefined,
       pattern: (row as any).pattern || 'uni',
+      texture: (row as any).texture || undefined,
+      fit: (row as any).fit || undefined,
+      length: (row as any).length || undefined,
     };
   });
 }
@@ -159,6 +162,10 @@ export async function addClothing(item: ClothingItem): Promise<void> {
     occasion: item.occasion,
     brand: item.brand || null,
     price: item.price || null,
+    pattern: item.pattern || 'uni',
+    texture: item.texture || null,
+    fit: item.fit || null,
+    length: item.length || null,
   } as any);
   if (error) {
     console.error('addClothing error:', error);
@@ -178,6 +185,10 @@ export async function updateClothing(item: ClothingItem): Promise<void> {
     occasion: item.occasion,
     brand: item.brand || null,
     price: item.price || null,
+    pattern: item.pattern || 'uni',
+    texture: item.texture || null,
+    fit: item.fit || null,
+    length: item.length || null,
   };
   if (item.imageUrl) {
     patch.image_url = item.imageUrl;

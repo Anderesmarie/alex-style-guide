@@ -229,6 +229,8 @@ const TEXTURE_PALETTE: { label: string; value: string }[] = [
   { label: 'Cuir', value: 'cuir' },
   { label: 'Lin', value: 'lin' },
   { label: 'Synthétique', value: 'synthetique' },
+  { label: 'Laine', value: 'laine' },
+  { label: 'Dentelle', value: 'dentelle' },
 ];
 
 // Rend l'aperçu d'une texture dans un cercle SVG 28x28 (clip circulaire)
@@ -334,6 +336,34 @@ function TextureSwatch({ value }: { value: string }) {
           <>
             <rect width={size} height={size} fill="#E8F0FE" />
             {grid}
+          </>
+        );
+      }
+      case 'laine': {
+        const bouclettes: JSX.Element[] = [];
+        for (let y = 3; y < size; y += 4) {
+          for (let x = 3; x < size; x += 4) {
+            bouclettes.push(<circle key={`${x}-${y}`} cx={x} cy={y} r={1.2} fill="#B89A7A" opacity={0.7} />);
+          }
+        }
+        return (
+          <>
+            <rect width={size} height={size} fill="#E8DCC8" />
+            {bouclettes}
+          </>
+        );
+      }
+      case 'dentelle': {
+        const dots: JSX.Element[] = [];
+        for (let y = 4; y < size; y += 4) {
+          for (let x = 4; x < size; x += 4) {
+            dots.push(<circle key={`${x}-${y}`} cx={x} cy={y} r={1} fill="none" stroke="#C9956C" strokeWidth={0.4} />);
+          }
+        }
+        return (
+          <>
+            <rect width={size} height={size} fill="#FBF6F0" />
+            {dots}
           </>
         );
       }
