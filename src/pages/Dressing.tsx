@@ -229,6 +229,8 @@ const TEXTURE_PALETTE: { label: string; value: string }[] = [
   { label: 'Cuir', value: 'cuir' },
   { label: 'Lin', value: 'lin' },
   { label: 'Synthétique', value: 'synthetique' },
+  { label: 'Laine', value: 'laine' },
+  { label: 'Dentelle', value: 'dentelle' },
 ];
 
 // Rend l'aperçu d'une texture dans un cercle SVG 28x28 (clip circulaire)
