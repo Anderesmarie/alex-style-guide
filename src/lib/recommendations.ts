@@ -685,9 +685,9 @@ function scoreByProfile(
 
 /**
  * Validate that an outfit contains the required pieces:
- * - At least 1 top OR 1 dress/combinaison
- * - At least 1 bottom (if no dress)
- * - At least 1 pair of shoes
+ * - At least 1 top AND 1 bottom
+ * - OR at least 1 dress/combinaison
+ * Shoes are optional (used when available, not required for validation).
  */
 export function isValidOutfit(outfit: ClothingItem[]): boolean {
   if (!outfit || outfit.length === 0) return false;
@@ -695,11 +695,9 @@ export function isValidOutfit(outfit: ClothingItem[]): boolean {
   const hasTop = groups.includes('HAUTS');
   const hasBottom = groups.includes('BAS');
   const hasDress = groups.includes('ROBES');
-  const hasShoes = groups.includes('CHAUSSURES');
 
-  if (!hasShoes) return false;
-  if (hasDress) return true;
-  return hasTop && hasBottom;
+  // Valid if (haut + bas) OR (robe/combinaison), shoes optional
+  return (hasTop && hasBottom) || hasDress;
 }
 
 /**
