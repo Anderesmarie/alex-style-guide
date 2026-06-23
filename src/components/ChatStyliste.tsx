@@ -7,11 +7,20 @@ interface ChatStylisteProps {
   onClose: () => void;
 }
 
+interface Product {
+  title: string;
+  price: string;
+  link: string;
+  thumbnail: string;
+}
+
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   quotaExceeded?: boolean;
+  products?: Product[];
 }
+
 
 const WELCOME: ChatMessage = {
   role: 'assistant',
