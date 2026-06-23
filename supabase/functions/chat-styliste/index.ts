@@ -9,6 +9,40 @@ const corsHeaders = {
 const DAILY_LIMIT = 3;
 const TESTER_EMAILS = ["anderes.richez@gmail.com", "alexandra.richez2021@gmail.com"];
 
+type SerpProduct = {
+  title: string;
+  price: string;
+  link: string;
+  thumbnail: string;
+};
+
+async function serpapiShopping(query: string): Promise<SerpProduct[]> {
+  const apiKey = Deno.env.get("SERPAPI_KEY");
+  if (!apiKey) {
+    console.error("SERPAPI_KEY missing");
+    return [];
+  }
+  try {
+    const url = `https://serpapi.com/search?engine=google_shopping&q=${encodeURIComponent(query)}&api_key=${apiKey}&hl=fr&gl=fr`;
+    const r = await fetch(url);
+    if (!r.ok) {
+      console.error("serpapi non-ok", r.status);
+      return [];
+    }
+    const d = await r.json();
+    const items: any[] = d?.shopping_results ?? [];
+    return items.slice(0, 4).map((it) => ({
+      title: String(it.title ?? ""),
+      price: String(it.price ?? it.extracted_price ?? ""),
+      link: String(it.product_link ?? it.link ?? ""),
+      thumbnail: String(it.thumbnail ?? ""),
+    })).filter((p) => p.title && p.link);
+  } catch (e) {
+    console.error("serpapi error", e);
+    return [];
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -51,7 +85,7 @@ Deno.serve(async (req) => {
     // --- Quota ---
     const { data: profile, error: profileErr } = await supabase
       .from("profiles")
-      .select("pseudo, silhouette, styles, colorimetry_season, budget, chat_messages_today, chat_reset_date")
+      .select("pseudo, silhouette, styles, colorimetry_season, budget, brands, chat_messages_today, chat_reset_date")
       .eq("id", userId)
       .maybeSingle();
     if (profileErr) {
@@ -225,6 +259,8 @@ Deno.serve(async (req) => {
     const colorimetry_season = profile?.colorimetry_season ?? "non renseignée";
     const styles = fmtList(profile?.styles) || "non renseignés";
     const budget = profile?.budget ?? "non renseigné";
+    const brandsArr: string[] = Array.isArray(profile?.brands) ? profile!.brands.filter((b: any) => typeof b === "string" && b.trim()) : [];
+    const favoriteBrand = brandsArr[0] ?? null;
 
 
     const systemPrompt = `Tu es la styliste IA personnelle de l'app MyStyl.
@@ -242,6 +278,7 @@ CE QUE TU CONNAIS DE L'UTILISATRICE :
 - Colorimétrie : ${colorimetry_season}
 - Styles préférés : ${styles}
 - Budget shopping : ${budget}€
+- Marques favorites : ${brandsArr.length ? brandsArr.join(", ") : "non renseignées"}
 
 RÈGLE ABSOLUE — INVENTAIRE RÉEL UNIQUEMENT :
 
@@ -262,51 +299,139 @@ RÈGLE MÉTÉO :
 - Si elle demande une date au-delà de 2 jours : précise que tu ne connais pas encore la météo et propose une tenue adaptable
 - Ne propose JAMAIS de pièce épaisse (trench, manteau, veste doublée) si la température du jour visé dépasse 25°C
 
+OUTIL search_products (recherche shopping) :
+- Tu disposes d'un outil "search_products" qui cherche de vrais produits en ligne.
+- Appelle-le UNIQUEMENT si l'utilisatrice demande explicitement de TROUVER, CHERCHER ou ACHETER un produit (ex : "trouve-moi une jupe blanche", "où acheter un blazer noir", "cherche-moi des baskets blanches").
+- N'appelle JAMAIS cet outil pour un simple conseil de style, une suggestion de tenue ou une question générale.
+- Le paramètre query doit être une description courte du produit en français (ex : "jupe blanche", "blazer noir oversize").
+- Après réception des résultats, présente-les en UNE phrase d'intro naturelle et chaleureuse (ex : "J'ai trouvé quelques jupes blanches qui pourraient te plaire !"). NE liste PAS les titres, prix ou liens — ils seront affichés visuellement.
+- Si aucun résultat n'est trouvé, excuse-toi gentiment et propose une alternative.
+
 CE QUE TU PEUX FAIRE :
 
 - Donner des conseils mode généraux (tendances, associations)
 - Conseiller selon sa morphologie et colorimétrie
 - Aider à préparer une tenue pour un événement précis
 - Suggérer quoi acheter pour compléter sa garde-robe
+- Chercher de vrais produits en ligne via search_products quand on te le demande
 
 CE QUE TU NE FAIS PAS :
 - Proposer les tenues du quotidien (c'est le moteur MyStyl qui s'en charge)
 - Parler d'autre chose que de mode et style`;
 
-    const messages = [
+    const tools = [
+      {
+        type: "function",
+        function: {
+          name: "search_products",
+          description: "Cherche de vrais produits de mode en ligne via Google Shopping. À utiliser UNIQUEMENT quand l'utilisatrice demande explicitement de trouver, chercher ou acheter un produit.",
+          parameters: {
+            type: "object",
+            properties: {
+              query: {
+                type: "string",
+                description: "Description courte du produit à chercher en français, ex: 'jupe blanche', 'blazer noir oversize'",
+              },
+            },
+            required: ["query"],
+          },
+        },
+      },
+    ];
+
+    const messages: any[] = [
       { role: "system", content: systemPrompt },
       ...history.map((h: any) => ({ role: h.role, content: h.content })),
       { role: "user", content: message },
     ];
 
-    const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages,
-        temperature: 0.8,
-      }),
-    });
+    const callOpenAI = async (msgs: any[]) => {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: msgs,
+          temperature: 0.8,
+          tools,
+          tool_choice: "auto",
+        }),
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error("OpenAI error", res.status, errText);
+        return null;
+      }
+      return await res.json();
+    };
 
-    if (!openaiRes.ok) {
-      const errText = await openaiRes.text();
-      console.error("OpenAI error", openaiRes.status, errText);
-      return json({ error: "openai_error" }, 500);
+    let products: SerpProduct[] = [];
+    let data = await callOpenAI(messages);
+    if (!data) return json({ error: "openai_error" }, 500);
+
+    let assistantMsg = data?.choices?.[0]?.message;
+    const toolCalls = assistantMsg?.tool_calls;
+
+    if (Array.isArray(toolCalls) && toolCalls.length > 0) {
+      messages.push(assistantMsg);
+      for (const tc of toolCalls) {
+        if (tc?.function?.name === "search_products") {
+          let q = "";
+          try {
+            const args = JSON.parse(tc.function.arguments || "{}");
+            q = typeof args.query === "string" ? args.query.trim() : "";
+          } catch (_e) { /* ignore */ }
+
+          let results: SerpProduct[] = [];
+          if (q) {
+            if (favoriteBrand) {
+              results = await serpapiShopping(`${q} ${favoriteBrand}`);
+              if (results.length === 0) {
+                results = await serpapiShopping(q);
+              }
+            } else {
+              results = await serpapiShopping(q);
+            }
+          }
+          products = results;
+
+          messages.push({
+            role: "tool",
+            tool_call_id: tc.id,
+            content: JSON.stringify({
+              count: results.length,
+              products: results.map((p) => ({ title: p.title, price: p.price })),
+            }),
+          });
+        } else {
+          messages.push({
+            role: "tool",
+            tool_call_id: tc.id,
+            content: JSON.stringify({ error: "unknown_tool" }),
+          });
+        }
+      }
+
+      const followup = await callOpenAI(messages);
+      if (!followup) return json({ error: "openai_error" }, 500);
+      assistantMsg = followup?.choices?.[0]?.message;
     }
 
-    const data = await openaiRes.json();
-    const reply: string = data?.choices?.[0]?.message?.content?.trim() ?? "";
+    const reply: string = assistantMsg?.content?.trim() ?? "";
 
     await supabase.from("chat_styliste").insert([
       { user_id: userId, role: "user", content: message },
       { user_id: userId, role: "assistant", content: reply },
     ]);
 
-    return json({ reply, messages_remaining: isWhitelisted ? -1 : Math.max(0, DAILY_LIMIT - newCount) }, 200);
+    return json({
+      reply,
+      products,
+      messages_remaining: isWhitelisted ? -1 : Math.max(0, DAILY_LIMIT - newCount),
+    }, 200);
   } catch (e) {
     console.error("chat-styliste error", e);
     return json({ error: "internal_error" }, 500);
