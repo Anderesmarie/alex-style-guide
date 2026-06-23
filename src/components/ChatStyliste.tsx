@@ -7,11 +7,20 @@ interface ChatStylisteProps {
   onClose: () => void;
 }
 
+interface Product {
+  title: string;
+  price: string;
+  link: string;
+  thumbnail: string;
+}
+
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   quotaExceeded?: boolean;
+  products?: Product[];
 }
+
 
 const WELCOME: ChatMessage = {
   role: 'assistant',
@@ -61,11 +70,13 @@ export default function ChatStyliste({ isOpen, onClose }: ChatStylisteProps) {
           throw error;
         }
       } else {
-        setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
+        const products: Product[] = Array.isArray(data?.products) ? data.products : [];
+        setMessages((prev) => [...prev, { role: 'assistant', content: data.reply, products }]);
         if (typeof data.messages_remaining === 'number') {
           setRemaining(data.messages_remaining);
         }
       }
+
     } catch (e) {
       console.error(e);
       setMessages((prev) => [
@@ -106,7 +117,7 @@ export default function ChatStyliste({ isOpen, onClose }: ChatStylisteProps) {
           className="flex-1 overflow-y-auto flex flex-col gap-3 p-4"
         >
           {messages.map((m, i) => (
-            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div key={i} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'} gap-2`}>
               <div
                 className="max-w-[80%] rounded-2xl px-4 py-2 text-sm whitespace-pre-wrap break-words"
                 style={
@@ -125,8 +136,52 @@ export default function ChatStyliste({ isOpen, onClose }: ChatStylisteProps) {
                   </button>
                 )}
               </div>
+              {m.role === 'assistant' && m.products && m.products.length > 0 && (
+                <div className="w-full max-w-full overflow-x-auto -mx-1 px-1">
+                  <div className="flex gap-2 pb-1">
+                    {m.products.map((p, j) => (
+                      <a
+                        key={j}
+                        href={p.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="shrink-0 w-[140px] rounded-xl bg-white shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                      >
+                        <div className="w-full aspect-square bg-gray-100">
+                          {p.thumbnail && (
+                            <img
+                              src={p.thumbnail}
+                              alt={p.title}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          )}
+                        </div>
+                        <div className="p-2 flex flex-col gap-1">
+                          <p
+                            className="text-[12px] leading-tight text-gray-700 overflow-hidden"
+                            style={{
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                            }}
+                          >
+                            {p.title}
+                          </p>
+                          {p.price && (
+                            <p className="text-[13px] font-bold" style={{ color: '#C9956C' }}>
+                              {p.price}
+                            </p>
+                          )}
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ))}
+
           {loading && (
             <div className="flex justify-start">
               <div
