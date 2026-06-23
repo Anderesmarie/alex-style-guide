@@ -70,11 +70,13 @@ export default function ChatStyliste({ isOpen, onClose }: ChatStylisteProps) {
           throw error;
         }
       } else {
-        setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
+        const products: Product[] = Array.isArray(data?.products) ? data.products : [];
+        setMessages((prev) => [...prev, { role: 'assistant', content: data.reply, products }]);
         if (typeof data.messages_remaining === 'number') {
           setRemaining(data.messages_remaining);
         }
       }
+
     } catch (e) {
       console.error(e);
       setMessages((prev) => [
