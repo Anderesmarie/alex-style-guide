@@ -91,7 +91,64 @@ Deno.serve(async (req) => {
       failedTables.push({ table: "profiles", error: msg });
     }
 
-    const summary = { success: true, userId, deletedTables, failedTables };
+    const STORAGE_BUCKETS = ["wardrobe-images", "outfit-shares", "snapshots"];
+    const storageCleanedBuckets: string[] = [];
+    const storageFailedBuckets: { bucket: string; error: string }[] = [];
+
+    async function collectPaths(
+      bucket: string,
+      prefix: string,
+    ): Promise<string[]> {
+      const { data: entries, error: listError } = await admin.storage
+        .from(bucket)
+        .list(prefix, { limit: 1000 });
+      if (listError) throw listError;
+      if (!entries || entries.length === 0) return [];
+      const paths: string[] = [];
+      for (const entry of entries) {
+        const fullPath = `${prefix}/${entry.name}`;
+        // Folders have a null id in the Supabase storage list API
+        if (entry.id === null) {
+          const nested = await collectPaths(bucket, fullPath);
+          paths.push(...nested);
+        } else {
+          paths.push(fullPath);
+        }
+      }
+      return paths;
+    }
+
+    for (const bucket of STORAGE_BUCKETS) {
+      try {
+        const paths = await collectPaths(bucket, userId);
+        if (paths.length === 0) {
+          console.log(`delete-account: nothing to remove in ${bucket}`);
+          storageCleanedBuckets.push(bucket);
+          continue;
+        }
+        const { error: removeError } = await admin.storage
+          .from(bucket)
+          .remove(paths);
+        if (removeError) throw removeError;
+        console.log(
+          `delete-account: removed ${paths.length} file(s) from ${bucket}`,
+        );
+        storageCleanedBuckets.push(bucket);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.error(`delete-account: storage cleanup failed for ${bucket}:`, msg);
+        storageFailedBuckets.push({ bucket, error: msg });
+      }
+    }
+
+    const summary = {
+      success: true,
+      userId,
+      deletedTables,
+      failedTables,
+      storageCleanedBuckets,
+      storageFailedBuckets,
+    };
     console.log("delete-account summary:", JSON.stringify(summary));
 
     return new Response(JSON.stringify(summary), {
