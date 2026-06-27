@@ -50,6 +50,40 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
   const [pseudo, setPseudo] = useState('');
   const [editingPseudo, setEditingPseudo] = useState(false);
   const [tempPseudo, setTempPseudo] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) {
+        setDeleteError('Session expirée, reconnecte-toi.');
+        setDeleting(false);
+        return;
+      }
+      const res = await fetch(
+        `https://tseermbuwyrzcrulhxba.supabase.co/functions/v1/delete-account`,
+        { method: 'POST', headers: { Authorization: `Bearer ${token}` } }
+      );
+      const json = await res.json().catch(() => null);
+      if (res.ok && json?.success) {
+        await supabase.auth.signOut();
+        toast.success('Ton compte a bien été supprimé.');
+        window.location.href = '/';
+        return;
+      }
+      setDeleteError('Une erreur est survenue, réessaie ou contacte le support.');
+      setDeleting(false);
+    } catch {
+      setDeleteError('Une erreur est survenue, réessaie ou contacte le support.');
+      setDeleting(false);
+    }
+  };
 
   const computeAndSaveSeason = async (avatarData: AvatarData) => {
     const s = determineSeason(avatarData.skin, avatarData.eyeColor, avatarData.hairColor);
@@ -484,7 +518,82 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
         >
           🔄 Réinitialiser la preview
         </button>
+
+        {/* Zone de danger */}
+        <div
+          className="rounded-2xl p-5 mt-8 mb-4"
+          style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5' }}
+        >
+          <p className="font-serif font-semibold text-base mb-2" style={{ color: '#B91C1C' }}>
+            ⚠️ Zone de danger
+          </p>
+          <p className="text-xs mb-4" style={{ color: '#7F1D1D' }}>
+            Cette action est définitive et irréversible.
+          </p>
+          <button
+            onClick={() => { setDeleteConfirmText(''); setDeleteError(null); setShowDeleteModal(true); }}
+            className="w-full py-3 rounded-xl text-sm font-semibold"
+            style={{ backgroundColor: '#FFFFFF', color: '#DC2626', border: '1.5px solid #DC2626' }}
+          >
+            Supprimer mon compte
+          </button>
+        </div>
       </div>
+
+      {showDeleteModal && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          onClick={() => !deleting && setShowDeleteModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl p-6 w-full max-w-md"
+            onClick={e => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-serif font-bold mb-3" style={{ color: '#2C2C2C' }}>
+              Supprimer définitivement ton compte ?
+            </h2>
+            <p className="text-sm mb-4" style={{ color: '#6B6B6B' }}>
+              Cette action est <strong>irréversible</strong>. Tu vas perdre définitivement :
+              ton dressing, tes tenues sauvegardées, ton profil, ton avatar et toutes tes données personnelles.
+            </p>
+            <input
+              type="text"
+              value={deleteConfirmText}
+              onChange={e => setDeleteConfirmText(e.target.value)}
+              placeholder="Tape SUPPRIMER pour confirmer"
+              disabled={deleting}
+              className="w-full px-3 py-2 rounded-lg border text-sm outline-none mb-3"
+              style={{ borderColor: '#E0D5C8' }}
+            />
+            {deleteError && (
+              <p className="text-xs mb-3" style={{ color: '#DC2626' }}>{deleteError}</p>
+            )}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                disabled={deleting}
+                className="flex-1 py-2.5 rounded-xl text-sm font-medium"
+                style={{ backgroundColor: '#F5F0EB', color: '#6B6B6B', opacity: deleting ? 0.5 : 1 }}
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleteConfirmText !== 'SUPPRIMER' || deleting}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white"
+                style={{
+                  backgroundColor: '#DC2626',
+                  opacity: (deleteConfirmText !== 'SUPPRIMER' || deleting) ? 0.4 : 1,
+                  cursor: (deleteConfirmText !== 'SUPPRIMER' || deleting) ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {deleting ? 'Suppression en cours…' : 'Supprimer mon compte'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
