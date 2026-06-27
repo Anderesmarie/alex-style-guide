@@ -50,6 +50,40 @@ export default function Profile({ onEditProfile, onLogout }: Props) {
   const [pseudo, setPseudo] = useState('');
   const [editingPseudo, setEditingPseudo] = useState(false);
   const [tempPseudo, setTempPseudo] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) {
+        setDeleteError('Session expirée, reconnecte-toi.');
+        setDeleting(false);
+        return;
+      }
+      const res = await fetch(
+        `https://tseermbuwyrzcrulhxba.supabase.co/functions/v1/delete-account`,
+        { method: 'POST', headers: { Authorization: `Bearer ${token}` } }
+      );
+      const json = await res.json().catch(() => null);
+      if (res.ok && json?.success) {
+        await supabase.auth.signOut();
+        toast.success('Ton compte a bien été supprimé.');
+        window.location.href = '/';
+        return;
+      }
+      setDeleteError('Une erreur est survenue, réessaie ou contacte le support.');
+      setDeleting(false);
+    } catch {
+      setDeleteError('Une erreur est survenue, réessaie ou contacte le support.');
+      setDeleting(false);
+    }
+  };
 
   const computeAndSaveSeason = async (avatarData: AvatarData) => {
     const s = determineSeason(avatarData.skin, avatarData.eyeColor, avatarData.hairColor);
