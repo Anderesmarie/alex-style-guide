@@ -141,6 +141,19 @@ Deno.serve(async (req) => {
       }
     }
 
+    let authDeletionFailed = false;
+    let authError: string | null = null;
+    try {
+      const { error: authDelError } = await admin.auth.admin.deleteUser(userId);
+      if (authDelError) throw authDelError;
+      console.log("delete-account: auth user deleted:", userId);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("delete-account: failed to delete auth user:", msg);
+      authDeletionFailed = true;
+      authError = msg;
+    }
+
     const summary = {
       success: true,
       userId,
@@ -148,6 +161,8 @@ Deno.serve(async (req) => {
       failedTables,
       storageCleanedBuckets,
       storageFailedBuckets,
+      authDeletionFailed,
+      authError,
     };
     console.log("delete-account summary:", JSON.stringify(summary));
 
@@ -155,6 +170,7 @@ Deno.serve(async (req) => {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+
   } catch (e) {
     console.error("delete-account error:", e);
     return new Response(JSON.stringify({ error: "Erreur serveur" }), {
