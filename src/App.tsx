@@ -66,6 +66,7 @@ function MainApp() {
       const logged = !!session;
       setIsLoggedIn(logged);
       if (logged) {
+        if (session?.user?.id) trackSession(session.user.id);
         checkProfile();
       } else {
         setCheckingProfile(false);
