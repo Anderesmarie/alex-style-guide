@@ -38,10 +38,24 @@ function MainApp() {
       setCheckingProfile(false);
     };
 
+    const trackSession = (userId: string) => {
+      const key = `mystyl_last_session_${userId}`;
+      const last = localStorage.getItem(key);
+      const now = Date.now();
+      // 1 session / 30 min max par user
+      if (last && now - parseInt(last, 10) < 30 * 60 * 1000) return;
+      localStorage.setItem(key, String(now));
+      supabase.from('user_sessions').insert({
+        user_id: userId,
+        user_agent: navigator.userAgent,
+      }).then(() => {});
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       const logged = !!session;
       setIsLoggedIn(logged);
       if (logged) {
+        if (session?.user?.id) trackSession(session.user.id);
         checkProfile();
       } else {
         setCheckingProfile(false);
@@ -52,6 +66,7 @@ function MainApp() {
       const logged = !!session;
       setIsLoggedIn(logged);
       if (logged) {
+        if (session?.user?.id) trackSession(session.user.id);
         checkProfile();
       } else {
         setCheckingProfile(false);
