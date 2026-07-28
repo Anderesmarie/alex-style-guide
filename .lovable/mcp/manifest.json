@@ -1,0 +1,150 @@
+{
+  "version": 1,
+  "sdk_version": "0.25.0",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://tseermbuwyrzcrulhxba.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "mystyl-mcp",
+      "version": "0.1.0",
+      "title": "MyStyl"
+    },
+    "tools": [
+      {
+        "name": "list_wardrobe",
+        "title": "Lister le dressing",
+        "description": "Liste les vêtements du dressing MyStyl de l'utilisateur connecté (catégorie, type, couleur, style, occasion, marque).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "category": {
+              "description": "Filtrer par catégorie, ex: Hauts, Bas, Chaussures.",
+              "type": "string"
+            },
+            "limit": {
+              "description": "Nombre maximum de pièces à retourner (défaut 100).",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_outfits",
+        "title": "Lister les tenues",
+        "description": "Liste les tenues enregistrées de l'utilisateur MyStyl connecté, avec les ids des pièces qui les composent.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "description": "Nombre maximum de tenues à retourner (défaut 50).",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_style_profile",
+        "title": "Profil style",
+        "description": "Récupère le profil style MyStyl de l'utilisateur connecté : morphologie, silhouette, colorimétrie, styles préférés, lifestyle, budget.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "add_wardrobe_item",
+        "title": "Ajouter une pièce au dressing",
+        "description": "Ajoute une pièce (sans photo) au dressing MyStyl de l'utilisateur connecté.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "category": {
+              "type": "string",
+              "description": "Catégorie, ex: Hauts, Bas, Chaussures."
+            },
+            "type": {
+              "type": "string",
+              "description": "Type de pièce, ex: T-shirt, Jean droit."
+            },
+            "subcategory": {
+              "type": "string"
+            },
+            "color": {
+              "description": "Couleurs de la pièce.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "season": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "style": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "occasion": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "brand": {
+              "type": "string"
+            },
+            "price": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "category",
+            "type"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

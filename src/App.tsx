@@ -6,6 +6,8 @@ import Onboarding from '@/components/Onboarding';
 import AppShell from '@/components/AppShell';
 import Login from '@/pages/Login';
 import ResetPassword from '@/pages/ResetPassword';
+import OAuthConsent from '@/pages/OAuthConsent';
+
 
 
 function MainApp() {
@@ -133,6 +135,9 @@ export default function App() {
   return (
     <Routes>
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
+      
+
       
       <Route path="/*" element={<MainApp />} />
     </Routes>
